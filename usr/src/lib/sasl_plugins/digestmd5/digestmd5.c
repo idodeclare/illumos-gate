@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.174 2004/12/24 16:06:44 shadow Exp $
+ * $Id: digestmd5.c,v 1.175 2004/12/27 21:30:43 shadow Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2947,7 +2947,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
 			    "realm changed: authentication aborted");
 #else
-    if (((realm != NULL) && (strcmp(realm, text->realm) != 0)) ||
+    if (((realm != NULL) && (strcmp(realm, text->realm) != 0)) &&
 	(text->realm[0] != 0)) {
 	SETERROR(sparams->utils,
 		 "realm changed: authentication aborted");
