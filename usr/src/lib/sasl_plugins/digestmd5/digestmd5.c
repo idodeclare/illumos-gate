@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.164 2003/12/22 15:08:55 rjs3 Exp $
+ * $Id: digestmd5.c,v 1.165 2004/02/06 17:23:50 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -84,7 +84,7 @@
 #endif /* WITH_DES */
 
 #ifdef WIN32
-# include <winsock.h>
+# include <winsock2.h>
 #else /* Unix */
 # include <netinet/in.h>
 #endif /* WIN32 */
