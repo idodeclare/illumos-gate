@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.61 2003/04/16 19:36:00 rjs3 Exp $
+ * $Id: client.c,v 1.60 2003/03/19 18:25:27 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -106,44 +106,19 @@ static int init_mechlist()
   cmechlist->mech_list=NULL;
   cmechlist->mech_length=0;
 
-  return SASL_OK;
+  _sasl_client_active = 0;
 }
 
 #ifdef _SUN_SDK_
-static int client_done(_sasl_global_context_t *gctx) {
+static void client_done(_sasl_global_context_t *gctx) {
   cmech_list_t *cmechlist = gctx->cmechlist;
   _sasl_path_info_t *path_info, *p;
 #else
-static int client_done(void) {
+static void client_done(void) {
 #endif /* _SUN_SDK_ */
   cmechanism_t *cm;
   cmechanism_t *cprevm;
 
-#ifdef _SUN_SDK_
-  if(!gctx->sasl_client_active)
-      return SASL_NOTINIT;
-  if (LOCK_MUTEX(&client_active_mutex) < 0) {
-	return (SASL_FAIL);
-  }
-  gctx->sasl_client_active--;
-
-  if(gctx->sasl_client_active) {
-      /* Don't de-init yet! Our refcount is nonzero. */
-      UNLOCK_MUTEX(&client_active_mutex);
-      return SASL_CONTINUE;
-  }
-#else
-  if(!_sasl_client_active)
-      return SASL_NOTINIT;
-  else
-      _sasl_client_active--;
-  
-  if(_sasl_client_active) {
-      /* Don't de-init yet! Our refcount is nonzero. */
-      return SASL_CONTINUE;
-  }
-#endif /* _SUN_SDK_ */
-  
   cm=cmechlist->mech_list; /* m point to begging of the list */
   while (cm!=NULL)
   {
@@ -438,12 +413,8 @@ int sasl_client_init(const sasl_callback_t *callbacks)
       { NULL, NULL }
   };
 
-  if(_sasl_client_active) {
-      /* We're already active, just increase our refcount */
-      /* xxx do something with the callback structure? */
-      _sasl_client_active++;
-      return SASL_OK;
-  }
+  _sasl_client_cleanup_hook = &client_done;
+  _sasl_client_idle_hook = &client_idle;
 
   global_callbacks.callbacks = callbacks;
   global_callbacks.appname = NULL;
@@ -451,15 +422,10 @@ int sasl_client_init(const sasl_callback_t *callbacks)
   cmechlist=sasl_ALLOC(sizeof(cmech_list_t));
   if (cmechlist==NULL) return SASL_NOMEM;
 
-  /* We need to call client_done if we fail now */
-  _sasl_client_active = 1;
-
   /* load plugins */
   ret=init_mechlist();  
-  if (ret!=SASL_OK) {
-      client_done();
-      return ret;
-  }
+  if (ret!=SASL_OK)
+    return ret;
 
   sasl_client_add_plugin("EXTERNAL", &external_client_plug_init);
 
@@ -475,25 +441,18 @@ int sasl_client_init(const sasl_callback_t *callbacks)
 			       _sasl_find_verifyfile_callback(callbacks));
 #endif /* _SUN_SDK_ */
   
+  if (ret == SASL_OK) {
+      _sasl_client_active = 1;
 #ifdef _SUN_SDK_
-  if (ret == SASL_OK)
 	/* If sasl_client_init returns error, sasl_done() need not be called */
       ret = _sasl_build_mechlist(gctx);
-  if (ret == SASL_OK) {
-      gctx->sasl_client_cleanup_hook = &client_done;
-      gctx->sasl_client_idle_hook = &client_idle;
-  } else {
+  }
+  if (ret != SASL_OK) {
       client_done(gctx);
   }
   UNLOCK_MUTEX(&init_client_mutex);
 #else
-  if (ret == SASL_OK) {
-      _sasl_client_cleanup_hook = &client_done;
-      _sasl_client_idle_hook = &client_idle;
-
       ret = _sasl_build_mechlist();
-  } else {
-      client_done();
   }
 #endif /* _SUN_SDK_ */
       
