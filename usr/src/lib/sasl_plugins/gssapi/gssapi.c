@@ -1505,6 +1505,8 @@ static int gssapi_client_mech_step(void *conn_context,
     OM_uint32 maj_stat = 0, min_stat = 0;
 #ifdef _SUN_SDK_
     OM_uint32 max_input_size;
+#else
+    OM_uint32 max_input;
 #endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
     int ret;
@@ -1973,8 +1975,14 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 #else
 	if(oparams->mech_ssf) {
-	    /* xxx probably too large */
-	    oparams->maxoutbuf -= 256;
+            maj_stat = gss_wrap_size_limit( &min_stat,
+                                            text->gss_ctx,
+                                            1,
+                                            GSS_C_QOP_DEFAULT,
+                                            (OM_uint32) oparams->maxoutbuf,
+                                            &max_input);
+
+            oparams->maxoutbuf = max_input;
 	}
 #endif /* _SUN_SDK_ */
 	
