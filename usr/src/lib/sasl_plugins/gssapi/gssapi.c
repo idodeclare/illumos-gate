@@ -734,7 +734,7 @@ gssapi_server_mech_step(void *conn_context,
     context_t *text = (context_t *)conn_context;
     gss_buffer_t input_token, output_token;
     gss_buffer_desc real_input_token, real_output_token;
-    OM_uint32 maj_stat, min_stat;
+    OM_uint32 maj_stat = 0, min_stat = 0;
 #ifdef _SUN_SDK_
     OM_uint32 max_input_size;
     gss_OID_set desired_mechs = GSS_C_NULL_OID_SET;
@@ -1475,7 +1475,7 @@ static int gssapi_client_mech_step(void *conn_context,
     context_t *text = (context_t *)conn_context;
     gss_buffer_t input_token, output_token;
     gss_buffer_desc real_input_token, real_output_token;
-    OM_uint32 maj_stat, min_stat;
+    OM_uint32 maj_stat = 0, min_stat = 0;
 #ifdef _SUN_SDK_
     OM_uint32 max_input_size;
 #endif /* _SUN_SDK_ */
