@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.126 2003/07/25 16:11:14 ken3 Exp $
+ * $Id: server.c,v 1.127 2003/07/27 20:47:42 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
