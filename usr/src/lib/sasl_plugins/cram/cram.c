@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,v 1.82 2003/12/07 00:34:08 ken3 Exp $
+ * $Id: cram.c,v 1.83 2003/12/15 20:04:22 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,v 1.82 2003/12/07 00:34:08 ken3 Exp $";
+static const char plugin_id[] = "$Id: cram.c,v 1.83 2003/12/15 20:04:22 rjs3 Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -252,7 +252,8 @@ crammd5_server_mech_step2(server_context_t *text,
 {
     char *userid = NULL;
     sasl_secret_t *sec = NULL;
-    int pos, len;
+    int pos;
+    unsigned len;
     int result = SASL_FAIL;
     const char *password_request[] = { SASL_AUX_PASSWORD,
 				       "*cmusaslsecretCRAM-MD5",
@@ -380,8 +381,11 @@ crammd5_server_mech_step2(server_context_t *text,
     
     /* if same then verified 
      *  - we know digest_str is null terminated but clientin might not be
+     *  - verify the length of clientin anyway!
      */
-    if (strncmp(digest_str, clientin+pos+1, strlen(digest_str)) != 0) {
+    len = strlen(digest_str);
+    if (clientinlen-pos-1 < len ||
+	strncmp(digest_str, clientin+pos+1, len) != 0) {
 #ifdef _INTEGRATED_SOLARIS_
 	sparams->utils->seterror(sparams->utils->conn, 0,
 				 gettext("incorrect digest response"));
