@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.168 2004/05/18 15:08:41 ken3 Exp $
+ * $Id: digestmd5.c,v 1.169 2004/05/25 15:02:27 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -226,9 +226,9 @@ typedef struct reauth_cache {
 } reauth_cache_t;
 
 /* global context for reauth use */
-struct digest_glob_context { 
+typedef struct digest_glob_context { 
    reauth_cache_t *reauth; 
-} my_glob_context;
+} digest_glob_context_t;
 
 /* context that stores info */
 typedef struct context {
@@ -2057,8 +2057,8 @@ static void clear_reauth_entry(reauth_entry_t *reauth, enum Context_type type,
 static void digestmd5_common_mech_free(void *glob_context,
 				       const sasl_utils_t *utils)
 {
-    struct digest_glob_context *my_glob_context =
-	(struct digest_glob_context *) glob_context;
+    digest_glob_context_t *my_glob_context =
+	(digest_glob_context_t *) glob_context;
     reauth_cache_t *reauth_cache = my_glob_context->reauth;
     size_t n;
     
@@ -2083,6 +2083,8 @@ typedef struct server_context {
     int stale;				/* last nonce is stale */
     sasl_ssf_t limitssf, requiressf;	/* application defined bounds */
 } server_context_t;
+
+static digest_glob_context_t server_glob_context;
 
 static void DigestCalcHA1FromSecret(context_t * text,
 				    const sasl_utils_t * utils,
@@ -2287,7 +2289,7 @@ static int digestmd5_server_mech_new(void *glob_context,
     
     text->state = 1;
     text->i_am = SERVER;
-    text->reauth = ((struct digest_glob_context *) glob_context)->reauth;
+    text->reauth = ((digest_glob_context_t *) glob_context)->reauth;
     
     *conn_context = text;
     return SASL_OK;
@@ -3454,7 +3456,7 @@ static sasl_server_plug_t digestmd5_server_plugins[] =
 	| SASL_SEC_NOANONYMOUS
 	| SASL_SEC_MUTUAL_AUTH,		/* security_flags */
 	SASL_FEAT_ALLOWS_PROXY,		/* features */
-	&my_glob_context,		/* glob_context */
+	&server_glob_context,		/* glob_context */
 	&digestmd5_server_mech_new,	/* mech_new */
 	&digestmd5_server_mech_step,	/* mech_step */
 	&digestmd5_server_mech_dispose,	/* mech_dispose */
@@ -3522,7 +3524,7 @@ int digestmd5_server_plug_init(sasl_utils_t *utils,
 	memset(reauth_cache->e, 0, reauth_cache->size * sizeof(reauth_entry_t));
     }
 
-    ((struct digest_glob_context *) digestmd5_server_plugins[0].glob_context)->reauth = reauth_cache;
+    ((digest_glob_context_t *) digestmd5_server_plugins[0].glob_context)->reauth = reauth_cache;
 
 #ifdef _SUN_SDK_
 #ifdef USE_UEF_CLIENT
@@ -3560,6 +3562,8 @@ typedef struct client_context {
     void *h;
 #endif /* _INTEGRATED_SOLARIS_ */
 } client_context_t;
+
+static digest_glob_context_t client_glob_context;
 
 /* calculate H(A1) as per spec */
 static void DigestCalcHA1(context_t * text,
@@ -4602,7 +4606,7 @@ static int digestmd5_client_mech_new(void *glob_context,
     
     text->state = 1;
     text->i_am = CLIENT;
-    text->reauth = ((struct digest_glob_context *) glob_context)->reauth;
+    text->reauth = ((digest_glob_context_t *) glob_context)->reauth;
     
     *conn_context = text;
 
@@ -5000,7 +5004,7 @@ static sasl_client_plug_t digestmd5_client_plugins[] =
 	SASL_FEAT_NEEDSERVERFQDN
 	| SASL_FEAT_ALLOWS_PROXY, 	/* features */
 	NULL,				/* required_prompts */
-	&my_glob_context,		/* glob_context */
+	&client_glob_context,		/* glob_context */
 	&digestmd5_client_mech_new,	/* mech_new */
 	&digestmd5_client_mech_step,	/* mech_step */
 	&digestmd5_client_mech_dispose,	/* mech_dispose */
@@ -5050,7 +5054,7 @@ int digestmd5_client_plug_init(sasl_utils_t *utils,
 	return SASL_NOMEM;
     memset(reauth_cache->e, 0, reauth_cache->size * sizeof(reauth_entry_t));
 
-    ((struct digest_glob_context *) digestmd5_client_plugins[0].glob_context)->reauth = reauth_cache;
+    ((digest_glob_context_t *) digestmd5_client_plugins[0].glob_context)->reauth = reauth_cache;
 #ifdef _SUN_SDK_
 #ifdef USE_UEF_CLIENT
     digestmd5_client_plugins[0].max_ssf = uef_max_ssf;
