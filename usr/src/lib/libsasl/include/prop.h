@@ -59,6 +59,10 @@ struct propval {
 #define	PROP_DEFAULT 4		/* default number of propvals to assume */
 struct propctx;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*
  * create a property context
  *  estimate -- an estimate of the storage needed for requests & responses
@@ -130,6 +134,9 @@ void prop_erase(struct propctx *ctx, const char *name);
  */
 void prop_dispose(struct propctx **ctx);
 
+#ifdef __cplusplus
+}
+#endif
 
 /* fetcher interfaces */
 
