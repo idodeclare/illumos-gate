@@ -722,6 +722,8 @@ gssapi_server_mech_step(void *conn_context,
 #ifdef _SUN_SDK_
     OM_uint32 max_input_size;
     gss_OID_set desired_mechs = GSS_C_NULL_OID_SET;
+#else
+    OM_uint32 max_input;
 #endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
     int ret;
@@ -1243,8 +1245,14 @@ gssapi_server_mech_step(void *conn_context,
 	}
 #else
 	if (oparams->mech_ssf) {
-	    /* xxx this is probably too big */
-	    oparams->maxoutbuf -= 50;
+ 	    maj_stat = gss_wrap_size_limit( &min_stat,
+					    text->gss_ctx,
+					    1,
+					    GSS_C_QOP_DEFAULT,
+					    (OM_uint32) oparams->maxoutbuf,
+					    &max_input);
+	    
+	    oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
 	}
 #endif /* _SUN_SDK_ */
 	
