@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.171 2004/07/06 13:48:10 rjs3 Exp $
+ * $Id: digestmd5.c,v 1.172 2004/07/06 14:03:49 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3777,7 +3777,7 @@ static int make_client_response(context_t *text,
     char           maxbufstr[64];
     char           *response = NULL;
     unsigned        resplen = 0;
-    int result;
+    int result = SASL_OK;
 
     switch (ctext->protection) {
     case DIGEST_PRIVACY:
