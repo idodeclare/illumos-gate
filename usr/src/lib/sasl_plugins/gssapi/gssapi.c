@@ -1023,16 +1023,6 @@ gssapi_server_mech_step(void *conn_context,
 	
 	if (GSS_ERROR(maj_stat)) {
 #ifndef _SUN_SDK_
-	    if (name_without_realm.value)
-		params->utils->free(name_without_realm.value);
-#endif /* !_SUN_SDK_ */
-	    
-	    if (name_token.value) {
-		GSS_LOCK_MUTEX(params->utils);
-		gss_release_buffer(&min_stat, &name_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-	    }
-#ifndef _SUN_SDK_
 	    if (without) {
 		GSS_LOCK_MUTEX(params->utils);
 		gss_release_name(&min_stat, &without);
@@ -1056,8 +1046,13 @@ gssapi_server_mech_step(void *conn_context,
 	if (strchr((char *) name_token.value, (int) '@') != NULL) {
 	    /* NOTE: libc malloc, as it is freed below by a gssapi internal
 	     *       function! */
-	    name_without_realm.value = malloc(strlen(name_token.value)+1);
+	    name_without_realm.value = params->utils->malloc(strlen(name_token.value)+1);
 	    if (name_without_realm.value == NULL) {
+		if (name_token.value) {
+	    	    GSS_LOCK_MUTEX(params->utils);
+		    gss_release_buffer(&min_stat, &name_token);
+	    	    GSS_UNLOCK_MUTEX(params->utils);
+		}
 		MEMERROR(text->utils);
 		return SASL_NOMEM;
 	    }
@@ -1087,11 +1082,6 @@ gssapi_server_mech_step(void *conn_context,
 		if (name_token.value) {
 	    	    GSS_LOCK_MUTEX(params->utils);
 		    gss_release_buffer(&min_stat, &name_token);
-	    	    GSS_UNLOCK_MUTEX(params->utils);
-		}
-		if (without) {
-	    	    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_name(&min_stat, &without);
 	    	    GSS_UNLOCK_MUTEX(params->utils);
 		}
 		SETERROR(text->utils, "GSSAPI Failure");
