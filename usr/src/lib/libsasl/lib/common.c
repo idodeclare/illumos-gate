@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.94 2003/08/18 15:47:17 rjs3 Exp $
+ * $Id: common.c,v 1.95 2003/08/24 20:53:31 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1777,6 +1777,7 @@ ___sasl_log(const _sasl_global_context_t *gctx,
 #endif /* !_SUN_SDK_ */
   
   int ival;
+  unsigned int uval;
   char *cval;
 #ifndef _SUN_SDK_
   va_list ap; /* varargs thing */
@@ -1887,8 +1888,25 @@ ___sasl_log(const _sasl_global_context_t *gctx,
 		goto done;
 
 	    done=1;
-
 	    break;
+
+	  case 'o':
+	  case 'u':
+	  case 'x':
+	  case 'X':
+	    frmt[frmtpos++]=fmt[pos];
+	    frmt[frmtpos]=0;
+	    uval = va_arg(ap, unsigned int); /* get the next arg */
+
+	    snprintf(tempbuf,20,frmt,uval); /* have snprintf do the work */
+	    /* now add the string */
+	    result = _sasl_add_string(&out, &alloclen, &outlen, tempbuf);
+	    if (result != SASL_OK)
+		goto done;
+
+	    done=1;
+	    break;
+
 	  default: 
 	    frmt[frmtpos++]=fmt[pos]; /* add to the formating */
 	    frmt[frmtpos]=0;	    
