@@ -6,7 +6,7 @@
 /* saslutil.c
  * Rob Siemborski
  * Tim Martin
- * $Id: saslutil.c,v 1.41 2003/03/19 18:25:28 rjs3 Exp $
+ * $Id: saslutil.c,v 1.51 2010/12/01 14:25:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -50,9 +50,13 @@
 
 #include <config.h>
 #include <stdio.h>
+
+#if defined(WIN32)
+#define _CRT_RAND_S
+#endif
+
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -78,7 +82,13 @@
  * sasl_randseed
  * sasl_rand
  * sasl_churn
-*/
+ * sasl_erasebuffer
+ */
+
+#ifdef sun
+/* gotta define gethostname ourselves on suns */
+extern int gethostname(char *, int);
+#endif
 
 #ifndef _SUN_SDK_
 char *encode_table;
@@ -119,8 +129,11 @@ static char index_64[128] = {
  * Returns SASL_OK on success, SASL_BUFOVER if result won't fit
  */
 
-int sasl_encode64(const char *_in, unsigned inlen,
-		  char *_out, unsigned outmax, unsigned *outlen)
+int sasl_encode64(const char *_in,
+		  unsigned inlen,
+		  char *_out,
+		  unsigned outmax,
+		  unsigned *outlen)
 {
     const unsigned char *in = (const unsigned char *)_in;
     unsigned char *out = (unsigned char *)_out;
@@ -134,19 +147,21 @@ int sasl_encode64(const char *_in, unsigned inlen,
 #ifdef _SUN_SDK_
     if (((inlen >0) && (in == NULL)) || _out == NULL) return SASL_BADPARAM;
 #else
-    if ((inlen >0) && (in == NULL)) return SASL_BADPARAM;
+    if ((inlen > 0) && (in == NULL)) return SASL_BADPARAM;
 #endif /* _SUN_SDK_ */
     
     /* Will it fit? */
     olen = (inlen + 2) / 3 * 4;
-    if (outlen)
-      *outlen = olen;
-    if (outmax <= olen)
-      return SASL_BUFOVER;
+    if (outlen) {
+	*outlen = olen;
+    }
+    if (outmax <= olen) {
+	return SASL_BUFOVER;
+    }
 
     /* Do the work... */
 #ifndef _SUN_SDK_
-    blah=(char *) out;
+    blah = (char *) out;
 #endif /* !_SUN_SDK_ */
     while (inlen >= 3) {
       /* user provided max buffer size; make sure we don't go over it */
@@ -183,52 +198,62 @@ int sasl_encode64(const char *_in, unsigned inlen,
  * returns:
  * SASL_BADPROT on bad base64,
  * SASL_BUFOVER if result won't fit,
+ * SASL_CONTINUE on a partial block,
  * SASL_OK on success
  */
 
-int sasl_decode64(const char *in, unsigned inlen,
-		  char *out, unsigned outmax, unsigned *outlen)
+int sasl_decode64(const char *in,
+                  unsigned inlen,
+                  char *out,
+                  unsigned outmax,  /* size of the buffer, not counting the NUL */
+                  unsigned *outlen)
 {
-    unsigned len = 0,lup;
-    int c1, c2, c3, c4;
+    unsigned len = 0;
+    unsigned j;
+    int c[4];
+    int saw_equal = 0;
 
     /* check parameters */
 #ifdef _SUN_SDK_
-    if (out==NULL || in == NULL) return SASL_FAIL;
+    if (ou == NULL || in == NULL) return SASL_FAIL;
 #else
-    if (out==NULL) return SASL_FAIL;
+    if (out == NULL) return SASL_FAIL;
 #endif /* _SUN_SDK_ */
 
-    /* xxx these necessary? */
-    if (in[0] == '+' && in[1] == ' ') in += 2;
-    if (*in == '\r') return SASL_FAIL;
+    if (inlen > 0 && *in == '\r') return SASL_FAIL;
 
-    for (lup=0;lup<inlen/4;lup++)
-    {
-        c1 = in[0];
-        if (CHAR64(c1) == -1) return SASL_BADPROT;
-        c2 = in[1];
-        if (CHAR64(c2) == -1) return SASL_BADPROT;
-        c3 = in[2];
-        if (c3 != '=' && CHAR64(c3) == -1) return SASL_BADPROT; 
-        c4 = in[3];
-        if (c4 != '=' && CHAR64(c4) == -1) return SASL_BADPROT;
-        in += 4;
-        *out++ = (CHAR64(c1) << 2) | (CHAR64(c2) >> 4);
-        if(++len >= outmax) return SASL_BUFOVER;
-        if (c3 != '=') {
-            *out++ = ((CHAR64(c2) << 4) & 0xf0) | (CHAR64(c3) >> 2);
-            if(++len >= outmax) return SASL_BUFOVER;
-            if (c4 != '=') {
-                *out++ = ((CHAR64(c3) << 6) & 0xc0) | CHAR64(c4);
-                if(++len >= outmax) return SASL_BUFOVER;
+    while (inlen > 3) {
+        /* No data is valid after an '=' character */
+        if (saw_equal) {
+            return SASL_BADPROT;
+        }
+
+	for (j = 0; j < 4; j++) {
+	    c[j] = in[0];
+	    in++;
+	    inlen--;
+	}
+
+        if (CHAR64(c[0]) == -1 || CHAR64(c[1]) == -1) return SASL_BADPROT;
+        if (c[2] != '=' && CHAR64(c[2]) == -1) return SASL_BADPROT;
+        if (c[3] != '=' && CHAR64(c[3]) == -1) return SASL_BADPROT;
+        /* No data is valid after a '=' character, unless it is another '=' */
+        if (c[2] == '=' && c[3] != '=') return SASL_BADPROT;
+        if (c[2] == '=' || c[3] == '=') {
+            saw_equal = 1;
+        }
+
+        *out++ = (CHAR64(c[0]) << 2) | (CHAR64(c[1]) >> 4);
+        if (++len >= outmax) return SASL_BUFOVER;
+        if (c[2] != '=') {
+            *out++ = ((CHAR64(c[1]) << 4) & 0xf0) | (CHAR64(c[2]) >> 2);
+            if (++len >= outmax) return SASL_BUFOVER;
+            if (c[3] != '=') {
+                *out++ = ((CHAR64(c[2]) << 6) & 0xc0) | CHAR64(c[3]);
+                if (++len >= outmax) return SASL_BUFOVER;
             }
         }
     }
-
-    *out=0; /* terminate string */
-
-    if(outlen) *outlen=len;
 
     return SASL_OK;
 }
@@ -269,7 +294,7 @@ int sasl_mkchal(sasl_conn_t *conn,
     + (2 * 20);			/* 2 numbers, 20 => max size of 64bit
 				 * ulong in base 10 */
   if (hostflag && conn->serverFQDN)
-    len += strlen(conn->serverFQDN) + 1 /* for the @ */;
+    len += (unsigned) strlen(conn->serverFQDN) + 1 /* for the @ */;
 
   if (maxlen < len)
     return 0;
@@ -291,7 +316,7 @@ int sasl_mkchal(sasl_conn_t *conn,
   else
     snprintf(buf,maxlen, "<%lu.%lu>", randnum, now);
 
-  return strlen(buf);
+  return (int) strlen(buf);
 }
 
   /* borrowed from larry. probably works :)
@@ -448,7 +473,7 @@ void sasl_randseed (sasl_rand_t *rpool, const char *seed, unsigned len)
 
 static void randinit(sasl_rand_t *rpool)
 {
-    assert(rpool);
+    if (!rpool) return;
     
     if (!rpool->initialized) {
 	getranddata(rpool->pool);
@@ -461,6 +486,11 @@ static void randinit(sasl_rand_t *rpool)
 	srandom(*foo);
     }
 #endif /* HAVE_JRAND48 */
+#else if defined(WIN32)
+    {
+	unsigned int *foo = (unsigned int *)rpool->pool;
+	srand(*foo);
+    }
 #endif /* WIN32 */
     }
 
@@ -469,24 +499,33 @@ static void randinit(sasl_rand_t *rpool)
 void sasl_rand (sasl_rand_t *rpool, char *buf, unsigned len)
 {
     unsigned int lup;
+#if defined(WIN32)
+    unsigned int randomValue;
+#endif
+
     /* check params */
     if (!rpool || !buf) return;
     
     /* init if necessary */
     randinit(rpool);
- 
-#if (defined(WIN32)||defined(macintosh))
-    for (lup=0;lup<len;lup++)
+
+    for (lup = 0; lup < len; lup++) {
+#if defined(WIN32)
+	if (rand_s(&randomValue) != 0) {
+	    randomValue = rand();
+	}
+
+	buf[lup] = (char) (randomValue >> 8);
+#elif defined(macintosh)
 	buf[lup] = (char) (rand() >> 8);
-#else /* WIN32 */
+#else /* !WIN32 && !macintosh */
 #ifdef HAVE_JRAND48
-    for (lup=0; lup<len; lup++)
 	buf[lup] = (char) (jrand48(rpool->pool) >> 8);
 #else
-    for (lup=0;lup<len;lup++)
 	buf[lup] = (char) (random() >> 8);
 #endif /* HAVE_JRAND48 */
 #endif /* WIN32 */
+    }
 }
 
 /* this function is just a bad idea all around, since we're not trying to
@@ -507,6 +546,101 @@ void sasl_churn (sasl_rand_t *rpool, const char *data, unsigned len)
 
 void sasl_erasebuffer(char *buf, unsigned len) {
     memset(buf, 0, len);
+}
+
+/* Lowercase string in place */
+char *sasl_strlower (
+  char *val
+)
+{
+    int i;
+
+    if (val == NULL) {
+	return (NULL);
+    }
+
+/* don't use tolower(), as it is locale dependent */
+
+    for (i = 0; val[i] != '\0'; i++) {
+	if (val[i] >= 'A' && val[i] <= 'Z') {
+	    val[i] = val[i] - 'A' + 'a';
+	}
+    }
+
+    return (val);
+}
+
+/* A version of gethostname that tries hard to return a FQDN */
+int get_fqhostname(
+  char *name,  
+  int namelen,
+  int abort_if_no_fqdn
+)
+{
+    int return_value;
+    struct addrinfo hints;
+    struct addrinfo *result;
+
+    return_value = gethostname (name, namelen);
+    if (return_value != 0) {
+	return (return_value);
+    }
+
+    if (strchr (name, '.') != NULL) {
+	goto LOWERCASE;
+    }
+
+/* gethostname hasn't returned a FQDN, we have to canonify it ourselves */
+    hints.ai_family = PF_UNSPEC;
+    hints.ai_flags = AI_CANONNAME;
+    hints.ai_socktype = SOCK_STREAM;	/* TCP only */
+/* A value of zero for ai_protocol indicates the caller will accept any protocol. or IPPROTO_TCP? */
+    hints.ai_protocol = 0;  /* 0 or IPPROTO_xxx for IPv4 and IPv6 */
+    hints.ai_addrlen = 0;
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
+
+    if (getaddrinfo(name,
+		  NULL,		/* don't care abour service/port */
+		  &hints,
+		  &result) != 0) {
+	/* errno on Unix, WSASetLastError on Windows are already done by the function */
+	return (-1);
+    }
+
+    if (abort_if_no_fqdn && (result == NULL || result->ai_canonname == NULL)) {
+	freeaddrinfo (result);
+#ifdef WIN32
+	WSASetLastError (WSANO_DATA);
+#elif defined(ENODATA)
+	errno = ENODATA;
+#elif defined(EADDRNOTAVAIL)
+	errno = EADDRNOTAVAIL;
+#endif
+	return (-1);
+    }
+
+    if (abort_if_no_fqdn && strchr (result->ai_canonname, '.') == NULL) {
+	freeaddrinfo (result);
+#ifdef WIN32
+	WSASetLastError (WSANO_DATA);
+#elif defined(ENODATA)
+	errno = ENODATA;
+#elif defined(EADDRNOTAVAIL)
+	errno = EADDRNOTAVAIL;
+#endif
+	return (-1);
+    }
+
+
+/* Do we need to check for buffer overflow and set errno? */
+    strncpy (name, result->ai_canonname, namelen);
+    freeaddrinfo (result);
+
+LOWERCASE:
+    sasl_strlower (name);
+    return (0);
 }
 
 #ifndef _SUN_SDK_
@@ -697,13 +831,13 @@ getpass(prompt)
 const char *prompt;
 {
 	register char *p;
-	register c;
+	register int c;
 	static char pbuf[PASSWORD_MAX];
 
 	fprintf(stderr, "%s", prompt); (void) fflush(stderr);
 	for (p=pbuf; (c = _getch())!=13 && c!=EOF;) {
 		if (p < &pbuf[sizeof(pbuf)-1])
-			*p++ = c;
+			*p++ = (char) c;
 	}
 	*p = '\0';
 	fprintf(stderr, "\n"); (void) fflush(stderr);

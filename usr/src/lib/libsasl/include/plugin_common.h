@@ -5,7 +5,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.h,v 1.16 2003/04/07 16:03:43 rjs3 Exp $
+ * $Id: plugin_common.h,v 1.21 2006/01/17 12:18:21 mel Exp $
  */
 
 /* 
@@ -55,7 +55,7 @@
 
 #ifndef macintosh
 #ifdef WIN32
-# include <winsock.h>
+# include <winsock2.h>
 #else
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -149,6 +149,10 @@ typedef struct buffer_info
 } buffer_info_t;
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int _plug_ipfromstring(const sasl_utils_t *utils, const char *addr,
 		       struct sockaddr *out, socklen_t outlen);
 int _plug_iovec_to_buf(const sasl_utils_t *utils, const struct iovec *vec,
@@ -190,17 +194,45 @@ int _plug_make_prompts(const sasl_utils_t *utils,
 		       const char *realm_chal,
 		       const char *realm_prompt, const char *realm_def);
 
-int _plug_decode(const sasl_utils_t *utils,
-		 void *context,
+typedef struct decode_context {
+    const sasl_utils_t *utils;
+    unsigned int needsize;	/* How much of the 4-byte size do we need? */
+    char sizebuf[4];		/* Buffer to accumulate the 4-byte size */
+    unsigned int size;		/* Absolute size of the encoded packet */
+    char *buffer;		/* Buffer to accumulate an encoded packet */
+    unsigned int cursize;	/* Amount of packet data in the buffer */
+    unsigned int in_maxbuf;	/* Maximum allowed size of an incoming encoded packet */
+} decode_context_t;
+
+void _plug_decode_init(decode_context_t *text,
+		       const sasl_utils_t *utils, unsigned int in_maxbuf);
+
+int _plug_decode(decode_context_t *text,
 		 const char *input, unsigned inputlen,
 		 char **output, unsigned *outputsize, unsigned *outputlen,
-		 int (*decode_pkt)(void *context,
-				   const char **input, unsigned *inputlen,
-				   char **output, unsigned *outputlen));
+		 int (*decode_pkt)(void *rock,
+				   const char *input, unsigned inputlen,
+				   char **output, unsigned *outputlen),
+		 void *rock);
+
+void _plug_decode_free(decode_context_t *text);
 
 int _plug_parseuser(const sasl_utils_t *utils,
 		    char **user, char **realm, const char *user_realm, 
 		    const char *serverFQDN, const char *input);
+
+int _plug_make_fulluser(const sasl_utils_t *utils,
+			char **fulluser, const char * useronly, const char *realm);
+
+char * _plug_get_error_message (const sasl_utils_t *utils,
+#ifdef WIN32
+				DWORD error
+#else
+				int error
+#endif
+				);
+void _plug_snprintf_os_info (char * osbuf, int osbuf_len);
+
 
 #ifdef _INTEGRATED_SOLARIS_
 typedef void reg_sun_t(void *);
@@ -218,4 +250,9 @@ int use_locale(const char *lang_list, int is_client);
 const char *convert_prompt(const sasl_utils_t *utils, void **h, const char *s);
 char *local_to_utf(const sasl_utils_t *utils, const char *s);
 #endif /* _INTEGRATED_SOLARIS_ */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* _PLUGIN_COMMON_H_ */

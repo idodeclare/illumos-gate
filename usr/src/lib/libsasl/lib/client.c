@@ -3,10 +3,10 @@
  * Use is subject to license terms.
  */
 
-/* SASL server API implementation
+/* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.61 2003/04/16 19:36:00 rjs3 Exp $
+ * $Id: client.c,v 1.86 2011/09/01 14:12:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,9 +76,7 @@ DEFINE_STATIC_MUTEX(client_active_mutex);
 DEFINE_STATIC_MUTEX(client_plug_mutex);
 #else
 static cmech_list_t *cmechlist; /* global var which holds the list */
-
-static sasl_global_callbacks_t global_callbacks;
-
+sasl_global_callbacks_t global_callbacks_client; 
 static int _sasl_client_active = 0;
 #endif /* _SUN_SDK_ */
 
@@ -91,14 +89,11 @@ static int init_mechlist()
 {
 #endif /* _SUN_SDK_ */
 
-  cmechlist->mutex = sasl_MUTEX_ALLOC();
-  if(!cmechlist->mutex) return SASL_FAIL;
-  
 #ifdef _SUN_SDK_
   cmechlist->utils=
 	_sasl_alloc_utils(gctx, NULL, &gctx->client_global_callbacks);
 #else
-  cmechlist->utils=_sasl_alloc_utils(NULL, &global_callbacks);
+  cmechlist->utils=_sasl_alloc_utils(NULL, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
   if (cmechlist->utils==NULL)
     return SASL_NOMEM;
@@ -106,68 +101,80 @@ static int init_mechlist()
   cmechlist->mech_list=NULL;
   cmechlist->mech_length=0;
 
-  return SASL_OK;
+  _sasl_client_active = 0;
+}
+
+int sasl_client_done(void)
+{
+    int result = SASL_CONTINUE;
+
+    if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
+	return SASL_NOTINIT;
+    }
+
+    if (_sasl_client_cleanup_hook) {
+	result = _sasl_client_cleanup_hook();
+	
+	if (result == SASL_OK) {
+	    _sasl_client_idle_hook = NULL;	
+	    _sasl_client_cleanup_hook = NULL;
+	} else {
+	    return result;
+	}
+    }
+    
+    if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
+	return result;
+    }
+    
+    sasl_common_done();
+
+    return SASL_OK;
 }
 
 #ifdef _SUN_SDK_
-static int client_done(_sasl_global_context_t *gctx) {
+static void client_done(_sasl_global_context_t *gctx) {
   cmech_list_t *cmechlist = gctx->cmechlist;
   _sasl_path_info_t *path_info, *p;
 #else
-static int client_done(void) {
+static void client_done(void) {
 #endif /* _SUN_SDK_ */
-  cmechanism_t *cm;
-  cmechanism_t *cprevm;
+    cmechanism_t *cm;
+    cmechanism_t *cprevm;
 
-#ifdef _SUN_SDK_
-  if(!gctx->sasl_client_active)
-      return SASL_NOTINIT;
-  if (LOCK_MUTEX(&client_active_mutex) < 0) {
-	return (SASL_FAIL);
-  }
-  gctx->sasl_client_active--;
-
-  if(gctx->sasl_client_active) {
-      /* Don't de-init yet! Our refcount is nonzero. */
-      UNLOCK_MUTEX(&client_active_mutex);
-      return SASL_CONTINUE;
-  }
-#else
-  if(!_sasl_client_active)
-      return SASL_NOTINIT;
-  else
-      _sasl_client_active--;
-  
-  if(_sasl_client_active) {
-      /* Don't de-init yet! Our refcount is nonzero. */
-      return SASL_CONTINUE;
-  }
-#endif /* _SUN_SDK_ */
-  
-  cm=cmechlist->mech_list; /* m point to begging of the list */
-  while (cm!=NULL)
-  {
-    cprevm=cm;
-    cm=cm->next;
-
-    if (cprevm->plug->mech_free) {
-#ifdef _SUN_SDK_
-	cprevm->plug->mech_free(cprevm->glob_context, cmechlist->utils);
-#else
-	cprevm->plug->mech_free(cprevm->plug->glob_context,
-				cmechlist->utils);
-#endif /* _SUN_SDK_ */
+    if (!_sasl_client_active) {
+	return SASL_NOTINIT;
+    } else {
+	_sasl_client_active--;
     }
 
-    sasl_FREE(cprevm->plugname);
-    sasl_FREE(cprevm);    
-  }
-  sasl_MUTEX_FREE(cmechlist->mutex);
-  _sasl_free_utils(&cmechlist->utils);
-  sasl_FREE(cmechlist);
+    if(_sasl_client_active) {
+	/* Don't de-init yet! Our refcount is nonzero. */
+	return SASL_CONTINUE;
+    }
+
+    cm = cmechlist->mech_list; /* m point to beginning of the list */
+    while (cm != NULL) {
+	cprevm = cm;
+	cm = cm->next;
+
+	if (cprevm->m.plug->mech_free) {
+#ifdef _SUN_SDK_
+	    cprevm->plug->mech_free(cprevm->glob_context, cmechlist->utils);
+#else
+	    cprevm->m.plug->mech_free(cprevm->m.plug->glob_context,
+				      cmechlist->utils);
+#endif /* _SUN_SDK_ */
+	}
+
+	sasl_FREE(cprevm->m.plugname);
+	sasl_FREE(cprevm);    
+    }
+    _sasl_free_utils(&cmechlist->utils);
+    sasl_FREE(cmechlist);
 
 #ifdef _SUN_SDK_
-  gctx->cmechlist = NULL;
+    gctx->cmechlist = NULL;
   p = gctx->cplug_path_info;
   while((path_info = p) != NULL) {
     sasl_FREE(path_info->path);
@@ -177,10 +184,45 @@ static int client_done(void) {
   gctx->cplug_path_info = NULL;
   UNLOCK_MUTEX(&client_active_mutex);
 #else
-  cmechlist = NULL;
+    cmechlist = NULL;
 #endif /* _SUN_SDK_ */
 
-  return SASL_OK;
+    return SASL_OK;
+}
+
+/* This is nearly identical to the version in server.c.
+   Keep in sync. */
+static int mech_compare(const sasl_client_plug_t *a,
+			const sasl_client_plug_t *b)
+{
+    unsigned sec_diff;
+    unsigned features_diff;
+
+    /* XXX  the following is fairly arbitrary, but its independent
+       of the order in which the plugins are loaded
+    */
+    sec_diff = a->security_flags ^ b->security_flags;
+    if (sec_diff & a->security_flags & SASL_SEC_NOANONYMOUS) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOANONYMOUS) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NOPLAINTEXT) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOPLAINTEXT) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_MUTUAL_AUTH) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_MUTUAL_AUTH) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NOACTIVE) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOACTIVE) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NODICTIONARY) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NODICTIONARY) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_FORWARD_SECRECY) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_FORWARD_SECRECY) return -1;
+
+    features_diff = a->features ^ b->features;
+    if (features_diff & a->features & SASL_FEAT_CHANNEL_BINDING) return 1;
+    if (features_diff & b->features & SASL_FEAT_CHANNEL_BINDING) return -1;
+
+    if (a->max_ssf > b->max_ssf) return 1;
+    if (a->max_ssf < b->max_ssf) return -1;
+  
+    return 0;
 }
 
 int sasl_client_add_plugin(const char *plugname,
@@ -202,14 +244,14 @@ int _sasl_client_add_plugin(void *ctx,
   int i;
   cmechanism_t *m;
 #endif /* _SUN_SDK_ */
-  int plugcount;
-  sasl_client_plug_t *pluglist;
-  cmechanism_t *mech;
-  int result;
-  int version;
-  int lupe;
+    int plugcount;
+    sasl_client_plug_t *pluglist;
+    cmechanism_t *mech, *mp;
+    int result;
+    int version;
+    int lupe;
 
-  if(!plugname || !entry_point) return SASL_BADPARAM;
+    if (!plugname || !entry_point) return SASL_BADPARAM;
   
 #ifdef _SUN_SDK_
   cmechlist = gctx->cmechlist;
@@ -231,39 +273,42 @@ int _sasl_client_add_plugin(void *ctx,
 
 #endif /* _SUN_SDK_ */
 
-  result = entry_point(cmechlist->utils, SASL_CLIENT_PLUG_VERSION, &version,
-		       &pluglist, &plugcount);
+    result = entry_point(cmechlist->utils,
+			 SASL_CLIENT_PLUG_VERSION,
+			 &version,
+			 &pluglist,
+			 &plugcount);
 
 #ifdef _INTEGRATED_SOLARIS_
   sun_reg = _is_sun_reg(pluglist);
 #endif /* _INTEGRATED_SOLARIS_ */
-  if (result != SASL_OK)
-  {
+    if (result != SASL_OK)
+    {
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
     __sasl_log(gctx, gctx->client_global_callbacks.callbacks, SASL_LOG_WARN,
 	      "entry_point failed in sasl_client_add_plugin for %s",
 	      plugname);
 #else
-    _sasl_log(NULL, SASL_LOG_WARN,
+	_sasl_log(NULL, SASL_LOG_WARN,
 	      "entry_point failed in sasl_client_add_plugin for %s",
 	      plugname);
 #endif /* _SUN_SDK_ */
-    return result;
-  }
+	return result;
+    }
 
-  if (version != SASL_CLIENT_PLUG_VERSION)
-  {
+    if (version != SASL_CLIENT_PLUG_VERSION)
+    {
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
     __sasl_log(gctx, gctx->client_global_callbacks.callbacks, SASL_LOG_WARN,
 	      "version conflict in sasl_client_add_plugin for %s", plugname);
 #else
-    _sasl_log(NULL, SASL_LOG_WARN,
+	_sasl_log(NULL, SASL_LOG_WARN,
 	      "version conflict in sasl_client_add_plugin for %s", plugname);
 #endif /* _SUN_SDK_ */
-    return SASL_BADVERS;
-  }
+	return SASL_BADVERS;
+    }
 
 #ifdef _SUN_SDK_
     /* Check plugins to make sure mech_name is non-NULL */
@@ -279,9 +324,9 @@ int _sasl_client_add_plugin(void *ctx,
     }
 #endif /* _SUN_SDK_ */
 
-  for (lupe=0;lupe< plugcount ;lupe++)
+    for (lupe=0; lupe < plugcount; lupe++, pluglist++)
     {
-      mech = sasl_ALLOC(sizeof(cmechanism_t));
+	mech = sasl_ALLOC(sizeof(cmechanism_t));
 #ifdef _SUN_SDK_
       if (! mech) {
 	UNLOCK_MUTEX(&client_plug_mutex);
@@ -289,30 +334,43 @@ int _sasl_client_add_plugin(void *ctx,
       }
       mech->glob_context = pluglist->glob_context;
 #else
-      if (! mech) return SASL_NOMEM;
+	if (!mech) return SASL_NOMEM;
 #endif /* _SUN_SDK_ */
 
-      mech->plug=pluglist++;
-      if(_sasl_strdup(plugname, &mech->plugname, NULL) != SASL_OK) {
+	mech->m.plug = pluglist;
+	if (_sasl_strdup(plugname, &mech->m.plugname, NULL) != SASL_OK) {
 #ifdef _SUN_SDK_
 	UNLOCK_MUTEX(&client_plug_mutex);
 #endif /* _SUN_SDK_ */
-	sasl_FREE(mech);
-	return SASL_NOMEM;
-      }
+	    sasl_FREE(mech);
+	    return SASL_NOMEM;
+	}
 #ifdef _INTEGRATED_SOLARIS_
       mech->sun_reg = sun_reg;
 #endif /* _INTEGRATED_SOLARIS_ */
-      mech->version = version;
-      mech->next = cmechlist->mech_list;
-      cmechlist->mech_list = mech;
-      cmechlist->mech_length++;
+	mech->m.version = version;
+
+	/* sort mech_list by relative "strength" */
+	mp = cmechlist->mech_list;
+	if (!mp || mech_compare(pluglist, mp->m.plug) >= 0) {
+	    /* add mech to head of list */
+	    mech->next = cmechlist->mech_list;
+	    cmechlist->mech_list = mech;
+	} else {
+	    /* find where to insert mech into list */
+	    while (mp->next &&
+		   mech_compare(pluglist, mp->next->m.plug) <= 0) mp = mp->next;
+	    mech->next = mp->next;
+	    mp->next = mech;
+	}
+
+	cmechlist->mech_length++;
     }
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
 #endif /* _SUN_SDK_ */
 
-  return SASL_OK;
+    return SASL_OK;
 }
 
 static int
@@ -330,11 +388,11 @@ client_idle(sasl_conn_t *conn)
   for (m = cmechlist->mech_list;
        m;
        m = m->next)
-    if (m->plug->idle
+    if (m->m.plug->idle
 #ifdef _SUN_SDK_
 	&&  m->plug->idle(m->glob_context,
 #else
-	&&  m->plug->idle(m->plug->glob_context,
+	&&  m->m.plug->idle(m->m.plug->glob_context,
 #endif /* _SUN_SDK_ */
 			  conn,
 			  conn ? ((sasl_client_conn_t *)conn)->cparams : NULL))
@@ -395,6 +453,9 @@ int _sasl_client_init(void *ctx,
 	UNLOCK_MUTEX(&init_client_mutex);
 	return (SASL_FAIL);
   }
+  /* lock allocation type */
+  _sasl_allocation_locked++;
+  
   if(gctx->sasl_client_active) {
       /* We're already active, just increase our refcount */
       /* xxx do something with the callback structure? */
@@ -438,32 +499,23 @@ int sasl_client_init(const sasl_callback_t *callbacks)
       { NULL, NULL }
   };
 
-  if(_sasl_client_active) {
-      /* We're already active, just increase our refcount */
-      /* xxx do something with the callback structure? */
-      _sasl_client_active++;
-      return SASL_OK;
-  }
+  _sasl_client_cleanup_hook = &client_done;
+  _sasl_client_idle_hook = &client_idle;
 
-  global_callbacks.callbacks = callbacks;
-  global_callbacks.appname = NULL;
+  global_callbacks_client.callbacks = callbacks;
+  global_callbacks_client.appname = NULL;
 
   cmechlist=sasl_ALLOC(sizeof(cmech_list_t));
   if (cmechlist==NULL) return SASL_NOMEM;
 
-  /* We need to call client_done if we fail now */
-  _sasl_client_active = 1;
-
   /* load plugins */
   ret=init_mechlist();  
-  if (ret!=SASL_OK) {
-      client_done();
-      return ret;
-  }
+  if (ret!=SASL_OK)
+    return ret;
 
   sasl_client_add_plugin("EXTERNAL", &external_client_plug_init);
 
-  ret = _sasl_common_init(&global_callbacks);
+  ret = _sasl_common_init(&global_callbacks_client);
 #endif /* _SUN_SDK_ */
 
   if (ret == SASL_OK)
@@ -475,25 +527,18 @@ int sasl_client_init(const sasl_callback_t *callbacks)
 			       _sasl_find_verifyfile_callback(callbacks));
 #endif /* _SUN_SDK_ */
   
+  if (ret == SASL_OK) {
+      _sasl_client_active = 1;
 #ifdef _SUN_SDK_
-  if (ret == SASL_OK)
 	/* If sasl_client_init returns error, sasl_done() need not be called */
       ret = _sasl_build_mechlist(gctx);
-  if (ret == SASL_OK) {
-      gctx->sasl_client_cleanup_hook = &client_done;
-      gctx->sasl_client_idle_hook = &client_idle;
-  } else {
+  }
+  if (ret != SASL_OK) {
       client_done(gctx);
   }
   UNLOCK_MUTEX(&init_client_mutex);
 #else
-  if (ret == SASL_OK) {
-      _sasl_client_cleanup_hook = &client_done;
-      _sasl_client_idle_hook = &client_idle;
-
       ret = _sasl_build_mechlist();
-  } else {
-      client_done();
   }
 #endif /* _SUN_SDK_ */
       
@@ -507,8 +552,8 @@ static void client_dispose(sasl_conn_t *pconn)
   sasl_free_t *free_func = c_conn->cparams->utils->free;
 #endif /* _SUN_SDK_ */
 
-  if (c_conn->mech && c_conn->mech->plug->mech_dispose) {
-    c_conn->mech->plug->mech_dispose(pconn->context,
+  if (c_conn->mech && c_conn->mech->m.plug->mech_dispose) {
+    c_conn->mech->m.plug->mech_dispose(pconn->context,
 				     c_conn->cparams->utils);
   }
 
@@ -528,6 +573,19 @@ static void client_dispose(sasl_conn_t *pconn)
 #else
       sasl_FREE(c_conn->cparams);
 #endif /* _SUN_SDK_ */
+  }
+
+  if (c_conn->mech_list != cmechlist->mech_list) {
+      /* free connection-specific mech_list */
+      cmechanism_t *m, *prevm;
+
+      m = c_conn->mech_list; /* m point to beginning of the list */
+
+      while (m) {
+	  prevm = m;
+	  m = m->next;
+	  sasl_FREE(prevm);    
+      }
   }
 
   _sasl_conn_dispose(pconn);
@@ -582,18 +640,22 @@ int _sasl_client_new(void *ctx,
   char name[MAXHOSTNAMELEN];
   sasl_client_conn_t *conn;
   sasl_utils_t *utils;
+  sasl_getopt_t *getopt;
+  void *context;
+  const char *mlist = NULL;
+  int plus = 0;
 
 #ifdef _SUN_SDK_
   if (gctx == NULL)
 	gctx = _sasl_gbl_ctx();
 
-  if(gctx->sasl_client_active==0) return SASL_NOTINIT;
+  if (gctx->sasl_client_active == 0) return SASL_NOTINIT;
 #else
-  if(_sasl_client_active==0) return SASL_NOTINIT;
+  if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
   
-  /* Remember, iplocalport and ipremoteport can be NULL and be valid! */
-  if (!pconn || !service || !serverFQDN)
+  /* Remember, serverFQDN, iplocalport and ipremoteport can be NULL and be valid! */
+  if (!pconn || !service)
     return SASL_BADPARAM;
 
   *pconn=sasl_ALLOC(sizeof(sasl_client_conn_t));
@@ -630,7 +692,7 @@ int _sasl_client_new(void *ctx,
 #ifdef _SUN_SDK_
 			   prompt_supp, &gctx->client_global_callbacks);
 #else
-			   prompt_supp, &global_callbacks);
+			   prompt_supp, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
 
   if (result != SASL_OK) RETURN(*pconn, result);
@@ -638,27 +700,87 @@ int _sasl_client_new(void *ctx,
 #ifdef _SUN_SDK_
   utils=_sasl_alloc_utils(gctx, *pconn, &gctx->client_global_callbacks);
 #else
-  utils=_sasl_alloc_utils(*pconn, &global_callbacks);
+  utils = _sasl_alloc_utils(*pconn, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
-  if (utils==NULL)
+  if (utils == NULL) {
       MEMERROR(*pconn);
   
   utils->conn= *pconn;
+  conn->cparams->utils = utils;
+
+  if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
+    getopt(context, NULL, "client_mech_list", &mlist, NULL);
+  }
+
+  /* if we have a client_mech_list, create ordered list of
+     available mechanisms for this conn */
+  if (mlist) {
+      const char *cp;
+      cmechanism_t *mptr, *tail = NULL;
+      cmechanism_t *new;
+
+      while (*mlist) {
+	  /* find end of current mech name */
+	  for (cp = mlist; *cp && !isspace((int) *cp); cp++);
+
+	  /* search for mech name in loaded plugins */
+	  for (mptr = cmechlist->mech_list; mptr; mptr = mptr->next) {
+	      const sasl_client_plug_t *plug = mptr->m.plug;
+
+	      if (_sasl_is_equal_mech(mlist, plug->mech_name, (size_t) (cp - mlist), &plus)) {
+		  /* found a match */
+		  break;
+	      }
+	  }
+	  if (mptr) {
+	      new = sasl_ALLOC(sizeof(cmechanism_t));
+	      if (!new) {
+		  result = SASL_NOMEM;
+		  goto failed_client_new;
+	      }
+	      memcpy(&new->m, &mptr->m, sizeof(client_sasl_mechanism_t));
+	      new->next = NULL;
+
+	      if (!conn->mech_list) {
+		  conn->mech_list = new;
+		  tail = conn->mech_list;
+	      } else {
+		  tail->next = new;
+		  tail = new;
+	      }
+	      conn->mech_length++;
+	  }
+
+	  /* find next mech name */
+	  mlist = cp;
+	  while (*mlist && isspace((int) *mlist)) mlist++;
+      }
+  } else {
+      conn->mech_list = cmechlist->mech_list;
+      conn->mech_length = cmechlist->mech_length;
+  }
+
+  if (conn->mech_list == NULL) {
+      sasl_seterror(*pconn, 0, "No worthy mechs found");
+      result = SASL_NOMECH;
+      goto failed_client_new;
+  }
 
   /* Setup the non-lazy parts of cparams, the rest is done in
    * sasl_client_start */
-  conn->cparams->utils = utils;
-  conn->cparams->canon_user = &_sasl_canon_user;
+  conn->cparams->canon_user = &_sasl_canon_user_lookup;
   conn->cparams->flags = flags;
   conn->cparams->prompt_supp = (*pconn)->callbacks;
   
   /* get the clientFQDN (serverFQDN was set in _sasl_conn_init) */
   memset(name, 0, sizeof(name));
-  gethostname(name, MAXHOSTNAMELEN);
+  if (get_fqhostname (name, MAXHOSTNAMELEN, 0) != 0) {
+      return (SASL_FAIL);
+  }
 
   result = _sasl_strdup(name, &conn->clientFQDN, NULL);
 
-  if(result == SASL_OK) return SASL_OK;
+  if (result == SASL_OK) return SASL_OK;
 
 #ifdef _SUN_SDK_
   conn->cparams->iplocalport = (*pconn)->iplocalport;
@@ -667,6 +789,7 @@ int _sasl_client_new(void *ctx,
   conn->cparams->ipremlen = strlen((*pconn)->ipremoteport);
 #endif /* _SUN_SDK_ */
 
+failed_client_new:
   /* result isn't SASL_OK */
   _sasl_conn_dispose(*pconn);
   sasl_FREE(*pconn);
@@ -690,7 +813,7 @@ static int have_prompts(sasl_conn_t *conn,
   };
 
   const unsigned long *prompt;
-  int (*pproc)();
+  sasl_callback_ft pproc;
   void *pcontext;
   int result;
 
@@ -705,6 +828,117 @@ static int have_prompts(sasl_conn_t *conn,
   }
 
   return 1; /* we have all the prompts */
+}
+
+static int
+_mech_plus_p(const char *mech, size_t len)
+{
+    return (len > 5 && strncasecmp(&mech[len - 5], "-PLUS", 5) == 0);
+}
+
+/*
+ * Order PLUS mechanisms first. Returns NUL separated list of
+ * *count items.
+ */
+static int
+_sasl_client_order_mechs(const sasl_utils_t *utils,
+			 const char *mechs,
+			 int has_cb_data,
+			 char **ordered_mechs,
+			 size_t *count,
+			 int *server_can_cb)
+{
+    char *list, *listp;
+    size_t i, mechslen, start;
+
+    *count = 0;
+    *server_can_cb = 0;
+
+    if (mechs == NULL || mechs[0] == '\0')
+        return SASL_NOMECH;
+
+    mechslen = strlen(mechs);
+
+    listp = list = utils->malloc(mechslen + 1);
+    if (list == NULL)
+	return SASL_NOMEM;
+
+    /* As per RFC 4422:
+     * SASL mechanism allowable characters are "AZ-_"
+     * separators can be any other characters and of any length
+     * even variable lengths between.
+     *
+     * But for convenience we accept lowercase ASCII.
+     *
+     * Apps should be encouraged to simply use space or comma space
+     * though
+     */
+#define ismechchar(c)   (isalnum((c)) || (c) == '_' || (c) == '-')
+    do {
+        for (i = start = 0; i <= mechslen; i++) {
+	    if (!ismechchar(mechs[i])) {
+                const char *mechp = &mechs[start];
+		size_t len = i - start;
+
+		if (len != 0 &&
+                    _mech_plus_p(mechp, len) == has_cb_data) {
+		    memcpy(listp, mechp, len);
+		    listp[len] = '\0';
+		    listp += len + 1;
+		    (*count)++;
+		    if (*server_can_cb == 0 && has_cb_data)
+			*server_can_cb = 1;
+		}
+		start = ++i;
+	    }
+	}
+	if (has_cb_data)
+	    has_cb_data = 0;
+	else
+	    break;
+    } while (1);
+
+    if (*count == 0) {
+        utils->free(list);
+        return SASL_NOMECH;
+    }
+
+    *ordered_mechs = list;
+
+    return SASL_OK;
+}
+
+static INLINE int
+_sasl_cbinding_disp(sasl_client_params_t *cparams,
+                    int mech_nego,
+                    int server_can_cb,
+                    sasl_cbinding_disp_t *cbindingdisp)
+{
+    /*
+     * If negotiating mechanisms, then we fail immediately if the
+     * client requires channel binding and the server does not
+     * advertise support. Otherwise we send "y" (which later will
+     * become "p" if we select a supporting mechanism).
+     *
+     * If the client explicitly selected a mechanism, then we only
+     * send channel bindings if they're marked critical.
+     */
+
+    *cbindingdisp = SASL_CB_DISP_NONE;
+
+    if (SASL_CB_PRESENT(cparams)) {
+        if (mech_nego) {
+	    if (!server_can_cb && SASL_CB_CRITICAL(cparams)) {
+	        return SASL_NOMECH;
+	    } else {
+                *cbindingdisp = SASL_CB_DISP_WANT;
+	    }
+        } else if (SASL_CB_CRITICAL(cparams)) {
+            *cbindingdisp = SASL_CB_DISP_USED;
+        }
+    }
+
+    return SASL_OK;
 }
 
 /* select a mechanism for a connection
@@ -722,10 +956,12 @@ static int have_prompts(sasl_conn_t *conn,
  *  SASL_INTERACT -- user interaction needed to fill in prompt_need list
  */
 
-/* xxx confirm this with rfc 2222
- * SASL mechanism allowable characters are "AZaz-_"
- * seperators can be any other characters and of any length
- * even variable lengths between
+/*
+ * SASL mechanism allowable characters are "AZ-_"
+ * separators can be any other characters and of any length
+ * even variable lengths between.
+ *
+ * But for convenience we accept lowercase ASCII.
  *
  * Apps should be encouraged to simply use space or comma space
  * though
@@ -737,29 +973,32 @@ int sasl_client_start(sasl_conn_t *conn,
 		      unsigned *clientoutlen,
 		      const char **mech)
 {
-    sasl_client_conn_t *c_conn= (sasl_client_conn_t *) conn;
-    char name[SASL_MECHNAMEMAX + 1];
-    cmechanism_t *m=NULL,*bestm=NULL;
-    size_t pos=0,place;
-    size_t list_len;
+    sasl_client_conn_t *c_conn = (sasl_client_conn_t *) conn;
+    char *ordered_mechs = NULL, *name;
+    cmechanism_t *m = NULL, *bestm = NULL;
+    size_t i, list_len, name_len;
     sasl_ssf_t bestssf = 0, minssf = 0;
-    int result;
+    int result, server_can_cb = 0;
+    sasl_cbinding_disp_t cbindingdisp;
+    sasl_cbinding_disp_t cur_cbindingdisp;
+    sasl_cbinding_disp_t best_cbindingdisp = SASL_CB_DISP_NONE;
 #ifdef _SUN_SDK_
     _sasl_global_context_t *gctx = (conn == NULL) ?
 		_sasl_gbl_ctx() : conn->gctx;
     cmech_list_t *cmechlist;
 
-    if(gctx->sasl_client_active==0) return SASL_NOTINIT;
+  if (gctx->sasl_client_active == 0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-    if(_sasl_client_active==0) return SASL_NOTINIT;
+  if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
 
-    if (!conn) return SASL_BADPARAM;
+  if (!conn) return SASL_BADPARAM;
 
     /* verify parameters */
-    if (mechlist == NULL)
+    if (mechlist == NULL) {
 	PARAMERROR(conn);
+    }
 
     /* if prompt_need != NULL we've already been here
        and just need to do the continue step again */
@@ -783,51 +1022,52 @@ int sasl_client_start(sasl_conn_t *conn,
     (void) _load_client_plugins(gctx);
 #endif /* _SUN_SDK_ */
 
-    if(conn->props.min_ssf < conn->external.ssf) {
+    if (conn->props.min_ssf < conn->external.ssf) {
 	minssf = 0;
     } else {
 	minssf = conn->props.min_ssf - conn->external.ssf;
     }
 
-    /* parse mechlist */
-    list_len = strlen(mechlist);
+    /* Order mechanisms so -PLUS are preferred */
+    result = _sasl_client_order_mechs(c_conn->cparams->utils,
+				      mechlist,
+				      SASL_CB_PRESENT(c_conn->cparams),
+				      &ordered_mechs,
+				      &list_len,
+				      &server_can_cb);
+    if (result != 0)
+	goto done;
+  
+    /*
+     * Determine channel binding disposition based on whether we
+     * are doing mechanism negotiation and whether server supports
+     * channel bindings.
+     */
+    result = _sasl_cbinding_disp(c_conn->cparams,
+				 (list_len > 1),
+                                 server_can_cb,
+				 &cbindingdisp);
+    if (result != 0)
+	goto done;
 
-    while (pos<list_len)
-    {
-	place=0;
-	while ((pos<list_len) && (isalnum((unsigned char)mechlist[pos])
-				  || mechlist[pos] == '_'
-				  || mechlist[pos] == '-')) {
-	    name[place]=mechlist[pos];
-	    pos++;
-	    place++;
-	    if (SASL_MECHNAMEMAX < place) {
-		place--;
-		while(pos<list_len && (isalnum((unsigned char)mechlist[pos])
-				       || mechlist[pos] == '_'
-				       || mechlist[pos] == '-'))
-		    pos++;
+    for (i = 0, name = ordered_mechs; i < list_len; i++) {
+
+	name_len = strlen(name);
+
+	/* for each mechanism in client's list */
+	for (m = c_conn->mech_list; m != NULL; m = m->next) {
+	    int myflags, plus;
+
+	    if (!_sasl_is_equal_mech(name, m->m.plug->mech_name, name_len, &plus)) {
+		continue;
 	    }
-	}
-	pos++;
-	name[place]=0;
-
-	if (! place) continue;
-
-	/* foreach in server list */
-	for (m = cmechlist->mech_list; m != NULL; m = m->next) {
-	    int myflags;
-	    
-	    /* Is this the mechanism the server is suggesting? */
-	    if (strcasecmp(m->plug->mech_name, name))
-		continue; /* no */
 
 	    /* Do we have the prompts for it? */
-	    if (!have_prompts(conn, m->plug))
+	    if (!have_prompts(conn, m->m.plug))
 		break;
 
 	    /* Is it strong enough? */
-	    if (minssf > m->plug->max_ssf)
+	    if (minssf > m->m.plug->max_ssf)
 		break;
 
 #ifdef _INTEGRATED_SOLARIS_
@@ -845,48 +1085,31 @@ int sasl_client_start(sasl_conn_t *conn,
 		myflags &= ~SASL_SEC_NOPLAINTEXT;
 	    }
 
-	    if (((myflags ^ m->plug->security_flags) & myflags) != 0) {
+	    if (((myflags ^ m->m.plug->security_flags) & myflags) != 0) {
 		break;
 	    }
 
 	    /* Can we meet it's features? */
-	    if ((m->plug->features & SASL_FEAT_NEEDSERVERFQDN)
+	    if (cbindingdisp == SASL_CB_DISP_USED &&
+		!(m->m.plug->features & SASL_FEAT_CHANNEL_BINDING)) {
+		break;
+	    }
+
+	    if ((m->m.plug->features & SASL_FEAT_NEEDSERVERFQDN)
 		&& !conn->serverFQDN) {
 		break;
 	    }
 
 	    /* Can it meet our features? */
 	    if ((conn->flags & SASL_NEED_PROXY) &&
-		!(m->plug->features & SASL_FEAT_ALLOWS_PROXY)) {
+		!(m->m.plug->features & SASL_FEAT_ALLOWS_PROXY)) {
 		break;
 	    }
-	    
-#ifdef PREFER_MECH
-#ifdef _INTEGRATED_SOLARIS_
-	    if (strcasecmp(m->plug->mech_name, PREFER_MECH) &&
-		bestm && (m->sun_reg && m->plug->max_ssf <= bestssf) ||
-		(m->plug->max_ssf == 0)) {
-#else
-	    if (strcasecmp(m->plug->mech_name, PREFER_MECH) &&
-		bestm && m->plug->max_ssf <= bestssf) {
-#endif /* _INTEGRATED_SOLARIS_ */
 
-		/* this mechanism isn't our favorite, and it's no better
-		   than what we already have! */
+	    if ((conn->flags & SASL_NEED_HTTP) &&
+		!(m->m.plug->features & SASL_FEAT_SUPPORTS_HTTP)) {
 		break;
 	    }
-#else
-#ifdef _INTEGRATED_SOLARIS_
-	    if (bestm && m->sun_reg && m->plug->max_ssf <= bestssf) {
-#else
-
-	    if (bestm && m->plug->max_ssf <= bestssf) {
-#endif /* _INTEGRATED_SOLARIS_ */
-
-		/* this mechanism is no better than what we already have! */
-		break;
-	    }
-#endif
 
 	    /* compare security flags, only take new mechanism if it has
 	     * all the security flags of the previous one.
@@ -907,22 +1130,49 @@ int sasl_client_start(sasl_conn_t *conn,
 	     */
 
 	    if (bestm &&
-		((m->plug->security_flags ^ bestm->plug->security_flags) &
-		 bestm->plug->security_flags)) {
+		((m->m.plug->security_flags ^ bestm->m.plug->security_flags) &
+		 bestm->m.plug->security_flags)) {
 		break;
 	    }
 
-	    if (mech) {
-		*mech = m->plug->mech_name;
+	    if (SASL_CB_PRESENT(c_conn->cparams) && plus) {
+		cur_cbindingdisp = SASL_CB_DISP_USED;
+	    } else {
+		cur_cbindingdisp = cbindingdisp;
 	    }
+
+	    if (bestm && (best_cbindingdisp > cur_cbindingdisp)) {
+		break;
+	    }
+
+#ifdef PREFER_MECH
+	    if (strcasecmp(m->m.plug->mech_name, PREFER_MECH) &&
+		bestm && m->m.plug->max_ssf <= bestssf) {
+		/* this mechanism isn't our favorite, and it's no better
+		   than what we already have! */
+		break;
+	    }
+#else
+	    if (bestm && m->m.plug->max_ssf <= bestssf) {
+		/* this mechanism is no better than what we already have! */
+		break;
+	    }
+#endif
+
+	    if (mech) {
+		*mech = m->m.plug->mech_name;
+	    }
+
+	    best_cbindingdisp = cur_cbindingdisp;
 #ifdef _INTEGRATED_SOLARIS_
 	    bestssf = m->sun_reg ? m->plug->max_ssf : 0;
 #else
-	    bestssf = m->plug->max_ssf;
+	    bestssf = m->m.plug->max_ssf;
 #endif /* _INTEGRATED_SOLARIS_ */
 	    bestm = m;
 	    break;
 	}
+	name += strlen(name) + 1;
     }
 
     if (bestm == NULL) {
@@ -937,13 +1187,15 @@ int sasl_client_start(sasl_conn_t *conn,
 
     /* make (the rest of) cparams */
     c_conn->cparams->service = conn->service;
-    c_conn->cparams->servicelen = strlen(conn->service);
+    c_conn->cparams->servicelen = (unsigned) strlen(conn->service);
     
-    c_conn->cparams->serverFQDN = conn->serverFQDN; 
-    c_conn->cparams->slen = strlen(conn->serverFQDN);
+    if (conn->serverFQDN) {
+	c_conn->cparams->serverFQDN = conn->serverFQDN; 
+	c_conn->cparams->slen = (unsigned) strlen(conn->serverFQDN);
+    }
 
     c_conn->cparams->clientFQDN = c_conn->clientFQDN; 
-    c_conn->cparams->clen = strlen(c_conn->clientFQDN);
+    c_conn->cparams->clen = (unsigned) strlen(c_conn->clientFQDN);
 
     c_conn->cparams->external_ssf = conn->external.ssf;
     c_conn->cparams->props = conn->props;
@@ -954,22 +1206,23 @@ int sasl_client_start(sasl_conn_t *conn,
     }
     c_conn->base.sun_reg = bestm->sun_reg;
 #endif /* _INTEGRATED_SOLARIS_ */
+    c_conn->cparams->cbindingdisp = best_cbindingdisp;
     c_conn->mech = bestm;
 
     /* init that plugin */
 #ifdef _SUN_SDK_
     result = c_conn->mech->plug->mech_new(c_conn->mech->glob_context,
 #else
-    result = c_conn->mech->plug->mech_new(c_conn->mech->plug->glob_context,
+    result = c_conn->mech->m.plug->mech_new(c_conn->mech->m.plug->glob_context,
 #endif /* _SUN_SDK_ */
 					  c_conn->cparams,
 					  &(conn->context));
-    if(result != SASL_OK) goto done;
+    if (result != SASL_OK) goto done;
 
     /* do a step -- but only if we can do a client-send-first */
  dostep:
     if(clientout) {
-        if(c_conn->mech->plug->features & SASL_FEAT_SERVER_FIRST) {
+        if(c_conn->mech->m.plug->features & SASL_FEAT_SERVER_FIRST) {
             *clientout = NULL;
             *clientoutlen = 0;
             result = SASL_CONTINUE;
@@ -982,6 +1235,8 @@ int sasl_client_start(sasl_conn_t *conn,
 	result = SASL_CONTINUE;
 
  done:
+    if (ordered_mechs != NULL)
+	c_conn->cparams->utils->free(ordered_mechs);
     RETURN(conn, result);
 }
 
@@ -1033,7 +1288,7 @@ int sasl_client_step(sasl_conn_t *conn,
   if(clientoutlen) *clientoutlen = 0;
 
   /* do a step */
-  result = c_conn->mech->plug->mech_step(conn->context,
+  result = c_conn->mech->m.plug->mech_step(conn->context,
 					 c_conn->cparams,
 					 serverin,
 					 serverinlen,
@@ -1079,16 +1334,16 @@ static unsigned mech_names_len(_sasl_global_context_t *gctx)
 {
   cmech_list_t *cmechlist = gctx->cmechlist;
 #else
-static unsigned mech_names_len()
+static unsigned mech_names_len(cmechanism_t *mech_list)
 {
 #endif /* _SUN_SDK_ */
   cmechanism_t *listptr;
   unsigned result = 0;
 
-  for (listptr = cmechlist->mech_list;
+  for (listptr = mech_list;
        listptr;
        listptr = listptr->next)
-    result += strlen(listptr->plug->mech_name);
+    result += (unsigned) strlen(listptr->m.plug->mech_name);
 
   return result;
 }
@@ -1102,10 +1357,11 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 			  unsigned *plen,
 			  int *pcount)
 {
-    cmechanism_t *m=NULL;
+    sasl_client_conn_t *c_conn = (sasl_client_conn_t *)conn;
+    cmechanism_t *m = NULL;
     sasl_ssf_t minssf = 0;
     int ret;
-    unsigned int resultlen;
+    size_t resultlen;
     int flag;
     const char *mysep;
 #ifdef _SUN_SDK_
@@ -1115,10 +1371,10 @@ int _sasl_client_listmech(sasl_conn_t *conn,
     if(gctx->sasl_client_active==0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-    if(_sasl_client_active == 0) return SASL_NOTINIT;
+    if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
     if (!conn) return SASL_BADPARAM;
-    if(conn->type != SASL_CONN_CLIENT) PARAMERROR(conn);
+    if (conn->type != SASL_CONN_CLIENT) PARAMERROR(conn);
     
     if (! result)
 	PARAMERROR(conn);
@@ -1138,42 +1394,47 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 	mysep = " ";
     }
 
-    if(conn->props.min_ssf < conn->external.ssf) {
+    if (conn->props.min_ssf < conn->external.ssf) {
 	minssf = 0;
     } else {
 	minssf = conn->props.min_ssf - conn->external.ssf;
     }
 
-    if (! cmechlist || cmechlist->mech_length <= 0)
+    if (!c_conn->mech_list || c_conn->mech_length <= 0) {
 	INTERROR(conn, SASL_NOMECH);
+    }
 
     resultlen = (prefix ? strlen(prefix) : 0)
-	+ (strlen(mysep) * (cmechlist->mech_length - 1))
+	+ (strlen(mysep) * (c_conn->mech_length - 1))
 #ifdef _SUN_SDK_
 	+ mech_names_len(gctx)
 #else
-	+ mech_names_len()
+	+ mech_names_len(c_conn->mech_list)
 #endif /* _SUN_SDK_ */
 	+ (suffix ? strlen(suffix) : 0)
 	+ 1;
     ret = _buf_alloc(&conn->mechlist_buf,
-		     &conn->mechlist_buf_len, resultlen);
-    if(ret != SASL_OK) MEMERROR(conn);
+		     &conn->mechlist_buf_len,
+		     resultlen);
+    if (ret != SASL_OK) MEMERROR(conn);
 
-    if (prefix)
+    if (prefix) {
 	strcpy (conn->mechlist_buf,prefix);
-    else
+    } else {
 	*(conn->mechlist_buf) = '\0';
+    }
 
     flag = 0;
-    for (m = cmechlist->mech_list; m != NULL; m = m->next) {
+    for (m = c_conn->mech_list; m != NULL; m = m->next) {
 	    /* do we have the prompts for it? */
-	    if (!have_prompts(conn, m->plug))
+	    if (!have_prompts(conn, m->m.plug)) {
 		continue;
+	    }
 
 	    /* is it strong enough? */
-	    if (minssf > m->plug->max_ssf)
+	    if (minssf > m->m.plug->max_ssf) {
 		continue;
+	    }
 
 #ifdef _INTEGRATED_SOLARIS_
 	    /* If not SUN supplied mech, it has no strength */
@@ -1182,21 +1443,21 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 #endif /* _INTEGRATED_SOLARIS_ */
 
 	    /* does it meet our security properties? */
-	    if (((conn->props.security_flags ^ m->plug->security_flags)
+	    if (((conn->props.security_flags ^ m->m.plug->security_flags)
 		 & conn->props.security_flags) != 0) {
 		continue;
 	    }
 
 	    /* Can we meet it's features? */
-	    if ((m->plug->features & SASL_FEAT_NEEDSERVERFQDN)
+	    if ((m->m.plug->features & SASL_FEAT_NEEDSERVERFQDN)
 		&& !conn->serverFQDN) {
 		continue;
 	    }
 
 	    /* Can it meet our features? */
 	    if ((conn->flags & SASL_NEED_PROXY) &&
-		!(m->plug->features & SASL_FEAT_ALLOWS_PROXY)) {
-		break;
+		!(m->m.plug->features & SASL_FEAT_ALLOWS_PROXY)) {
+		continue;
 	    }
 
 	    /* Okay, we like it, add it to the list! */
@@ -1212,14 +1473,14 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 	    }
 	    
 	    /* now print the mechanism name */
-	    strcat(conn->mechlist_buf, m->plug->mech_name);
+	    strcat(conn->mechlist_buf, m->m.plug->mech_name);
     }
     
   if (suffix)
       strcat(conn->mechlist_buf,suffix);
 
   if (plen!=NULL)
-      *plen=strlen(conn->mechlist_buf);
+      *plen = (unsigned) strlen(conn->mechlist_buf);
 
   *result = conn->mechlist_buf;
 
@@ -1258,7 +1519,7 @@ sasl_string_list_t *_sasl_client_mechs(void)
 	  return NULL;
       }
       
-      next->d = listptr->plug->mech_name;
+      next->d = listptr->m.plug->mech_name;
 
       if(!retval) {
 	  next->next = NULL;
@@ -1270,4 +1531,194 @@ sasl_string_list_t *_sasl_client_mechs(void)
   }
 
   return retval;
+}
+
+
+
+
+/* It would be nice if we can show other information like Author, Company, Year, plugin version */
+static void
+_sasl_print_mechanism (
+  client_sasl_mechanism_t *m,
+  sasl_info_callback_stage_t stage,
+  void *rock __attribute__((unused))
+)
+{
+    char delimiter;
+
+    if (stage == SASL_INFO_LIST_START) {
+	printf ("List of client plugins follows\n");
+	return;
+    } else if (stage == SASL_INFO_LIST_END) {
+	return;
+    }
+
+    /* Process the mechanism */
+    printf ("Plugin \"%s\" ", m->plugname);
+
+    /* There is no delay loading for client side plugins */
+    printf ("[loaded]");
+
+    printf (", \tAPI version: %d\n", m->version);
+
+    if (m->plug != NULL) {
+	printf ("\tSASL mechanism: %s, best SSF: %d\n",
+		m->plug->mech_name,
+		m->plug->max_ssf);
+
+	printf ("\tsecurity flags:");
+	
+	delimiter = ' ';
+	if (m->plug->security_flags & SASL_SEC_NOANONYMOUS) {
+	    printf ("%cNO_ANONYMOUS", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->security_flags & SASL_SEC_NOPLAINTEXT) {
+	    printf ("%cNO_PLAINTEXT", delimiter);
+	    delimiter = '|';
+	}
+	
+	if (m->plug->security_flags & SASL_SEC_NOACTIVE) {
+	    printf ("%cNO_ACTIVE", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->security_flags & SASL_SEC_NODICTIONARY) {
+	    printf ("%cNO_DICTIONARY", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->security_flags & SASL_SEC_FORWARD_SECRECY) {
+	    printf ("%cFORWARD_SECRECY", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->security_flags & SASL_SEC_PASS_CREDENTIALS) {
+	    printf ("%cPASS_CREDENTIALS", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->security_flags & SASL_SEC_MUTUAL_AUTH) {
+	    printf ("%cMUTUAL_AUTH", delimiter);
+	    delimiter = '|';
+	}
+
+
+
+	printf ("\n\tfeatures:");
+	
+	delimiter = ' ';
+	if (m->plug->features & SASL_FEAT_WANT_CLIENT_FIRST) {
+	    printf ("%cWANT_CLIENT_FIRST", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_SERVER_FIRST) {
+	    printf ("%cSERVER_FIRST", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_ALLOWS_PROXY) {
+	    printf ("%cPROXY_AUTHENTICATION", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_NEEDSERVERFQDN) {
+	    printf ("%cNEED_SERVER_FQDN", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_GSS_FRAMING) {
+	    printf ("%cGSS_FRAMING", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_CHANNEL_BINDING) {
+	    printf ("%cCHANNEL_BINDING", delimiter);
+	    delimiter = '|';
+	}
+
+	if (m->plug->features & SASL_FEAT_SUPPORTS_HTTP) {
+	    printf ("%cSUPPORTS_HTTP", delimiter);
+	    delimiter = '|';
+	}
+    }
+
+/* Delay loading is not supported for the client side plugins:
+    if (m->f) {
+	printf ("\n\twill be loaded from \"%s\"", m->f);
+    }
+ */
+
+    printf ("\n");
+}
+
+
+/* Dump information about available client plugins */
+int sasl_client_plugin_info (
+  const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
+  sasl_client_info_callback_t *info_cb,
+  void *info_cb_rock
+)
+{
+    cmechanism_t *m;
+    client_sasl_mechanism_t plug_data;
+    char * cur_mech;
+    char * mech_list = NULL;
+    char * p;
+
+    if (info_cb == NULL) {
+	info_cb = _sasl_print_mechanism;
+    }
+
+    if (cmechlist != NULL) {
+	info_cb (NULL, SASL_INFO_LIST_START, info_cb_rock);
+
+	if (c_mech_list == NULL) {
+	    m = cmechlist->mech_list; /* m point to beginning of the list */
+
+	    while (m != NULL) {
+		memcpy (&plug_data, &m->m, sizeof(plug_data));
+
+		info_cb (&plug_data, SASL_INFO_LIST_MECH, info_cb_rock);
+	    
+		m = m->next;
+	    }
+	} else {
+            mech_list = strdup (c_mech_list);
+
+	    cur_mech = mech_list;
+
+	    while (cur_mech != NULL) {
+		p = strchr (cur_mech, ' ');
+		if (p != NULL) {
+		    *p = '\0';
+		    p++;
+		}
+
+		m = cmechlist->mech_list; /* m point to beginning of the list */
+
+		while (m != NULL) {
+		    if (strcasecmp (cur_mech, m->m.plug->mech_name) == 0) {
+			memcpy (&plug_data, &m->m, sizeof(plug_data));
+
+			info_cb (&plug_data, SASL_INFO_LIST_MECH, info_cb_rock);
+		    }
+	    
+		    m = m->next;
+		}
+
+		cur_mech = p;
+	    }
+
+            free (mech_list);
+	}
+
+	info_cb (NULL, SASL_INFO_LIST_END, info_cb_rock);
+
+	return (SASL_OK);
+    }
+
+    return (SASL_NOTINIT);
 }

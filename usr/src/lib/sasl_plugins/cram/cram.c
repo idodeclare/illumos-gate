@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,v 1.79 2003/02/18 18:27:37 rjs3 Exp $
+ * $Id: cram.c,v 1.87 2011/09/07 13:19:44 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,v 1.79 2003/02/18 18:27:37 rjs3 Exp $";
+static const char plugin_id[] = "$Id: cram.c,v 1.87 2011/09/07 13:19:44 murch Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -205,7 +205,7 @@ crammd5_server_mech_step1(server_context_t *text,
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
 		"CRAM-MD5 does not accept inital data");
 #else
-	SETERROR(sparams->utils, "CRAM-MD5 does not accpet inital data");
+	SETERROR(sparams->utils, "CRAM-MD5 does not accept inital data");
 #endif /* _SUN_SDK_ */
 	return SASL_BADPROT;
     }
@@ -230,7 +230,7 @@ crammd5_server_mech_step1(server_context_t *text,
 	     sparams->serverFQDN);
     
     *serverout = text->challenge;
-    *serveroutlen = strlen(text->challenge);
+    *serveroutlen = (unsigned) strlen(text->challenge);
     
     /* free stuff */
     sparams->utils->free(time);    
@@ -252,10 +252,13 @@ crammd5_server_mech_step2(server_context_t *text,
 {
     char *userid = NULL;
     sasl_secret_t *sec = NULL;
-    int pos, len;
+    int pos;
+    size_t len;
     int result = SASL_FAIL;
     const char *password_request[] = { SASL_AUX_PASSWORD,
+#if defined(OBSOLETE_CRAM_ATTR)
 				       "*cmusaslsecretCRAM-MD5",
+#endif
 				       NULL };
     struct propval auxprop_values[3];
     HMAC_MD5_CTX tmphmac;
@@ -301,8 +304,11 @@ crammd5_server_mech_step2(server_context_t *text,
 					   password_request,
 					   auxprop_values);
     if (result < 0 ||
-	((!auxprop_values[0].name || !auxprop_values[0].values) &&
-	 (!auxprop_values[1].name || !auxprop_values[1].values))) {
+	((!auxprop_values[0].name || !auxprop_values[0].values)
+#if defined(OBSOLETE_CRAM_ATTR)
+	  && (!auxprop_values[1].name || !auxprop_values[1].values)
+#endif
+	)) {
 	/* We didn't find this username */
 #ifdef _INTEGRATED_SOLARIS_
 	sparams->utils->seterror(sparams->utils->conn,0,
@@ -311,7 +317,7 @@ crammd5_server_mech_step2(server_context_t *text,
 	sparams->utils->seterror(sparams->utils->conn,0,
 				 "no secret in database");
 #endif /* _INTEGRATED_SOLARIS_ */
-	result = SASL_NOUSER;
+	result = sparams->transition ? SASL_TRANS : SASL_NOUSER;
 	goto done;
     }
     
@@ -332,22 +338,20 @@ crammd5_server_mech_step2(server_context_t *text,
 	sec = sparams->utils->malloc(sizeof(sasl_secret_t) + len);
 	if (!sec) goto done;
 	
-	sec->len = len;
-#ifdef _SUN_SDK_
+	sec->len = (unsigned) len;
 	strncpy((char *)sec->data, auxprop_values[0].values[0], len + 1);   
-#else
-	strncpy(sec->data, auxprop_values[0].values[0], len + 1);   
-#endif /* _SUN_SDK_ */
 	
 	clear_md5state = 1;
 	/* Do precalculation on plaintext secret */
 	sparams->utils->hmac_md5_precalc(&md5state, /* OUT */
 					 sec->data,
 					 sec->len);
+#if defined(OBSOLETE_CRAM_ATTR)
     } else if (auxprop_values[1].name && auxprop_values[1].values) {
 	/* We have a precomputed secret */
 	memcpy(&md5state, auxprop_values[1].values[0],
 	       sizeof(HMAC_MD5_STATE));
+#endif
     } else {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
@@ -359,6 +363,9 @@ crammd5_server_mech_step2(server_context_t *text,
 	return SASL_FAIL;
     }
     
+    /* erase the plaintext password */
+    sparams->utils->prop_erase(sparams->propctx, password_request[0]);
+
     /* ok this is annoying:
        so we have this half-way hmac transform instead of the plaintext
        that means we half to:
@@ -369,7 +376,7 @@ crammd5_server_mech_step2(server_context_t *text,
     sparams->utils->hmac_md5_import(&tmphmac, (HMAC_MD5_STATE *) &md5state);
     sparams->utils->MD5Update(&(tmphmac.ictx),
 			      (const unsigned char *) text->challenge,
-			      strlen(text->challenge));
+			      (unsigned) strlen(text->challenge));
     sparams->utils->hmac_md5_final((unsigned char *) &digest, &tmphmac);
     
     /* convert to base 16 with lower case letters */
@@ -377,8 +384,11 @@ crammd5_server_mech_step2(server_context_t *text,
     
     /* if same then verified 
      *  - we know digest_str is null terminated but clientin might not be
+     *  - verify the length of clientin anyway!
      */
-    if (strncmp(digest_str, clientin+pos+1, strlen(digest_str)) != 0) {
+    len = strlen(digest_str);
+    if (clientinlen-pos-1 < len ||
+	strncmp(digest_str, clientin+pos+1, len) != 0) {
 #ifdef _INTEGRATED_SOLARIS_
 	sparams->utils->seterror(sparams->utils->conn, 0,
 				 gettext("incorrect digest response"));
@@ -424,7 +434,11 @@ static int crammd5_server_mech_step(void *conn_context,
     
     *serverout = NULL;
     *serveroutlen = 0;
-    
+
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     /* this should be well more than is ever needed */
     if (clientinlen > 1024) {
 #ifdef _SUN_SDK_
@@ -554,27 +568,14 @@ static int crammd5_client_mech_new(void *glob_context __attribute__((unused)),
 static char *make_hashed(sasl_secret_t *sec, char *nonce, int noncelen, 
 			 const sasl_utils_t *utils)
 {
-    char secret[65];
     unsigned char digest[24];  
-    int lup;
     char *in16;
     
     if (sec == NULL) return NULL;
     
-    if (sec->len < 64) {
-	memcpy(secret, sec->data, sec->len);
-	
-	/* fill in rest with 0's */
-	for (lup= sec->len; lup < 64; lup++)
-	    secret[lup]='\0';
-	
-    } else {
-	memcpy(secret, sec->data, 64);
-    }
-    
     /* do the hmac md5 hash output 128 bits */
     utils->hmac_md5((unsigned char *) nonce, noncelen,
-		    (unsigned char *) secret, 64, digest);
+		    sec->data, sec->len, digest);
     
     /* convert that to hex form */
     in16 = convert16(digest, 16, utils);
@@ -593,13 +594,13 @@ static int crammd5_client_mech_step(void *conn_context,
 				    sasl_out_params_t *oparams)
 {
     client_context_t *text = (client_context_t *) conn_context;
-    const char *authid;
+    const char *authid = NULL;
     sasl_secret_t *password = NULL;
     unsigned int free_password = 0; /* set if we need to free password */
     int auth_result = SASL_OK;
     int pass_result = SASL_OK;
     int result;
-    int maxsize;
+    size_t maxsize;
     char *in16 = NULL;
 
     *clientout = NULL;
@@ -713,13 +714,13 @@ static int crammd5_client_mech_step(void *conn_context,
     
     maxsize = 32+1+strlen(oparams->authid)+30;
     result = _plug_buf_alloc(params->utils, &(text->out_buf),
-			     &(text->out_buf_len), maxsize);
+			     &(text->out_buf_len), (unsigned) maxsize);
     if (result != SASL_OK) goto cleanup;
     
     snprintf(text->out_buf, maxsize, "%s %s", oparams->authid, in16);
     
     *clientout = text->out_buf;
-    *clientoutlen = strlen(*clientout);
+    *clientoutlen = (unsigned) strlen(*clientout);
     
     /* set oparams */
     oparams->doneflag = 1;

@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: external.c,v 1.19 2003/04/08 17:30:54 rjs3 Exp $
+ * $Id: external.c,v 1.24 2009/03/10 16:27:52 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -64,7 +64,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: external.c,v 1.19 2003/04/08 17:30:54 rjs3 Exp $";
+static const char plugin_id[] = "$Id: external.c,v 1.24 2009/03/10 16:27:52 mel Exp $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
@@ -113,6 +113,9 @@ external_server_mech_step(void *conn_context __attribute__((unused)),
     if (!sparams->utils->conn->external.auth_id)
 	return SASL_BADPROT;
     
+    /* xxx arbitrary limit here */
+    if (clientinlen > 16384) return SASL_BADPROT;
+
     if ((sparams->props.security_flags & SASL_SEC_NOANONYMOUS) &&
 	(!strcmp(sparams->utils->conn->external.auth_id, "anonymous"))) {
 #ifdef _INTEGRATED_SOLARIS_
@@ -137,16 +140,17 @@ external_server_mech_step(void *conn_context __attribute__((unused)),
 	/* The user's trying to authorize as someone they didn't
 	 * authenticate as */
 	result = sparams->canon_user(sparams->utils->conn,
-				     clientin, 0, SASL_CU_AUTHZID, oparams);
+				     clientin, 0,
+				     SASL_CU_AUTHZID, oparams);
 	if(result != SASL_OK) return result;
 	
 	result = sparams->canon_user(sparams->utils->conn,
 				     sparams->utils->conn->external.auth_id, 0,
-				     SASL_CU_AUTHID, oparams);
+				     SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED, oparams);
     } else {
 	result = sparams->canon_user(sparams->utils->conn,
 				     sparams->utils->conn->external.auth_id, 0,
-				     SASL_CU_AUTHID | SASL_CU_AUTHZID, oparams);
+				     SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED | SASL_CU_AUTHZID, oparams);
     }
     
     if (result != SASL_OK) return result;
@@ -169,8 +173,11 @@ external_server_mech_avail(void *glob_context __attribute__((unused)),
 			   sasl_server_params_t *sparams,
 			   void **conn_context __attribute__((unused)))
 {
-    if (!sparams->utils->conn->external.auth_id)
-	return SASL_NOMECH;
+    if (!sparams->utils->conn->external.auth_id) {
+	/* Return Temporary Failure */
+	return SASL_NOTDONE;
+    }
+    
     return SASL_OK;
 }
 
@@ -337,7 +344,7 @@ external_client_mech_step(void *conn_context,
 	return SASL_INTERACT;
     }
     
-    *clientoutlen = user ? strlen(user) : 0;
+    *clientoutlen = user ? (unsigned) strlen(user) : 0;
     
 #ifdef _SUN_SDK_
     result = _plug_buf_alloc(params->utils, &text->out_buf,
@@ -406,11 +413,7 @@ external_client_mech_dispose(void *conn_context,
 #endif /* _SUN_SDK_ */
 }
 
-#ifdef _SUN_SDK_
 static const unsigned long external_required_prompts[] = {
-#else
-static const long external_required_prompts[] = {
-#endif /* _SUN_SDK_ */
     SASL_CB_LIST_END
 };
 

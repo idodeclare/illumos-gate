@@ -7,10 +7,10 @@
 /* SASL Config file API
  * Rob Siemborski
  * Tim Martin (originally in Cyrus distribution)
- * $Id: config.c,v 1.13 2003/02/13 19:55:54 rjs3 Exp $
+ * $Id: config.c,v 1.18 2009/02/14 14:01:24 mel Exp $
  */
 /* 
- * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
+ * Copyright (c) 1998-2009 Carnegie Mellon University.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -49,26 +49,14 @@
  * OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/*
- * Current Valid keys:
- *
- * canon_user_plugin: <string>
- * pwcheck_method: <string>
- * auto_transition: <boolean>
- * plugin_list: <string>
- *
- * srvtab: <string>
- */
-
-
-#include "sasl.h"
-#include "saslint.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 #include "config.h"	/* _SUN_SDK_ */
+
+#include "sasl.h"
+#include "saslint.h"
 
 struct configlist {
     char *key;
@@ -93,6 +81,7 @@ int sasl_config_init(const char *filename)
     int alloced = 0;
     char buf[4096];
     char *p, *key;
+    char *tail;
     int result;
 #ifdef _SUN_SDK_
     int invalid_line = 0;
@@ -104,7 +93,7 @@ int sasl_config_init(const char *filename)
 
     infile = fopen(filename, "rF");
     if (!infile) {
-      return SASL_CONTINUE;
+        return SASL_CONTINUE;
     }
 #ifdef _SUN_SDK_
     result = _sasl_strdup(filename, &gctx->config_path, NULL);
@@ -121,7 +110,7 @@ int sasl_config_init(const char *filename)
 
 	key = p;
 	while (*p && (isalnum((int) *p) || *p == '-' || *p == '_')) {
-	    if (isupper((int) *p)) *p = tolower(*p);
+	    if (isupper((int) *p)) *p = (char) tolower(*p);
 	    p++;
 	}
 	if (*p != ':') {
@@ -129,7 +118,7 @@ int sasl_config_init(const char *filename)
 	  invalid_line = 1;
 	  goto done;
 #else
-	  return SASL_FAIL;
+	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
 	}
 	*p++ = '\0';
@@ -141,8 +130,15 @@ int sasl_config_init(const char *filename)
 	  invalid_line = 1;
 	  goto done;
 #else
-	  return SASL_FAIL;
+	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
+	}
+
+	/* Now strip trailing spaces, if any */
+	tail = p + strlen(p) - 1;
+	while (tail > p && isspace((int) *tail)) {
+	    *tail = '\0';
+	    tail--;
 	}
 
 #ifdef _SUN_SDK_
@@ -164,8 +160,6 @@ int sasl_config_init(const char *filename)
 	    if (configlist==NULL) return SASL_NOMEM;
 #endif /* _SUN_SDK_ */
 	}
-
-
 
 #ifdef _SUN_SDK_
 	result = _sasl_strdup(key,
@@ -272,46 +266,3 @@ const char *sasl_config_getstring(const char *key,const char *def)
     return def;
 }
 #endif /* _SUN_SDK_ */
-
-#ifdef _SUN_SDK_
-int sasl_config_getint(_sasl_global_context_t *gctx, const char *key,int def)
-#else
-int sasl_config_getint(const char *key,int def)
-#endif /* _SUN_SDK_ */
-{
-#ifdef _SUN_SDK_
-    const char *val = sasl_config_getstring(gctx, key, (char *)0);
-#else
-    const char *val = sasl_config_getstring(key, (char *)0);
-#endif /* _SUN_SDK_ */
-
-    if (!val) return def;
-    if (!isdigit((int) *val) && (*val != '-' || !isdigit((int) val[1]))) return def;
-    return atoi(val);
-}
-
-#ifdef _SUN_SDK_
-int sasl_config_getswitch(_sasl_global_context_t *gctx,const char *key,int def)
-#else
-int sasl_config_getswitch(const char *key,int def)
-#endif /* _SUN_SDK_ */
-{
-#ifdef _SUN_SDK_
-    const char *val = sasl_config_getstring(gctx, key, (char *)0);
-#else
-    const char *val = sasl_config_getstring(key, (char *)0);
-#endif /* _SUN_SDK_ */
-
-    if (!val) return def;
-
-    if (*val == '0' || *val == 'n' ||
-	(*val == 'o' && val[1] == 'f') || *val == 'f') {
-	return 0;
-    }
-    else if (*val == '1' || *val == 'y' ||
-	     (*val == 'o' && val[1] == 'n') || *val == 't') {
-	return 1;
-    }
-    return def;
-}
-

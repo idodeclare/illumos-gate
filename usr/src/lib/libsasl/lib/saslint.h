@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.48 2003/04/16 19:36:01 rjs3 Exp $
+ * $Id: saslint.h,v 1.73 2011/09/01 14:12:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -57,15 +57,24 @@
 #include "saslutil.h"
 #include "prop.h"
 
+#ifndef INLINE
+#if defined (WIN32)
+/* Visual Studio: "inline" keyword is not available in C, only in C++ */
+#define INLINE __inline
+#else
+#define INLINE  inline
+#endif
+#endif
+
 /* #define'd constants */
-#define CANON_BUF_SIZE 256
+#define CANON_BUF_SIZE 1024
 
 /* Error Handling Foo */
 /* Helpful Hints:
  *  -Error strings are set as soon as possible (first function in stack trace
  *   with a pointer to the sasl_conn_t.
  *  -Error codes are set as late as possible (only in the sasl api functions),
- *   thoug "as often as possible" also comes to mind to ensure correctness
+ *   though "as often as possible" also comes to mind to ensure correctness
  *  -Errors from calls to _buf_alloc, _sasl_strdup, etc are assumed to be
  *   memory errors.
  *  -Only errors (error codes < SASL_OK) should be remembered
@@ -106,14 +115,14 @@
 #  ifdef _POSIX_PATH_MAX
 #   define PATH_MAX _POSIX_PATH_MAX
 #  else
-#   define PATH_MAX 1024         /* arbitrary; probably big enough will
-                                  * probably only be 256+64 on
+#   define PATH_MAX 1024         /* arbitrary; probably big enough.
+                                  * will probably only be 256+64 on
                                   * pre-posix machines */
 #  endif /* _POSIX_PATH_MAX */
 # endif /* WIN32 */
 #endif
 
-/* : Define directory delimiter in SASL_PATH variable */
+/* : Define directory delimiter in SASL_PATH/SASL_CONF_PATH variables */
 #ifdef WIN32
 #define PATHS_DELIMITER	';'
 #else
@@ -128,6 +137,8 @@ typedef struct {
   struct _sasl_global_context_s *gctx;
 #endif /* _SUN_SDK_ */
 } sasl_global_callbacks_t;
+
+extern sasl_global_callbacks_t global_callbacks;
 
 typedef struct _sasl_external_properties 
 {
@@ -209,6 +220,9 @@ struct sasl_conn {
 
   char user_buf[CANON_BUF_SIZE+1], authid_buf[CANON_BUF_SIZE+1];
 
+  /* Allocated by sasl_encodev if the output contains multiple SASL packet. */
+  buffer_info_t multipacket_encoded_data;
+
 #ifdef _SUN_SDK_
   struct _sasl_global_context_s *gctx;
 #ifdef _INTEGRATED_SOLARIS_
@@ -230,35 +244,27 @@ typedef struct _sasl_path_info {
 
 typedef struct mechanism
 {
-    int version;
-    int condition; /* set to SASL_NOUSER if no available users;
-		      set to SASL_CONTINUE if delayed plugn loading */
-    char *plugname; /* for AUTHSOURCE tracking */
+    server_sasl_mechanism_t m;
 #ifdef _SUN_SDK_
 #ifdef _INTEGRATED_SOLARIS_
     int sun_reg;
 #endif /* _INTEGRATED_SOLARIS_ */
-    sasl_server_plug_t *plug;
 	/*
 	 * The global context needs to be stored with separately from the	
 	 * the plugin because it will be overwritten when the plugin is
 	 * relloaded
 	 */
     void *glob_context;
-    struct mechanism *next;
-#else
-    const sasl_server_plug_t *plug;
-    struct mechanism *next;
-    char *f;       /* where should i load the mechanism from? */
 #endif /* _SUN_SDK_ */
+    struct mechanism *next;
 } mechanism_t;
 
 typedef struct mech_list {
   const sasl_utils_t *utils;  /* gotten from plug_init */
 
   void *mutex;            /* mutex for this data */ 
-  mechanism_t *mech_list; /* list of mechanisms */
-  int mech_length;       /* number of mechanisms */
+  mechanism_t *mech_list; /* list of loaded mechanisms */
+  int mech_length;        /* number of loaded mechanisms */
 } mech_list_t;
 
 typedef struct context_list 
@@ -273,21 +279,22 @@ typedef struct context_list
 typedef struct sasl_server_conn {
     sasl_conn_t base; /* parts common to server + client */
 
+    char *appname; /* application name buffer (for sparams) */
     char *user_realm; /* domain the user authenticating is in */
     int sent_last; /* Have we already done the last send? */
     int authenticated;
     mechanism_t *mech; /* mechanism trying to use */
     sasl_server_params_t *sparams;
     context_list_t *mech_contexts;
+    mechanism_t *mech_list; /* list of available mechanisms */
+    int mech_length;        /* number of available mechanisms */
 } sasl_server_conn_t;
 
 /* Client Conn Type Information */
 
 typedef struct cmechanism
 {
-    int version;
-
-    char *plugname;
+    client_sasl_mechanism_t m;
 #ifdef _SUN_SDK_
 #ifdef _INTEGRATED_SOLARIS_
     int sun_reg;
@@ -298,11 +305,7 @@ typedef struct cmechanism
 	 * relloaded
 	 */
     void *glob_context;
-    sasl_client_plug_t *plug;
-#else
-    const sasl_client_plug_t *plug;
 #endif /* _SUN_SDK_ */
-
     struct cmechanism *next;  
 } cmechanism_t;
 
@@ -323,6 +326,8 @@ typedef struct sasl_client_conn {
 
   char *clientFQDN;
 
+  cmechanism_t *mech_list; /* list of available mechanisms */
+  int mech_length;	   /* number of available mechanisms */
 } sasl_client_conn_t;
 
 typedef struct sasl_allocation_utils {
@@ -417,6 +422,13 @@ struct sasl_verify_password_s {
     sasl_plaintext_verifier *verify;
 };
 
+void sasl_common_done(void);
+
+extern int _sasl_is_equal_mech(const char *req_mech,
+                               const char *plug_mech,
+                               size_t req_mech_len,
+                               int *plus);
+
 /*
  * globals & constants
  */
@@ -430,7 +442,7 @@ extern int (*_sasl_client_idle_hook)(sasl_conn_t *conn);
 extern int (*_sasl_server_idle_hook)(sasl_conn_t *conn);
 
 /* These return SASL_OK if we've actually finished cleanup, 
- * SASL_NOTINIT if that part of the library isn't inited, and
+ * SASL_NOTINIT if that part of the library isn't initialized, and
  * SASL_CONTINUE if we need to call them again */
 extern int (*_sasl_client_cleanup_hook)(void);
 extern int (*_sasl_server_cleanup_hook)(void);
@@ -438,6 +450,8 @@ extern int (*_sasl_server_cleanup_hook)(void);
 extern sasl_allocation_utils_t _sasl_allocation_utils;
 extern sasl_mutex_utils_t _sasl_mutex_utils;
 #endif /* !_SUN_SDK_ */
+
+extern int _sasl_allocation_locked;
 
 /*
  * checkpw.c
@@ -526,12 +540,14 @@ extern int _sasl_locate_entry(void *library, const char *entryname,
 extern int _sasl_done_with_plugins();
 #endif /* _SUN_SDK_ */
 
-
 /*
  * common.c
  */
 extern const sasl_callback_t *
 _sasl_find_getpath_callback(const sasl_callback_t *callbacks);
+
+extern const sasl_callback_t *
+_sasl_find_getconfpath_callback(const sasl_callback_t *callbacks);
 
 extern const sasl_callback_t *
 _sasl_find_verifyfile_callback(const sasl_callback_t *callbacks);
@@ -573,7 +589,7 @@ extern int _sasl_free_utils(const sasl_utils_t ** utils);
 extern int
 _sasl_getcallback(sasl_conn_t * conn,
 		  unsigned long callbackid,
-		  int (**pproc)(),
+		  sasl_callback_ft * pproc,
 		  void **pcontext);
 
 extern void
@@ -685,20 +701,11 @@ sasl_string_list_t *_sasl_server_mechs(void);
  * config file declarations (config.c)
  */
 #ifdef _SUN_SDK_
-extern int sasl_config_init(_sasl_global_context_t *gctx,
-        const char *filename);
 extern void sasl_config_free(_sasl_global_context_t *gctx);
 extern const char *sasl_config_getstring(_sasl_global_context_t *gctx,
         const char *key,const char *def);
-extern int sasl_config_getint(_sasl_global_context_t *gctx,
-        const char *key,int def);
-extern int sasl_config_getswitch(_sasl_global_context_t *gctx,
-        const char *key,int def);
 #else
-extern int sasl_config_init(const char *filename);
 extern const char *sasl_config_getstring(const char *key,const char *def);
-extern int sasl_config_getint(const char *key,int def);
-extern int sasl_config_getswitch(const char *key,int def);
 #endif /* _SUN_SDK_ */
 
 /* checkpw.c */
@@ -710,7 +717,7 @@ extern int _sasl_auxprop_verify_apop(sasl_conn_t *conn,
 				     const char *user_realm);
 #endif /* DO_SASL_CHECKAPOP */
 
-/* Auxprop Plugin (checkpw.c) */
+/* Auxprop Plugin (sasldb.c) */
 extern int sasldb_auxprop_plug_init(const sasl_utils_t *utils,
 				    int max_version,
 				    int *out_version,
@@ -726,7 +733,7 @@ extern void _sasl_auxprop_free(_sasl_global_context_t *gctx);
 extern int _sasl_auxprop_add_plugin(void *p, void *library);
 extern void _sasl_auxprop_free(void);
 #endif /* _SUN_SDK_ */
-extern void _sasl_auxprop_lookup(sasl_server_params_t *sparams,
+extern int _sasl_auxprop_lookup(sasl_server_params_t *sparams,
 				 unsigned flags,
 				 const char *user, unsigned ulen);
 
@@ -744,9 +751,15 @@ extern int internal_canonuser_init(const sasl_utils_t *utils,
 				   sasl_canonuser_plug_t **plug,
 				   const char *plugname);
 extern int _sasl_canon_user(sasl_conn_t *conn,
-			    const char *user, unsigned ulen,
+			    const char *user,
+			    unsigned ulen,
 			    unsigned flags,
 			    sasl_out_params_t *oparams);
+int _sasl_canon_user_lookup (sasl_conn_t *conn,
+			     const char *user,
+			     unsigned ulen,
+			     unsigned flags,
+			     sasl_out_params_t *oparams);
 
 #ifdef _SUN_SDK_
 /* Private functions to create, free, and use a private context */
@@ -806,5 +819,14 @@ void sasl_churn(sasl_rand_t *rpool, const char *data, unsigned len);
 int sasl_mkchal(sasl_conn_t *conn, char *buf, unsigned maxlen,
 		unsigned hostflag);
 #endif	/* _SUN_SDK_ */
+
+/*
+ * saslutil.c
+ */
+int get_fqhostname(
+  char *name,  
+  int namelen,
+  int abort_if_no_fqdn
+  );
 
 #endif /* SASLINT_H */
