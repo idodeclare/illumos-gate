@@ -85,11 +85,6 @@
 
 #include <errno.h>
 
-#ifdef WIN32
-/* This must be after sasl.h */
-# include "saslgssapi.h"
-#endif /* WIN32 */
-
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
