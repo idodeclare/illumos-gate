@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.135 2004/01/23 22:16:38 rjs3 Exp $
+ * $Id: server.c,v 1.136 2004/02/20 17:23:58 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1477,6 +1477,7 @@ static int mech_permitted(sasl_conn_t *conn,
 {
     sasl_server_conn_t *s_conn = (sasl_server_conn_t *)conn;
     const sasl_server_plug_t *plug;
+    int ret;
     int myflags;
     context_list_t *cur;
     sasl_getopt_t *getopt;
@@ -1578,25 +1579,29 @@ static int mech_permitted(sasl_conn_t *conn,
     context = NULL;
     if(plug->mech_avail
 #ifdef _SUN_SDK_
-       && plug->mech_avail(mech->glob_context,
+       && (plug->mech_avail(mech->glob_context,
 #else
-       && plug->mech_avail(plug->glob_context,
+       && (plug->mech_avail(plug->glob_context,
 #endif /* _SUN_SDK_ */
-			   s_conn->sparams, (void **)&context) != SASL_OK ) {
-	/* Mark this mech as no good for this connection */
-	cur = sasl_ALLOC(sizeof(context_list_t));
-	if(!cur) {
+			   s_conn->sparams, (void **)&context)) != SASL_OK ) {
+	if(ret == SASL_NOMECH) {
+	    /* Mark this mech as no good for this connection */
+	    cur = sasl_ALLOC(sizeof(context_list_t));
+	    if(!cur) {
 #ifdef _SUN_SDK_
 	    if(conn) _sasl_log(conn, SASL_LOG_WARN, "Out of Memory");
 #else
-	    MEMERROR(conn);
+		MEMERROR(conn);
 #endif /* _SUN_SDK_ */
-	    return 0;
+		return 0;
+	    }
+	    cur->context = NULL;
+	    cur->mech = mech;
+	    cur->next = s_conn->mech_contexts;
+	    s_conn->mech_contexts = cur;
 	}
-	cur->context = NULL;
-	cur->mech = mech;
-	cur->next = s_conn->mech_contexts;
-	s_conn->mech_contexts = cur;
+	
+	/* SASL_NOTDONE might also get us here */
 
 	/* Error should be set by mech_avail call */
 	return 0;
