@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.140 2004/06/18 21:22:27 rjs3 Exp $
+ * $Id: server.c,v 1.141 2004/07/06 13:42:23 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -360,8 +360,8 @@ static void server_dispose(sasl_conn_t *pconn)
   if (s_conn->sparams->propctx)
       prop_dispose(&s_conn->sparams->propctx);
 
-  if (s_conn->sparams->appname)
-      sasl_FREE(s_conn->sparams->appname);
+  if (s_conn->appname)
+      sasl_FREE(s_conn->appname);
 
   if (s_conn->user_realm)
       sasl_FREE(s_conn->user_realm);
@@ -1447,23 +1447,25 @@ int _sasl_server_new(void *ctx,
   if (global_callbacks.appname && global_callbacks.appname[0] != '\0') {
 #ifdef _SUN_SDK_
     result = _sasl_strdup (gctx->server_global_callbacks.appname,
-			   &serverconn->sparams->appname,
+			   &serverconn->appname,
 			   NULL);
 #else
     result = _sasl_strdup (global_callbacks.appname,
-			   &serverconn->sparams->appname,
+			   &serverconn->appname,
 			   NULL);
 #endif /* _SUN_SDK_ */
     if (result != SASL_OK) {
       result = SASL_NOMEM;
       goto done_error;
     }
+    serverconn->sparams->appname = serverconn->appname;
 #ifdef _SUN_SDK_
     serverconn->sparams->applen = (unsigned) strlen(gctx->server_global_callbacks.appname);
 #else
     serverconn->sparams->applen = (unsigned) strlen(serverconn->sparams->appname);
 #endif /* _SUN_SDK_ */
   } else {
+    serverconn->appname = NULL;
     serverconn->sparams->appname = NULL;
     serverconn->sparams->applen = 0;
   }
