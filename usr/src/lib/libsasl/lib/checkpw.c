@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: checkpw.c,v 1.62 2003/03/19 18:25:27 rjs3 Exp $
+ * $Id: checkpw.c,v 1.63 2003/07/17 19:46:15 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -509,6 +509,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
     void *context;
     char pwpath[sizeof(srvaddr.sun_path)];
     const char *p = NULL;
+    char *freeme = NULL;
 #ifdef USE_DOORS
     door_arg_t arg;
 #endif
@@ -527,6 +528,19 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 	strcat(pwpath, "/mux");
     }
 
+    /* Split out username/realm if necessary */
+    if(strrchr(userid,'@') != NULL) {
+	char *rtmp;
+	
+	if(_sasl_strdup(userid, &freeme, NULL) != SASL_OK)
+	    goto fail;
+
+	userid = freeme;
+	rtmp = strrchr(userid,'@');
+	*rtmp = '\0';
+	user_realm = rtmp + 1;
+    }
+
     /*
      * build request of the form:
      *
@@ -543,7 +557,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 	if (u_len + p_len + s_len + r_len + 30 > (unsigned short) sizeof(query)) {
 	    /* request just too damn big */
             sasl_seterror(conn, 0, "saslauthd request too large");
-	    return SASL_FAIL;
+	    goto fail;
 	}
 
 	u_len = htons(u_len);
@@ -572,7 +586,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
     s = open(pwpath, O_RDONLY);
     if (s < 0) {
 	sasl_seterror(conn, 0, "cannot open door to saslauthd server: %m", errno);
-	return SASL_FAIL;
+	goto fail;
     }
 
     arg.data_ptr = query;
@@ -588,7 +602,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 	/* oh damn, we got back a really long response */
 	munmap(arg.rbuf, arg.rsize);
 	sasl_seterror(conn, 0, "saslauthd sent an overly long response");
-	return SASL_FAIL;
+	goto fail;
     }
     response[arg.data_size] = '\0';
 
@@ -599,7 +613,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
     s = socket(AF_UNIX, SOCK_STREAM, 0);
     if (s == -1) {
 	sasl_seterror(conn, 0, "cannot create socket for saslauthd: %m", errno);
-	return SASL_FAIL;
+	goto fail;
     }
 
     memset((char *)&srvaddr, 0, sizeof(srvaddr));
@@ -610,7 +624,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 	int r = connect(s, (struct sockaddr *) &srvaddr, sizeof(srvaddr));
 	if (r == -1) {
 	    sasl_seterror(conn, 0, "cannot connect to saslauthd server: %m", errno);
-	    return SASL_FAIL;
+	    goto fail;
 	}
     }
 
@@ -622,7 +636,7 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 
 	if (retry_writev(s, iov, 1) == -1) {
             sasl_seterror(conn, 0, "write failed");
-  	    return SASL_FAIL;
+	    goto fail;
   	}
     }
 
@@ -636,21 +650,21 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 	 */
 	if (retry_read(s, &count, sizeof(count)) < (int) sizeof(count)) {
 	    sasl_seterror(conn, 0, "size read failed");
-	    return SASL_FAIL;
+	    goto fail;
 	}
 	
 	count = ntohs(count);
 	if (count < 2) { /* MUST have at least "OK" or "NO" */
 	    close(s);
 	    sasl_seterror(conn, 0, "bad response from saslauthd");
-	    return SASL_FAIL;
+	    goto fail;
 	}
 	
 	count = (int)sizeof(response) < count ? sizeof(response) : count;
 	if (retry_read(s, response, count) < count) {
 	    close(s);
 	    sasl_seterror(conn, 0, "read failed");
-	    return SASL_FAIL;
+	    goto fail;
 	}
 	response[count] = '\0';
     }
@@ -658,12 +672,18 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
     close(s);
 #endif /* USE_DOORS */
   
+    if(freeme) free(freeme);
+
     if (!strncmp(response, "OK", 2)) {
 	return SASL_OK;
     }
   
     sasl_seterror(conn, SASL_NOLOG, "authentication failed");
     return SASL_BADAUTH;
+
+ fail:
+    if (freeme) free(freeme);
+    return SASL_FAIL;
 }
 
 #endif
