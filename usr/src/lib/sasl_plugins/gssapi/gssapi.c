@@ -172,12 +172,18 @@ enum {
 /* sasl_gss_log only logs gss_display_status() error string */
 #define sasl_gss_log(x,y,z) sasl_gss_seterror_(text,y,z,1)
 #define sasl_gss_seterror(x,y,z) sasl_gss_seterror_(text,y,z,0)
+
 static void
 sasl_gss_seterror_(const context_t *text, OM_uint32 maj, OM_uint32 min, 
 	int logonly)
 #else
+/* sasl_gss_log: only logs status string returned from gss_display_status() */
+#define sasl_gss_log(x,y,z) sasl_gss_seterror_(x,y,z,1)
+#define sasl_gss_seterror(x,y,z) sasl_gss_seterror_(x,y,z,0)
+
 static void
-sasl_gss_seterror(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min)
+sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
+	int logonly)
 #endif /* _SUN_SDK_ */
 {
     OM_uint32 maj_stat, min_stat;
@@ -212,27 +218,14 @@ sasl_gss_seterror(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min)
 #endif /* _SUN_SDK_ */
 				      &msg_ctx, &msg);
 	if(GSS_ERROR(maj_stat)) {
-#ifdef _SUN_SDK_
 	    if (logonly) {
-		utils->log(text->utils->conn, SASL_LOG_FAIL,
-		    "GSSAPI Failure: (could not get major error message)");
+		utils->log(utils->conn, SASL_LOG_FAIL,
+			"GSSAPI Failure: (could not get major error message)");
 	    } else {
-#endif /* _SUN_SDK_ */
-#ifdef _INTEGRATED_SOLARIS_
 		utils->seterror(utils->conn, 0,
-				gettext("GSSAPI Failure "
-				"(could not get major error message)"));
-#ifdef _SUN_SDK_
+				"GSSAPI Failure "
+				"(could not get major error message)");
 	    }
-#endif /* _SUN_SDK_ */
-#else
-	    utils->seterror(utils->conn, 0,
-			    "GSSAPI Failure "
-			    "(could not get major error message)");
-#ifdef _SUN_SDK_
-	    }
-#endif /* _SUN_SDK_ */
-#endif /* _INTEGRATED_SOLARIS_ */
 	    utils->free(out);
 	    return;
 	}
@@ -274,27 +267,14 @@ sasl_gss_seterror(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min)
 #endif /* _SUN_SDK_ */
 				      &msg_ctx, &msg);
 	if(GSS_ERROR(maj_stat)) {
-#ifdef _SUN_SDK_
 	    if (logonly) {
-		utils->log(text->utils->conn, SASL_LOG_FAIL,
-		    "GSSAPI Failure: (could not get minor error message)");
+		utils->log(utils->conn, SASL_LOG_FAIL,
+			"GSSAPI Failure: (could not get minor error message)");
 	    } else {
-#endif /* _SUN_SDK_ */
-#ifdef _INTEGRATED_SOLARIS_
 		utils->seterror(utils->conn, 0,
-				gettext("GSSAPI Failure "
-				"(could not get minor error message)"));
-#ifdef _SUN_SDK_
+				"GSSAPI Failure "
+				"(could not get minor error message)");
 	    }
-#endif /* _SUN_SDK_ */
-#else
-	    utils->seterror(utils->conn, 0,
-			    "GSSAPI Failure "
-			    "(could not get minor error message)");
-#ifdef _SUN_SDK_
-	    }
-#endif /* _SUN_SDK_ */
-#endif /* _INTEGRATED_SOLARIS_ */
 	    utils->free(out);
 	    return;
 	}
@@ -324,15 +304,11 @@ sasl_gss_seterror(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min)
     
     strcat(out, ")");
     
-#ifdef _SUN_SDK_
     if (logonly) {
-	utils->log(text->utils->conn, SASL_LOG_FAIL, out);
+	utils->log(utils->conn, SASL_LOG_FAIL, out);
     } else {
 	utils->seterror(utils->conn, 0, out);
     }
-#else
-    utils->seterror(utils->conn, 0, out);
-#endif /* _SUN_SDK_ */
     utils->free(out);
 }
 
@@ -863,11 +839,11 @@ gssapi_server_mech_step(void *conn_context,
 		gss_release_buffer(&min_stat, output_token);
 	    }
 #else
+	    sasl_gss_log(text->utils, maj_stat, min_stat);
+	    text->utils->seterror(text->utils->conn, SASL_NOLOG, "GSSAPI Failure: gss_accept_sec_context");
 	    if (output_token->value) {
 		gss_release_buffer(&min_stat, output_token);
 	    }
-	    text->utils->seterror(text->utils->conn, SASL_NOLOG, "GSSAPI Failure: gss_accept_sec_context");
-	    text->utils->log(NULL, SASL_LOG_DEBUG, "GSSAPI Failure: gss_accept_sec_context");
 #endif /* _SUN_SDK_ */
 	    sasl_gss_free_context_contents(text);
 	    return SASL_BADAUTH;
