@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.51 2003/12/12 01:00:03 rbraun Exp $
+ * $Id: saslint.h,v 1.52 2004/02/20 23:54:51 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -232,7 +232,7 @@ typedef struct mechanism
 {
     int version;
     int condition; /* set to SASL_NOUSER if no available users;
-		      set to SASL_CONTINUE if delayed plugn loading */
+		      set to SASL_CONTINUE if delayed plugin loading */
     char *plugname; /* for AUTHSOURCE tracking */
 #ifdef _SUN_SDK_
 #ifdef _INTEGRATED_SOLARIS_
