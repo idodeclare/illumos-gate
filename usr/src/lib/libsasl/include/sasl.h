@@ -143,6 +143,10 @@ extern "C" {
 #define	SASL_VERSION_MINOR 1
 #define SASL_VERSION_STEP 20
 
+/* A convenience macro: same as was defined in the OpenLDAP LDAPDB */
+#define SASL_VERSION_FULL ((SASL_VERSION_MAJOR << 16) |\
+      (SASL_VERSION_MINOR << 8) | SASL_VERSION_STEP)
+
 /*
  * Basic API
  */
