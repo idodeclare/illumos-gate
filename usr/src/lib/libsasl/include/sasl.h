@@ -141,7 +141,7 @@ extern "C" {
 
 #define	SASL_VERSION_MAJOR 2
 #define	SASL_VERSION_MINOR 1
-#define SASL_VERSION_STEP 17
+#define SASL_VERSION_STEP 18
 
 /*
  * Basic API
