@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.170 2004/06/30 19:41:35 rjs3 Exp $
+ * $Id: digestmd5.c,v 1.171 2004/07/06 13:48:10 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -558,11 +558,13 @@ static int add_to_challenge(const sasl_utils_t *utils,
     ret = _plug_buf_alloc(utils, str, buflen,
 			  *curlen + 1 + namesize + 2 + valuesize + 2);
     if(ret != SASL_OK) return ret;
-    
-    *curlen = *curlen + 1 + namesize + 2 + valuesize + 2;
-    
-    strcat(*str, ",");
-    strcat(*str, name);
+
+    if (*curlen > 0) {
+	strcat(*str, ",");
+	strcat(*str, name);
+    } else {
+	strcpy(*str, name);
+    }
     
     if (need_quotes) {
 	strcat(*str, "=\"");
@@ -570,8 +572,18 @@ static int add_to_challenge(const sasl_utils_t *utils,
 	/* Check if the value needs quoting */
 	if (strpbrk ((char *)value, NEED_ESCAPING) != NULL) {
 	    char * quoted = quote ((char *) value);
-	    strcat(*str, quoted);
-	    free (quoted);
+	    valuesize = strlen(quoted);
+	    /* As the quoted string is bigger, make sure we have enough
+	       space now */
+	    ret = _plug_buf_alloc(utils, str, buflen,
+			  *curlen + 1 + namesize + 2 + valuesize + 2);
+	    if (ret == SASL_OK) {
+		strcat(*str, quoted);
+		free (quoted);
+	    } else {
+		free (quoted);
+		return ret;
+	    }
 	} else {
 	    strcat(*str, (char *) value);
 	}
@@ -581,6 +593,7 @@ static int add_to_challenge(const sasl_utils_t *utils,
 	strcat(*str, (char *) value);
     }
     
+    *curlen = *curlen + 1 + namesize + 2 + valuesize + 2;
     return SASL_OK;
 }
 
@@ -2438,24 +2451,21 @@ digestmd5_server_mech_step1(server_context_t *stext,
 	return SASL_FAIL;
     }
     
-#ifdef _SUN_SDK_
-    resplen = strlen((char *)nonce) + strlen("nonce") + 5;
+    resplen = 0;
+    text->out_buf = NULL;
+    text->out_buf_len = 0;
+    if (add_to_challenge(sparams->utils,
+				  &text->out_buf, &text->out_buf_len, &resplen,
+				  "nonce", (unsigned char *) nonce,
+				  TRUE) != SASL_OK) {
+#ifdef _INTEGRATED_SOLARIS_
+	SETERROR(sparams->utils, gettext("internal error: add_to_challenge failed"));
 #else
-    resplen = strlen(nonce) + strlen("nonce") + 5;
-#endif /* _SUN_SDK_ */
-    result = _plug_buf_alloc(sparams->utils, &(text->out_buf),
-			     &(text->out_buf_len), resplen);
-#ifdef _SUN_SDK_
-    if(result != SASL_OK) {
-	sparams->utils->free(nonce);
-	return result;
+	SETERROR(sparams->utils, "internal error: add_to_challenge failed");
+#endif
+	return SASL_FAIL;
     }
-#else
-    if(result != SASL_OK) return result;
-#endif /* _SUN_SDK_ */
-    
-    sprintf(text->out_buf, "nonce=\"%s\"", nonce);
-    
+
     /* add to challenge; if we chose not to specify a realm, we won't
      * send one to the client */
     if (realm && add_to_challenge(sparams->utils,
@@ -3843,14 +3853,17 @@ static int make_client_response(context_t *text,
     }
 #endif /* _SUN_SDK_ */
     
-    resplen = strlen(oparams->authid) + strlen("username") + 5;
-    result =_plug_buf_alloc(params->utils, &(text->out_buf),
-			    &(text->out_buf_len),
-			    resplen);
-    if (result != SASL_OK) goto FreeAllocatedMem;
-    
-    sprintf(text->out_buf, "username=\"%s\"", oparams->authid);
-    
+    resplen = 0;
+    text->out_buf = NULL;
+    text->out_buf_len = 0;
+    if (add_to_challenge(params->utils,
+			 &text->out_buf, &text->out_buf_len, &resplen,
+			 "username", (unsigned char *) oparams->authid,
+			 TRUE) != SASL_OK) {
+	result = SASL_FAIL;
+	goto FreeAllocatedMem;
+    }
+
     if (add_to_challenge(params->utils,
 			 &text->out_buf, &text->out_buf_len, &resplen,
 			 "realm", (unsigned char *) text->realm,
