@@ -2081,7 +2081,8 @@ static sasl_client_plug_t gssapi_client_plugins[] =
 	| SASL_SEC_NOACTIVE
 	| SASL_SEC_NOANONYMOUS
 	| SASL_SEC_MUTUAL_AUTH,		/* security_flags */
-	SASL_FEAT_WANT_CLIENT_FIRST
+	SASL_FEAT_NEEDSERVERFQDN
+	| SASL_FEAT_WANT_CLIENT_FIRST
 	| SASL_FEAT_ALLOWS_PROXY,	/* features */
 	gssapi_required_prompts,	/* required_prompts */
 	NULL,				/* glob_context */
