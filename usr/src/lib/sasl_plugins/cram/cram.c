@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,v 1.81 2003/11/03 18:25:24 ken3 Exp $
+ * $Id: cram.c,v 1.82 2003/12/07 00:34:08 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,v 1.81 2003/11/03 18:25:24 ken3 Exp $";
+static const char plugin_id[] = "$Id: cram.c,v 1.82 2003/12/07 00:34:08 ken3 Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -359,6 +359,9 @@ crammd5_server_mech_step2(server_context_t *text,
 	return SASL_FAIL;
     }
     
+    /* erase the plaintext password */
+    sparams->utils->prop_erase(sparams->propctx, password_request[0]);
+
     /* ok this is annoying:
        so we have this half-way hmac transform instead of the plaintext
        that means we half to:
