@@ -5,7 +5,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.h,v 1.19 2004/02/06 17:23:51 rjs3 Exp $
+ * $Id: plugin_common.h,v 1.20 2004/06/23 18:43:37 rjs3 Exp $
  */
 
 /* 
@@ -220,6 +220,9 @@ void _plug_decode_free(decode_context_t *text);
 int _plug_parseuser(const sasl_utils_t *utils,
 		    char **user, char **realm, const char *user_realm, 
 		    const char *serverFQDN, const char *input);
+
+int _plug_make_fulluser(const sasl_utils_t *utils,
+			char **fulluser, const char * useronly, const char *realm);
 
 char * _plug_get_error_message (const sasl_utils_t *utils,
 #ifdef WIN32
