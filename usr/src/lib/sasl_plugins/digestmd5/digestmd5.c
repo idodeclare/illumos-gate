@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.165 2004/02/06 17:23:50 rjs3 Exp $
+ * $Id: digestmd5.c,v 1.166 2004/02/18 17:07:33 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2679,13 +2679,24 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	} else if (strcasecmp(name, "digest-uri") == 0) {
             size_t service_len;
 
-	    /*
-	     * digest-uri-value  = serv-type "/" host [ "/" serv-name ]
-	     */
- 
+	    if (digesturi) {
+#ifdef _INTEGRATED_SOLARIS_
+		SETERROR(sparams->utils,
+			 gettext("duplicate digest-uri: authentication aborted"));
+#else
+		SETERROR(sparams->utils,
+			 "duplicate digest-uri: authentication aborted");
+#endif /* _INTEGRATED_SOLARIS_ */
+		result = SASL_FAIL;
+		goto FreeAllMem;
+	    }
+
 	    _plug_strdup(sparams->utils, value, &digesturi, NULL);
 
-	    /* verify digest-uri format */
+	    /* Verify digest-uri format:
+	     *
+	     * digest-uri-value  = serv-type "/" host [ "/" serv-name ]
+	     */
 
             /* make sure it's the service that we're expecting */
             service_len = strlen(sparams->service);
