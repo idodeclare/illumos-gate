@@ -106,14 +106,35 @@ DEFINE_STATIC_MUTEX(global_mutex);
 #endif /* GSSAPI_PROTECT */
 #endif /* _SUN_SDK_ */
 
+#ifdef WANT_KERBEROS5_3DES
+/* Check if CyberSafe flag is defined */
+#ifdef CSF_GSS_C_DES3_FLAG
+#define K5_MAX_SSF	112
+#endif
+
+/* Heimdal and MIT use the following */
+#ifdef GSS_KRB5_CONF_C_QOP_DES3_KD
+#define K5_MAX_SSF	112
+#endif
+
+#endif
+
+#ifndef K5_MAX_SSF
+/* All Kerberos implementations support DES */
+#define K5_MAX_SSF	56
+#endif
+
 /* GSSAPI SASL Mechanism by Leif Johansson <leifj@matematik.su.se>
  * inspired by the kerberos mechanism and the gssapi_server and
  * gssapi_client from the heimdal distribution by Assar Westerlund
  * <assar@sics.se> and Johan Danielsson <joda@pdc.kth.se>. 
  * See the configure.in file for details on dependencies.
- * Heimdal can be obtained from http://www.pdc.kth.se/heimdal
  *
  * Important contributions from Sam Hartman <hartmans@fundsxpress.com>.
+ *
+ * This code was tested with the following distributions of Kerberos:
+ * Heimdal (http://www.pdc.kth.se/heimdal), MIT (http://web.mit.edu/kerberos/www/)
+ * CyberSafe (http://www.cybersafe.com/) and SEAM.
  */
 
 typedef struct context {
@@ -1059,7 +1080,7 @@ gssapi_server_mech_step(void *conn_context,
 	    && params->props.maxbufsize) {
 	    sasldata[0] |= 2;
 	}
-	if (text->requiressf <= 56 && text->limitssf >= 56
+	if (text->requiressf <= K5_MAX_SSF && text->limitssf >= K5_MAX_SSF
 	    && params->props.maxbufsize) {
 	    sasldata[0] |= 4;
 	}
@@ -1136,11 +1157,12 @@ gssapi_server_mech_step(void *conn_context,
 	    oparams->encode=&gssapi_integrity_encode;
 	    oparams->decode=&gssapi_decode;
 	    oparams->mech_ssf=1;
-	} else if (layerchoice == 4 && text->requiressf <= 56 &&
-		   text->limitssf >= 56) { /* privacy */
+	} else if (layerchoice == 4 && text->requiressf <= K5_MAX_SSF &&
+		   text->limitssf >= K5_MAX_SSF) { /* privacy */
 	    oparams->encode = &gssapi_privacy_encode;
 	    oparams->decode = &gssapi_decode;
-	    oparams->mech_ssf = 56;
+	    /* FIX ME: Need to extract the proper value here */
+	    oparams->mech_ssf = K5_MAX_SSF;
 	} else {
 	    /* not a supported encryption layer */
 #ifdef _SUN_SDK_
@@ -1308,7 +1330,7 @@ static sasl_server_plug_t gssapi_server_plugins[] =
 {
     {
 	"GSSAPI",			/* mech_name */
-	56,				/* max_ssf */
+	K5_MAX_SSF,			/* max_ssf */
 	SASL_SEC_NOPLAINTEXT
 	| SASL_SEC_NOACTIVE
 	| SASL_SEC_NOANONYMOUS
@@ -1634,7 +1656,10 @@ static int gssapi_client_mech_step(void *conn_context,
 	if(params->props.max_ssf > params->external_ssf) {
 	    /* We are requesting a security layer */
 	    req_flags |= GSS_C_INTEG_FLAG;
-	    if(params->props.max_ssf - params->external_ssf > 56) {
+	    /* Any SSF bigger than 1 is confidentiality. */
+	    /* Let's check if the client of the API requires confidentiality,
+	       and it wasn't already provided by an external layer */
+	    if(params->props.max_ssf - params->external_ssf > 1) {
 		/* We want to try for privacy */
 		req_flags |= GSS_C_CONF_FLAG;
 	    }
@@ -1744,6 +1769,7 @@ static int gssapi_client_mech_step(void *conn_context,
 					   NULL,       /* targ_name */
 					   NULL,       /* lifetime */
 					   NULL,       /* mech */
+					   /* FIX ME: Should check the resulting flags here */
 					   NULL,       /* flags */
 					   NULL,       /* local init */
 					   NULL);      /* open */
@@ -1821,7 +1847,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 	
 	/* taken from kerberos.c */
-	if (secprops->min_ssf > (56 + external)) {
+	if (secprops->min_ssf > (K5_MAX_SSF + external)) {
 	    return SASL_TOOWEAK;
 	} else if (secprops->min_ssf > secprops->max_ssf) {
 	    return SASL_BADPARAM;
@@ -1844,11 +1870,12 @@ static int gssapi_client_mech_step(void *conn_context,
 	serverhas = ((char *)output_token->value)[0];
 	
 	/* if client didn't set use strongest layer available */
-	if (allowed >= 56 && need <= 56 && (serverhas & 4)) {
+	if (allowed >= K5_MAX_SSF && need <= K5_MAX_SSF && (serverhas & 4)) {
 	    /* encryption */
 	    oparams->encode = &gssapi_privacy_encode;
 	    oparams->decode = &gssapi_decode;
-	    oparams->mech_ssf = 56;
+	    /* FIX ME: Need to extract the proper value here */
+	    oparams->mech_ssf = K5_MAX_SSF;
 	    mychoice = 4;
 	} else if (allowed >= 1 && need <= 1 && (serverhas & 2)) {
 	    /* integrity */
@@ -2049,7 +2076,7 @@ static sasl_client_plug_t gssapi_client_plugins[] =
 {
     {
 	"GSSAPI",			/* mech_name */
-	56,				/* max_ssf */
+	K5_MAX_SSF,			/* max_ssf */
 	SASL_SEC_NOPLAINTEXT
 	| SASL_SEC_NOACTIVE
 	| SASL_SEC_NOANONYMOUS
