@@ -5,7 +5,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.h,v 1.18 2003/09/14 13:38:28 ken3 Exp $
+ * $Id: plugin_common.h,v 1.19 2004/02/06 17:23:51 rjs3 Exp $
  */
 
 /* 
@@ -55,7 +55,7 @@
 
 #ifndef macintosh
 #ifdef WIN32
-# include <winsock.h>
+# include <winsock2.h>
 #else
 # include <sys/socket.h>
 # include <netinet/in.h>
@@ -147,6 +147,10 @@ typedef struct buffer_info
     unsigned curlen;   /* Current length of data in buffer */
     unsigned reallen;  /* total length of buffer (>= curlen) */
 } buffer_info_t;
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 int _plug_ipfromstring(const sasl_utils_t *utils, const char *addr,
@@ -243,4 +247,9 @@ int use_locale(const char *lang_list, int is_client);
 const char *convert_prompt(const sasl_utils_t *utils, void **h, const char *s);
 char *local_to_utf(const sasl_utils_t *utils, const char *s);
 #endif /* _INTEGRATED_SOLARIS_ */
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* _PLUGIN_COMMON_H_ */
