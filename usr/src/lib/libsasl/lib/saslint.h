@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.54 2004/07/06 13:42:23 rjs3 Exp $
+ * $Id: saslint.h,v 1.55 2004/10/26 17:28:45 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -232,27 +232,19 @@ typedef struct _sasl_path_info {
 
 typedef struct mechanism
 {
-    int version;
-    int condition; /* set to SASL_NOUSER if no available users;
-		      set to SASL_CONTINUE if delayed plugin loading */
-    char *plugname; /* for AUTHSOURCE tracking */
+    server_sasl_mechanism_t m;
 #ifdef _SUN_SDK_
 #ifdef _INTEGRATED_SOLARIS_
     int sun_reg;
 #endif /* _INTEGRATED_SOLARIS_ */
-    sasl_server_plug_t *plug;
 	/*
 	 * The global context needs to be stored with separately from the	
 	 * the plugin because it will be overwritten when the plugin is
 	 * relloaded
 	 */
     void *glob_context;
-    struct mechanism *next;
-#else
-    const sasl_server_plug_t *plug;
-    struct mechanism *next;
-    char *f;       /* where should i load the mechanism from? */
 #endif /* _SUN_SDK_ */
+    struct mechanism *next;
 } mechanism_t;
 
 typedef struct mech_list {
