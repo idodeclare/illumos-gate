@@ -1293,8 +1293,14 @@ gssapi_server_mech_step(void *conn_context,
 					    GSS_C_QOP_DEFAULT,
 					    (OM_uint32) oparams->maxoutbuf,
 					    &max_input);
-	    
-	    oparams->maxoutbuf = max_input;
+
+	    if(max_input > oparams->maxoutbuf) {
+		/* Heimdal appears to get this wrong */
+		oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
+	    } else {
+		/* This code is actually correct */
+		oparams->maxoutbuf = max_input;
+	    }
 	}
 #endif /* _SUN_SDK_ */
 	
@@ -1982,7 +1988,13 @@ static int gssapi_client_mech_step(void *conn_context,
                                             (OM_uint32) oparams->maxoutbuf,
                                             &max_input);
 
-            oparams->maxoutbuf = max_input;
+	    if(max_input > oparams->maxoutbuf) {
+		/* Heimdal appears to get this wrong */
+		oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
+	    } else {
+		/* This code is actually correct */
+		oparams->maxoutbuf = max_input;
+	    }
 	}
 #endif /* _SUN_SDK_ */
 	
