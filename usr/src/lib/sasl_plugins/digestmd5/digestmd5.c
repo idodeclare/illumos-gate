@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.163 2003/12/07 00:34:08 ken3 Exp $
+ * $Id: digestmd5.c,v 1.164 2003/12/22 15:08:55 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3301,10 +3301,8 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     
     if (username != NULL)
 	sparams->utils->free (username);
-#ifdef _SUN_SDK_
     if (authorization_id != NULL)
 	sparams->utils->free (authorization_id);
-#endif /* _SUN_SDK_ */
     if (realm != NULL)
 	sparams->utils->free (realm);
     if (nonce != NULL)
