@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.104 2004/09/22 21:35:34 shadow Exp $
+ * $Id: common.c,v 1.105 2004/10/24 23:53:17 shadow Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2785,6 +2785,8 @@ _sasl_getpath(void *context __attribute__((unused)),
 #ifdef _SUN_SDK_
 /* SASL_PATH is not allowed for SUN SDK */
 #else
+  *path = NULL;
+
   /* Honor external variable only in a safe environment */
   if (getuid() == geteuid() && getgid() == getegid())
     *path = getenv(SASL_PATH_ENV_VAR);
