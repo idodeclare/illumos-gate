@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.129 2003/09/02 15:34:03 rjs3 Exp $
+ * $Id: server.c,v 1.130 2003/09/18 17:33:49 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -157,6 +157,7 @@ int sasl_setpass(sasl_conn_t *conn,
     const char *password_request[] = { SASL_AUX_PASSWORD_PROP, NULL };
     sasl_server_userdb_setpass_t *setpass_cb = NULL;
     void *context = NULL;
+    int tried_setpass = 0;
     mechanism_t *m;
      
 #ifdef _SUN_SDK_
@@ -182,6 +183,8 @@ int sasl_setpass(sasl_conn_t *conn,
      */
     if ((flags & SASL_SET_DISABLE || !(flags & SASL_SET_NOPLAIN)) &&
 	sasl_auxprop_store(NULL, NULL, NULL) == SASL_OK) {
+
+	tried_setpass++;
 
 	if (flags & SASL_SET_DISABLE) {
 	    pass = NULL;
@@ -210,6 +213,9 @@ int sasl_setpass(sasl_conn_t *conn,
     result = _sasl_getcallback(conn, SASL_CB_SERVER_USERDB_SETPASS,
 			       &setpass_cb, &context);
     if(result == SASL_OK && setpass_cb) {
+
+	tried_setpass++;
+
 	tmpresult = setpass_cb(conn, context, user, pass, passlen,
 			    s_conn->sparams->propctx, flags);
 	if(tmpresult != SASL_OK) {
@@ -230,6 +236,9 @@ int sasl_setpass(sasl_conn_t *conn,
 	    /* can't set pass for this mech */
 	    continue;
 	}
+
+	tried_setpass++;
+
 #ifdef _SUN_SDK_
 	tmpresult = m->plug->setpass(m->glob_context,
 #else
@@ -264,6 +273,13 @@ int sasl_setpass(sasl_conn_t *conn,
 #endif
 		      );
 	}
+    }
+
+    if (!tried_setpass) {
+	_sasl_log(conn, SASL_LOG_WARN,
+		  "secret not changed for %s: "
+		  "no writable auxprop plugin or setpass callback found",
+		  user);
     }
 
     RETURN(conn, result);
