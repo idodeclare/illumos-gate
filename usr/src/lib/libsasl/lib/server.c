@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.131 2003/10/20 15:19:58 rjs3 Exp $
+ * $Id: server.c,v 1.132 2003/11/03 18:25:22 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1331,7 +1331,7 @@ int _sasl_server_new(void *ctx,
   sasl_utils_t *utils;
   sasl_getopt_t *getopt;
   void *context;
-  const char *log_level;
+  const char *log_level, *auto_trans;
 
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx = (ctx == NULL) ? _sasl_gbl_ctx() : ctx;
@@ -1430,14 +1430,23 @@ int _sasl_server_new(void *ctx,
   serverconn->sparams->callbacks = callbacks;
 #endif /* _SUN_SDK_ */
 
-  log_level = NULL;
+  log_level = auto_trans = NULL;
   if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
     getopt(context, NULL, "log_level", &log_level, NULL);
+    getopt(context, NULL, "auto_transition", &auto_trans, NULL);
   }
   serverconn->sparams->log_level = log_level ? atoi(log_level) : SASL_LOG_ERR;
 
   serverconn->sparams->utils = utils;
-  serverconn->sparams->transition = &_sasl_transition;
+
+  if (auto_trans &&
+      (*auto_trans == '1' || *auto_trans == 'y' || *auto_trans == 't' ||
+       (*auto_trans == 'o' && auto_trans[1] == 'n') ||
+       !strcmp(auto_trans, "noplain")) &&
+      sasl_auxprop_store(NULL, NULL, NULL) == SASL_OK) {
+      serverconn->sparams->transition = &_sasl_transition;
+  }
+
   serverconn->sparams->canon_user = &_sasl_canon_user;
   serverconn->sparams->props = serverconn->base.props;
   serverconn->sparams->flags = flags;
@@ -2292,8 +2301,8 @@ static int _sasl_checkpass(sasl_conn_t *conn,
 	    while (*mech && !isspace((int) *mech)) mech++;
 	    while (*mech && isspace((int) *mech)) mech++;
 	}
-	else if (!is_mech(mech, "auxprop")) {
-	    _sasl_transition(conn, pass, passlen);
+	else if (!is_mech(mech, "auxprop") && s_conn->sparams->transition) {
+	    s_conn->sparams->transition(conn, pass, passlen);
 	}
     }
 
