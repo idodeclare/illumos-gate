@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.159 2003/09/30 15:48:35 rjs3 Exp $
+ * $Id: digestmd5.c,v 1.160 2003/10/02 19:47:12 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -137,7 +137,7 @@ extern int      gethostname(char *, int);
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: digestmd5.c,v 1.159 2003/09/30 15:48:35 rjs3 Exp $";
+static const char plugin_id[] = "$Id: digestmd5.c,v 1.160 2003/10/02 19:47:12 rjs3 Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* Definitions */
@@ -666,7 +666,7 @@ static bool str2ul32 (char *str, unsigned long * value)
     n = 0;
     while (str[0] != '\0') {
 	c = str[0];
-	if (!isdigit(c)) {
+	if (!isdigit((int)c)) {
 	    return (FALSE);
 	}
 
