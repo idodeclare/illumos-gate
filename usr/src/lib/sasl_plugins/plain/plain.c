@@ -7,7 +7,7 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,v 1.62 2003/07/25 16:11:15 ken3 Exp $
+ * $Id: plain.c,v 1.63 2004/04/14 17:51:27 ken3 Exp $
  */
 
 /* 
@@ -311,6 +311,7 @@ static int plain_client_mech_step(void *conn_context,
     int auth_result = SASL_OK;
     int pass_result = SASL_OK;
     int result;
+    char *p;
     
     *clientout = NULL;
     *clientoutlen = 0;
@@ -419,9 +420,9 @@ static int plain_client_mech_step(void *conn_context,
     if (result != SASL_OK) goto cleanup;
     
     /* send authorized id NUL authentication id NUL password */
-    *clientoutlen = (oparams->ulen + 1
-		     + oparams->alen + 1
-		     + password->len);
+    *clientoutlen = ((user && *user ? oparams->ulen : 0) +
+		     1 + oparams->alen +
+		     1 + password->len);
     
     /* remember the extra NUL on the end for stupid clients */
     result = _plug_buf_alloc(params->utils, &(text->out_buf),
@@ -429,10 +430,14 @@ static int plain_client_mech_step(void *conn_context,
     if (result != SASL_OK) goto cleanup;
     
     memset(text->out_buf, 0, *clientoutlen + 1);
-    memcpy(text->out_buf, oparams->user, oparams->ulen);
-    memcpy(text->out_buf + oparams->ulen + 1, oparams->authid, oparams->alen);
-    memcpy(text->out_buf + oparams->ulen + oparams->alen + 2,
-	   password->data, password->len);
+    p = text->out_buf;
+    if (user && *user) {
+	memcpy(p, oparams->user, oparams->ulen);
+	p += oparams->ulen;
+    }
+    memcpy(++p, oparams->authid, oparams->alen);
+    p += oparams->alen;
+    memcpy(++p, password->data, password->len);
     
     *clientout = text->out_buf;
     
