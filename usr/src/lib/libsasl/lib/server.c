@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.138 2004/05/20 16:55:21 rjs3 Exp $
+ * $Id: server.c,v 1.139 2004/06/16 17:47:41 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1518,7 +1518,7 @@ static int mech_permitted(sasl_conn_t *conn,
     _sasl_global_context_t *gctx;
 #endif /* _SUN_SDK_ */
 
-    if(!conn) return 0;
+    if(!conn) return SASL_NOMECH;
 
 #ifdef _SUN_SDK_
     gctx = conn->gctx;
@@ -1530,7 +1530,7 @@ static int mech_permitted(sasl_conn_t *conn,
 #else
 	PARAMERROR(conn);
 #endif /* _SUN_SDK_ */
-	return 0;
+	return SASL_NOMECH;
     }
     
     plug = mech->plug;
@@ -1557,7 +1557,7 @@ static int mech_permitted(sasl_conn_t *conn,
 		while (*mlist && isspace((int) *mlist)) mlist++;
 	    }
 
-	    if (!*mlist) return 0;  /* reached EOS -> not in our list */
+	    if (!*mlist) return SASL_NOMECH;  /* reached EOS -> not in our list */
 	}
     }
 
@@ -1572,7 +1572,7 @@ static int mech_permitted(sasl_conn_t *conn,
     for(cur = s_conn->mech_contexts; cur; cur=cur->next) {
 	if(cur->mech == mech) {
 	    /* If it's not mech_avail'd, then stop now */
-	    if(!cur->context) return 0;
+	    if(!cur->context) return SASL_NOMECH;
 	    break;
 	}
     }
@@ -1604,7 +1604,7 @@ static int mech_permitted(sasl_conn_t *conn,
 	sasl_seterror(conn, SASL_NOLOG,
 		      "mech %s is too weak", plug->mech_name);
 #endif /* _INTEGRATED_SOLARIS_ */
-	return 0; /* too weak */
+	return SASL_TOOWEAK; /* too weak */
     }
 
     context = NULL;
@@ -1624,7 +1624,7 @@ static int mech_permitted(sasl_conn_t *conn,
 #else
 		MEMERROR(conn);
 #endif /* _SUN_SDK_ */
-		return 0;
+		return SASL_NOMECH;
 	    }
 	    cur->context = NULL;
 	    cur->mech = mech;
@@ -1635,7 +1635,7 @@ static int mech_permitted(sasl_conn_t *conn,
 	/* SASL_NOTDONE might also get us here */
 
 	/* Error should be set by mech_avail call */
-	return 0;
+	return SASL_NOMECH;
     } else if(context) {
 	/* Save this context */
 	cur = sasl_ALLOC(sizeof(context_list_t));
@@ -1645,7 +1645,7 @@ static int mech_permitted(sasl_conn_t *conn,
 #else
 	    MEMERROR(conn);
 #endif /* _SUN_SDK_ */
-	    return 0;
+	    return SASL_NOMECH;
 	}
 	cur->context = context;
 	cur->mech = mech;
@@ -1665,7 +1665,7 @@ static int mech_permitted(sasl_conn_t *conn,
 #else
 	sasl_seterror(conn, SASL_NOLOG, "too weak");
 #endif /* _INTEGRATED_SOLARIS_ */
-	return 0; /* too weak */
+	return SASL_TOOWEAK; /* too weak */
     }
 
 #ifndef _SUN_SDK_
@@ -1673,14 +1673,14 @@ static int mech_permitted(sasl_conn_t *conn,
        mechanism */
     if (mech->condition == SASL_NOUSER) {
 	sasl_seterror(conn, 0, "no users in secrets db");
-	return 0;
+	return SASL_NOMECH;
     }
 #endif /* !_SUN_SDK_ */
 
     /* Can it meet our features? */
     if ((conn->flags & SASL_NEED_PROXY) &&
 	!(plug->features & SASL_FEAT_ALLOWS_PROXY)) {
-	return 0;
+	return SASL_NOMECH;
     }
     
     /* security properties---if there are any flags that differ and are
@@ -1696,7 +1696,7 @@ static int mech_permitted(sasl_conn_t *conn,
     }
 
     /* do we want to special case SASL_SEC_PASS_CREDENTIALS? nah.. */
-    if (((myflags ^ plug->security_flags) & myflags) != 0) {
+    if ((myflags &= (myflags ^ plug->security_flags)) != 0) {
 #ifdef _INTEGRATED_SOLARIS_
 	sasl_seterror(conn, SASL_NOLOG,
 		      gettext("security flags do not match required"));
@@ -1704,7 +1704,7 @@ static int mech_permitted(sasl_conn_t *conn,
 	sasl_seterror(conn, SASL_NOLOG,
 		      "security flags do not match required");
 #endif /* _INTEGRATED_SOLARIS_ */
-	return 0;
+	return (myflags & SASL_SEC_NOPLAINTEXT) ? SASL_ENCRYPT : SASL_NOMECH;
     }
 
     /* Check Features */
@@ -1719,10 +1719,10 @@ static int mech_permitted(sasl_conn_t *conn,
 		      "mech %s requires unprovided secret facility",
 		      plug->mech_name);
 #endif /* _SUN_SDK_ */
-	return 0;
+	return SASL_NOMECH;
     }
 
-    return 1;
+    return SASL_OK;
 }
 
 /*
@@ -1841,8 +1841,7 @@ int sasl_server_start(sasl_conn_t *conn,
 #endif /*_SUN_SDK_ */
 
     /* Make sure that we're willing to use this mech */
-    if (! mech_permitted(conn, m)) {
-	result = SASL_NOMECH;
+    if ((result = mech_permitted(conn, m)) != SASL_OK) {
 	goto done;
     }
 
@@ -2209,7 +2208,7 @@ int _sasl_server_listmech(sasl_conn_t *conn,
   /* make list */
   for (lup = 0; lup < mechlist->mech_length; lup++) {
       /* currently, we don't use the "user" parameter for anything */
-      if (mech_permitted(conn, listptr)) {
+      if (mech_permitted(conn, listptr) == SASL_OK) {
 	  if (pcount != NULL)
 	      (*pcount)++;
 
