@@ -1294,7 +1294,7 @@ gssapi_server_mech_step(void *conn_context,
 					    (OM_uint32) oparams->maxoutbuf,
 					    &max_input);
 	    
-	    oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
+	    oparams->maxoutbuf -= (oparams->maxoutbuf - max_input);
 	}
 #endif /* _SUN_SDK_ */
 	
