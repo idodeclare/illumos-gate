@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.162 2003/11/11 16:26:07 ken3 Exp $
+ * $Id: digestmd5.c,v 1.163 2003/12/07 00:34:08 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3037,6 +3037,9 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 #endif /* _SUN_SDK_ */
     } 
     
+    /* erase the plaintext password */
+    sparams->utils->prop_erase(sparams->propctx, password_request[0]);
+
     /* defaulting qop to "auth" if not specified */
     if (qop == NULL) {
 	_plug_strdup(sparams->utils, "auth", &qop, NULL);      
