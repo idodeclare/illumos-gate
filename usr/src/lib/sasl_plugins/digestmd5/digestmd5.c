@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.157 2003/08/27 19:15:04 ken3 Exp $
+ * $Id: digestmd5.c,v 1.158 2003/09/03 21:47:32 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -127,12 +127,17 @@ extern int      gethostname(char *, int);
 #define FALSE (0)
 #endif
 
-#define DEFAULT_BUFSIZE 0xFFFF
+/* MAX_UIN32_DIV_10 * 10 + MAX_UIN32_MOD_10 == 2^32-1 == 4294967295 */
+#define MAX_UIN32_DIV_10    429496729
+#define MAX_UIN32_MOD_10    5
+
+#define DEFAULT_BUFSIZE	    0xFFFF
+#define MAX_SASL_BUFSIZE    0xFFFFFF
 
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: digestmd5.c,v 1.157 2003/08/27 19:15:04 ken3 Exp $";
+static const char plugin_id[] = "$Id: digestmd5.c,v 1.158 2003/09/03 21:47:32 rjs3 Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* Definitions */
@@ -461,9 +466,12 @@ static void DigestCalcSecret(const sasl_utils_t * utils,
     
     utils->MD5Update(&Md5Ctx, COLON, 1);
     
+    /* a NULL realm is equivalent to the empty string */
     if (pszRealm != NULL && pszRealm[0] != '\0') {
-	/* a NULL realm is equivalent to the empty string */
-	utils->MD5Update(&Md5Ctx, pszRealm, strlen((char *) pszRealm));
+	/* We have to convert UTF-8 to ISO-8859-1 if possible */
+	In_8859_1 = UTF8_In_8859_1(pszRealm, strlen((char *) pszRealm));
+	MD5_UTF8_8859_1(utils, &Md5Ctx, In_8859_1,
+				pszRealm, strlen((char *) pszRealm));
     }      
     
     utils->MD5Update(&Md5Ctx, COLON, 1);
@@ -561,15 +569,45 @@ static int add_to_challenge(const sasl_utils_t *utils,
 
 static char *skip_lws (char *s)
 {
-    if(!s) return NULL;
+    if (!s) return NULL;
     
     /* skipping spaces: */
     while (s[0] == ' ' || s[0] == HT || s[0] == CR || s[0] == LF) {
-	if (s[0]=='\0') break;
+	if (s[0] == '\0') break;
 	s++;
     }  
     
     return s;
+}
+
+/* Same as skip_lws, but do this right to left */
+/* skip LWSP at the end of the value (if any), skip_r_lws returns pointer to
+   the first LWSP character, NUL (if there were none) or NULL if the value
+   is entirely from LWSP characters */
+static char *skip_r_lws (char *s)
+{
+    char *end;
+    size_t len;
+
+    if (!s) return NULL;
+    
+    len = strlen(s);
+    if (len == 0) return NULL;
+
+    /* the last character before terminating NUL */
+    end = s + len - 1;
+
+    /* skipping spaces: */
+    while (end > s && (end[0] == ' ' || end[0] == HT || end[0] == CR || end[0] == LF)) {
+	end--;
+    }  
+
+    /* If all string from spaces, return NULL */
+    if (end == s && (end[0] == ' ' || end[0] == HT || end[0] == CR || end[0] == LF)) {
+	return NULL;
+    } else {
+	return (end + 1);
+    }
 }
 
 #ifdef __SUN_SDK_
@@ -604,6 +642,47 @@ static char *skip_token (char *s, int caseinsensitive)
 	s++;
     }  
     return s;
+}
+
+/* Convert a string to 32 bit unsigned integer.
+   Any number of trailing spaces is allowed, but not a string
+   entirely comprised of spaces */
+static bool str2ul32 (char *str, unsigned long * value)
+{
+    unsigned int n;
+    char c;
+
+    if (str == NULL) {
+	return (FALSE);
+    }
+    
+    *value = 0;
+
+    str = skip_lws (str);
+    if (str[0] == '\0') {
+	return (FALSE);
+    }
+
+    n = 0;
+    while (str[0] != '\0') {
+	c = str[0];
+	if (!isdigit(c)) {
+	    return (FALSE);
+	}
+
+/* Will overflow after adding additional digit */
+	if (n > MAX_UIN32_DIV_10) {
+	    return (FALSE);
+	} else if (n == MAX_UIN32_DIV_10 && ((unsigned) (c - '0') > MAX_UIN32_MOD_10)) {
+	    return (FALSE);
+	}
+
+	n = n * 10 + (unsigned) (c - '0');
+	str++;
+    }
+
+    *value = n;
+    return (TRUE);
 }
 
 /* NULL - error (unbalanced quotes), 
@@ -2401,7 +2480,7 @@ digestmd5_server_mech_step1(server_context_t *stext,
      * authentication exchange.
      */
     if(sparams->props.maxbufsize) {
-	snprintf(maxbufstr, sizeof(maxbufstr), "%d",
+	snprintf(maxbufstr, sizeof(maxbufstr), "%u",
 		 sparams->props.maxbufsize);
 	if (add_to_challenge(sparams->utils,
 			     &text->out_buf, &text->out_buf_len, &resplen,
@@ -2641,7 +2720,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 			 "duplicate maxbuf: authentication aborted");
 #endif /* _SUN_SDK_ */
 		goto FreeAllMem;
-	    } else if (sscanf(value, "%u", &client_maxbuf) != 1) {
+	    } else if (str2ul32 (value, &client_maxbuf) == FALSE) {
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
@@ -2660,6 +2739,13 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		    SETERROR(sparams->utils,
 			     "maxbuf parameter too small");
 #endif /* _SUN_SDK_ */
+		    goto FreeAllMem;
+		}
+
+		if (client_maxbuf > MAX_SASL_BUFSIZE) {
+		    result = SASL_BADAUTH;
+		    SETERROR(sparams->utils,
+			     "maxbuf parameter too big");
 		    goto FreeAllMem;
 		}
 	    }
@@ -2684,16 +2770,22 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     
     /*
      * username         = "username" "=" <"> username-value <">
-     * username-value   = qdstr-val cnonce           = "cnonce" "=" <">
-     * cnonce-value <"> cnonce-value     = qdstr-val nonce-count      = "nc"
-     * "=" nc-value nc-value         = 8LHEX qop              = "qop" "="
-     * qop-value digest-uri = "digest-uri" "=" digest-uri-value
-     * digest-uri-value  = serv-type "/" host [ "/" serv-name ] serv-type
-     * = 1*ALPHA host             = 1*( ALPHA | DIGIT | "-" | "." ) service
-     * = host response         = "response" "=" <"> response-value <">
-     * response-value   = 32LHEX LHEX = "0" | "1" | "2" | "3" | "4" | "5" |
-     * "6" | "7" | "8" | "9" | "a" | "b" | "c" | "d" | "e" | "f" cipher =
-     * "cipher" "=" cipher-value
+     * username-value   = qdstr-val
+     * cnonce           = "cnonce" "=" <"> cnonce-value <"> 
+     * cnonce-value     = qdstr-val
+     * nonce-count      = "nc" "=" nc-value
+     * nc-value         = 8LHEX
+     * qop              = "qop" "=" qop-value
+     * digest-uri       = "digest-uri" "=" digest-uri-value
+     * digest-uri-value = serv-type "/" host [ "/" serv-name ]
+     * serv-type        = 1*ALPHA
+     * host             = 1*( ALPHA | DIGIT | "-" | "." )
+     * service          = host
+     * response         = "response" "=" <"> response-value <">
+     * response-value   = 32LHEX
+     * LHEX             = "0" | "1" | "2" | "3" | "4" | "5" |
+     * "6" | "7" | "8" | "9" | "a" | "b" | "c" | "d" | "e" | "f"
+     * cipher           = "cipher" "=" cipher-value
      */
     /* Verifing that all parameters was defined */
     if ((username == NULL) ||
@@ -2805,9 +2897,9 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     if(result != SASL_OK) {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			    "unable to request user password");
+			    "unable to obtain user password");
 #else
-	SETERROR(sparams->utils, "unable to resquest user password");
+	SETERROR(sparams->utils, "unable to obtain user password");
 #endif /* _SUN_SDK_ */
 	goto FreeAllMem;
     }
@@ -3949,11 +4041,40 @@ static int parse_server_challenge(client_context_t *ctext,
 	    text->nonce_count = 1;
 	} else if (strcasecmp(name, "qop") == 0) {
 	    while (value && *value) {
-		char *comma = strchr(value, ',');
+		char *comma;
+		char *end_val;
+
+SKIP_SPACES_IN_QOP:
+		/* skipping spaces: */
+		value = skip_lws(value);
+		if (*value == '\0') {
+		    break;
+		}
+
+		/* check for an extreme case when there is no data: LWSP ',' */
+		if (*value == ',') {
+		    value++;
+		    goto SKIP_SPACES_IN_QOP;
+		}
+
+		comma = strchr(value, ',');
+
 		if (comma != NULL) {
 		    *comma++ = '\0';
 		}
-		
+
+		/* skip LWSP at the end of the value (if any), skip_r_lws returns pointer to
+		   the first LWSP character, NUL (if there were none) or NULL if the value
+		   is entirely from LWSP characters */
+		end_val = skip_r_lws (value);
+		if (end_val == NULL) {
+		    value = comma;
+		    continue;
+		} else {
+		    /* strip LWSP */
+		    *end_val = '\0';
+		}
+
 		if (strcasecmp(value, "auth-conf") == 0) {
 		    protection |= DIGEST_PRIVACY;
 		} else if (strcasecmp(value, "auth-int") == 0) {
@@ -3976,23 +4097,50 @@ static int parse_server_challenge(client_context_t *ctext,
 			gettext("Server doesn't support known qop level"));
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Server doesn't support known qop level");
+					"Server doesn't support any known qop level");
 #endif /* _INTEGRATED_SOLARIS_ */
 		goto FreeAllocatedMem;
 	    }
 	} else if (strcasecmp(name, "cipher") == 0) {
 	    while (value && *value) {
-		char *comma = strchr(value, ',');
 #ifdef USE_UEF_CLIENT
 		struct digest_cipher *cipher = available_ciphers1;
 #else
 		struct digest_cipher *cipher = available_ciphers;
 #endif
-		
+		char *comma;
+		char *end_val;
+
+SKIP_SPACES_IN_CIPHER:
+		/* skipping spaces: */
+		value = skip_lws(value);
+		if (*value == '\0') {
+		    break;
+		}
+
+		/* check for an extreme case when there is no data: LWSP ',' */
+		if (*value == ',') {
+		    value++;
+		    goto SKIP_SPACES_IN_CIPHER;
+		}
+
+		comma = strchr(value, ',');
+
 		if (comma != NULL) {
 		    *comma++ = '\0';
 		}
-		
+
+		/* skip LWSP at the end of the value, skip_r_lws returns pointer to
+		   the first LWSP character or NULL */
+		end_val = skip_r_lws (value);
+		if (end_val == NULL) {
+		    value = comma;
+		    continue;
+		} else {
+		    /* strip LWSP */
+		    *end_val = '\0';
+		}
+
 		/* do we support this cipher? */
 		while (cipher->name) {
 		    if (!strcasecmp(value, cipher->name)) break;
@@ -4034,29 +4182,42 @@ static int parse_server_challenge(client_context_t *ctext,
 					"At least two maxbuf directives found. Authentication aborted");
 #endif /* _SUN_SDK_ */
 		goto FreeAllocatedMem;
-	    } else if (sscanf(value, "%u", &ctext->server_maxbuf) != 1) {
+	    } 
+
+	    if (str2ul32 (value, &ctext->server_maxbuf) == FALSE) {
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			"Invalid maxbuf parameter received from server");
+					"Invalid maxbuf parameter received from server (%s)", value);
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Invalid maxbuf parameter received from server");
+					"Invalid maxbuf parameter received from server (%s)", value);
 #endif /* _SUN_SDK_ */
 		goto FreeAllocatedMem;
-	    } else {
-		if (ctext->server_maxbuf<=16) {
-		    result = SASL_BADAUTH;
+	    }
+	    
+	    if (ctext->server_maxbuf <= 16) {
+		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
-		    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			"Invalid maxbuf parameter received from server"
-			" (too small: %s)", value);
+		params->utils->log(params->utils->conn, SASL_LOG_ERR,
+		    "Invalid maxbuf parameter received from server (too small: %s)", value);
 #else
-		    params->utils->seterror(params->utils->conn, 0,
-					    "Invalid maxbuf parameter received from server (too small: %s)", value);
+		params->utils->seterror(params->utils->conn, 0,
+					"Invalid maxbuf parameter received from server (too small: %s)", value);
 #endif /* _SUN_SDK_ */
-		    goto FreeAllocatedMem;
-		}
+		goto FreeAllocatedMem;
+	    }
+
+	    if (ctext->server_maxbuf > MAX_SASL_BUFSIZE) {
+		result = SASL_BADAUTH;
+#ifdef _SUN_SDK_
+		params->utils->log(params->utils->conn, SASL_LOG_ERR,
+		    "Invalid maxbuf parameter received from server (too big: %s)", value);
+#else
+		params->utils->seterror(params->utils->conn, 0,
+					"Invalid maxbuf parameter received from server (too big: %s)", value);
+#endif /* _SUN_SDK_ */
+		goto FreeAllocatedMem;
 	    }
 	} else if (strcasecmp(name, "charset") == 0) {
 	    if (strcasecmp(value, "utf-8") != 0) {
@@ -4553,8 +4714,8 @@ static int digestmd5_client_mech_step2(client_context_t *ctext,
     if (result != SASL_OK) goto FreeAllocatedMem;
 
     /*
-     * (username | realm | nonce | cnonce | nonce-count | qop digest-uri |
-     * response | maxbuf | charset | auth-param )
+     * (username | realm | nonce | cnonce | nonce-count | qop | digest-uri |
+     *  response | maxbuf | charset | auth-param )
      */
     
     result = make_client_response(text, params, oparams);
