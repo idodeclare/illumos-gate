@@ -57,7 +57,7 @@
 #endif
 
 #ifdef WIN32
-#  include <winsock.h>
+#  include <winsock2.h>
 
 #  ifndef R_OK
 #    define R_OK 04
