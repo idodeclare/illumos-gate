@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: external.c,v 1.20 2003/10/20 15:19:58 rjs3 Exp $
+ * $Id: external.c,v 1.21 2003/12/15 20:03:47 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -113,6 +113,9 @@ external_server_mech_step(void *conn_context __attribute__((unused)),
     if (!sparams->utils->conn->external.auth_id)
 	return SASL_BADPROT;
     
+    /* xxx arbitrary limit here */
+    if (clientinlen > 16384) return SASL_BADPROT;
+
     if ((sparams->props.security_flags & SASL_SEC_NOANONYMOUS) &&
 	(!strcmp(sparams->utils->conn->external.auth_id, "anonymous"))) {
 #ifdef _INTEGRATED_SOLARIS_
@@ -137,7 +140,8 @@ external_server_mech_step(void *conn_context __attribute__((unused)),
 	/* The user's trying to authorize as someone they didn't
 	 * authenticate as */
 	result = sparams->canon_user(sparams->utils->conn,
-				     clientin, 0, SASL_CU_AUTHZID, oparams);
+				     clientin, 0,
+				     SASL_CU_AUTHZID, oparams);
 	if(result != SASL_OK) return result;
 	
 	result = sparams->canon_user(sparams->utils->conn,
