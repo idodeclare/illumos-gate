@@ -7,7 +7,7 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,v 1.61 2003/03/26 17:18:04 rjs3 Exp $
+ * $Id: plain.c,v 1.62 2003/07/25 16:11:15 ken3 Exp $
  */
 
 /* 
@@ -212,11 +212,6 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
 				author, 0, SASL_CU_AUTHZID, oparams);
     if (result != SASL_OK) return result;
 
-    /* Transition? */
-    if (params->transition) {
-	params->transition(params->utils->conn, password, password_len);
-    }
-    
     /* set oparams */
     oparams->doneflag = 1;
     oparams->mech_ssf = 0;
