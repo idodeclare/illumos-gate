@@ -7,7 +7,7 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,v 1.63 2004/04/14 17:51:27 ken3 Exp $
+ * $Id: plain.c,v 1.64 2004/09/08 11:06:11 mel Exp $
  */
 
 /* 
@@ -105,7 +105,7 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
     const char *author;
     const char *authen;
     const char *password;
-    size_t password_len;
+    unsigned password_len;
     unsigned lup=0;
     int result;
     char *passcopy; 
@@ -150,7 +150,7 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
     password = clientin + lup;
     while ((lup < clientinlen) && (clientin[lup] != 0)) ++lup;
     
-    password_len = clientin + lup - password;
+    password_len = (unsigned) (clientin + lup - password);
     
     if (lup != clientinlen) {
 #ifdef _SUN_SDK_
