@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.128 2003/07/27 21:33:04 rjs3 Exp $
+ * $Id: server.c,v 1.129 2003/09/02 15:34:03 rjs3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -583,7 +583,7 @@ static int server_done(void) {
       return SASL_CONTINUE;
   }
 #else
-  if(!_sasl_server_active)
+  if(_sasl_server_active == 0)
       return SASL_NOTINIT;
   else
       _sasl_server_active--;
@@ -821,8 +821,8 @@ static int load_config(const sasl_callback_t *verifyfile_cb)
       goto done;
   }
 
-  snprintf(config_filename, len, "%.*s/%s.conf", path_len, path_to_config, 
-	   global_callbacks.appname);
+  snprintf(config_filename, len, "%.*s%c%s.conf", path_len, path_to_config, 
+	   HIER_DELIMITER, global_callbacks.appname);
 
   /* Ask the application if it's safe to use this file */
   result = ((sasl_verifyfile_t *)(verifyfile_cb->proc))(verifyfile_cb->context,
