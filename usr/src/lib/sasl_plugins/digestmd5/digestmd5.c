@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.161 2003/11/03 18:25:24 ken3 Exp $
+ * $Id: digestmd5.c,v 1.162 2003/11/11 16:26:07 ken3 Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -137,7 +137,7 @@ extern int      gethostname(char *, int);
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: digestmd5.c,v 1.161 2003/11/03 18:25:24 ken3 Exp $";
+static const char plugin_id[] = "$Id: digestmd5.c,v 1.162 2003/11/11 16:26:07 ken3 Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* Definitions */
@@ -4980,7 +4980,8 @@ static sasl_client_plug_t digestmd5_client_plugins[] =
 	SASL_SEC_NOPLAINTEXT
 	| SASL_SEC_NOANONYMOUS
 	| SASL_SEC_MUTUAL_AUTH,		/* security_flags */
-	SASL_FEAT_ALLOWS_PROXY, 	/* features */
+	SASL_FEAT_NEEDSERVERFQDN
+	| SASL_FEAT_ALLOWS_PROXY, 	/* features */
 	NULL,				/* required_prompts */
 	NULL,				/* glob_context */
 	&digestmd5_client_mech_new,	/* mech_new */
