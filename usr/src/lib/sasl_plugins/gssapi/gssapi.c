@@ -1934,7 +1934,7 @@ static int gssapi_client_mech_step(void *conn_context,
 #else
 	if(oparams->mech_ssf) {
 	    /* xxx probably too large */
-	    oparams->maxoutbuf -= 50;
+	    oparams->maxoutbuf -= 256;
 	}
 #endif /* _SUN_SDK_ */
 	
