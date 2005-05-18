@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.64 2004/11/02 11:32:17 mel Exp $
+ * $Id: client.c,v 1.65 2005/05/18 21:06:50 shadow Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,9 +76,7 @@ DEFINE_STATIC_MUTEX(client_active_mutex);
 DEFINE_STATIC_MUTEX(client_plug_mutex);
 #else
 static cmech_list_t *cmechlist; /* global var which holds the list */
-
-static sasl_global_callbacks_t global_callbacks;
-
+sasl_global_callbacks_t global_callbacks_client; 
 static int _sasl_client_active = 0;
 #endif /* _SUN_SDK_ */
 
@@ -98,7 +96,7 @@ static int init_mechlist()
   cmechlist->utils=
 	_sasl_alloc_utils(gctx, NULL, &gctx->client_global_callbacks);
 #else
-  cmechlist->utils=_sasl_alloc_utils(NULL, &global_callbacks);
+  cmechlist->utils=_sasl_alloc_utils(NULL, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
   if (cmechlist->utils==NULL)
     return SASL_NOMEM;
@@ -416,8 +414,8 @@ int sasl_client_init(const sasl_callback_t *callbacks)
   _sasl_client_cleanup_hook = &client_done;
   _sasl_client_idle_hook = &client_idle;
 
-  global_callbacks.callbacks = callbacks;
-  global_callbacks.appname = NULL;
+  global_callbacks_client.callbacks = callbacks;
+  global_callbacks_client.appname = NULL;
 
   cmechlist=sasl_ALLOC(sizeof(cmech_list_t));
   if (cmechlist==NULL) return SASL_NOMEM;
@@ -429,7 +427,7 @@ int sasl_client_init(const sasl_callback_t *callbacks)
 
   sasl_client_add_plugin("EXTERNAL", &external_client_plug_init);
 
-  ret = _sasl_common_init(&global_callbacks);
+  ret = _sasl_common_init(&global_callbacks_client);
 #endif /* _SUN_SDK_ */
 
   if (ret == SASL_OK)
@@ -589,7 +587,7 @@ int _sasl_client_new(void *ctx,
 #ifdef _SUN_SDK_
 			   prompt_supp, &gctx->client_global_callbacks);
 #else
-			   prompt_supp, &global_callbacks);
+			   prompt_supp, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
 
   if (result != SASL_OK) RETURN(*pconn, result);
@@ -597,7 +595,7 @@ int _sasl_client_new(void *ctx,
 #ifdef _SUN_SDK_
   utils=_sasl_alloc_utils(gctx, *pconn, &gctx->client_global_callbacks);
 #else
-  utils=_sasl_alloc_utils(*pconn, &global_callbacks);
+  utils=_sasl_alloc_utils(*pconn, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
   if (utils==NULL)
       MEMERROR(*pconn);
