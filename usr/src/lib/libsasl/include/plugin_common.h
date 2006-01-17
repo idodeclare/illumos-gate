@@ -5,7 +5,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.h,v 1.20 2004/06/23 18:43:37 rjs3 Exp $
+ * $Id: plugin_common.h,v 1.21 2006/01/17 12:18:21 mel Exp $
  */
 
 /* 
@@ -201,7 +201,7 @@ typedef struct decode_context {
     unsigned int size;		/* Absolute size of the encoded packet */
     char *buffer;		/* Buffer to accumulate an encoded packet */
     unsigned int cursize;	/* Amount of packet data in the buffer */
-    unsigned int in_maxbuf;	/* Maximum allowed size of an encoded packet */
+    unsigned int in_maxbuf;	/* Maximum allowed size of an incoming encoded packet */
 } decode_context_t;
 
 void _plug_decode_init(decode_context_t *text,
