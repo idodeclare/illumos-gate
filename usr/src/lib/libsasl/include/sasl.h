@@ -35,6 +35,7 @@
  *
  * Server only Callbacks:
  *  sasl_authorize_t               user authorization policy callback
+ *  sasl_getconfpath_t           get path to search for config file
  *  sasl_server_userdb_checkpass_t check password and auxprops in userdb
  *  sasl_server_userdb_setpass_t   set password in userdb
  *
@@ -478,6 +479,24 @@ typedef int sasl_verifyfile_t(void *context,
 			    const char *file, sasl_verify_type_t type);
 #define	SASL_CB_VERIFYFILE  4
 
+/* getconfpath callback -- this allows applications to specify the
+ * colon-separated path to search for config files (by default,
+ * taken from the SASL_CONF_PATH environment variable).
+ * inputs:
+ *  context     -- getconfpath context from the callback record
+ * outputs:
+ *  path        -- colon seperated path (allocated on the heap; the
+ *                 library will free it using the sasl_free_t *
+ *                 passed to sasl_set_callback, or the standard free()
+ *                 library call).
+ * returns:
+ *  SASL_OK     -- no error
+ *  SASL_FAIL   -- error
+ */
+typedef int sasl_getconfpath_t(void *context,
+                               char **path);
+
+#define SASL_CB_GETCONFPATH  5
 
 /* client/user interaction callbacks: */
 /*
