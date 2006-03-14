@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.143 2006/02/13 19:22:56 mel Exp $
+ * $Id: server.c,v 1.144 2006/03/14 14:23:56 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -503,14 +503,14 @@ int _sasl_server_add_plugin(void *ctx,
     sun_reg = _is_sun_reg(pluglist);
 #endif /* _INTEGRATED_SOLARIS_ */
 
+    if ((result != SASL_OK) && (result != SASL_NOUSER)
+        && (result != SASL_CONTINUE)) {
 #ifdef _SUN_SDK_
-    if (result != SASL_OK) {
 	UNLOCK_MUTEX(&server_plug_mutex);
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks,
 		   SASL_LOG_DEBUG,
 		   "server add_plugin entry_point error %z", result);
 #else
-    if ((result != SASL_OK) && (result != SASL_NOUSER)) {
 	_sasl_log(NULL, SASL_LOG_DEBUG,
 		  "server add_plugin entry_point error %z\n", result);
 #endif /* _SUN_SDK_ */
@@ -568,6 +568,7 @@ int _sasl_server_add_plugin(void *ctx,
 #else
 	if (! mech) return SASL_NOMEM;
 #endif /* _SUN_SDK_ */
+        memset (mech, 0, sizeof(mechanism_t));
 
 	mech->m.plug = pluglist++;
 	if(_sasl_strdup(plugname, &mech->m.plugname, NULL) != SASL_OK) {
@@ -589,6 +590,8 @@ int _sasl_server_add_plugin(void *ctx,
 	/* whether this mech actually has any users in it's db */
 	mech->m.condition = result; /* SASL_OK, SASL_CONTINUE or SASL_NOUSER */
 #endif /* _SUN_SDK_ */
+
+        /* mech->m.f = NULL; */
 
 	mech->next = mechlist->mech_list;
 	mechlist->mech_list = mech;
@@ -2675,8 +2678,6 @@ int sasl_checkapop(sasl_conn_t *conn,
     RETURN(conn, SASL_NOMECH);
 #endif /* DO_SASL_CHECKAPOP */
 }
- 
-
 
 /* It would be nice if we can show other information like Author, Company, Year, plugin version */
 static void
@@ -2788,8 +2789,18 @@ _sasl_print_mechanism (
 	    printf ("%cNEED_SERVER_FQDN", delimiter);
 	    delimiter = '|';
 	}
-    }
 
+        /* Is this one used? */
+        if (m->plug->features & SASL_FEAT_SERVICE) {
+	    printf ("%cSERVICE", delimiter);
+	    delimiter = '|';
+	}
+
+        if (m->plug->features & SASL_FEAT_GETSECRET) {
+	    printf ("%cNEED_GETSECRET", delimiter);
+	    delimiter = '|';
+	}
+    }
 
     if (m->f) {
 	printf ("\n\twill be loaded from \"%s\"", m->f);
@@ -2798,11 +2809,10 @@ _sasl_print_mechanism (
     printf ("\n");
 }
 
-
 /* Dump information about available server plugins (separate functions should be
    used for canon and auxprop plugins */
 int sasl_server_plugin_info (
-  char *mech_list,		/* space separated mechanism list or NULL for ALL */
+  const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   sasl_server_info_callback_t *info_cb,
   void *info_cb_rock
 )
@@ -2810,6 +2820,7 @@ int sasl_server_plugin_info (
     mechanism_t *m;
     server_sasl_mechanism_t plug_data;
     char * cur_mech;
+    char *mech_list = NULL;
     char * p;
 
     if (info_cb == NULL) {
@@ -2819,7 +2830,7 @@ int sasl_server_plugin_info (
     if (mechlist != NULL) {
 	info_cb (NULL, SASL_INFO_LIST_START, info_cb_rock);
 
-	if (mech_list == NULL) {
+	if (c_mech_list == NULL) {
 	    m = mechlist->mech_list; /* m point to beginning of the list */
 
 	    while (m != NULL) {
@@ -2830,6 +2841,7 @@ int sasl_server_plugin_info (
 		m = m->next;
 	    }
 	} else {
+            mech_list = strdup(c_mech_list);
 
 	    cur_mech = mech_list;
 
@@ -2854,6 +2866,8 @@ int sasl_server_plugin_info (
 
 		cur_mech = p;
 	    }
+
+            free (mech_list);
 	}
 
 	info_cb (NULL, SASL_INFO_LIST_END, info_cb_rock);
