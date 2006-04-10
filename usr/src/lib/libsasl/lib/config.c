@@ -7,7 +7,7 @@
 /* SASL Config file API
  * Rob Siemborski
  * Tim Martin (originally in Cyrus distribution)
- * $Id: config.c,v 1.14 2003/07/17 18:00:43 rjs3 Exp $
+ * $Id: config.c,v 1.15 2006/04/10 13:28:06 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -104,7 +104,7 @@ int sasl_config_init(const char *filename)
 
     infile = fopen(filename, "rF");
     if (!infile) {
-      return SASL_CONTINUE;
+        return SASL_CONTINUE;
     }
 #ifdef _SUN_SDK_
     result = _sasl_strdup(filename, &gctx->config_path, NULL);
@@ -129,7 +129,7 @@ int sasl_config_init(const char *filename)
 	  invalid_line = 1;
 	  goto done;
 #else
-	  return SASL_FAIL;
+	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
 	}
 	*p++ = '\0';
@@ -141,7 +141,7 @@ int sasl_config_init(const char *filename)
 	  invalid_line = 1;
 	  goto done;
 #else
-	  return SASL_FAIL;
+	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
 	}
 
