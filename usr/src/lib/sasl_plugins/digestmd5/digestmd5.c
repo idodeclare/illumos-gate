@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.178 2006/04/19 17:58:56 mel Exp $
+ * $Id: digestmd5.c,v 1.179 2006/04/25 12:47:35 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1985,6 +1985,11 @@ static int digestmd5_decode_packet(void *context,
     unsigned int seqnum;
     unsigned char checkdigest[16];
 	
+    if (inputlen < 16) {
+	text->utils->seterror(text->utils->conn, 0, "DIGEST-MD5 SASL packets must be at least 16 bytes long");
+	return SASL_FAIL;
+    }
+
     /* check the version number */
     memcpy(&ver, input+inputlen-6, 2);
     ver = ntohs(ver);
@@ -2035,7 +2040,7 @@ static int digestmd5_decode_packet(void *context,
 	memcpy(*output, input, inputlen - 6);
 	*outputlen = inputlen - 16; /* -16 to skip HMAC, ver and seqnum */
     }
-    digest = *output + inputlen - 16;
+    digest = *output + (inputlen - 16);
 
     /* check the CMAC */
 
