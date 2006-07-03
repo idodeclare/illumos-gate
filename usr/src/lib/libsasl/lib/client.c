@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.67 2006/04/26 15:33:41 mel Exp $
+ * $Id: client.c,v 1.68 2006/07/03 14:00:05 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1238,7 +1238,7 @@ static void
 _sasl_print_mechanism (
   client_sasl_mechanism_t *m,
   sasl_info_callback_stage_t stage,
-  void *rock
+  void *rock __attribute__((unused))
 )
 {
     char delimiter;
