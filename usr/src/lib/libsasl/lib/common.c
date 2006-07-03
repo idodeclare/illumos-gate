@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.114 2006/04/19 18:39:59 mel Exp $
+ * $Id: common.c,v 1.115 2006/07/03 14:43:16 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -392,7 +392,7 @@ _sasl_encodev (sasl_conn_t *conn,
 	       const char **output,     /* previous output, if *p_num_packets > 0 */
                unsigned *outputlen)
 {
-    int result;
+    int result = SASL_OK;
     char * new_buf;
 
     VERIFY(conn->oparams.encode != NULL);
