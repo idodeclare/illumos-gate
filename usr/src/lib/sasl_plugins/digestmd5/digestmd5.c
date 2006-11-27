@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.182 2006/07/03 19:34:39 murch Exp $
+ * $Id: digestmd5.c,v 1.183 2006/11/27 20:41:55 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2006,7 +2006,9 @@ static int digestmd5_decode_packet(void *context,
 	
     if (seqnum != text->rec_seqnum) {
 	text->utils->seterror(text->utils->conn, 0,
-			      "Incorrect Sequence Number");
+	    "Incorrect Sequence Number: received %u, expected %u",
+	    seqnum,
+	    text->rec_seqnum);
 	return SASL_FAIL;
     }
 
@@ -2294,10 +2296,10 @@ static int get_server_realm(sasl_server_params_t * params, char **realm)
     } else {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "no way to obtain domain");
+			   "no way to obtain DIGEST-MD5 realm");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"no way to obtain domain");
+				"no way to obtain DIGEST-MD5 realm");
 #endif /* _SUN_SDK_ */
 	return SASL_FAIL;
     }
@@ -2605,7 +2607,7 @@ digestmd5_server_mech_step1(server_context_t *stext,
     /*
      * algorithm 
      *  This directive is required for backwards compatibility with HTTP 
-     *  Digest., which supports other algorithms. . This directive is 
+     *  Digest, which supports other algorithms. This directive is 
      *  required and MUST appear exactly once; if not present, or if multiple 
      *  instances are present, the client should abort the authentication 
      *  exchange. 
@@ -2643,7 +2645,11 @@ digestmd5_server_mech_step1(server_context_t *stext,
     }
 
     text->authid = NULL;
-    _plug_strdup(sparams->utils, realm, &text->realm, NULL);
+    if (_plug_strdup(sparams->utils, realm, &text->realm, NULL) != SASL_OK) {
+	SETERROR(sparams->utils,
+		 "internal error: out of memory when saving realm");
+	return SASL_FAIL;
+    }
     text->nonce = nonce;
     text->nonce_count = 1;
     text->cnonce = NULL;
@@ -2939,7 +2945,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 
     /* Sanity check the parameters */
     if (realm == NULL) {
-        /* From 2821bis:
+        /* From 2831bis:
            If the directive is missing, "realm-value" will set to
            the empty string when computing A1. */
 	_plug_strdup(sparams->utils, "", &realm, NULL);
