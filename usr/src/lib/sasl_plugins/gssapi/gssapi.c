@@ -1763,12 +1763,6 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 	    
 	if (text->server_name == GSS_C_NO_NAME) { /* only once */
-	    name_token.length = strlen(params->service) + 1 + strlen(params->serverFQDN);
-	    name_token.value = (char *)params->utils->malloc((name_token.length + 1) * sizeof(char));
-	    if (name_token.value == NULL) {
-		sasl_gss_free_context_contents(text);
-		return SASL_NOMEM;
-	    }
 	    if (params->serverFQDN == NULL
 		|| strlen(params->serverFQDN) == 0) {
 #ifdef _SUN_SDK_
@@ -1778,6 +1772,12 @@ static int gssapi_client_mech_step(void *conn_context,
 		SETERROR(text->utils, "GSSAPI Failure: no serverFQDN");
 #endif /* _SUN_SDK_ */
 		return SASL_FAIL;
+	    }
+	    name_token.length = strlen(params->service) + 1 + strlen(params->serverFQDN);
+	    name_token.value = (char *)params->utils->malloc((name_token.length + 1) * sizeof(char));
+	    if (name_token.value == NULL) {
+		sasl_gss_free_context_contents(text);
+		return SASL_NOMEM;
 	    }
 	    
 #ifdef _SUN_SDK_
