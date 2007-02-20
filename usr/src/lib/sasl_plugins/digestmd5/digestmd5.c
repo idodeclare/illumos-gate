@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.184 2007/02/14 17:16:14 mel Exp $
+ * $Id: digestmd5.c,v 1.185 2007/02/20 17:53:36 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1827,6 +1827,9 @@ static int create_layer_keys(context_t *text,
 {
     MD5_CTX Md5Ctx;
     
+    utils->log(utils->conn, SASL_LOG_DEBUG,
+	       "DIGEST-MD5 create_layer_keys()");
+
     utils->MD5Init(&Md5Ctx);
     utils->MD5Update(&Md5Ctx, key, keylen);
     if (text->i_am == SERVER) {
@@ -2109,6 +2112,9 @@ static void digestmd5_common_mech_dispose(void *conn_context,
     
     if (!text || !utils) return;
     
+    utils->log(utils->conn, SASL_LOG_DEBUG,
+	       "DIGEST-MD5 common mech dispose");
+
     if (text->authid) utils->free(text->authid);
     if (text->realm) utils->free(text->realm);
 
@@ -2167,6 +2173,9 @@ static void digestmd5_common_mech_free(void *glob_context,
     reauth_cache_t *reauth_cache = my_glob_context->reauth;
     size_t n;
     
+    utils->log(utils->conn, SASL_LOG_DEBUG,
+	       "DIGEST-MD5 common mech free");
+
     if (!reauth_cache) return;
 
     for (n = 0; n < reauth_cache->size; n++)
@@ -2270,7 +2279,7 @@ static char *create_response(context_t * text,
     memcpy(result, Response, HASHHEXLEN);
     result[HASHHEXLEN] = 0;
     
-    /* response_value (used for reauth i think */
+    /* response_value (used for reauth i think) */
     if (response_value != NULL) {
 	DigestCalcResponse(utils,
 			   SessionKey,	/* HEX(H(A1)) */
@@ -2285,7 +2294,7 @@ static char *create_response(context_t * text,
 			   Response	/* request-digest or response-digest */
 	    );
 	
-	*response_value = utils->malloc(HASHHEXLEN + 1);
+	*response_value = utils->realloc(*response_value, HASHHEXLEN + 1);
 	if (*response_value == NULL)
 	    return NULL;
 	memcpy(*response_value, Response, HASHHEXLEN);
@@ -3812,7 +3821,7 @@ static char *calculate_response(context_t * text,
 	if (*response_value != NULL)
 	    utils->free(*response_value);
 #endif /* _SUN_SDK_ */
-	*response_value = utils->malloc(HASHHEXLEN + 1);
+	*response_value = utils->realloc(*response_value, HASHHEXLEN + 1);
 	if (*response_value == NULL)
 	    return NULL;
 	
@@ -3838,6 +3847,9 @@ static int make_client_response(context_t *text,
     char           *response = NULL;
     unsigned        resplen = 0;
     int result = SASL_OK;
+
+    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
+		       "DIGEST-MD5 make_client_response()");
 
     switch (ctext->protection) {
     case DIGEST_PRIVACY:
@@ -3906,8 +3918,6 @@ static int make_client_response(context_t *text,
 #endif /* _SUN_SDK_ */
     
     resplen = 0;
-    text->out_buf = NULL;
-    text->out_buf_len = 0;
     if (add_to_challenge(params->utils,
 			 &text->out_buf, &text->out_buf_len, &resplen,
 			 "username", (unsigned char *) oparams->authid,
@@ -4099,6 +4109,9 @@ static int parse_server_challenge(client_context_t *ctext,
     bool IsUTF8 = FALSE;
 #endif /* !_SUN_SDK_ */
     int algorithm_count = 0;
+
+    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
+		       "DIGEST-MD5 parse_server_challenge()");
 
     if (!serverin || !serverinlen) {
 #ifndef _SUN_SDK_
@@ -4567,6 +4580,9 @@ static int ask_user_info(client_context_t *ctext,
     int i;
     size_t len;
 
+    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
+		       "DIGEST-MD5 ask_user_info()");
+
     /* try to get the authid */
     if (oparams->authid == NULL) {
 	auth_result = _plug_get_authid(params->utils, &authid, prompt_need);
@@ -4783,6 +4799,7 @@ digestmd5_client_mech_step1(client_context_t *ctext,
 	    if (text->cnonce) params->utils->free(text->cnonce);
 #endif /* _SUN_SDK_ */
 	    /* we have info, so use it */
+	    if (text->realm) params->utils->free(text->realm);
 	    _plug_strdup(params->utils, text->reauth->e[val].realm,
 			 &text->realm, NULL);
 	    _plug_strdup(params->utils, (char *) text->reauth->e[val].nonce,
@@ -5108,6 +5125,9 @@ static void digestmd5_client_mech_dispose(void *conn_context,
 #endif /* _INTEGRATED_SOLARIS_ */
 
     if (ctext->free_password) _plug_free_secret(utils, &ctext->password);
+
+    utils->log(utils->conn, SASL_LOG_DEBUG,
+	       "DIGEST-MD5 client mech dispose");
 
     digestmd5_common_mech_dispose(conn_context, utils);
 }
