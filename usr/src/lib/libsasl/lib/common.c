@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.116 2006/12/01 17:34:35 mel Exp $
+ * $Id: common.c,v 1.117 2008/09/30 16:53:22 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -222,21 +222,29 @@ sasl_mutex_utils_t _sasl_mutex_utils={
 };
 #endif /* !_SUN_SDK_ */
 
-void sasl_set_mutex(sasl_mutex_alloc_t *n, sasl_mutex_lock_t *l,
-		    sasl_mutex_unlock_t *u, sasl_mutex_free_t *d)
+void sasl_set_mutex(sasl_mutex_alloc_t *n,
+		    sasl_mutex_lock_t *l,
+		    sasl_mutex_unlock_t *u,
+		    sasl_mutex_free_t *d)
 {
-#ifdef _SUN_SDK_
-  _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
+    /* Disallow mutex function changes once sasl_client_init
+       and/or sasl_server_init is called */
+    if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
+	return;
+    }
 
-  gctx->sasl_mutex_utils.alloc=n;
-  gctx->sasl_mutex_utils.lock=l;
-  gctx->sasl_mutex_utils.unlock=u;
-  gctx->sasl_mutex_utils.free=d;
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
+
+    gctx->sasl_mutex_utils.alloc=n;
+    gctx->sasl_mutex_utils.lock=l;
+    gctx->sasl_mutex_utils.unlock=u;
+    gctx->sasl_mutex_utils.free=d;
 #else
-  _sasl_mutex_utils.alloc=n;
-  _sasl_mutex_utils.lock=l;
-  _sasl_mutex_utils.unlock=u;
-  _sasl_mutex_utils.free=d;
+    _sasl_mutex_utils.alloc=n;
+    _sasl_mutex_utils.lock=l;
+    _sasl_mutex_utils.unlock=u;
+    _sasl_mutex_utils.free=d;
 #endif
 }
 
