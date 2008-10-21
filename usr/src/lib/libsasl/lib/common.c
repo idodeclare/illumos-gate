@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.118 2008/10/19 21:53:32 mel Exp $
+ * $Id: common.c,v 1.119 2008/10/21 13:16:39 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -793,25 +793,11 @@ sasl_set_alloc(sasl_malloc_t *m,
 #endif /* _SUN_SDK_ */
 }
 
-void sasl_done(void)
+void sasl_common_done(void)
 {
 #ifdef _SUN_SDK_
    _sasl_dispose_context(_sasl_gbl_ctx());
 #else
-    if (_sasl_server_cleanup_hook && _sasl_server_cleanup_hook() == SASL_OK) {
-	_sasl_server_idle_hook = NULL;
-	_sasl_server_cleanup_hook = NULL;
-    }
-    
-    if (_sasl_client_cleanup_hook && _sasl_client_cleanup_hook() == SASL_OK) {
-	_sasl_client_idle_hook = NULL;	
-	_sasl_client_cleanup_hook = NULL;
-    }
-    
-    if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
-	return;
-    }
-    
     /* NOTE - the caller will need to reinitialize the values,
        if it is going to call sasl_client_init/sasl_server_init again. */
     if (default_plugin_path != NULL) {
@@ -835,8 +821,30 @@ void sasl_done(void)
     
     _sasl_free_utils(&sasl_global_utils);
     
-    if(global_mech_list) sasl_FREE(global_mech_list);
-    global_mech_list = NULL;
+    if (global_mech_list) {
+	sasl_FREE(global_mech_list);
+	global_mech_list = NULL;
+    }
+}
+
+/* This function is for backward compatibility */
+void sasl_done(void)
+{
+    if (_sasl_server_cleanup_hook && _sasl_server_cleanup_hook() == SASL_OK) {
+	_sasl_server_idle_hook = NULL;
+	_sasl_server_cleanup_hook = NULL;
+    }
+    
+    if (_sasl_client_cleanup_hook && _sasl_client_cleanup_hook() == SASL_OK) {
+	_sasl_client_idle_hook = NULL;	
+	_sasl_client_cleanup_hook = NULL;
+    }
+    
+    if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
+	return;
+    }
+
+    sasl_common_done();
 #endif /* _SUN_SDK_ */
 }
 
