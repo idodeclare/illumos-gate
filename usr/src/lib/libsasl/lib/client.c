@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.68 2006/07/03 14:00:05 murch Exp $
+ * $Id: client.c,v 1.69 2008/10/21 13:16:39 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -107,6 +107,34 @@ static int init_mechlist()
   _sasl_client_active = 0;
 }
 
+int sasl_client_done(void)
+{
+    int result = SASL_CONTINUE;
+
+    if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
+	return SASL_NOTINIT;
+    }
+
+    if (_sasl_client_cleanup_hook) {
+	result = _sasl_client_cleanup_hook();
+	
+	if (result == SASL_OK) {
+	    _sasl_client_idle_hook = NULL;	
+	    _sasl_client_cleanup_hook = NULL;
+	} else {
+	    return result;
+	}
+    }
+    
+    if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
+	return result;
+    }
+    
+    sasl_common_done();
+
+    return SASL_OK;
+}
+
 #ifdef _SUN_SDK_
 static void client_done(_sasl_global_context_t *gctx) {
   cmech_list_t *cmechlist = gctx->cmechlist;
@@ -117,7 +145,7 @@ static void client_done(void) {
   cmechanism_t *cm;
   cmechanism_t *cprevm;
 
-  cm=cmechlist->mech_list; /* m point to begging of the list */
+  cm=cmechlist->mech_list; /* m point to beggining of the list */
   while (cm!=NULL)
   {
     cprevm=cm;
