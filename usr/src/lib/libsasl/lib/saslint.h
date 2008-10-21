@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.60 2006/04/18 20:25:45 mel Exp $
+ * $Id: saslint.h,v 1.61 2008/10/21 13:16:39 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -408,6 +408,8 @@ struct sasl_verify_password_s {
     char *name;
     sasl_plaintext_verifier *verify;
 };
+
+void sasl_common_done(void);
 
 /*
  * globals & constants
