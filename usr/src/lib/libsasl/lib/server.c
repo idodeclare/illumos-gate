@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.148 2008/10/21 13:16:39 mel Exp $
+ * $Id: server.c,v 1.149 2008/10/23 14:35:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -67,13 +67,6 @@
 #include "saslint.h"
 #include "saslplug.h"
 #include "saslutil.h"
-
-#ifndef _SUN_SDK_
-#ifdef sun
-/* gotta define gethostname ourselves on suns */
-extern int gethostname(char *, int);
-#endif
-#endif /* !_SUN_SDK_ */
 
 #define DEFAULT_CHECKPASS_MECH "auxprop"
 
