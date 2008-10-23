@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.69 2008/10/21 13:16:39 mel Exp $
+ * $Id: client.c,v 1.70 2008/10/23 14:35:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -639,7 +639,9 @@ int _sasl_client_new(void *ctx,
   
   /* get the clientFQDN (serverFQDN was set in _sasl_conn_init) */
   memset(name, 0, sizeof(name));
-  gethostname(name, MAXHOSTNAMELEN);
+  if (get_fqhostname (name, MAXHOSTNAMELEN, 0) != 0) {
+      return (SASL_FAIL);
+  }
 
   result = _sasl_strdup(name, &conn->clientFQDN, NULL);
 
