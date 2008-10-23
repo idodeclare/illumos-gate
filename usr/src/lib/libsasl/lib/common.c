@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.119 2008/10/21 13:16:39 mel Exp $
+ * $Id: common.c,v 1.120 2008/10/23 14:35:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -341,7 +341,10 @@ int sasl_set_path (int path_type, char * path)
 
 /* return the version of the cyrus sasl library as compiled,
  * using 32 bits: high byte is major version, second byte is minor version,
- * low 16 bits are step # */
+ * low 16 bits are step #.
+ * Patch version is not available using this function,
+ * use sasl_version_info() instead.
+ */
 void sasl_version(const char **implementation, int *version) 
 {
     if(implementation) *implementation = implementation_string;
@@ -911,11 +914,14 @@ int _sasl_conn_init(sasl_conn_t *conn,
 
   if(serverFQDN) {
       result = _sasl_strdup(serverFQDN, &conn->serverFQDN, NULL);
+      sasl_strlower (conn->serverFQDN);
   } else if (conn->type == SASL_CONN_SERVER) {
       /* We can fake it because we *are* the server */
       char name[MAXHOSTNAMELEN];
       memset(name, 0, sizeof(name));
-      gethostname(name, MAXHOSTNAMELEN);
+      if (get_fqhostname (name, MAXHOSTNAMELEN, 0) != 0) {
+        return (SASL_FAIL);
+      }
       
       result = _sasl_strdup(name, &conn->serverFQDN, NULL);
   } else {
@@ -3013,6 +3019,7 @@ int _sasl_build_mechlist(void)
 #ifdef _SUN_SDK_
 	UNLOCK_MUTEX(&global_mutex);
 #else
+	/* This is not going to be very useful */
 	printf ("no olist");
 #endif /* _SUN_SDK_ */
 	return SASL_FAIL;
