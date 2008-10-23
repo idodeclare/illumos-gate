@@ -98,6 +98,10 @@ LIBSASL_API void sasl_churn(sasl_rand_t *rpool, const char *data,
  */
 LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 
+/* Lowercase string in place */
+LIBSASL_API char *sasl_strlower (char *val);
+
+
 #ifdef	__cplusplus
 }
 #endif
