@@ -6,7 +6,7 @@
 /* saslutil.c
  * Rob Siemborski
  * Tim Martin
- * $Id: saslutil.c,v 1.45 2008/10/23 14:35:53 mel Exp $
+ * $Id: saslutil.c,v 1.46 2008/10/29 12:39:58 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -593,8 +593,10 @@ int get_fqhostname(
 	freeaddrinfo (result);
 #ifdef WIN32
 	WSASetLastError (WSANO_DATA);
-#else
+#elif defined(ENODATA)
 	errno = ENODATA;
+#elif defined(EADDRNOTAVAIL)
+	errno = EADDRNOTAVAIL;
 #endif
 	return (-1);
     }
@@ -603,8 +605,10 @@ int get_fqhostname(
 	freeaddrinfo (result);
 #ifdef WIN32
 	WSASetLastError (WSANO_DATA);
-#else
+#elif defined(ENODATA)
 	errno = ENODATA;
+#elif defined(EADDRNOTAVAIL)
+	errno = EADDRNOTAVAIL;
 #endif
 	return (-1);
     }
