@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.63 2008/10/29 14:11:28 mel Exp $
+ * $Id: saslint.h,v 1.64 2008/10/29 15:01:30 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -734,9 +734,15 @@ extern int internal_canonuser_init(const sasl_utils_t *utils,
 				   sasl_canonuser_plug_t **plug,
 				   const char *plugname);
 extern int _sasl_canon_user(sasl_conn_t *conn,
-			    const char *user, unsigned ulen,
+			    const char *user,
+			    unsigned ulen,
 			    unsigned flags,
 			    sasl_out_params_t *oparams);
+int _sasl_canon_user_lookup (sasl_conn_t *conn,
+			     const char *user,
+			     unsigned ulen,
+			     unsigned flags,
+			     sasl_out_params_t *oparams);
 
 #ifdef _SUN_SDK_
 /* Private functions to create, free, and use a private context */
