@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.70 2008/10/23 14:35:53 mel Exp $
+ * $Id: client.c,v 1.71 2008/10/29 15:01:30 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -633,7 +633,7 @@ int _sasl_client_new(void *ctx,
   /* Setup the non-lazy parts of cparams, the rest is done in
    * sasl_client_start */
   conn->cparams->utils = utils;
-  conn->cparams->canon_user = &_sasl_canon_user;
+  conn->cparams->canon_user = &_sasl_canon_user_lookup;
   conn->cparams->flags = flags;
   conn->cparams->prompt_supp = (*pconn)->callbacks;
   
