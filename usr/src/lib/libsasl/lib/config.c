@@ -7,7 +7,7 @@
 /* SASL Config file API
  * Rob Siemborski
  * Tim Martin (originally in Cyrus distribution)
- * $Id: config.c,v 1.15 2006/04/10 13:28:06 mel Exp $
+ * $Id: config.c,v 1.16 2008/10/30 14:21:30 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -60,15 +60,14 @@
  * srvtab: <string>
  */
 
-
-#include "sasl.h"
-#include "saslint.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 
 #include "config.h"	/* _SUN_SDK_ */
+
+#include "sasl.h"
+#include "saslint.h"
 
 struct configlist {
     char *key;
@@ -121,7 +120,7 @@ int sasl_config_init(const char *filename)
 
 	key = p;
 	while (*p && (isalnum((int) *p) || *p == '-' || *p == '_')) {
-	    if (isupper((int) *p)) *p = tolower(*p);
+	    if (isupper((int) *p)) *p = (char) tolower(*p);
 	    p++;
 	}
 	if (*p != ':') {
