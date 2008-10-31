@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.152 2008/10/29 15:01:31 mel Exp $
+ * $Id: server.c,v 1.153 2008/10/31 16:37:58 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -242,7 +242,7 @@ int sasl_setpass(sasl_conn_t *conn,
     }
 
     /* now we let the mechanisms set their secrets */
-    for (sm = mechlist->mech_list; sm; sm = sm->next) {
+    for (sm = s_conn->mech_list; sm; sm = sm->next) {
 	m = &sm->m;
 
 	if (!m->plug->setpass) {
@@ -366,6 +366,19 @@ static void server_dispose(sasl_conn_t *pconn)
   if (s_conn->sparams)
       sasl_FREE(s_conn->sparams);
 
+  if (s_conn->mech_list != mechlist->mech_list) {
+      /* free connection-specific mech_list */
+      mechanism_t *m, *prevm;
+
+      m = s_conn->mech_list; /* m point to beginning of the list */
+
+      while (m) {
+	  prevm = m;
+	  m = m->next;
+	  sasl_FREE(prevm);    
+      }
+  }
+
   _sasl_conn_dispose(pconn);
 }
 
@@ -433,6 +446,34 @@ static int load_mech(_sasl_global_context_t *gctx, const char *mechname)
 }
 #endif /* _SUN_SDK_ */
 
+static int mech_compare(const sasl_server_plug_t *a,
+			const sasl_server_plug_t *b)
+{
+    unsigned sec_diff;
+
+    if (a->max_ssf > b->max_ssf) return 1;
+    if (a->max_ssf < b->max_ssf) return -1;
+
+    /* XXX  the following is fairly arbitrary, but its independent
+       of the order in which the plugins are loaded
+    */
+    sec_diff = a->security_flags ^ b->security_flags;
+    if (sec_diff & a->security_flags & SASL_SEC_FORWARD_SECRECY) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_FORWARD_SECRECY) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NOACTIVE) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOACTIVE) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NODICTIONARY) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NODICTIONARY) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_MUTUAL_AUTH) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_MUTUAL_AUTH) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NOANONYMOUS) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOANONYMOUS) return -1;
+    if (sec_diff & a->security_flags & SASL_SEC_NOPLAINTEXT) return 1;
+    if (sec_diff & b->security_flags & SASL_SEC_NOPLAINTEXT) return -1;
+
+    return 0;
+}
+
 /*
  * parameters:
  *  p - entry point
@@ -462,7 +503,6 @@ int _sasl_server_add_plugin(void *ctx,
 #endif /* _SUN_SDK_ */
     int plugcount;
     sasl_server_plug_t *pluglist;
-    mechanism_t *mech;
     sasl_server_plug_init_t *entry_point;
     int result;
     int version;
@@ -542,8 +582,10 @@ int _sasl_server_add_plugin(void *ctx,
     }
 #endif /* _SUN_SDK_ */
 
-    for (lupe=0;lupe < plugcount ;lupe++)
+    for (lupe=0;lupe < plugcount ;lupe++, pluglist++)
     {
+	mechanism_t *mech, *mp;
+
 #ifdef _SUN_SDK_
 	if (!load_mech(gctx, pluglist->mech_name)) {
 	     pluglist++;
@@ -564,7 +606,7 @@ int _sasl_server_add_plugin(void *ctx,
 #endif /* _SUN_SDK_ */
         memset (mech, 0, sizeof(mechanism_t));
 
-	mech->m.plug = pluglist++;
+	mech->m.plug = pluglist;
 	if(_sasl_strdup(plugname, &mech->m.plugname, NULL) != SASL_OK) {
 #ifdef _SUN_SDK_
 	    UNLOCK_MUTEX(&server_plug_mutex);
@@ -587,8 +629,19 @@ int _sasl_server_add_plugin(void *ctx,
 
         /* mech->m.f = NULL; */
 
-	mech->next = mechlist->mech_list;
-	mechlist->mech_list = mech;
+	/* sort mech_list by relative "strength" */
+	mp = mechlist->mech_list;
+	if (!mp || mech_compare(pluglist, mp->m.plug) >= 0) {
+	    /* add mech to head of list */
+	    mech->next = mechlist->mech_list;
+	    mechlist->mech_list = mech;
+	} else {
+	    /* find where to insert mech into list */
+	    while (mp->next &&
+		   mech_compare(pluglist, mp->next->m.plug) <= 0) mp = mp->next;
+	    mech->next = mp->next;
+	    mp->next = mech;
+	}
 	mechlist->mech_length++;
     }
 
@@ -1417,7 +1470,7 @@ int _sasl_server_new(void *ctx,
   sasl_utils_t *utils;
   sasl_getopt_t *getopt;
   void *context;
-  const char *log_level, *auto_trans;
+  const char *log_level, *auto_trans, *mlist;
 
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx = (ctx == NULL) ? _sasl_gbl_ctx() : ctx;
@@ -1538,6 +1591,7 @@ int _sasl_server_new(void *ctx,
   if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
     getopt(context, NULL, "log_level", &log_level, NULL);
     getopt(context, NULL, "auto_transition", &auto_trans, NULL);
+    getopt(context, NULL, "mech_list", &mlist, NULL);
   }
   serverconn->sparams->log_level = log_level ? atoi(log_level) : SASL_LOG_ERR;
 
@@ -1549,6 +1603,52 @@ int _sasl_server_new(void *ctx,
        !strcmp(auto_trans, "noplain")) &&
       sasl_auxprop_store(NULL, NULL, NULL) == SASL_OK) {
       serverconn->sparams->transition = &_sasl_transition;
+  }
+
+  /* if we have a mech_list, create ordered list of avail mechs for this conn */
+  if (mlist) {
+      const char *cp;
+      mechanism_t *mptr, *tail = NULL;
+
+      while (*mlist) {
+	  /* find end of current mech name */
+	  for (cp = mlist; *cp && !isspace((int) *cp); cp++);
+
+	  /* search for mech name in loaded plugins */
+	  for (mptr = mechlist->mech_list; mptr; mptr = mptr->next) {
+	      const sasl_server_plug_t *plug = mptr->m.plug;
+
+	      if (((size_t) (cp - mlist) == strlen(plug->mech_name)) &&
+		  !strncasecmp(mlist, plug->mech_name, strlen(plug->mech_name)))
+		  /* found a match */
+		  break;
+	  }
+	  if (mptr) {
+	      mechanism_t *new = sasl_ALLOC(sizeof(mechanism_t));
+	      if (!new) return SASL_NOMEM;
+
+	      memcpy(&new->m, &mptr->m, sizeof(server_sasl_mechanism_t));
+	      new->next = NULL;
+
+	      if (!serverconn->mech_list) {
+		  serverconn->mech_list = new;
+		  tail = serverconn->mech_list;
+	      }
+	      else {
+		  tail->next = new;
+		  tail = new;
+	      }
+	      serverconn->mech_length++;
+	  }
+
+	  /* find next mech name */
+	  mlist = cp;
+	  while (*mlist && isspace((int) *mlist)) mlist++;
+      }
+  }
+  else {
+      serverconn->mech_list = mechlist->mech_list;
+      serverconn->mech_length = mechlist->mech_length;
   }
 
   serverconn->sparams->canon_user = &_sasl_canon_user_lookup;
@@ -1580,7 +1680,6 @@ static int mech_permitted(sasl_conn_t *conn,
     int ret;
     int myflags;
     context_list_t *cur;
-    sasl_getopt_t *getopt;
     void *context;
     sasl_ssf_t minssf = 0;
 #ifdef _SUN_SDK_
@@ -1603,32 +1702,6 @@ static int mech_permitted(sasl_conn_t *conn,
     }
     
     plug = mech->m.plug;
-
-    /* get the list of allowed mechanisms (default = all) */
-    if (_sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context)
-            == SASL_OK) {
-	const char *mlist = NULL;
-
-	getopt(context, NULL, "mech_list", &mlist, NULL);
-
-	/* if we have a list, check the plugin against it */
-	if (mlist) {
-	    const char *cp;
-
-	    while (*mlist) {
-		for (cp = mlist; *cp && !isspace((int) *cp); cp++);
-		if (((size_t) (cp - mlist) == strlen(plug->mech_name)) &&
-		    !strncasecmp(mlist, plug->mech_name,
-				 strlen(plug->mech_name))) {
-		    break;
-		}
-		mlist = cp;
-		while (*mlist && isspace((int) *mlist)) mlist++;
-	    }
-
-	    if (!*mlist) return SASL_NOMECH;  /* reached EOS -> not in our list */
-	}
-    }
 
     /* setup parameters for the call to mech_avail */
     s_conn->sparams->serverFQDN=conn->serverFQDN;
@@ -1874,7 +1947,7 @@ int sasl_server_start(sasl_conn_t *conn,
 
     /* make sure mech is valid mechanism
        if not return appropriate error */
-    m=mechlist->mech_list;
+    m = s_conn->mech_list;
 
     /* check parameters */
     if(!conn) return SASL_BADPARAM;
@@ -2184,13 +2257,13 @@ static unsigned mech_names_len(_sasl_global_context_t *gctx)
 {
   mech_list_t *mechlist = gctx->mechlist;
 #else
-static unsigned mech_names_len()
+static unsigned mech_names_len(mechanism_t *mech_list)
 {
 #endif /* _SUN_SDK_ */
   mechanism_t *listptr;
   unsigned result = 0;
 
-  for (listptr = mechlist->mech_list;
+  for (listptr = mech_list;
        listptr;
        listptr = listptr->next)
     result += (unsigned) strlen(listptr->m.plug->mech_name);
@@ -2211,6 +2284,7 @@ int _sasl_server_listmech(sasl_conn_t *conn,
 			  unsigned *plen,
 			  int *pcount)
 {
+  sasl_server_conn_t *s_conn = (sasl_server_conn_t *)conn;
   int lup;
   mechanism_t *listptr;
   int ret;
@@ -2250,15 +2324,15 @@ int _sasl_server_listmech(sasl_conn_t *conn,
       mysep = " ";
   }
 
-  if (! mechlist || mechlist->mech_length <= 0)
+  if (!s_conn->mech_list || s_conn->mech_length <= 0)
       INTERROR(conn, SASL_NOMECH);
 
   resultlen = (prefix ? strlen(prefix) : 0)
-            + (strlen(mysep) * (mechlist->mech_length - 1))
+            + (strlen(mysep) * (s_conn->mech_length - 1))
 #ifdef _SUN_SDK_
 	    + mech_names_len(gctx)
 #else
-	    + mech_names_len()
+	    + mech_names_len(s_conn->mech_list)
 #endif /* _SUN_SDK_ */
             + (suffix ? strlen(suffix) : 0)
 	    + 1;
@@ -2271,11 +2345,11 @@ int _sasl_server_listmech(sasl_conn_t *conn,
   else
     *(conn->mechlist_buf) = '\0';
 
-  listptr = mechlist->mech_list;  
+  listptr = s_conn->mech_list;
    
   flag = 0;
   /* make list */
-  for (lup = 0; lup < mechlist->mech_length; lup++) {
+  for (lup = 0; lup < s_conn->mech_length; lup++) {
       /* currently, we don't use the "user" parameter for anything */
       if (mech_permitted(conn, listptr) == SASL_OK) {
 	  if (pcount != NULL)
