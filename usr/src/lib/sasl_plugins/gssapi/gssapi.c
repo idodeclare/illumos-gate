@@ -922,10 +922,10 @@ gssapi_server_mech_step(void *conn_context,
 				   input_token,
 				   GSS_C_NO_CHANNEL_BINDINGS,
 				   &text->client_name,
-				   NULL,
+				   NULL,	/* resulting mech_name */
 				   output_token,
 				   &out_flags,
-				   NULL,
+				   NULL,	/* context validity period */
 				   &(text->client_creds));
 	GSS_UNLOCK_MUTEX(params->utils);
 	
