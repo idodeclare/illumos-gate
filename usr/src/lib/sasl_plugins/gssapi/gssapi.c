@@ -1022,13 +1022,6 @@ gssapi_server_mech_step(void *conn_context,
 	GSS_UNLOCK_MUTEX(params->utils);
 	
 	if (GSS_ERROR(maj_stat)) {
-#ifndef _SUN_SDK_
-	    if (without) {
-		GSS_LOCK_MUTEX(params->utils);
-		gss_release_name(&min_stat, &without);
-		GSS_UNLOCK_MUTEX(params->utils);
-	    }
-#endif /* !_SUN_SDK_ */
 #ifdef _INTEGRATED_SOLARIS_
 	    SETERROR(text->utils, gettext("GSSAPI Failure"));
 #else
