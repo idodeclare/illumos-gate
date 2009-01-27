@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.154 2008/11/04 18:40:46 murch Exp $
+ * $Id: server.c,v 1.155 2009/01/27 00:14:16 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1470,7 +1470,8 @@ int _sasl_server_new(void *ctx,
   sasl_utils_t *utils;
   sasl_getopt_t *getopt;
   void *context;
-  const char *log_level, *auto_trans, *mlist;
+  const char *log_level, *auto_trans;
+  const char *mlist = NULL;
 
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx = (ctx == NULL) ? _sasl_gbl_ctx() : ctx;
@@ -1669,8 +1670,6 @@ int _sasl_server_new(void *ctx,
  * IF mech strength + external strength < min ssf THEN FAIL.
  * We also have to look at the security properties and make sure
  * that this mechanism has everything we want.
- * The mechanism should also be listed in "mech_list" option,
- * if it is not NULL.
  */
 static int mech_permitted(sasl_conn_t *conn,
 			  mechanism_t *mech)
