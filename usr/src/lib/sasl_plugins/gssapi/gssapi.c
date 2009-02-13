@@ -1484,7 +1484,8 @@ static sasl_server_plug_t gssapi_server_plugins[] =
 	| SASL_SEC_MUTUAL_AUTH		/* security_flags */
 	| SASL_SEC_PASS_CREDENTIALS,
 	SASL_FEAT_WANT_CLIENT_FIRST
-	| SASL_FEAT_ALLOWS_PROXY,	/* features */
+	| SASL_FEAT_ALLOWS_PROXY
+	| SASL_FEAT_DONTUSE_USERPASSWD,	/* features */
 	NULL,				/* glob_context */
 	&gssapi_server_mech_new,	/* mech_new */
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
