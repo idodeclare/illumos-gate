@@ -7,7 +7,7 @@
 /* SASL Config file API
  * Rob Siemborski
  * Tim Martin (originally in Cyrus distribution)
- * $Id: config.c,v 1.16 2008/10/30 14:21:30 mel Exp $
+ * $Id: config.c,v 1.17 2009/02/14 13:59:51 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -92,6 +92,7 @@ int sasl_config_init(const char *filename)
     int alloced = 0;
     char buf[4096];
     char *p, *key;
+    char *tail;
     int result;
 #ifdef _SUN_SDK_
     int invalid_line = 0;
@@ -142,6 +143,13 @@ int sasl_config_init(const char *filename)
 #else
 	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
+	}
+
+	/* Now strip trailing spaces, if any */
+	tail = p + strlen(p) - 1;
+	while (tail > p && isspace((int) *tail)) {
+	    *tail = '\0';
+	    tail--;
 	}
 
 #ifdef _SUN_SDK_
