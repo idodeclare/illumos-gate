@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.189 2008/10/30 16:11:13 mel Exp $
+ * $Id: digestmd5.c,v 1.190 2009/02/20 22:55:58 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3644,7 +3644,7 @@ static sasl_server_plug_t digestmd5_server_plugins[] =
 	"DIGEST-MD5",			/* mech_name */
 #ifdef WITH_RC4
 	128,				/* max_ssf */
-#elif WITH_DES
+#elif defined(WITH_DES)
 	112,
 #else 
 	1,
@@ -5227,7 +5227,7 @@ static sasl_client_plug_t digestmd5_client_plugins[] =
 	"DIGEST-MD5",
 #ifdef WITH_RC4				/* mech_name */
 	128,				/* max ssf */
-#elif WITH_DES
+#elif defined(WITH_DES)
 	112,
 #else
 	1,
