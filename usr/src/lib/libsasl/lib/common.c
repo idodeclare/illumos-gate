@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.123 2009/01/28 22:49:14 mel Exp $
+ * $Id: common.c,v 1.124 2009/02/20 23:10:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -144,6 +144,7 @@ static sasl_callback_t default_getpath_cb = {
 static sasl_callback_t default_getconfpath_cb = {
     SASL_CB_GETCONFPATH, &_sasl_getconfpath, NULL
 };
+int _sasl_allocation_locked = 0;
 
 static char * default_plugin_path = NULL;
 static char * default_conf_path = NULL;
@@ -785,6 +786,8 @@ sasl_set_alloc(sasl_malloc_t *m,
 	       sasl_realloc_t *r,
 	       sasl_free_t *f)
 {
+  if (_sasl_allocation_locked++)  return;
+
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
 
