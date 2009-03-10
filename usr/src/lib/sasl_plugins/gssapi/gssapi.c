@@ -1323,7 +1323,7 @@ gssapi_server_mech_step(void *conn_context,
 	    ret = params->canon_user(params->utils->conn,
 				     text->authid,
 				     0, /* strlen(text->authid) */
-				     SASL_CU_AUTHID, oparams);
+				     SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED, oparams);
 	    if (ret != SASL_OK) {
 		sasl_gss_free_context_contents(text);
 		return ret;
@@ -1335,7 +1335,7 @@ gssapi_server_mech_step(void *conn_context,
 	    ret = params->canon_user(params->utils->conn,
 				     text->authid,
 				     0, /* strlen(text->authid) */
-				     SASL_CU_AUTHZID | SASL_CU_AUTHID,
+				     SASL_CU_AUTHZID | SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED,
 				     oparams);
 	    
 	    if (ret != SASL_OK) {
