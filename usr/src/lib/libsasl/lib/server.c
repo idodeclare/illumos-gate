@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.159 2009/02/20 23:10:53 mel Exp $
+ * $Id: server.c,v 1.160 2009/04/08 19:36:20 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -423,9 +423,6 @@ static int init_mechlist(void)
 #endif /* _SUN_SDK_ */
     sasl_utils_t *newutils = NULL;
 
-    mechlist->mutex = sasl_MUTEX_ALLOC();
-    if(!mechlist->mutex) return SASL_FAIL;
-
     /* set util functions - need to do rest */
 #ifdef _SUN_SDK_
     newutils = _sasl_alloc_utils(gctx, NULL, &gctx->server_global_callbacks);
@@ -770,7 +767,6 @@ static int server_done(void) {
 	  sasl_FREE(prevm);    
       }
       _sasl_free_utils(&mechlist->utils);
-      sasl_MUTEX_FREE(mechlist->mutex);
       sasl_FREE(mechlist);
 #ifdef _SUN_SDK_
       gctx->mechlist = NULL;
