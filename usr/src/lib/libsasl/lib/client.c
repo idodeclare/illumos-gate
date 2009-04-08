@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.73 2009/02/20 23:10:53 mel Exp $
+ * $Id: client.c,v 1.74 2009/04/08 19:36:20 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -89,9 +89,6 @@ static int init_mechlist()
 {
 #endif /* _SUN_SDK_ */
 
-  cmechlist->mutex = sasl_MUTEX_ALLOC();
-  if(!cmechlist->mutex) return SASL_FAIL;
-  
 #ifdef _SUN_SDK_
   cmechlist->utils=
 	_sasl_alloc_utils(gctx, NULL, &gctx->client_global_callbacks);
@@ -163,7 +160,6 @@ static void client_done(void) {
     sasl_FREE(cprevm->m.plugname);
     sasl_FREE(cprevm);    
   }
-  sasl_MUTEX_FREE(cmechlist->mutex);
   _sasl_free_utils(&cmechlist->utils);
   sasl_FREE(cmechlist);
 
