@@ -6,7 +6,7 @@
 /* saslutil.c
  * Rob Siemborski
  * Tim Martin
- * $Id: saslutil.c,v 1.47 2009/04/17 05:53:45 mel Exp $
+ * $Id: saslutil.c,v 1.48 2009/04/17 06:04:50 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -124,8 +124,11 @@ static char index_64[128] = {
  * Returns SASL_OK on success, SASL_BUFOVER if result won't fit
  */
 
-int sasl_encode64(const char *_in, unsigned inlen,
-		  char *_out, unsigned outmax, unsigned *outlen)
+int sasl_encode64(const char *_in,
+		  unsigned inlen,
+		  char *_out,
+		  unsigned outmax,
+		  unsigned *outlen)
 {
     const unsigned char *in = (const unsigned char *)_in;
     unsigned char *out = (unsigned char *)_out;
@@ -139,19 +142,21 @@ int sasl_encode64(const char *_in, unsigned inlen,
 #ifdef _SUN_SDK_
     if (((inlen >0) && (in == NULL)) || _out == NULL) return SASL_BADPARAM;
 #else
-    if ((inlen >0) && (in == NULL)) return SASL_BADPARAM;
+    if ((inlen > 0) && (in == NULL)) return SASL_BADPARAM;
 #endif /* _SUN_SDK_ */
     
     /* Will it fit? */
     olen = (inlen + 2) / 3 * 4;
-    if (outlen)
-      *outlen = olen;
-    if (outmax <= olen)
-      return SASL_BUFOVER;
+    if (outlen) {
+	*outlen = olen;
+    }
+    if (outmax < olen) {
+	return SASL_BUFOVER;
+    }
 
     /* Do the work... */
 #ifndef _SUN_SDK_
-    blah=(char *) out;
+    blah = (char *) out;
 #endif /* !_SUN_SDK_ */
     while (inlen >= 3) {
       /* user provided max buffer size; make sure we don't go over it */
@@ -172,7 +177,9 @@ int sasl_encode64(const char *_in, unsigned inlen,
         *out++ = '=';
     }
 
-    *out = '\0';
+    if (olen < outmax) {
+	*out = '\0';
+    }
  
     return SASL_OK;
 }
