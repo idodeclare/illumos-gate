@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.74 2009/04/08 19:36:20 mel Exp $
+ * $Id: client.c,v 1.75 2009/07/16 13:43:50 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -199,14 +199,14 @@ int _sasl_client_add_plugin(void *ctx,
   int i;
   cmechanism_t *m;
 #endif /* _SUN_SDK_ */
-  int plugcount;
-  sasl_client_plug_t *pluglist;
-  cmechanism_t *mech;
-  int result;
-  int version;
-  int lupe;
+    int plugcount;
+    sasl_client_plug_t *pluglist;
+    cmechanism_t *mech;
+    int result;
+    int version;
+    int lupe;
 
-  if(!plugname || !entry_point) return SASL_BADPARAM;
+    if (!plugname || !entry_point) return SASL_BADPARAM;
   
 #ifdef _SUN_SDK_
   cmechlist = gctx->cmechlist;
@@ -228,39 +228,39 @@ int _sasl_client_add_plugin(void *ctx,
 
 #endif /* _SUN_SDK_ */
 
-  result = entry_point(cmechlist->utils, SASL_CLIENT_PLUG_VERSION, &version,
-		       &pluglist, &plugcount);
+    result = entry_point(cmechlist->utils, SASL_CLIENT_PLUG_VERSION, &version,
+		   &pluglist, &plugcount);
 
 #ifdef _INTEGRATED_SOLARIS_
   sun_reg = _is_sun_reg(pluglist);
 #endif /* _INTEGRATED_SOLARIS_ */
-  if (result != SASL_OK)
-  {
+    if (result != SASL_OK)
+    {
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
     __sasl_log(gctx, gctx->client_global_callbacks.callbacks, SASL_LOG_WARN,
 	      "entry_point failed in sasl_client_add_plugin for %s",
 	      plugname);
 #else
-    _sasl_log(NULL, SASL_LOG_WARN,
+	_sasl_log(NULL, SASL_LOG_WARN,
 	      "entry_point failed in sasl_client_add_plugin for %s",
 	      plugname);
 #endif /* _SUN_SDK_ */
-    return result;
-  }
+	return result;
+    }
 
-  if (version != SASL_CLIENT_PLUG_VERSION)
-  {
+    if (version != SASL_CLIENT_PLUG_VERSION)
+    {
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
     __sasl_log(gctx, gctx->client_global_callbacks.callbacks, SASL_LOG_WARN,
 	      "version conflict in sasl_client_add_plugin for %s", plugname);
 #else
-    _sasl_log(NULL, SASL_LOG_WARN,
+	_sasl_log(NULL, SASL_LOG_WARN,
 	      "version conflict in sasl_client_add_plugin for %s", plugname);
 #endif /* _SUN_SDK_ */
-    return SASL_BADVERS;
-  }
+	return SASL_BADVERS;
+    }
 
 #ifdef _SUN_SDK_
     /* Check plugins to make sure mech_name is non-NULL */
@@ -276,9 +276,9 @@ int _sasl_client_add_plugin(void *ctx,
     }
 #endif /* _SUN_SDK_ */
 
-  for (lupe=0;lupe< plugcount ;lupe++)
+    for (lupe=0; lupe< plugcount ;lupe++)
     {
-      mech = sasl_ALLOC(sizeof(cmechanism_t));
+	mech = sasl_ALLOC(sizeof(cmechanism_t));
 #ifdef _SUN_SDK_
       if (! mech) {
 	UNLOCK_MUTEX(&client_plug_mutex);
@@ -286,30 +286,30 @@ int _sasl_client_add_plugin(void *ctx,
       }
       mech->glob_context = pluglist->glob_context;
 #else
-      if (! mech) return SASL_NOMEM;
+	if (!mech) return SASL_NOMEM;
 #endif /* _SUN_SDK_ */
 
-      mech->m.plug=pluglist++;
-      if(_sasl_strdup(plugname, &mech->m.plugname, NULL) != SASL_OK) {
+	mech->m.plug = pluglist++;
+	if (_sasl_strdup(plugname, &mech->m.plugname, NULL) != SASL_OK) {
 #ifdef _SUN_SDK_
 	UNLOCK_MUTEX(&client_plug_mutex);
 #endif /* _SUN_SDK_ */
-	sasl_FREE(mech);
-	return SASL_NOMEM;
-      }
+	    sasl_FREE(mech);
+	    return SASL_NOMEM;
+	}
 #ifdef _INTEGRATED_SOLARIS_
       mech->sun_reg = sun_reg;
 #endif /* _INTEGRATED_SOLARIS_ */
-      mech->m.version = version;
-      mech->next = cmechlist->mech_list;
-      cmechlist->mech_list = mech;
-      cmechlist->mech_length++;
+	mech->m.version = version;
+	mech->next = cmechlist->mech_list;
+	cmechlist->mech_list = mech;
+	cmechlist->mech_length++;
     }
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
 #endif /* _SUN_SDK_ */
 
-  return SASL_OK;
+    return SASL_OK;
 }
 
 static int
