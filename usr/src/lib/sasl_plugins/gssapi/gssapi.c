@@ -1167,15 +1167,22 @@ gssapi_server_mech_step(void *conn_context,
 	}
 	
 	/* build up our security properties token */
-        if (params->props.maxbufsize > 0xFFFFFF) {
-            /* make sure maxbufsize isn't too large */
-            /* maxbufsize = 0xFFFFFF */
-            sasldata[1] = sasldata[2] = sasldata[3] = 0xFF;
-        } else {
-            sasldata[1] = (params->props.maxbufsize >> 16) & 0xFF;
-            sasldata[2] = (params->props.maxbufsize >> 8) & 0xFF;
-            sasldata[3] = (params->props.maxbufsize >> 0) & 0xFF;
-        }
+	if (text->requiressf != 0) {
+	    if (params->props.maxbufsize > 0xFFFFFF) {
+		/* make sure maxbufsize isn't too large */
+		/* maxbufsize = 0xFFFFFF */
+		sasldata[1] = sasldata[2] = sasldata[3] = 0xFF;
+	    } else {
+		sasldata[1] = (params->props.maxbufsize >> 16) & 0xFF;
+		sasldata[2] = (params->props.maxbufsize >> 8) & 0xFF;
+		sasldata[3] = (params->props.maxbufsize >> 0) & 0xFF;
+	    }
+	} else {
+	    /* From RFC 4752: "The client verifies that the server maximum buffer is 0
+	       if the server does not advertise support for any security layer." */
+	    sasldata[1] = sasldata[2] = sasldata[3] = 0;
+	}
+
 	sasldata[0] = 0;
 	if(text->requiressf != 0 && !params->props.maxbufsize) {
 #ifdef _SUN_SDK_
@@ -1272,6 +1279,16 @@ gssapi_server_mech_step(void *conn_context,
 	    sasl_gss_free_context_contents(text);
 	    return SASL_FAIL;
 	}
+
+	if (output_token->length < 4) {
+	    SETERROR(text->utils,
+		     "token too short");
+	    GSS_LOCK_MUTEX(params->utils);
+	    gss_release_buffer(&min_stat, output_token);
+	    GSS_UNLOCK_MUTEX(params->utils);
+	    sasl_gss_free_context_contents(text);
+	    return SASL_FAIL;
+	}
 	
 	layerchoice = (int)(((char *)(output_token->value))[0]);
 	if (layerchoice == 1 && text->requiressf == 0) { /* no encryption */
@@ -1330,7 +1347,7 @@ gssapi_server_mech_step(void *conn_context,
 		sasl_gss_free_context_contents(text);
 		return ret;
 	    }
-	} else if(output_token->length == 4) {
+	} else /* if (output_token->length == 4) */ {
 	    /* null authzid */
 	    int ret;
 	    
@@ -1343,21 +1360,8 @@ gssapi_server_mech_step(void *conn_context,
 	    if (ret != SASL_OK) {
 		sasl_gss_free_context_contents(text);
 		return ret;
-	    }	    
-	} else {
-#ifdef _SUN_SDK_
-	    text->utils->log(text->utils->conn, SASL_LOG_ERR,
-	    		     "token too short");
-#else
-	    SETERROR(text->utils,
-		     "token too short");
-#endif /* _SUN_SDK_ */
-	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_buffer(&min_stat, output_token);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	    sasl_gss_free_context_contents(text);
-	    return SASL_FAIL;
-	}	
+	    }
+	}
 	
 	/* No matter what, set the rest of the oparams */
 
@@ -2050,6 +2054,16 @@ static int gssapi_client_mech_step(void *conn_context,
 	    return SASL_FAIL;
 	}
 	
+	if (output_token->length != 4) {
+	    SETERROR(text->utils,
+		     (output_token->length < 4) ? "token too short" : "token too long");
+	    GSS_LOCK_MUTEX(params->utils);
+	    gss_release_buffer(&min_stat, output_token);
+	    GSS_UNLOCK_MUTEX(params->utils);
+	    sasl_gss_free_context_contents(text);
+	    return SASL_FAIL;
+	}
+
 	/* taken from kerberos.c */
 	if (secprops->min_ssf > (K5_MAX_SSF + external)) {
 	    return SASL_TOOWEAK;
@@ -2182,20 +2196,26 @@ static int gssapi_client_mech_step(void *conn_context,
 	    memcpy((char *)input_token->value+4,oparams->user,alen);
 
 	/* build up our security properties token */
-        if (params->props.maxbufsize > 0xFFFFFF) {
-            /* make sure maxbufsize isn't too large */
-            /* maxbufsize = 0xFFFFFF */
-            ((unsigned char *)input_token->value)[1] = 0xFF;
-            ((unsigned char *)input_token->value)[2] = 0xFF;
-            ((unsigned char *)input_token->value)[3] = 0xFF;
-        } else {
-            ((unsigned char *)input_token->value)[1] = 
-                (params->props.maxbufsize >> 16) & 0xFF;
-            ((unsigned char *)input_token->value)[2] = 
-                (params->props.maxbufsize >> 8) & 0xFF;
-            ((unsigned char *)input_token->value)[3] = 
-                (params->props.maxbufsize >> 0) & 0xFF;
-        }
+	if (mychoice > 1) {
+	    if (params->props.maxbufsize > 0xFFFFFF) {
+		/* make sure maxbufsize isn't too large */
+		/* maxbufsize = 0xFFFFFF */
+		((unsigned char *)input_token->value)[1] = 0xFF;
+		((unsigned char *)input_token->value)[2] = 0xFF;
+		((unsigned char *)input_token->value)[3] = 0xFF;
+	    } else {
+		((unsigned char *)input_token->value)[1] = 
+		    (params->props.maxbufsize >> 16) & 0xFF;
+		((unsigned char *)input_token->value)[2] = 
+		    (params->props.maxbufsize >> 8) & 0xFF;
+		((unsigned char *)input_token->value)[3] = 
+		    (params->props.maxbufsize >> 0) & 0xFF;
+	    }
+	} else {
+	    ((unsigned char *)input_token->value)[1] = 0;
+	    ((unsigned char *)input_token->value)[2] = 0;
+	    ((unsigned char *)input_token->value)[3] = 0;
+	}
 	((unsigned char *)input_token->value)[0] = mychoice;
 	
 	GSS_LOCK_MUTEX(params->utils);
