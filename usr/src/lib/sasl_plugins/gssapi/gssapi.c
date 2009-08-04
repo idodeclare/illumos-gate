@@ -988,7 +988,7 @@ gssapi_server_mech_step(void *conn_context,
 	    /* No output token, send an empty string */
 	    *serverout = GSSAPI_BLANK_STRING;
 #ifndef _SUN_SDK_
-	    serveroutlen = 0;
+	    *serveroutlen = 0;
 #endif /* !_SUN_SDK_ */
 	}
 	
@@ -996,6 +996,17 @@ gssapi_server_mech_step(void *conn_context,
 	if (maj_stat == GSS_S_COMPLETE) {
 	    /* Switch to ssf negotiation */
 	    text->state = SASL_GSSAPI_STATE_SSFCAP;
+
+	    if (*serveroutlen != 0) {
+		return SASL_CONTINUE;
+	    }
+
+	    /* Pretend that we just got an empty response from the client */
+	    clientinlen = 0;
+
+	    /* fall through */
+	} else {
+	    return SASL_CONTINUE;
 	}
 	
 	return SASL_CONTINUE;
@@ -1014,7 +1025,16 @@ gssapi_server_mech_step(void *conn_context,
 	name_without_realm.value = NULL;
 #endif /* !_SUN_SDK_ */
 	
-	/* We ignore whatever the client sent us at this stage */
+	if (clientinlen != 0) {
+#ifdef _INTEGRATED_SOLARIS_
+	    SETERROR(text->utils,
+	      gettext("GSSAPI server is not expecting data at this stage"));
+#else
+	    SETERROR(text->utils, "GSSAPI server is not expecting data at this stage");
+#endif
+	    sasl_gss_free_context_contents(text);
+	    return SASL_BADAUTH;
+	}
 	
 	GSS_LOCK_MUTEX(params->utils);
 	maj_stat = gss_display_name (&min_stat,
