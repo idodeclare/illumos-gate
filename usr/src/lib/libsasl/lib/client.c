@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.75 2009/07/16 13:43:50 mel Exp $
+ * $Id: client.c,v 1.76 2009/08/04 17:13:51 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -139,32 +139,43 @@ static void client_done(_sasl_global_context_t *gctx) {
 #else
 static void client_done(void) {
 #endif /* _SUN_SDK_ */
-  cmechanism_t *cm;
-  cmechanism_t *cprevm;
+    cmechanism_t *cm;
+    cmechanism_t *cprevm;
 
-  cm=cmechlist->mech_list; /* m point to beggining of the list */
-  while (cm!=NULL)
-  {
-    cprevm=cm;
-    cm=cm->next;
-
-    if (cprevm->m.plug->mech_free) {
-#ifdef _SUN_SDK_
-	cprevm->plug->mech_free(cprevm->glob_context, cmechlist->utils);
-#else
-	cprevm->m.plug->mech_free(cprevm->m.plug->glob_context,
-				cmechlist->utils);
-#endif /* _SUN_SDK_ */
+    if (!_sasl_client_active) {
+	return SASL_NOTINIT;
+    } else {
+	_sasl_client_active--;
     }
 
-    sasl_FREE(cprevm->m.plugname);
-    sasl_FREE(cprevm);    
-  }
-  _sasl_free_utils(&cmechlist->utils);
-  sasl_FREE(cmechlist);
+    if(_sasl_client_active) {
+	/* Don't de-init yet! Our refcount is nonzero. */
+	return SASL_CONTINUE;
+    }
+
+    cm = cmechlist->mech_list; /* m point to beggining of the list */
+    while (cm!=NULL)
+    {
+	cprevm = cm;
+	cm = cm->next;
+
+	if (cprevm->m.plug->mech_free) {
+#ifdef _SUN_SDK_
+	    cprevm->plug->mech_free(cprevm->glob_context, cmechlist->utils);
+#else
+	    cprevm->m.plug->mech_free(cprevm->m.plug->glob_context,
+				      cmechlist->utils);
+#endif /* _SUN_SDK_ */
+	}
+
+	sasl_FREE(cprevm->m.plugname);
+	sasl_FREE(cprevm);    
+    }
+    _sasl_free_utils(&cmechlist->utils);
+    sasl_FREE(cmechlist);
 
 #ifdef _SUN_SDK_
-  gctx->cmechlist = NULL;
+    gctx->cmechlist = NULL;
   p = gctx->cplug_path_info;
   while((path_info = p) != NULL) {
     sasl_FREE(path_info->path);
@@ -174,10 +185,10 @@ static void client_done(void) {
   gctx->cplug_path_info = NULL;
   UNLOCK_MUTEX(&client_active_mutex);
 #else
-  cmechlist = NULL;
+    cmechlist = NULL;
 #endif /* _SUN_SDK_ */
 
-  return SASL_OK;
+    return SASL_OK;
 }
 
 int sasl_client_add_plugin(const char *plugname,
@@ -228,8 +239,11 @@ int _sasl_client_add_plugin(void *ctx,
 
 #endif /* _SUN_SDK_ */
 
-    result = entry_point(cmechlist->utils, SASL_CLIENT_PLUG_VERSION, &version,
-		   &pluglist, &plugcount);
+    result = entry_point(cmechlist->utils,
+			 SASL_CLIENT_PLUG_VERSION,
+			 &version,
+			 &pluglist,
+			 &plugcount);
 
 #ifdef _INTEGRATED_SOLARIS_
   sun_reg = _is_sun_reg(pluglist);
@@ -1089,7 +1103,7 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 			  unsigned *plen,
 			  int *pcount)
 {
-    cmechanism_t *m=NULL;
+    cmechanism_t *m = NULL;
     sasl_ssf_t minssf = 0;
     int ret;
     size_t resultlen;
@@ -1102,10 +1116,10 @@ int _sasl_client_listmech(sasl_conn_t *conn,
     if(gctx->sasl_client_active==0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-    if(_sasl_client_active == 0) return SASL_NOTINIT;
+    if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
     if (!conn) return SASL_BADPARAM;
-    if(conn->type != SASL_CONN_CLIENT) PARAMERROR(conn);
+    if (conn->type != SASL_CONN_CLIENT) PARAMERROR(conn);
     
     if (! result)
 	PARAMERROR(conn);
@@ -1125,7 +1139,7 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 	mysep = " ";
     }
 
-    if(conn->props.min_ssf < conn->external.ssf) {
+    if (conn->props.min_ssf < conn->external.ssf) {
 	minssf = 0;
     } else {
 	minssf = conn->props.min_ssf - conn->external.ssf;
