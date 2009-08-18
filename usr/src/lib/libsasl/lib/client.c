@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.76 2009/08/04 17:13:51 mel Exp $
+ * $Id: client.c,v 1.77 2009/08/18 12:23:57 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -585,9 +585,9 @@ int _sasl_client_new(void *ctx,
   if (gctx == NULL)
 	gctx = _sasl_gbl_ctx();
 
-  if(gctx->sasl_client_active==0) return SASL_NOTINIT;
+  if (gctx->sasl_client_active == 0) return SASL_NOTINIT;
 #else
-  if(_sasl_client_active==0) return SASL_NOTINIT;
+  if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
   
   /* Remember, serverFQDN, iplocalport and ipremoteport can be NULL and be valid! */
@@ -636,9 +636,9 @@ int _sasl_client_new(void *ctx,
 #ifdef _SUN_SDK_
   utils=_sasl_alloc_utils(gctx, *pconn, &gctx->client_global_callbacks);
 #else
-  utils=_sasl_alloc_utils(*pconn, &global_callbacks_client);
+  utils = _sasl_alloc_utils(*pconn, &global_callbacks_client);
 #endif /* _SUN_SDK_ */
-  if (utils==NULL)
+  if (utils == NULL) {
       MEMERROR(*pconn);
   
   utils->conn= *pconn;
@@ -658,7 +658,7 @@ int _sasl_client_new(void *ctx,
 
   result = _sasl_strdup(name, &conn->clientFQDN, NULL);
 
-  if(result == SASL_OK) return SASL_OK;
+  if (result == SASL_OK) return SASL_OK;
 
 #ifdef _SUN_SDK_
   conn->cparams->iplocalport = (*pconn)->iplocalport;
@@ -737,7 +737,7 @@ int sasl_client_start(sasl_conn_t *conn,
 		      unsigned *clientoutlen,
 		      const char **mech)
 {
-    sasl_client_conn_t *c_conn= (sasl_client_conn_t *) conn;
+    sasl_client_conn_t *c_conn = (sasl_client_conn_t *) conn;
     char name[SASL_MECHNAMEMAX + 1];
     cmechanism_t *m=NULL,*bestm=NULL;
     size_t pos=0,place;
@@ -749,17 +749,18 @@ int sasl_client_start(sasl_conn_t *conn,
 		_sasl_gbl_ctx() : conn->gctx;
     cmech_list_t *cmechlist;
 
-    if(gctx->sasl_client_active==0) return SASL_NOTINIT;
+    if (gctx->sasl_client_active==0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-    if(_sasl_client_active==0) return SASL_NOTINIT;
+    if (_sasl_client_active==0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
 
     if (!conn) return SASL_BADPARAM;
 
     /* verify parameters */
-    if (mechlist == NULL)
+    if (mechlist == NULL) {
 	PARAMERROR(conn);
+    }
 
     /* if prompt_need != NULL we've already been here
        and just need to do the continue step again */
@@ -783,7 +784,7 @@ int sasl_client_start(sasl_conn_t *conn,
     (void) _load_client_plugins(gctx);
 #endif /* _SUN_SDK_ */
 
-    if(conn->props.min_ssf < conn->external.ssf) {
+    if (conn->props.min_ssf < conn->external.ssf) {
 	minssf = 0;
     } else {
 	minssf = conn->props.min_ssf - conn->external.ssf;
@@ -965,7 +966,7 @@ int sasl_client_start(sasl_conn_t *conn,
 #endif /* _SUN_SDK_ */
 					  c_conn->cparams,
 					  &(conn->context));
-    if(result != SASL_OK) goto done;
+    if (result != SASL_OK) goto done;
 
     /* do a step -- but only if we can do a client-send-first */
  dostep:
@@ -1145,8 +1146,9 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 	minssf = conn->props.min_ssf - conn->external.ssf;
     }
 
-    if (! cmechlist || cmechlist->mech_length <= 0)
+    if (! cmechlist || cmechlist->mech_length <= 0) {
 	INTERROR(conn, SASL_NOMECH);
+    }
 
     resultlen = (prefix ? strlen(prefix) : 0)
 	+ (strlen(mysep) * (cmechlist->mech_length - 1))
@@ -1158,23 +1160,27 @@ int _sasl_client_listmech(sasl_conn_t *conn,
 	+ (suffix ? strlen(suffix) : 0)
 	+ 1;
     ret = _buf_alloc(&conn->mechlist_buf,
-		     &conn->mechlist_buf_len, resultlen);
-    if(ret != SASL_OK) MEMERROR(conn);
+		     &conn->mechlist_buf_len,
+		     resultlen);
+    if (ret != SASL_OK) MEMERROR(conn);
 
-    if (prefix)
+    if (prefix) {
 	strcpy (conn->mechlist_buf,prefix);
-    else
+    } else {
 	*(conn->mechlist_buf) = '\0';
+    }
 
     flag = 0;
     for (m = cmechlist->mech_list; m != NULL; m = m->next) {
 	    /* do we have the prompts for it? */
-	    if (!have_prompts(conn, m->m.plug))
+	    if (!have_prompts(conn, m->m.plug)) {
 		continue;
+	    }
 
 	    /* is it strong enough? */
-	    if (minssf > m->m.plug->max_ssf)
+	    if (minssf > m->m.plug->max_ssf) {
 		continue;
+	    }
 
 #ifdef _INTEGRATED_SOLARIS_
 	    /* If not SUN supplied mech, it has no strength */
