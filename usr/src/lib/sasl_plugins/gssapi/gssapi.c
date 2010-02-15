@@ -375,7 +375,7 @@ sasl_gss_encode(void *context, const struct iovec *invec, unsigned numiov,
     int ret;
     struct buffer_info *inblob, bufinfo;
     
-    if(!output) return SASL_BADPARAM;
+    if (!output) return SASL_BADPARAM;
     
     if (numiov > 1) {
 	ret = _plug_iovec_to_buf(text->utils, invec, numiov, &text->enc_in_buf);
