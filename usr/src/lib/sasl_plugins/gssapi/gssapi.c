@@ -1848,21 +1848,22 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 	    
 	/* Setup req_flags properly */
-	req_flags = GSS_C_MUTUAL_FLAG | GSS_C_SEQUENCE_FLAG;
-	if(params->props.max_ssf > params->external_ssf) {
+	req_flags = GSS_C_INTEG_FLAG;
+	if (params->props.max_ssf > params->external_ssf) {
 	    /* We are requesting a security layer */
-	    req_flags |= GSS_C_INTEG_FLAG;
+	    req_flags |= GSS_C_MUTUAL_FLAG | GSS_C_SEQUENCE_FLAG;
 	    /* Any SSF bigger than 1 is confidentiality. */
 	    /* Let's check if the client of the API requires confidentiality,
 	       and it wasn't already provided by an external layer */
-	    if(params->props.max_ssf - params->external_ssf > 1) {
+	    if (params->props.max_ssf - params->external_ssf > 1) {
 		/* We want to try for privacy */
 		req_flags |= GSS_C_CONF_FLAG;
 	    }
 	}
-	
-	if (params->props.security_flags & SASL_SEC_PASS_CREDENTIALS)
+
+	if (params->props.security_flags & SASL_SEC_PASS_CREDENTIALS) {
 	    req_flags = req_flags |  GSS_C_DELEG_FLAG;
+	}
 
 #ifdef _SUN_SDK_
 	if (text->use_authid && text->client_creds == GSS_C_NO_CREDENTIAL) {
