@@ -239,14 +239,12 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
     size_t len, curlen = 0;
     const char prefix[] = "GSSAPI Error: ";
 #endif /* _SUN_SDK_ */
+
+    if (!utils) return SASL_OK;
     
     len = sizeof(prefix);
     ret = _plug_buf_alloc(utils, &out, &curlen, 256);
-#ifdef _INTEGRATED_SOLARIS_
-    if(ret != SASL_OK) return SASL_NOMEM;
-#else
-    if(ret != SASL_OK) return SASL_OK;
-#endif /* _INTEGRATED_SOLARIS_ */
+    if (ret != SASL_OK) return SASL_NOMEM;
     
     strcpy(out, prefix);
     
@@ -278,13 +276,9 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	len += len + msg.length;
 	ret = _plug_buf_alloc(utils, &out, &curlen, len);
 	
-	if(ret != SASL_OK) {
+	if (ret != SASL_OK) {
 	    utils->free(out);
-#ifdef _INTEGRATED_SOLARIS_
 	    return SASL_NOMEM;
-#else
-	    return SASL_OK;
-#endif /* _INTEGRATED_SOLARIS_ */
 	}
 	
 	strcat(out, msg.value);
@@ -301,7 +295,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
     
     len += 2;
     ret = _plug_buf_alloc(utils, &out, &curlen, len);
-    if(ret != SASL_OK) {
+    if (ret != SASL_OK) {
 	utils->free(out);
 	return SASL_NOMEM;
     }
@@ -335,7 +329,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	
 	len += len + msg.length;
 	ret = _plug_buf_alloc(utils, &out, &curlen, len);	
-	if(ret != SASL_OK) {
+	if (ret != SASL_OK) {
 	    utils->free(out);
 	    return SASL_NOMEM;
 	}
@@ -352,7 +346,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
     
     len += 1;
     ret = _plug_buf_alloc(utils, &out, &curlen, len);
-    if(ret != SASL_OK) {
+    if (ret != SASL_OK) {
 	utils->free(out);
 	return SASL_NOMEM;
     }
@@ -999,7 +993,7 @@ gssapi_server_mech_step(void *conn_context,
 	    if (serverout) {
 		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
 				      &(text->out_buf_len), *serveroutlen);
-		if(ret != SASL_OK) {
+		if (ret != SASL_OK) {
 		    GSS_LOCK_MUTEX(params->utils);
  		    gss_release_buffer(&min_stat, output_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
@@ -1291,7 +1285,7 @@ gssapi_server_mech_step(void *conn_context,
 	    if (serverout) {
 		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
 				      &(text->out_buf_len), *serveroutlen);
-		if(ret != SASL_OK) {
+		if (ret != SASL_OK) {
 		    GSS_LOCK_MUTEX(params->utils);
  		    gss_release_buffer(&min_stat, output_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
@@ -2014,7 +2008,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    if (clientout) {
 		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
 				      &(text->out_buf_len), *clientoutlen);
-		if(ret != SASL_OK) {
+		if (ret != SASL_OK) {
 		    GSS_LOCK_MUTEX(params->utils);
  		    gss_release_buffer(&min_stat, output_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
