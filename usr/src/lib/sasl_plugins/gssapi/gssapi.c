@@ -2170,12 +2170,30 @@ static int gssapi_client_mech_step(void *conn_context,
 	    allowed >= K5_MAX_SSF &&
 	    need <= K5_MAX_SSF &&
 	    (serverhas & LAYER_CONFIDENTIALITY)) {
+	    
+	    const char *ad_compat;
+
 	    /* encryption */
 	    oparams->encode = &gssapi_privacy_encode;
 	    oparams->decode = &gssapi_decode;
 	    /* FIX ME: Need to extract the proper value here */
 	    oparams->mech_ssf = K5_MAX_SSF;
 	    mychoice = LAYER_CONFIDENTIALITY;
+
+	    if (serverhas & LAYER_INTEGRITY) {
+		/* should we send an AD compatible choice of security layers? */
+		params->utils->getopt(params->utils->getopt_context,
+				      "GSSAPI",
+				      "ad_compat",
+				      &ad_compat,
+				      NULL);
+		if (ad_compat &&
+		    (ad_compat[0] == '1' || ad_compat[0] == 'y' ||
+		     (ad_compat[0] == 'o' && ad_compat[1] == 'n') ||
+		     ad_compat[0] == 't')) {
+		    mychoice = LAYER_INTEGRITY|LAYER_CONFIDENTIALITY;
+		}
+	    }
 	} else if ((text->qop & LAYER_INTEGRITY) &&
 		    allowed >= 1 &&
 		    need <= 1 &&
