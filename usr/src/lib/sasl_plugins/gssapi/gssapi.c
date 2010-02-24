@@ -836,6 +836,10 @@ gssapi_server_mech_step(void *conn_context,
     *serverout = NULL;
     *serveroutlen = 0;	
 	    
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     switch (text->state) {
 
     case SASL_GSSAPI_STATE_AUTHNEG:
