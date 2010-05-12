@@ -822,6 +822,7 @@ gssapi_server_mech_step(void *conn_context,
 #endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
     int ret, out_flags = 0 ;
+    gss_cred_id_t server_creds = params->gss_creds;
     
     input_token = &real_input_token;
     output_token = &real_output_token;
@@ -899,6 +900,8 @@ gssapi_server_mech_step(void *conn_context,
 	    }
 #endif /* _SUN_SDK_ */
 
+	    /* If caller didn't provide creds already */
+	    if ( server_creds == GSS_C_NO_CREDENTIAL) {
 	    GSS_LOCK_MUTEX(params->utils);
 	    maj_stat = gss_acquire_cred(&min_stat, 
 					text->server_name,
@@ -921,11 +924,13 @@ gssapi_server_mech_step(void *conn_context,
 	    }
 #endif /* _SUN_SDK_ */
 
-	    if (GSS_ERROR(maj_stat)) {
-		sasl_gss_seterror(text->utils, maj_stat, min_stat);
-		sasl_gss_free_context_contents(text);
-		return SASL_FAIL;
-	    }
+		if (GSS_ERROR(maj_stat)) {
+		    sasl_gss_seterror(text->utils, maj_stat, min_stat);
+		    sasl_gss_free_context_contents(text);
+		    return SASL_FAIL;
+		}
+		server_creds = text->server-creds;
+ 	    }
 	}
 	
 	if (clientinlen) {
@@ -937,7 +942,7 @@ gssapi_server_mech_step(void *conn_context,
 	maj_stat =
 	    gss_accept_sec_context(&min_stat,
 				   &(text->gss_ctx),
-				   text->server_creds,
+				   server_creds,
 				   input_token,
 				   GSS_C_NO_CHANNEL_BINDINGS,
 				   &text->client_name,
@@ -1722,6 +1727,7 @@ static int gssapi_client_mech_step(void *conn_context,
     output_token->value = NULL;
     input_token->value = NULL; 
     input_token->length = 0;
+    gss_cred_id_t client_creds = (gss_cred_id_t)params->gss_creds;
     
     *clientout = NULL;
     *clientoutlen = 0;
@@ -1910,7 +1916,9 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 
 #ifdef _SUN_SDK_
-	if (text->use_authid && text->client_creds == GSS_C_NO_CREDENTIAL) {
+	/* If caller didn't provide creds already */
+	if (client_creds == GSS_C_NO_CREDENTIAL
+	  && text->use_authid && text->client_creds == GSS_C_NO_CREDENTIAL) {
 	    gss_OID_set desired_mechs = GSS_C_NULL_OID_SET;
 	    gss_buffer_desc name_token;
 
@@ -1957,15 +1965,14 @@ static int gssapi_client_mech_step(void *conn_context,
 		return SASL_FAIL;
 	    }
 	}
+	if (client_creds == GSS_C_NO_CREDENTIAL) {
+		client_creds = text->client_creds;
+	}
 #endif /* _SUN_SDK_ */
 
 	GSS_LOCK_MUTEX(params->utils);
 	maj_stat = gss_init_sec_context(&min_stat,
-#ifdef _SUN_SDK_
-					text->client_creds,
-#else
-					GSS_C_NO_CREDENTIAL,
-#endif /* _SUN_SDK_ */
+					client_creds, /* GSS_C_NO_CREDENTIAL */
 					&text->gss_ctx,
 					text->server_name,
 #ifdef _SUN_SDK_
