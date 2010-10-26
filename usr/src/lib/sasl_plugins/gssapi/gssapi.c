@@ -929,7 +929,7 @@ gssapi_server_mech_step(void *conn_context,
 		    sasl_gss_free_context_contents(text);
 		    return SASL_FAIL;
 		}
-		server_creds = text->server-creds;
+		server_creds = text->server_creds;
  	    }
 	}
 	
