@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,v 1.85 2004/09/08 10:57:56 mel Exp $
+ * $Id: cram.c,v 1.86 2010/11/30 11:41:47 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,v 1.85 2004/09/08 10:57:56 mel Exp $";
+static const char plugin_id[] = "$Id: cram.c,v 1.86 2010/11/30 11:41:47 mel Exp $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -205,7 +205,7 @@ crammd5_server_mech_step1(server_context_t *text,
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
 		"CRAM-MD5 does not accept inital data");
 #else
-	SETERROR(sparams->utils, "CRAM-MD5 does not accpet inital data");
+	SETERROR(sparams->utils, "CRAM-MD5 does not accept inital data");
 #endif /* _SUN_SDK_ */
 	return SASL_BADPROT;
     }
@@ -427,7 +427,11 @@ static int crammd5_server_mech_step(void *conn_context,
     
     *serverout = NULL;
     *serveroutlen = 0;
-    
+
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     /* this should be well more than is ever needed */
     if (clientinlen > 1024) {
 #ifdef _SUN_SDK_
