@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.194 2010/11/30 11:57:00 mel Exp $
+ * $Id: digestmd5.c,v 1.195 2010/11/30 12:04:50 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2759,6 +2759,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     int            client_ignores_realm = 0;
     char           *full_username = NULL;
     char           *internal_username = NULL;
+    int            canon_flags;
 
     /* password prop_request */
     const char *password_request[] = { SASL_AUX_PASSWORD,
@@ -3172,8 +3173,17 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     } else {
 	internal_username = username;
     }
+
+    canon_flags = SASL_CU_AUTHID;
+    if (!authorization_id || !*authorization_id) {
+	canon_flags |= SASL_CU_AUTHZID;
+    }
+
     result = sparams->canon_user(sparams->utils->conn,
-				 internal_username, 0, SASL_CU_AUTHID, oparams);
+				 internal_username,
+				 0,
+				 canon_flags,
+				 oparams);
     if (result != SASL_OK) {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
@@ -3184,10 +3194,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	goto FreeAllMem;
     }
     
-    if (!authorization_id || !*authorization_id) {
-	result = sparams->canon_user(sparams->utils->conn,
-				     internal_username, 0, SASL_CU_AUTHZID, oparams);
-    } else {
+    if (authorization_id != NULL && *authorization_id != '\0') {
 	result = sparams->canon_user(sparams->utils->conn,
 				     authorization_id, 0, SASL_CU_AUTHZID,
 				     oparams);
