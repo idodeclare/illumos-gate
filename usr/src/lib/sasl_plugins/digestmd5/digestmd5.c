@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.195 2010/11/30 12:04:50 mel Exp $
+ * $Id: digestmd5.c,v 1.196 2010/11/30 12:08:24 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3676,11 +3676,15 @@ static int digestmd5_server_mech_step(void *conn_context,
     context_t *text = (context_t *) conn_context;
     server_context_t *stext = (server_context_t *) conn_context;
     
-    if (clientinlen > 4096) return SASL_BADPROT;
-    
     *serverout = NULL;
     *serveroutlen = 0;
     
+    if (clientinlen > 4096) return SASL_BADPROT;
+
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     switch (text->state) {
 	
     case 1:
