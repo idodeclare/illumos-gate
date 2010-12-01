@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.79 2010/12/01 15:08:00 mel Exp $
+ * $Id: client.c,v 1.80 2010/12/01 15:49:25 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -704,7 +704,7 @@ int _sasl_client_new(void *ctx,
   utils->conn= *pconn;
   conn->cparams->utils = utils;
 
-  if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
+  if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, (sasl_callback_t *)&getopt, &context) == SASL_OK) {
     getopt(context, NULL, "client_mech_list", &mlist, NULL);
   }
 
