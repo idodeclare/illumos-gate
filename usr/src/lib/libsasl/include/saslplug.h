@@ -213,12 +213,12 @@ typedef struct sasl_out_params {
     void *client_creds;
 
 	/* for additions which don't require a version upgrade; set to 0 */
-    void *spare_ptr2;
-    void *spare_ptr3;
-    void *spare_ptr4;
+    const void *gss_peer_name;
+    const void *gss_local_name;
+    const char *cbindingname;   /* channel binding name from packet */
     int (*spare_fptr1)();
     int (*spare_fptr2)();
-    int spare_int1;
+    unsigned int cbindingdisp;  /* channel binding disposition from client */
     int spare_int2;
     int spare_int3;
     int spare_int4;
@@ -231,7 +231,21 @@ typedef struct sasl_out_params {
     int param_version;
 } sasl_out_params_t;
 
+/******************************
+ * Channel binding macros     **
+ ******************************/
 
+typedef enum {
+    SASL_CB_DISP_NONE = 0,          /* client did not support CB */
+    SASL_CB_DISP_USED,              /* client supports and used CB */
+    SASL_CB_DISP_WANT               /* client supports CB, thinks server does not */
+} sasl_cbinding_disp_t;
+
+/* TRUE if channel binding is non-NULL */
+#define SASL_CB_PRESENT(params)     ((params)->cbinding != NULL)
+/* TRUE if channel binding is marked critical */
+#define SASL_CB_CRITICAL(params)    (SASL_CB_PRESENT(params) && \
+				     (params)->cbinding->critical)
 
 /* Used by both client and server side plugins */
 typedef enum  {
@@ -274,11 +288,9 @@ typedef struct sasl_client_params {
     sasl_security_properties_t props;
     sasl_ssf_t external_ssf;	/* external SSF active */
 
-    /* GSS credentials */
-    void *gss_creds;
-
 	/* for additions which don't require a version upgrade; set to 0 */
-    void *spare_ptr2;
+    const void *gss_creds;                  /* GSS credential handle */
+    const sasl_channel_binding_t *cbinding; /* client channel binding */
     void *spare_ptr3;
     void *spare_ptr4;
 
@@ -313,7 +325,7 @@ typedef struct sasl_client_params {
 
     int (*spare_fptr1)();
 
-    int spare_int1;
+    unsigned int cbindingdisp;
     int spare_int2;
     int spare_int3;
 
@@ -363,6 +375,12 @@ typedef struct sasl_client_params {
 
 /* server plugin don't use cleartext userPassword attribute */
 #define SASL_FEAT_DONTUSE_USERPASSWD 0x0080
+
+/* Underlying mechanism uses GSS framing */
+#define SASL_FEAT_GSS_FRAMING       0x0100
+
+/* Underlying mechanism supports channel binding */
+#define SASL_FEAT_CHANNEL_BINDING  0x0200
 
 /* client plug-in features */
 #define	SASL_FEAT_NEEDSERVERFQDN 0x0001
@@ -588,11 +606,9 @@ typedef struct sasl_server_params {
 	 */
     struct propctx *propctx;
 
-    /* GSS credentials */
-    void *gss_creds;
-
 	/* for additions which don't require a version upgrade; set to 0 */
-    void *spare_ptr2;
+    const void *gss_creds;                  /* GSS credential handle */
+    const sasl_channel_binding_t *cbinding; /* server channel binding */
     void *spare_ptr3;
     void *spare_ptr4;
     int (*spare_fptr1)();
