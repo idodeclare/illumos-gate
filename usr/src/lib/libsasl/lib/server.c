@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.162 2010/12/01 14:51:53 mel Exp $
+ * $Id: server.c,v 1.163 2010/12/01 15:18:12 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -435,8 +435,8 @@ static int init_mechlist(void)
     newutils->checkpass = &_sasl_checkpass;
 
     mechlist->utils = newutils;
-    mechlist->mech_list=NULL;
-    mechlist->mech_length=0;
+    mechlist->mech_list = NULL;
+    mechlist->mech_length = 0;
 
     return SASL_OK;
 }
@@ -763,7 +763,7 @@ static int server_done(void) {
 				     mechlist->utils);
 	  }
 
-	  sasl_FREE(prevm->m.plugname);	  	  
+	  sasl_FREE(prevm->m.plugname);
 	  sasl_FREE(prevm);    
       }
       _sasl_free_utils(&mechlist->utils);
@@ -1779,17 +1779,18 @@ static int mech_permitted(sasl_conn_t *conn,
     }
 
     context = NULL;
-    if(plug->mech_avail
+    if (plug->mech_avail
 #ifdef _SUN_SDK_
-       && (plug->mech_avail(mech->glob_context,
+        && (plug->mech_avail(mech->glob_context,
 #else
-       && (plug->mech_avail(plug->glob_context,
+        && (ret = plug->mech_avail(plug->glob_context,
 #endif /* _SUN_SDK_ */
-			   s_conn->sparams, (void **)&context)) != SASL_OK ) {
-	if(ret == SASL_NOMECH) {
+				   s_conn->sparams,
+				   (void **)&context)) != SASL_OK ) {
+	if (ret == SASL_NOMECH) {
 	    /* Mark this mech as no good for this connection */
 	    cur = sasl_ALLOC(sizeof(context_list_t));
-	    if(!cur) {
+	    if (!cur) {
 #ifdef _SUN_SDK_
 	    if(conn) _sasl_log(conn, SASL_LOG_WARN, "Out of Memory");
 #else
@@ -1807,10 +1808,10 @@ static int mech_permitted(sasl_conn_t *conn,
 
 	/* Error should be set by mech_avail call */
 	return SASL_NOMECH;
-    } else if(context) {
+    } else if (context) {
 	/* Save this context */
 	cur = sasl_ALLOC(sizeof(context_list_t));
-	if(!cur) {
+	if (!cur) {
 #ifdef _SUN_SDK_
 	    if(conn) _sasl_log(conn, SASL_LOG_WARN, "Out of Memory");
 #else
@@ -1879,7 +1880,7 @@ static int mech_permitted(sasl_conn_t *conn,
     }
 
     /* Check Features */
-    if(plug->features & SASL_FEAT_GETSECRET) {
+    if (plug->features & SASL_FEAT_GETSECRET) {
 	/* We no longer support sasl_server_{get,put}secret */
 #ifdef _SUN_SDK_
 	_sasl_log(conn, SASL_LOG_ERR,
@@ -1979,7 +1980,7 @@ int sasl_server_start(sasl_conn_t *conn,
     if(!conn) return SASL_BADPARAM;
 #endif /* _SUN_SDK_ */
     
-    if (!mech || ((clientin==NULL) && (clientinlen>0)))
+    if (!mech || ((clientin == NULL) && (clientinlen > 0)))
 	PARAMERROR(conn);
 
     if (serverout) *serverout = NULL;
@@ -1996,7 +1997,7 @@ int sasl_server_start(sasl_conn_t *conn,
 	m = m->next;
     }
   
-    if (m==NULL) {
+    if (m == NULL) {
 #ifdef _INTEGRATED_SOLARIS_
 	sasl_seterror(conn, 0, gettext("Couldn't find mech %s"), mech);
 #else
@@ -2103,32 +2104,33 @@ int sasl_server_start(sasl_conn_t *conn,
 
     s_conn->mech = m;
     
-    if(!conn->context) {
+    if (!conn->context) {
 	/* Note that we don't hand over a new challenge */
 #ifdef _SUN_SDK_
 	result = s_conn->mech->plug->mech_new(s_conn->mech->glob_context,
 #else
 	result = s_conn->mech->m.plug->mech_new(s_conn->mech->m.plug->glob_context,
 #endif /* _SUN_SDK_ */
-					      s_conn->sparams,
-					      NULL,
-					      0,
-					      &(conn->context));
+						s_conn->sparams,
+						NULL,
+						0,
+						&(conn->context));
     } else {
 	/* the work was already done by mech_avail! */
 	result = SASL_OK;
     }
     
     if (result == SASL_OK) {
-         if(clientin) {
-            if(s_conn->mech->m.plug->features & SASL_FEAT_SERVER_FIRST) {
+         if (clientin) {
+            if (s_conn->mech->m.plug->features & SASL_FEAT_SERVER_FIRST) {
                 /* Remote sent first, but mechanism does not support it.
                  * RFC 2222 says we fail at this point. */
 #ifdef _SUN_SDK_
 		_sasl_log(conn, SASL_LOG_ERR,
                           "Remote sent first but mech does not allow it.");
 #else
-                sasl_seterror(conn, 0,
+                sasl_seterror(conn,
+			      0,
                               "Remote sent first but mech does not allow it.");
 #endif /* _SUN_SDK_ */
                 result = SASL_BADPROT;
@@ -2141,10 +2143,10 @@ int sasl_server_start(sasl_conn_t *conn,
 					  serveroutlen);
             }
         } else {
-            if(s_conn->mech->m.plug->features & SASL_FEAT_WANT_CLIENT_FIRST) {
+            if (s_conn->mech->m.plug->features & SASL_FEAT_WANT_CLIENT_FIRST) {
                 /* Mech wants client first anyway, so we should do that */
-                *serverout = "";
-                *serveroutlen = 0;
+		if (serverout) *serverout = "";
+		if (serveroutlen) *serveroutlen = 0;
                 result = SASL_CONTINUE;
             } else {
                 /* Mech wants server-first, so let them have it */
@@ -2158,12 +2160,12 @@ int sasl_server_start(sasl_conn_t *conn,
     }
 
  done:
-    if(   result != SASL_OK
+    if (  result != SASL_OK
        && result != SASL_CONTINUE
        && result != SASL_INTERACT) {
-	if(conn->context) {
+	if (conn->context) {
 	    s_conn->mech->m.plug->mech_dispose(conn->context,
-					     s_conn->sparams->utils);
+					       s_conn->sparams->utils);
 	    conn->context = NULL;
 	}
     }
