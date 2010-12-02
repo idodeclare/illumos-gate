@@ -380,7 +380,7 @@ typedef struct sasl_client_params {
 #define SASL_FEAT_GSS_FRAMING       0x0100
 
 /* Underlying mechanism supports channel binding */
-#define SASL_FEAT_CHANNEL_BINDING  0x0200
+#define SASL_FEAT_CHANNEL_BINDING  0x0800
 
 /* client plug-in features */
 #define	SASL_FEAT_NEEDSERVERFQDN 0x0001
