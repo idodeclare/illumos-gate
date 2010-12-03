@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.198 2010/12/03 17:42:33 murch Exp $
+ * $Id: digestmd5.c,v 1.199 2010/12/03 18:05:29 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3616,7 +3616,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		text->reauth->e[val].nonce = text->nonce; text->nonce = NULL;
 		text->reauth->e[val].cnonce = cnonce; cnonce = NULL;
 	    }
-	    if (text->nonce_count <= text->reauth->e[val].nonce_count) {
+	    if (text->nonce_count < text->reauth->e[val].nonce_count) {
 		/* paranoia.  prevent replay attacks */
 		clear_reauth_entry(&text->reauth->e[val], SERVER, sparams->utils);
 	    }
