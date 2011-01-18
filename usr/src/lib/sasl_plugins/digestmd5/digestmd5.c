@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.200 2011/01/14 14:33:21 murch Exp $
+ * $Id: digestmd5.c,v 1.201 2011/01/18 14:42:27 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -3672,8 +3672,8 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     if (clientinlen > 0 &&
 	text->reauth->timeout &&
 	sparams->utils->mutex_lock(text->reauth->mutex) == SASL_OK) { /* LOCK */
-	/* Look for an entry for our "internal username" */
-	unsigned val = hash(internal_username) % text->reauth->size;
+	/* Look for an entry for our the username value as received */
+	unsigned val = hash(username) % text->reauth->size;
 
 	switch (result) {
 	case SASL_OK:
