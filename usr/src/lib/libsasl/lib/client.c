@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.80 2010/12/01 15:49:25 murch Exp $
+ * $Id: client.c,v 1.81 2011/01/19 09:04:29 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -980,13 +980,13 @@ int sasl_client_start(sasl_conn_t *conn,
 		_sasl_gbl_ctx() : conn->gctx;
     cmech_list_t *cmechlist;
 
-    if (gctx->sasl_client_active==0) return SASL_NOTINIT;
+  if (gctx->sasl_client_active == 0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-    if (_sasl_client_active==0) return SASL_NOTINIT;
+  if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
 
-    if (!conn) return SASL_BADPARAM;
+  if (!conn) return SASL_BADPARAM;
 
     /* verify parameters */
     if (mechlist == NULL) {
