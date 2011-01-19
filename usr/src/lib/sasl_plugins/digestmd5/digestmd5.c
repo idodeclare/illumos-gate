@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.201 2011/01/18 14:42:27 mel Exp $
+ * $Id: digestmd5.c,v 1.202 2011/01/19 21:28:49 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2276,18 +2276,19 @@ static char *create_response(context_t * text,
 			     unsigned char *cnonce,
 			     char *qop,
 			     char *digesturi,
-			     const char *method,
+			     const sasl_http_request_t *request,
 			     HASH Secret,
 			     char *authorization_id,
 			     char **response_value)
 {
     HASHHEX         SessionKey;
-    HASHHEX         HEntity = "00000000000000000000000000000000";
     HASHHEX         Response;
     char           *result;
+    /* RFC 2831 defaults */
+    const char	    *method = "AUTHENTICATE";
+    HASHHEX         HEntity = "00000000000000000000000000000000";
     
-    if (qop == NULL)
-	qop = "auth";
+    if (qop == NULL) qop = "auth";
     
     DigestCalcHA1FromSecret(text,
 			    utils,
@@ -2296,7 +2297,22 @@ static char *create_response(context_t * text,
 			    nonce,
 			    cnonce,
 			    SessionKey);
-    
+
+    if (request) {
+	/* per RFC 2617 */
+	MD5_CTX Md5Ctx;
+	HASH HE;
+
+	method = request->method;
+	utils->MD5Init(&Md5Ctx);
+	utils->MD5Update(&Md5Ctx,
+			 request->entity ? request->entity : (u_char *) "",
+			 request->elen);
+	utils->MD5Final(HE, &Md5Ctx);
+	CvtHex(HE, HEntity);
+    }
+
+    /* Calculate response for comparison with client's response */
     DigestCalcResponse(utils,
 		       SessionKey,/* HEX(H(A1)) */
 		       nonce,	/* nonce from server */
@@ -2319,7 +2335,7 @@ static char *create_response(context_t * text,
     memcpy(result, Response, HASHHEXLEN);
     result[HASHHEXLEN] = 0;
     
-    /* response_value (used for reauth i think) */
+    /* Calculate response value for mutal auth with the client (NO Method) */
     if (response_value != NULL) {
 	char * new_response_value;
 
@@ -2756,7 +2772,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     unsigned int   noncecount = 0;
     char           *qop = NULL;
     char           *digesturi = NULL;
-    const char     *method = NULL;
+    const sasl_http_request_t *request = NULL;
     char           *response = NULL;
     
     /* setting the default value (65536) */
@@ -2796,6 +2812,11 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	goto FreeAllMem;
     }
 
+    if (text->http_mode) {
+	/* per RFC 2617 (RFC 2616 request as set by calling application) */
+	request = sparams->http_request;
+    }
+    
     in = sparams->utils->malloc(clientinlen + 1);
 #ifdef _SUN_SDK_
     if (!in) return SASL_NOMEM;
@@ -2891,7 +2912,21 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 
 	    _plug_strdup(sparams->utils, value, &digesturi, NULL);
 
-	    if (!text->http_mode) {
+	    if (text->http_mode && request && request->uri) {
+		/* Verify digest-uri matches HTTP request (per RFC 2617) */
+		if (strcmp(digesturi, request->uri)) {
+		    result = SASL_BADAUTH;
+#ifdef _INTEGRATED_SOLARIS_
+		    SETERROR(sparams->utils,
+		      gettext("bad digest-uri: doesn't match HTTP request"));
+#else
+		    SETERROR(sparams->utils, 
+			     "bad digest-uri: doesn't match HTTP request");
+#endif /* _INTEGRATED_SOLARIS_ */
+		    goto FreeAllMem;
+		}
+	    }
+	    else {
 		/* Verify digest-uri format (per RFC 2831):
 		 *
 		 * digest-uri-value  = serv-type "/" host [ "/" serv-name ]
@@ -3095,6 +3130,8 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 
 	if (!text->nonce) {
 	    /* we don't have any reauth info, so bail */
+	    sparams->utils->log(sparams->utils->conn, SASL_LOG_DEBUG,
+				"No reauth info for '%s' found", username);
 	    result = SASL_FAIL;
 	    goto FreeAllMem;
 	}
@@ -3434,15 +3471,6 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	goto FreeAllMem;
     }
     
-    if (text->http_mode) {
-	/* per RFC 2617 (RFC 2616 Method as set by calling application) */
-	method = sparams->http_method;
-    }
-    if (!method) {
-	/* per RFC 2831 */
-	method = "AUTHENTICATE";
-    }
-    
     serverresponse = create_response(text,
 				     sparams->utils,
 				     text->nonce,
@@ -3450,7 +3478,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 				     cnonce,
 				     qop,
 				     digesturi,
-				     method,
+				     request,
 				     Secret,
 				     authorization_id,
 				     &text->response_value);
@@ -3474,7 +3502,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 					     cnonce,
 					     qop,
 					     digesturi,
-					     method,
+					     request,
 					     SecretBogus,
 					     authorization_id,
 					     &text->response_value);
@@ -3630,7 +3658,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    result = SASL_FAIL;
 	    goto FreeAllMem;
 	}
-	
+
 	if (text->http_mode) {
 	    /* per RFC 2617 */
 	    char ncvalue[10];
