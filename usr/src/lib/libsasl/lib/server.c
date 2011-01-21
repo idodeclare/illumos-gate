@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.170 2011/01/21 14:58:07 mel Exp $
+ * $Id: server.c,v 1.171 2011/01/21 15:19:36 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -1524,6 +1524,7 @@ int _sasl_server_new(void *ctx,
   void *context;
   const char *log_level, *auto_trans;
   const char *mlist = NULL;
+  int plus = 0;
 
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx = (ctx == NULL) ? _sasl_gbl_ctx() : ctx;
@@ -1671,10 +1672,10 @@ int _sasl_server_new(void *ctx,
 	  for (mptr = mechlist->mech_list; mptr; mptr = mptr->next) {
 	      const sasl_server_plug_t *plug = mptr->m.plug;
 
-	      if (((size_t) (cp - mlist) == strlen(plug->mech_name)) &&
-		  !strncasecmp(mlist, plug->mech_name, strlen(plug->mech_name)))
+	      if (_sasl_is_equal_mech(mlist, plug->mech_name, (size_t) (cp - mlist), &plus)) {
 		  /* found a match */
 		  break;
+	      }
 	  }
 	  if (mptr) {
 	      mechanism_t *new = sasl_ALLOC(sizeof(mechanism_t));
@@ -1981,6 +1982,7 @@ int sasl_server_start(sasl_conn_t *conn,
     int result;
     context_list_t *cur, **prev;
     mechanism_t *m;
+    size_t mech_len;
     int plus = 0;
 
 #ifdef _SUN_SDK_
@@ -2015,10 +2017,12 @@ int sasl_server_start(sasl_conn_t *conn,
     /* make sure mech is valid mechanism
        if not return appropriate error */
     m = s_conn->mech_list;
+    mech_len = strlen(mech);
 
     while (m != NULL) {
-	if (_sasl_is_equal_mech(mech, m->m.plug->mech_name, &plus))
+	if (_sasl_is_equal_mech(mech, m->m.plug->mech_name, mech_len, &plus)) {
 	    break;
+	}
 
 	m = m->next;
     }
