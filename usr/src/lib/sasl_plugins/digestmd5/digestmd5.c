@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.203 2011/01/19 23:06:52 murch Exp $
+ * $Id: digestmd5.c,v 1.204 2011/01/25 20:36:42 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -219,6 +219,10 @@ typedef struct reauth_entry {
 	    int protection;
 	    struct digest_cipher *cipher;
 	    unsigned long server_maxbuf;
+
+	    /* for HTTP mode (RFC 2617) only */
+	    char *algorithm;
+	    unsigned char *opaque;	
 	} c; /* client stuff */
     } u;
 } reauth_entry_t;
@@ -264,7 +268,7 @@ typedef struct context {
     HASH Ki_send;
     HASH Ki_receive;
     
-    HASH HA1;		/* Kcc or Kcs */
+    HASH HA1;			/* Kcc or Kcs */
     
     /* copy of utils from the params structures */
     const sasl_utils_t *utils;
@@ -2812,7 +2816,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     }
 
     if (text->http_mode) {
-	/* per RFC 2617 (RFC 2616 request as set by calling application) */
+	/* per RFC 2617 (HTTP Request as set by calling application) */
 	request = sparams->http_request;
     }
     else {
@@ -3799,7 +3803,8 @@ static int digestmd5_server_mech_step(void *conn_context,
 	
     case 1:
 	/* setup SSF limits */
-	if (!sparams->props.maxbufsize) {
+	if (!text->http_mode &&		/* HTTP Digest doesn't need buffer */
+	    !sparams->props.maxbufsize) {
 	    stext->limitssf = 0;
 	    stext->requiressf = 0;
 	} else {
@@ -4002,6 +4007,11 @@ typedef struct client_context {
     int protection;
     struct digest_cipher *cipher;
     unsigned long server_maxbuf;
+
+    /* for HTTP mode (RFC 2617) only */
+    char *algorithm;
+    unsigned char *opaque;
+
 #ifdef _INTEGRATED_SOLARIS_
     void *h;
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -4012,6 +4022,7 @@ static digest_glob_context_t client_glob_context;
 /* calculate H(A1) as per spec */
 static void DigestCalcHA1(context_t * text,
 			  const sasl_utils_t * utils,
+			  char *pszAlg,
 			  unsigned char *pszUserName,
 			  unsigned char *pszRealm,
 			  sasl_secret_t * pszPassword,
@@ -4031,19 +4042,32 @@ static void DigestCalcHA1(context_t * text,
 		     FALSE,
 		     HA1);
     
-    /* calculate the session key */
-    utils->MD5Init(&Md5Ctx);
-    utils->MD5Update(&Md5Ctx, HA1, HASHLEN);
-    utils->MD5Update(&Md5Ctx, COLON, 1);
-    utils->MD5Update(&Md5Ctx, pszNonce, (unsigned) strlen((char *) pszNonce));
-    utils->MD5Update(&Md5Ctx, COLON, 1);
-    utils->MD5Update(&Md5Ctx, pszCNonce, (unsigned) strlen((char *) pszCNonce));
-    if (pszAuthorization_id != NULL) {
+    if (!text->http_mode ||				    /* per RFC 2831 */
+	(pszAlg && strcasecmp(pszAlg, "md5-sess") == 0)) {  /* per RFC 2617 */
+	/* calculate the session key */
+	utils->MD5Init(&Md5Ctx);
+	if (text->http_mode) {
+	    /* per RFC 2617 Errata ID 1649 */
+	    HASHHEX HA1Hex;
+    
+	    CvtHex(HA1, HA1Hex);
+	    utils->MD5Update(&Md5Ctx, HA1Hex, HASHHEXLEN);
+	}
+	else {
+	    /* per RFC 2831 */
+	    utils->MD5Update(&Md5Ctx, HA1, HASHLEN);
+	}
 	utils->MD5Update(&Md5Ctx, COLON, 1);
-	utils->MD5Update(&Md5Ctx, pszAuthorization_id, 
-			 (unsigned) strlen((char *) pszAuthorization_id));
+	utils->MD5Update(&Md5Ctx, pszNonce, (unsigned) strlen((char *) pszNonce));
+	utils->MD5Update(&Md5Ctx, COLON, 1);
+	utils->MD5Update(&Md5Ctx, pszCNonce, (unsigned) strlen((char *) pszCNonce));
+	if (pszAuthorization_id != NULL) {
+	    utils->MD5Update(&Md5Ctx, COLON, 1);
+	    utils->MD5Update(&Md5Ctx, pszAuthorization_id, 
+			     (unsigned) strlen((char *) pszAuthorization_id));
+	}
+	utils->MD5Final(HA1, &Md5Ctx);
     }
-    utils->MD5Final(HA1, &Md5Ctx);
     
     CvtHex(HA1, SessionKey);
     
@@ -4056,24 +4080,26 @@ static void DigestCalcHA1(context_t * text,
 
 static char *calculate_response(context_t * text,
 				const sasl_utils_t * utils,
+				char *algorithm,
 				unsigned char *username,
 				unsigned char *realm,
 				unsigned char *nonce,
 				unsigned int ncvalue,
 				unsigned char *cnonce,
 				char *qop,
-				unsigned char *digesturi,
+				const sasl_http_request_t *request,
 				sasl_secret_t * passwd,
 				unsigned char *authorization_id,
 				char **response_value)
 {
     HASHHEX         SessionKey;
-    HASHHEX         HEntity = "00000000000000000000000000000000";
+    HASH            EntityHash;
+    HASHHEX         HEntity;
     HASHHEX         Response;
     char           *result;
     
     /* Verifing that all parameters was defined */
-    if(!username || !cnonce || !nonce || !ncvalue || !digesturi || !passwd) {
+    if(!username || !cnonce || !nonce || !ncvalue || !request || !passwd) {
 	PARAMERROR( utils );
 	return NULL;
     }
@@ -4090,6 +4116,7 @@ static char *calculate_response(context_t * text,
     
     DigestCalcHA1(text,
 		  utils,
+		  algorithm,
 		  username,
 		  realm,
 		  passwd,
@@ -4098,6 +4125,20 @@ static char *calculate_response(context_t * text,
 		  cnonce,
 		  SessionKey);
     
+    if (text->http_mode) {
+	/* per RFC 2617 */
+	MD5_CTX Md5Ctx;
+
+	utils->MD5Init(&Md5Ctx);
+	utils->MD5Update(&Md5Ctx, request->entity, request->elen);
+	utils->MD5Final(EntityHash, &Md5Ctx);
+    }
+    else {
+	/* per RFC 2831 */
+	memset(EntityHash, 0, HASHLEN);
+    }
+    CvtHex(EntityHash, HEntity);
+
     DigestCalcResponse(utils,
 		       SessionKey,/* HEX(H(A1)) */
 		       nonce,	/* nonce from server */
@@ -4105,8 +4146,8 @@ static char *calculate_response(context_t * text,
 		       cnonce,	/* client nonce */
 		       (unsigned char *) qop,	/* qop-value: "", "auth",
 						 * "auth-int" */
-		       digesturi,	/* requested URL */
-		       (unsigned char *) "AUTHENTICATE",
+		       (unsigned char *) request->uri,	/* requested URL */
+		       (unsigned char *) request->method,
 		       HEntity,	/* H(entity body) if qop="auth-int" */
 		       Response	/* request-digest or response-digest */
 	);
@@ -4129,7 +4170,7 @@ static char *calculate_response(context_t * text,
 			   cnonce,	/* client nonce */
 			   (unsigned char *) qop,	/* qop-value: "", "auth",
 							 * "auth-int" */
-			   (unsigned char *) digesturi,	/* requested URL */
+			   (unsigned char *) request->uri,	/* requested URL */
 			   NULL,
 			   HEntity,	/* H(entity body) if qop="auth-int" */
 			   Response	/* request-digest or response-digest */
@@ -4162,7 +4203,7 @@ static int make_client_response(context_t *text,
     client_context_t *ctext = (client_context_t *) text;
     char *qop = NULL;
     unsigned nbits = 0;
-    unsigned char  *digesturi = NULL;
+    char  *digesturi = NULL;
     bool            IsUTF8 = FALSE;
     char           ncvalue[10];
     char           maxbufstr[64];
@@ -4170,6 +4211,8 @@ static int make_client_response(context_t *text,
     unsigned        resplen = 0;
     int result = SASL_OK;
     cipher_free_t  *old_cipher_free = NULL;
+    sasl_http_request_t rfc2831_request;
+    const sasl_http_request_t *request;
 
     params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
 		       "DIGEST-MD5 make_client_response()");
@@ -4209,33 +4252,47 @@ static int make_client_response(context_t *text,
 	oparams->mech_ssf = 0;
     }
 
-    digesturi = params->utils->malloc(strlen(params->service) + 1 +
-				      strlen(params->serverFQDN) + 1 +
-				      1);
-    if (digesturi == NULL) {
-	result = SASL_NOMEM;
-	goto FreeAllocatedMem;
-    };
-    
-    /* allocated exactly this. safe */
-    strcpy((char *) digesturi, params->service);
-    strcat((char *) digesturi, "/");
-    strcat((char *) digesturi, params->serverFQDN);
-    /*
-     * strcat (digesturi, "/"); strcat (digesturi, params->serverFQDN);
-     */
+    if (text->http_mode) {
+	/* per RFC 2617 (HTTP Request as set by calling application) */
+	request = params->http_request;
+    }
+    else {
+	/* per RFC 2831 */
+	digesturi = params->utils->malloc(strlen(params->service) + 1 +
+					  strlen(params->serverFQDN) + 1 +
+					  1);
+	if (digesturi == NULL) {
+	    result = SASL_NOMEM;
+	    goto FreeAllocatedMem;
+	}
+
+	/* allocated exactly this. safe */
+	strcpy(digesturi, params->service);
+	strcat(digesturi, "/");
+	strcat(digesturi, params->serverFQDN);
+	/*
+	 * strcat (digesturi, "/"); strcat (digesturi, params->serverFQDN);
+	 */
+
+	rfc2831_request.method = "AUTHENTICATE";
+	rfc2831_request.uri = digesturi;
+	rfc2831_request.entity = NULL;
+	rfc2831_request.elen = 0;
+	request = &rfc2831_request;
+    }
 
     /* response */
     response =
 	calculate_response(text,
 			   params->utils,
+			   ctext->algorithm,
 			   (unsigned char *) oparams->authid,
 			   (unsigned char *) text->realm,
 			   text->nonce,
 			   text->nonce_count,
 			   text->cnonce,
 			   qop,
-			   digesturi,
+			   request,
 			   ctext->password,
 			   strcmp(oparams->user, oparams->authid) ?
 			   (unsigned char *) oparams->user : NULL,
@@ -4338,9 +4395,30 @@ static int make_client_response(context_t *text,
     }
     if (add_to_challenge(params->utils,
 			 &text->out_buf, &text->out_buf_len, &resplen,
-			 "digest-uri", digesturi, TRUE) != SASL_OK) {
+			 text->http_mode ? "uri"	     /* per RFC 2617 */
+			 : "digest-uri",   		     /* per RFC 2831 */
+			 (unsigned char *) request->uri,
+			 TRUE) != SASL_OK) {
 	result = SASL_FAIL;
 	goto FreeAllocatedMem;
+    }
+    if (text->http_mode) {
+	/* per RFC 2617: algorithm & opaque MUST be sent back to server */
+	if (add_to_challenge(params->utils,
+			     &text->out_buf, &text->out_buf_len, &resplen,
+			     "algorithm", (unsigned char *) ctext->algorithm,
+			     FALSE) != SASL_OK) {
+	    result = SASL_FAIL;
+	    goto FreeAllocatedMem;
+	}
+	if (ctext->opaque) {
+	    if (add_to_challenge(params->utils,
+				 &text->out_buf, &text->out_buf_len, &resplen,
+				 "opaque", ctext->opaque, TRUE) != SASL_OK) {
+		result = SASL_FAIL;
+		goto FreeAllocatedMem;
+	    }
+	}
     }
     if (add_to_challenge(params->utils,
 			 &text->out_buf, &text->out_buf_len, &resplen,
@@ -4446,6 +4524,7 @@ static int parse_server_challenge(client_context_t *ctext,
     bool IsUTF8 = FALSE;
 #endif /* !_SUN_SDK_ */
     int algorithm_count = 0;
+    int opaque_count = 0;
 
     params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
 		       "DIGEST-MD5 parse_server_challenge()");
@@ -4711,7 +4790,10 @@ SKIP_SPACES_IN_CIPHER:
 #endif /* !_SUN_SDK_ */
 	    }
 	} else if (strcasecmp(name,"algorithm")==0) {
-	    if (strcasecmp(value, "md5-sess") != 0)
+	    if (text->http_mode && strcasecmp(value, "md5") == 0) {
+		/* per RFC 2617: need to support both "md5" and "md5-sess" */
+	    }
+	    else if (strcasecmp(value, "md5-sess") != 0)
 		{
 #ifdef _SUN_SDK_
 		    params->utils->log(params->utils->conn, SASL_LOG_ERR,
@@ -4724,6 +4806,12 @@ SKIP_SPACES_IN_CIPHER:
 		    goto FreeAllocatedMem;
 		}
 	    
+
+	    if (text->http_mode) {
+		/* per RFC 2617: algorithm MUST be saved */
+		_plug_strdup(params->utils, value, (char **) &ctext->algorithm,
+			     NULL);
+	    }
 	    algorithm_count++;
 	    if (algorithm_count > 1)
 		{
@@ -4737,6 +4825,26 @@ SKIP_SPACES_IN_CIPHER:
 		    result = SASL_FAIL;
 		    goto FreeAllocatedMem;
 		}
+	} else if (strcasecmp(name,"opaque")==0) {
+	    /* per RFC 2831: opaque MUST be ignored if received */
+	    if (text->http_mode) {
+		/* per RFC 2617: opaque MUST be saved */
+		_plug_strdup(params->utils, value, (char **) &ctext->opaque,
+			     NULL);
+		opaque_count++;
+		if (opaque_count > 1)
+		    {
+#ifdef _SUN_SDK_
+			params->utils->log(params->utils->conn, SASL_LOG_ERR,
+						"Must see 'opaque' only once");
+#else
+			params->utils->seterror(params->utils->conn, 0,
+						"Must see 'opaque' only once");
+#endif /* _SUN_SDK_ */
+			result = SASL_FAIL;
+			goto FreeAllocatedMem;
+		    }
+	    }
 	} else {
 	    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
 			       "DIGEST-MD5 unrecognized pair %s/%s: ignoring",
@@ -4786,7 +4894,8 @@ SKIP_SPACES_IN_CIPHER:
     external = params->external_ssf;
     
     /* what do we _need_?  how much is too much? */
-    if (params->props.maxbufsize == 0) {
+    if (!text->http_mode &&    	       	   /* HTTP Digest doesn't need buffer */
+	params->props.maxbufsize == 0) {
 	musthave = 0;
 	limit = 0;
     } else {
@@ -5095,6 +5204,7 @@ static int digestmd5_client_mech_new(void *glob_context,
     
     text->state = 1;
     text->i_am = CLIENT;
+    text->http_mode = (params->flags & SASL_NEED_HTTP);
     text->reauth = ((digest_glob_context_t *) glob_context)->reauth;
     
     *conn_context = text;
@@ -5144,6 +5254,17 @@ digestmd5_client_mech_step1(client_context_t *ctext,
 	    text->nonce_count = ++text->reauth->e[val].nonce_count;
 	    _plug_strdup(params->utils, (char *) text->reauth->e[val].cnonce,
 			 (char **) &text->cnonce, NULL);
+	    if (text->http_mode) {
+		/* per RFC 2617: algorithm & opaque MUST be sent back to server */
+		_plug_strdup(params->utils,
+			     (char *) text->reauth->e[val].u.c.algorithm,
+			     (char **) &ctext->algorithm, NULL);
+		if (text->reauth->e[val].u.c.opaque) {
+		    _plug_strdup(params->utils,
+				 (char *) text->reauth->e[val].u.c.opaque,
+				 (char **) &ctext->opaque, NULL);
+		}
+	    }
 	    ctext->protection = text->reauth->e[val].u.c.protection;
 	    ctext->cipher = text->reauth->e[val].u.c.cipher;
 	    ctext->server_maxbuf = text->reauth->e[val].u.c.server_maxbuf;
@@ -5329,6 +5450,13 @@ digestmd5_client_mech_step3(client_context_t *ctext,
 		text->reauth->e[val].cnonce = text->cnonce; text->cnonce = NULL;
 		_plug_strdup(params->utils, params->serverFQDN,
 			     &text->reauth->e[val].u.c.serverFQDN, NULL);
+		if (text->http_mode) {
+		    /* per RFC 2617: algorithm & opaque MUST be saved */
+		    text->reauth->e[val].u.c.algorithm = ctext->algorithm;
+		    ctext->algorithm = NULL;
+		    text->reauth->e[val].u.c.opaque = ctext->opaque;
+		    ctext->opaque = NULL;
+		}
 		text->reauth->e[val].u.c.protection = ctext->protection;
 		text->reauth->e[val].u.c.cipher = ctext->cipher;
 		text->reauth->e[val].u.c.server_maxbuf = ctext->server_maxbuf;
@@ -5484,7 +5612,8 @@ static sasl_client_plug_t digestmd5_client_plugins[] =
 	| SASL_SEC_NOANONYMOUS
 	| SASL_SEC_MUTUAL_AUTH,		/* security_flags */
 	SASL_FEAT_NEEDSERVERFQDN
-	| SASL_FEAT_ALLOWS_PROXY, 	/* features */
+	| SASL_FEAT_ALLOWS_PROXY
+	| SASL_FEAT_SUPPORTS_HTTP,	/* features */
 	NULL,				/* required_prompts */
 	&client_glob_context,		/* glob_context */
 	&digestmd5_client_mech_new,	/* mech_new */
