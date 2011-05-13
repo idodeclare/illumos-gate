@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.204 2011/01/25 20:36:42 murch Exp $
+ * $Id: digestmd5.c,v 1.205 2011/05/13 19:18:37 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2337,7 +2337,7 @@ static char *create_response(context_t * text,
     memcpy(result, Response, HASHHEXLEN);
     result[HASHHEXLEN] = 0;
     
-    /* Calculate response value for mutal auth with the client (NO Method) */
+    /* Calculate response value for mutual auth with the client (NO Method) */
     if (response_value != NULL) {
 	char * new_response_value;
 
@@ -2460,6 +2460,12 @@ static int digestmd5_server_mech_new(void *glob_context,
 {
     context_t *text;
     
+    if ((sparams->flags & SASL_NEED_HTTP) && !sparams->http_request) {
+	SETERROR(sparams->utils,
+		 "DIGEST-MD5 unavailable due to lack of HTTP request");
+	return SASL_BADPARAM;
+    }
+
     /* holds state are in -- allocate server size */
     text = sparams->utils->malloc(sizeof(server_context_t));
     if (text == NULL)
@@ -2741,10 +2747,29 @@ digestmd5_server_mech_step1(server_context_t *stext,
 		 "internal error: out of memory when saving realm");
 	return SASL_FAIL;
     }
-    text->nonce = nonce;
-    text->nonce_count = 1;
-    text->cnonce = NULL;
-    stext->timestamp = time(0);
+
+    if (text->http_mode && sparams->http_request->non_persist &&
+	sparams->utils->mutex_lock(text->reauth->mutex) == SASL_OK) { /* LOCK */
+
+	/* Create an initial cache entry for non-persistent HTTP connections */
+	unsigned val = hash((char *) nonce) % text->reauth->size;
+
+	clear_reauth_entry(&text->reauth->e[val], SERVER, sparams->utils);
+	text->reauth->e[val].authid = NULL;
+	text->reauth->e[val].realm = text->realm; text->realm = NULL;
+	text->reauth->e[val].nonce = nonce;
+	text->reauth->e[val].nonce_count = 1;
+	text->reauth->e[val].cnonce = NULL;
+	text->reauth->e[val].u.s.timestamp = time(0);
+
+	sparams->utils->mutex_unlock(text->reauth->mutex); /* UNLOCK */
+    }
+    else {
+	text->nonce = nonce;
+	text->nonce_count = 1;
+	text->cnonce = NULL;
+	stext->timestamp = time(0);
+    }
     
     *serveroutlen = (unsigned) strlen(text->out_buf);
     *serverout = text->out_buf;
@@ -2825,6 +2850,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	rfc2831_request.uri = NULL;  /* to be filled in below from response */
 	rfc2831_request.entity = NULL;
 	rfc2831_request.elen = 0;
+	rfc2831_request.non_persist = 0;
 	request = &rfc2831_request;
     }
     
@@ -3122,20 +3148,27 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     }
 
     if (text->state == 1) {
-	unsigned val = hash(username) % text->reauth->size;
+	unsigned val = hash((char *) nonce) % text->reauth->size;
 
-	/* reauth attempt, see if we have any info for this user */
+	/* reauth attempt or continuation of HTTP Digest on a
+	   non-persistent connection, see if we have any info for this nonce */
 	if (sparams->utils->mutex_lock(text->reauth->mutex) == SASL_OK) { /* LOCK */
-	    if (text->reauth->e[val].authid &&
-		!strcmp(username, text->reauth->e[val].authid)) {
+	    if (text->reauth->e[val].realm &&
+		!strcmp(realm, text->reauth->e[val].realm) &&
+		((text->reauth->e[val].nonce_count == 1) ||
+		 (text->reauth->e[val].authid &&
+		  !strcmp(username, text->reauth->e[val].authid)))) {
 
 		_plug_strdup(sparams->utils, text->reauth->e[val].realm,
 			     &text->realm, NULL);
 		_plug_strdup(sparams->utils, (char *) text->reauth->e[val].nonce,
   			     (char **) &text->nonce, NULL);
-		text->nonce_count = ++text->reauth->e[val].nonce_count;
+		text->nonce_count = text->reauth->e[val].nonce_count;
+#if 0  /* XXX  Neither RFC 2617 nor RFC 2831 state that the cnonce
+	  needs to remain constant for subsequent authentication to work */
 		_plug_strdup(sparams->utils, (char *) text->reauth->e[val].cnonce,
 			     (char **) &text->cnonce, NULL);
+#endif
 		stext->timestamp = text->reauth->e[val].u.s.timestamp;
 	    }
 	    sparams->utils->mutex_unlock(text->reauth->mutex); /* UNLOCK */
@@ -3144,7 +3177,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (!text->nonce) {
 	    /* we don't have any reauth info, so bail */
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_DEBUG,
-				"No reauth info for '%s' found", username);
+				"No reauth info for '%s' found", nonce);
 	    result = SASL_FAIL;
 	    goto FreeAllMem;
 	}
@@ -3689,7 +3722,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    }
 	    if (add_to_challenge(sparams->utils,
 				 &text->out_buf, &text->out_buf_len, &resplen,
-				 "qop", (unsigned char *) qop, FALSE) != SASL_OK) {
+				 "qop", (unsigned char *) qop, TRUE) != SASL_OK) {
 		result = SASL_FAIL;
 		goto FreeAllMem;
 	    }
@@ -3711,8 +3744,9 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     if (clientinlen > 0 &&
 	text->reauth->timeout &&
 	sparams->utils->mutex_lock(text->reauth->mutex) == SASL_OK) { /* LOCK */
-	/* Look for an entry for our the username value as received */
-	unsigned val = hash(username) % text->reauth->size;
+
+	/* Look for an entry for the nonce value */
+	unsigned val = hash((char *) nonce) % text->reauth->size;
 
 	switch (result) {
 	case SASL_OK:
@@ -3730,7 +3764,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		clear_reauth_entry(&text->reauth->e[val], SERVER, sparams->utils);
 	    }
 	    else {
-		text->reauth->e[val].nonce_count = text->nonce_count;
+		text->reauth->e[val].nonce_count = ++text->nonce_count;
 		text->reauth->e[val].u.s.timestamp = time(0);
 	    }
 	    break;
@@ -4278,6 +4312,7 @@ static int make_client_response(context_t *text,
 	rfc2831_request.uri = digesturi;
 	rfc2831_request.entity = NULL;
 	rfc2831_request.elen = 0;
+	rfc2831_request.non_persist = 0;
 	request = &rfc2831_request;
     }
 
@@ -5196,6 +5231,17 @@ static int digestmd5_client_mech_new(void *glob_context,
 {
     context_t *text;
     
+    if ((params->flags & SASL_NEED_HTTP) && !params->http_request) {
+#ifdef _SUN_SDK_
+	params->utils->log(params->utils->conn, SASL_LOG_ERR,
+		 "DIGEST-MD5 unavailable due to lack of HTTP request");
+#else
+	SETERROR(params->utils,
+		 "DIGEST-MD5 unavailable due to lack of HTTP request");
+#endif /* _SUN_SDK_ */
+	return SASL_BADPARAM;
+    }
+
     /* holds state are in -- allocate client size */
     text = params->utils->malloc(sizeof(client_context_t));
     if (text == NULL)
