@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.173 2011/09/01 14:12:53 mel Exp $
+ * $Id: server.c,v 1.174 2011/09/01 14:47:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -2110,6 +2110,12 @@ int sasl_server_start(sasl_conn_t *conn,
 	}
     }
 #endif /* !_SUN_SDK_ */
+
+    if (conn->context) {
+	s_conn->mech->m.plug->mech_dispose(conn->context,
+					   s_conn->sparams->utils);
+	conn->context = NULL;
+    }
 
     /* We used to setup sparams HERE, but now it's done
        inside of mech_permitted (which is called above) */
