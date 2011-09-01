@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.132 2011/01/25 20:36:42 murch Exp $
+ * $Id: common.c,v 1.133 2011/09/01 14:12:53 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -139,10 +139,10 @@ sasl_allocation_utils_t _sasl_allocation_utils={
 
 /* Default getpath/getconfpath callbacks. These can be edited by sasl_set_path(). */
 static sasl_callback_t default_getpath_cb = {
-    SASL_CB_GETPATH, &_sasl_getpath, NULL
+    SASL_CB_GETPATH, (sasl_callback_ft)&_sasl_getpath, NULL
 };
 static sasl_callback_t default_getconfpath_cb = {
-    SASL_CB_GETCONFPATH, &_sasl_getconfpath, NULL
+    SASL_CB_GETCONFPATH, (sasl_callback_ft)&_sasl_getconfpath, NULL
 };
 int _sasl_allocation_locked = 0;
 
@@ -322,7 +322,7 @@ int sasl_set_path (int path_type, char * path)
             }
 
             /* Update the default getpath_t callback */
-            default_getpath_cb.proc = (int (*)()) &_sasl_getpath_simple;
+            default_getpath_cb.proc = (sasl_callback_ft)&_sasl_getpath_simple;
             break;
 
         case SASL_PATH_TYPE_CONFIG:
@@ -336,7 +336,7 @@ int sasl_set_path (int path_type, char * path)
             }
 
             /* Update the default getpath_t callback */
-            default_getconfpath_cb.proc = (int (*)()) &_sasl_getconfpath_simple;
+            default_getconfpath_cb.proc = (sasl_callback_ft)&_sasl_getconfpath_simple;
             break;
 
         default:
@@ -1130,7 +1130,7 @@ int sasl_getprop(sasl_conn_t *conn, int propnum, const void **pvalue)
       *(unsigned **)pvalue = &conn->oparams.maxoutbuf;
       break;
   case SASL_GETOPTCTX:
-      result = _sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context);
+      result = _sasl_getcallback(conn, SASL_CB_GETOPT, (sasl_callback_ft *)&getopt, &context);
       if(result != SASL_OK) break;
       
       *(void **)pvalue = context;
@@ -2189,7 +2189,7 @@ _sasl_proxy_policy(sasl_conn_t *conn,
 
 int _sasl_getcallback(sasl_conn_t * conn,
 		      unsigned long callbackid,
-		      int (**pproc)(),
+		      sasl_callback_ft *pproc,
 		      void **pcontext)
 {
   const sasl_callback_t *callback;
@@ -2207,10 +2207,10 @@ int _sasl_getcallback(sasl_conn_t * conn,
 #endif /* _SUN_SDK_ */
   case SASL_CB_GETOPT:
       if (conn) {
-	  *pproc = &_sasl_conn_getopt;
+	  *pproc = (sasl_callback_ft)&_sasl_conn_getopt;
 	  *pcontext = conn;
       } else {
-	  *pproc = &_sasl_global_getopt;
+	  *pproc = (sasl_callback_ft)&_sasl_global_getopt;
 	  *pcontext = NULL;
       }
       return SASL_OK;
@@ -2255,7 +2255,7 @@ int _sasl_getcallback(sasl_conn_t * conn,
   switch (callbackid) {
 #ifdef HAVE_SYSLOG
   case SASL_CB_LOG:
-    *pproc = (int (*)()) &_sasl_syslog;
+    *pproc = (sasl_callback_ft)&_sasl_syslog;
     *pcontext = conn;
     return SASL_OK;
 #endif /* HAVE_SYSLOG */
@@ -2268,15 +2268,15 @@ int _sasl_getcallback(sasl_conn_t * conn,
     *pcontext = default_getconfpath_cb.context;
     return SASL_OK;
   case SASL_CB_AUTHNAME:
-    *pproc = (int (*)()) &_sasl_getsimple;
+    *pproc = (sasl_callback_ft)&_sasl_getsimple;
     *pcontext = conn;
     return SASL_OK;
   case SASL_CB_VERIFYFILE:
-    *pproc = & _sasl_verifyfile;
+    *pproc = (sasl_callback_ft)&_sasl_verifyfile;
     *pcontext = NULL;
     return SASL_OK;
   case SASL_CB_PROXY_POLICY:
-    *pproc = (int (*)()) &_sasl_proxy_policy;
+    *pproc = (sasl_callback_ft)&_sasl_proxy_policy;
     *pcontext = NULL;
     return SASL_OK;
   }
@@ -2322,7 +2322,7 @@ _sasl_log (sasl_conn_t *conn,
   va_list ap;
 
   /* See if we have a logging callback... */
-  result = _sasl_getcallback(conn, SASL_CB_LOG, &log_cb, &log_ctx);
+  result = _sasl_getcallback(conn, SASL_CB_LOG, (sasl_callback_ft *)&log_cb, &log_ctx);
   if (result == SASL_OK && ! log_cb)
     return;
 
@@ -2817,7 +2817,7 @@ _sasl_find_verifyfile_callback(const sasl_callback_t *callbacks)
 {
   static const sasl_callback_t default_verifyfile_cb = {
     SASL_CB_VERIFYFILE,
-    &_sasl_verifyfile,
+    (sasl_callback_ft)&_sasl_verifyfile,
     NULL
   };
 
