@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.171 2011/01/21 15:19:36 mel Exp $
+ * $Id: server.c,v 1.172 2011/09/01 12:18:05 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -602,11 +602,13 @@ int _sasl_server_add_plugin(void *ctx,
 #ifdef _SUN_SDK_
 	UNLOCK_MUTEX(&server_plug_mutex);
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks,
-		   SASL_LOG_ERR, "version mismatch on plugin");
 #else
-	_sasl_log(NULL, SASL_LOG_ERR,
-		  "version mismatch on plugin");
+	_sasl_log(NULL,
 #endif /* _SUN_SDK_ */
+		  SASL_LOG_ERR,
+		  "version mismatch on plugin: %d expected, but %d reported",
+		  SASL_SERVER_PLUG_VERSION,
+		  version);
 	return SASL_BADVERS;
     }
 #ifdef _SUN_SDK_
