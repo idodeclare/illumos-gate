@@ -6,7 +6,7 @@
 
 /* canonusr.c - user canonicalization support
  * Rob Siemborski
- * $Id: canonusr.c,v 1.21 2011/09/01 14:12:53 mel Exp $
+ * $Id: canonusr.c,v 1.22 2011/09/01 16:33:42 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -113,15 +113,22 @@ int _sasl_canon_user(sasl_conn_t *conn,
     if(!ulen) ulen = (unsigned int)strlen(user);
     
     /* check to see if we have a callback to make*/
-    result = _sasl_getcallback(conn, SASL_CB_CANON_USER,
-			       (sasl_callback_ft *)&cuser_cb, &context);
+    result = _sasl_getcallback(conn,
+			       SASL_CB_CANON_USER,
+			       (sasl_callback_ft *)&cuser_cb,
+			       &context);
     if(result == SASL_OK && cuser_cb) {
-	result = cuser_cb(conn, context,
-			user, ulen,
-			flags, (conn->type == SASL_CONN_SERVER ?
+	result = cuser_cb(conn,
+			  context,
+			  user,
+			  ulen,
+			  flags,
+			  (conn->type == SASL_CONN_SERVER ?
 				sconn->user_realm :
 				NULL),
-			user_buf, CANON_BUF_SIZE, lenp);
+			  user_buf,
+			  CANON_BUF_SIZE,
+			  lenp);
 	
 
 	if (result != SASL_OK) return result;
@@ -132,30 +139,32 @@ int _sasl_canon_user(sasl_conn_t *conn,
     }
 
     /* which plugin are we supposed to use? */
-    result = _sasl_getcallback(conn, SASL_CB_GETOPT,
-			       (sasl_callback_ft *)&getopt, &context);
-    if(result == SASL_OK && getopt) {
+    result = _sasl_getcallback(conn,
+			       SASL_CB_GETOPT,
+			       (sasl_callback_ft *)&getopt,
+			       &context);
+    if (result == SASL_OK && getopt) {
 	getopt(context, NULL, "canon_user_plugin", &plugin_name, NULL);
     }
 
-    if(!plugin_name) {
+    if (!plugin_name) {
 	/* Use Default */
 	plugin_name = "INTERNAL";
     }
     
 #ifdef _SUN_SDK_
-    for(ptr = conn->gctx->canonuser_head; ptr; ptr = ptr->next) {
+    for (ptr = conn->gctx->canonuser_head; ptr; ptr = ptr->next) {
 #else
-    for(ptr = canonuser_head; ptr; ptr = ptr->next) {
+    for (ptr = canonuser_head; ptr; ptr = ptr->next) {
 #endif /* _SUN_SDK_ */
 	/* A match is if we match the internal name of the plugin, or if
 	 * we match the filename (old-style) */
-	if((ptr->plug->name && !strcmp(plugin_name, ptr->plug->name))
+	if ((ptr->plug->name && !strcmp(plugin_name, ptr->plug->name))
 	   || !strcmp(plugin_name, ptr->name)) break;
     }
 
     /* We clearly don't have this one! */
-    if(!ptr) {
+    if (!ptr) {
 #ifdef _INTEGRATED_SOLARIS_
 	if (conn->type == SASL_CONN_CLIENT)
 		sasl_seterror(conn, 0,
@@ -172,7 +181,7 @@ int _sasl_canon_user(sasl_conn_t *conn,
 	return SASL_NOMECH;
     }
     
-    if(sconn) {
+    if (sconn) {
 	/* we're a server */
 	result = ptr->plug->canon_user_server(ptr->plug->glob_context,
 					      sconn->sparams,
@@ -190,9 +199,9 @@ int _sasl_canon_user(sasl_conn_t *conn,
 					      CANON_BUF_SIZE, lenp);
     }
 
-    if(result != SASL_OK) return result;
+    if (result != SASL_OK) return result;
 
-    if((flags & SASL_CU_AUTHID) && (flags & SASL_CU_AUTHZID)) {
+    if ((flags & SASL_CU_AUTHID) && (flags & SASL_CU_AUTHZID)) {
 	/* We did both, so we need to copy the result into
 	 * the buffer for the authzid from the buffer for the authid */
 	memcpy(conn->user_buf, conn->authid_buf, CANON_BUF_SIZE);
@@ -200,7 +209,7 @@ int _sasl_canon_user(sasl_conn_t *conn,
     }
 	
     /* Set the appropriate oparams (lengths have already been set by lenp) */
-    if(flags & SASL_CU_AUTHID) {
+    if (flags & SASL_CU_AUTHID) {
 	oparams->authid = conn->authid_buf;
     }
 
