@@ -6,7 +6,7 @@
 /* GSSAPI SASL plugin
  * Leif Johansson
  * Rob Siemborski (SASL v2 Conversion)
- * $Id: gssapi.c,v 1.75 2003/07/02 13:13:42 rjs3 Exp $
+ * $Id: gssapi.c,v 1.114 2011/11/09 15:49:47 murch Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -86,14 +86,17 @@
 #endif
 
 #include <errno.h>
+#include <assert.h>
 
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: gssapi.c,v 1.75 2003/07/02 13:13:42 rjs3 Exp $";
+static const char plugin_id[] = "$Id: gssapi.c,v 1.114 2011/11/09 15:49:47 murch Exp $";
 #endif /* !_SUN_SDK_ */
 
 static const char * GSSAPI_BLANK_STRING = "";
+
+static gss_OID_desc gss_spnego_oid = { 6, (void *) "\x2b\x06\x01\x05\x05\x02" };
 
 #if !defined(HAVE_GSS_C_NT_HOSTBASED_SERVICE) && !defined(GSS_C_NT_HOSTBASED_SERVICE)
 extern gss_OID gss_nt_service_name;
@@ -158,6 +161,9 @@ static void *gss_mutex = NULL;
 
 typedef struct context {
     int state;
+
+    gss_OID mech_type;		     /* GSS-SPNEGO or GSSAPI */
+    int http_mode;		     /* use RFC 4559 compatible protocol? */
     
     gss_ctx_id_t gss_ctx;
     gss_name_t   client_name;
@@ -170,7 +176,6 @@ typedef struct context {
     unsigned char qop;		     /* as allowed by GSSAPI */
 
 #ifdef _SUN_SDK_
-    gss_OID	mech_oid;
     int		use_authid;
 #endif /* _SUN_SDK_ */
     const sasl_utils_t *utils;
@@ -255,7 +260,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	GSS_LOCK_MUTEX(utils);
 	maj_stat = gss_display_status(&min_stat, maj,
 #ifdef _SUN_SDK_
-				      GSS_C_GSS_CODE, text->mech_oid,
+				      GSS_C_GSS_CODE, text->mech_type,
 #else
 				      GSS_C_GSS_CODE, GSS_C_NULL_OID,
 #endif /* _SUN_SDK_ */
@@ -309,7 +314,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	GSS_LOCK_MUTEX(utils);
 	maj_stat = gss_display_status(&min_stat, min,
 #ifdef _SUN_SDK_
-				      GSS_C_MECH_CODE, text->mech_oid,
+				      GSS_C_MECH_CODE, text->mech_type,
 #else
 				      GSS_C_MECH_CODE, GSS_C_NULL_OID,
 #endif /* _SUN_SDK_ */
@@ -330,8 +335,9 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	}
 	
 	len += len + msg.length;
-	ret = _plug_buf_alloc(utils, &out, &curlen, len);	
-	if (ret != SASL_OK) {
+
+	ret = _plug_buf_alloc(utils, &out, &curlen, len);
+	if(ret != SASL_OK) {
 	    utils->free(out);
 	    return SASL_NOMEM;
 	}
@@ -339,7 +345,7 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
 	strcat(out, msg.value);
 	
 	GSS_LOCK_MUTEX(utils);
- 	gss_release_buffer(&min_stat, &msg);
+	gss_release_buffer(&min_stat, &msg);
 	GSS_UNLOCK_MUTEX(utils);
 	
 	if (!msg_ctx)
@@ -419,7 +425,7 @@ sasl_gss_encode(void *context, const struct iovec *invec, unsigned numiov,
 	    GSS_LOCK_MUTEX(text->utils);
 	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(text->utils);
- 	}
+	}
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
 	    UNLOCK_MUTEX(&global_mutex);
 #endif /* _SUN_SDK_ && GSSAPI_PROTECT */
@@ -436,14 +442,14 @@ sasl_gss_encode(void *context, const struct iovec *invec, unsigned numiov,
 	
 	if (ret != SASL_OK) {
 	    GSS_LOCK_MUTEX(text->utils);
- 	    gss_release_buffer(&min_stat, output_token);
+	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(text->utils);
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
 	    UNLOCK_MUTEX(&global_mutex);
 #endif /* _SUN_SDK_ && GSSAPI_PROTECT */
 	    return ret;
 	}
-	
+
 	p = (unsigned char *) text->encode_buf;
 	p[0] = (output_token->length>>24) & 0xFF;
 	p[1] = (output_token->length>>16) & 0xFF;
@@ -460,9 +466,9 @@ sasl_gss_encode(void *context, const struct iovec *invec, unsigned numiov,
     
     if (output_token->value) {
 	GSS_LOCK_MUTEX(text->utils);
- 	gss_release_buffer(&min_stat, output_token);
+	gss_release_buffer(&min_stat, output_token);
 	GSS_UNLOCK_MUTEX(text->utils);
-    } 
+    }
     
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
     UNLOCK_MUTEX(&global_mutex);
@@ -535,7 +541,7 @@ gssapi_decode_packet(void *context,
 	    GSS_LOCK_MUTEX(text->utils);
 	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(text->utils);
- 	}
+	}
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
 	    UNLOCK_MUTEX(&global_mutex);
 #endif /* _SUN_SDK_ && GSSAPI_PROTECT */
@@ -543,7 +549,7 @@ gssapi_decode_packet(void *context,
     }
     
     if (outputlen) {
- 	*outputlen = output_token->length;
+	*outputlen = output_token->length;
     }
     
     if (output_token->value) {
@@ -553,7 +559,7 @@ gssapi_decode_packet(void *context,
 				     *outputlen);
 	    if (result != SASL_OK) {
 		GSS_LOCK_MUTEX(text->utils);
- 		gss_release_buffer(&min_stat, output_token);
+		gss_release_buffer(&min_stat, output_token);
 		GSS_UNLOCK_MUTEX(text->utils);
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
 	    UNLOCK_MUTEX(&global_mutex);
@@ -564,7 +570,7 @@ gssapi_decode_packet(void *context,
 	    memcpy(*output, output_token->value, *outputlen);
 	}
 	GSS_LOCK_MUTEX(text->utils);
- 	gss_release_buffer(&min_stat, output_token);
+	gss_release_buffer(&min_stat, output_token);
 	GSS_UNLOCK_MUTEX(text->utils);
     }
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
@@ -605,7 +611,7 @@ static context_t *sasl_gss_new_context(const sasl_utils_t *utils)
     ret->server_name = GSS_C_NO_NAME;
     ret->server_creds = GSS_C_NO_CREDENTIAL;
     ret->client_creds = GSS_C_NO_CREDENTIAL;
-    if (get_oid(utils, &ret->mech_oid) != SASL_OK) {
+    if (get_oid(utils, &ret->mech_type) != SASL_OK) {
 	utils->free(ret);
 	return (NULL);
     }
@@ -724,7 +730,7 @@ add_mech_to_set(context_t *text, gss_OID_set *desired_mechs)
 	return SASL_FAIL;
     }
 
-    maj_stat = gss_add_oid_set_member(&min_stat, text->mech_oid, desired_mechs);
+    maj_stat = gss_add_oid_set_member(&min_stat, text->mech_type, desired_mechs);
     if (GSS_ERROR(maj_stat)) {
 	sasl_gss_seterror(text->utils, maj_stat, min_stat);
 	sasl_gss_free_context_contents(text);
@@ -799,112 +805,99 @@ gssapi_server_mech_new(void *glob_context __attribute__((unused)),
     text->client_creds = GSS_C_NO_CREDENTIAL;
     text->state = SASL_GSSAPI_STATE_AUTHNEG;
     
+    text->http_mode = (params->flags & SASL_NEED_HTTP);
+
     *conn_context = text;
     
     return SASL_OK;
 }
 
 static int 
-gssapi_server_mech_step(void *conn_context,
-			sasl_server_params_t *params,
-			const char *clientin,
-			unsigned clientinlen,
-			const char **serverout,
-			unsigned *serveroutlen,
-			sasl_out_params_t *oparams)
+gssapi_server_mech_authneg(context_t *text,
+			   sasl_server_params_t *params,
+			   const char *clientin,
+			   unsigned clientinlen,
+			   const char **serverout,
+			   unsigned *serveroutlen,
+			   sasl_out_params_t *oparams __attribute__((unused)))
 {
-    context_t *text = (context_t *)conn_context;
     gss_buffer_t input_token, output_token;
     gss_buffer_desc real_input_token, real_output_token;
     OM_uint32 maj_stat = 0, min_stat = 0;
 #ifdef _SUN_SDK_
-    OM_uint32 max_input_size;
     gss_OID_set desired_mechs = GSS_C_NULL_OID_SET;
-#else
-    OM_uint32 max_input;
 #endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
-    int ret, out_flags = 0 ;
-    gss_cred_id_t server_creds = params->gss_creds;
-    
+    int ret, equal = 0;
+    unsigned out_flags = 0;
+    gss_cred_id_t server_creds = (gss_cred_id_t) params->gss_creds;
+    gss_buffer_desc name_without_realm;
+    gss_name_t client_name_MN = NULL, without = NULL;
+    gss_OID mech_type;
+	
     input_token = &real_input_token;
     output_token = &real_output_token;
     output_token->value = NULL; output_token->length = 0;
     input_token->value = NULL; input_token->length = 0;
     
-    if(!serverout) {
-	PARAMERROR(text->utils);
-	return SASL_BADPARAM;
-    }
-    
-    *serverout = NULL;
-    *serveroutlen = 0;	
-	    
-    if (text == NULL) {
-	return SASL_BADPROT;
-    }
-
-    switch (text->state) {
-
-    case SASL_GSSAPI_STATE_AUTHNEG:
-	if (text->server_name == GSS_C_NO_NAME) { /* only once */
-	    if (params->serverFQDN == NULL
-		|| strlen(params->serverFQDN) == 0) {
+    if (text->server_name == GSS_C_NO_NAME) { /* only once */
+	if (params->serverFQDN == NULL
+	    || strlen(params->serverFQDN) == 0) {
 #ifdef _INTEGRATED_SOLARIS_
 		SETERROR(text->utils, gettext("GSSAPI Failure: no serverFQDN"));
 #else
-		SETERROR(text->utils, "GSSAPI Failure: no serverFQDN");
+	    SETERROR(text->utils, "GSSAPI Failure: no serverFQDN");
 #endif
-		sasl_gss_free_context_contents(text);
-		return SASL_FAIL;
-	    }
-	    name_token.length = strlen(params->service) + 1 + strlen(params->serverFQDN);
-	    name_token.value = (char *)params->utils->malloc((name_token.length + 1) * sizeof(char));
-	    if (name_token.value == NULL) {
-		MEMERROR(text->utils);
-		sasl_gss_free_context_contents(text);
-		return SASL_NOMEM;
-	    }
+	    sasl_gss_free_context_contents(text);
+	    return SASL_FAIL;
+	}
+	name_token.length = strlen(params->service) + 1 + strlen(params->serverFQDN);
+	name_token.value = (char *)params->utils->malloc((name_token.length + 1) * sizeof(char));
+	if (name_token.value == NULL) {
+	    MEMERROR(text->utils);
+	    sasl_gss_free_context_contents(text);
+	    return SASL_NOMEM;
+	}
 #ifdef _SUN_SDK_
 	    snprintf(name_token.value, name_token.length + 1,
 		"%s@%s", params->service, params->serverFQDN);
 #else
-	    sprintf(name_token.value,"%s@%s", params->service, params->serverFQDN);
+	sprintf(name_token.value,"%s@%s", params->service, params->serverFQDN);
 #endif /* _SUN_SDK_ */
 	    
+	GSS_LOCK_MUTEX(params->utils);
+	maj_stat = gss_import_name (&min_stat,
+				    &name_token,
+				    GSS_C_NT_HOSTBASED_SERVICE,
+				    &text->server_name);
+	GSS_UNLOCK_MUTEX(params->utils);
+
+	params->utils->free(name_token.value);
+	name_token.value = NULL;
+
+	if (GSS_ERROR(maj_stat)) {
+	    sasl_gss_seterror(text->utils, maj_stat, min_stat);
+	    sasl_gss_free_context_contents(text);
+	    return SASL_FAIL;
+	}
+
+	if ( text->server_creds != GSS_C_NO_CREDENTIAL) {
 	    GSS_LOCK_MUTEX(params->utils);
-	    maj_stat = gss_import_name (&min_stat,
-					&name_token,
-					GSS_C_NT_HOSTBASED_SERVICE,
-					&text->server_name);
+	    maj_stat = gss_release_cred(&min_stat, &text->server_creds);
 	    GSS_UNLOCK_MUTEX(params->utils);
-	    
-	    params->utils->free(name_token.value);
-	    name_token.value = NULL;
-	    
-	    if (GSS_ERROR(maj_stat)) {
-		sasl_gss_seterror(text->utils, maj_stat, min_stat);
-		sasl_gss_free_context_contents(text);
-		return SASL_FAIL;
-	    }
-	    
-	    if ( text->server_creds != GSS_C_NO_CREDENTIAL) {
-	    	GSS_LOCK_MUTEX(params->utils);
-		maj_stat = gss_release_cred(&min_stat, &text->server_creds);
-	    	GSS_UNLOCK_MUTEX(params->utils);
-		text->server_creds = GSS_C_NO_CREDENTIAL;
-	    }
+	    text->server_creds = GSS_C_NO_CREDENTIAL;
+	}
 	    
 #ifdef _SUN_SDK_
-	    if (text->mech_oid != GSS_C_NULL_OID) {
+	    if (text->mech_type != GSS_C_NULL_OID) {
 		ret = add_mech_to_set(text, &desired_mechs);
 		if (ret != SASL_OK)
 		    return (ret);
 	    }
 #endif /* _SUN_SDK_ */
 
-	    /* If caller didn't provide creds already */
-	    if ( server_creds == GSS_C_NO_CREDENTIAL) {
+	/* If caller didn't provide creds already */
+	if ( server_creds == GSS_C_NO_CREDENTIAL) {
 	    GSS_LOCK_MUTEX(params->utils);
 	    maj_stat = gss_acquire_cred(&min_stat, 
 					text->server_name,
@@ -927,77 +920,78 @@ gssapi_server_mech_step(void *conn_context,
 	    }
 #endif /* _SUN_SDK_ */
 
-		if (GSS_ERROR(maj_stat)) {
-		    sasl_gss_seterror(text->utils, maj_stat, min_stat);
-		    sasl_gss_free_context_contents(text);
-		    return SASL_FAIL;
-		}
-		server_creds = text->server_creds;
- 	    }
+	    if (GSS_ERROR(maj_stat)) {
+		sasl_gss_seterror(text->utils, maj_stat, min_stat);
+		sasl_gss_free_context_contents(text);
+		return SASL_FAIL;
+	    }
+	    server_creds = text->server_creds;
 	}
+    }
 	
-	if (clientinlen) {
-	    real_input_token.value = (void *)clientin;
-	    real_input_token.length = clientinlen;
-	}
-	
-	GSS_LOCK_MUTEX(params->utils);
-	maj_stat =
-	    gss_accept_sec_context(&min_stat,
-				   &(text->gss_ctx),
-				   server_creds,
-				   input_token,
-				   GSS_C_NO_CHANNEL_BINDINGS,
-				   &text->client_name,
-				   NULL,	/* resulting mech_name */
-				   output_token,
-				   &out_flags,
-				   NULL,	/* context validity period */
-				   &(text->client_creds));
-	GSS_UNLOCK_MUTEX(params->utils);
-	
-	if (GSS_ERROR(maj_stat)) {
+    if (clientinlen) {
+	real_input_token.value = (void *)clientin;
+	real_input_token.length = clientinlen;
+    }
+
+
+    GSS_LOCK_MUTEX(params->utils);
+    maj_stat =
+	gss_accept_sec_context(&min_stat,
+			       &(text->gss_ctx),
+			       server_creds,
+			       input_token,
+			       GSS_C_NO_CHANNEL_BINDINGS,
+			       &text->client_name,
+			       &mech_type,
+			       output_token,
+			       &out_flags,
+			       NULL,	/* context validity period */
+			       &(text->client_creds));
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    if (GSS_ERROR(maj_stat)) {
 #ifdef _SUN_SDK_
 	    /* log the local error info, set a more generic error */
-	    sasl_gss_log(text->utils, maj_stat, min_stat);
+	sasl_gss_log(text->utils, maj_stat, min_stat);
 	    text->utils->seterror(text->utils->conn, SASL_NOLOG, 
 		    gettext("GSSAPI Failure: accept security context error"));
 #else
 	    sasl_gss_log(text->utils, maj_stat, min_stat);
-	    text->utils->seterror(text->utils->conn, SASL_NOLOG, "GSSAPI Failure: gss_accept_sec_context");
+	text->utils->seterror(text->utils->conn, SASL_NOLOG, "GSSAPI Failure: gss_accept_sec_context");
 #endif /* _SUN_SDK_ */
-	    if (output_token->value) {
-		GSS_LOCK_MUTEX(params->utils);
- 		gss_release_buffer(&min_stat, output_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-	    }
-	    sasl_gss_free_context_contents(text);
-	    return SASL_BADAUTH;
+	if (output_token->value) {
+	    GSS_LOCK_MUTEX(params->utils);
+	    gss_release_buffer(&min_stat, output_token);
+	    GSS_UNLOCK_MUTEX(params->utils);
 	}
+	sasl_gss_free_context_contents(text);
+	return SASL_BADAUTH;
+    }
 
-	/* When GSS_Accept_sec_context returns GSS_S_COMPLETE, the server
-	   examines the context to ensure that it provides a level of protection
-	   permitted by the server's security policy.  In particular, if the
-	   integ_avail flag is not set in the context, then no security layer
-	   can be offered or accepted.  If the conf_avail flag is not set in the
-	   context, then no security layer with confidentiality can be offered
+    /* When GSS_Accept_sec_context returns GSS_S_COMPLETE, the server
+       examines the context to ensure that it provides a level of protection
+       permitted by the server's security policy.  In particular, if the
+       integ_avail flag is not set in the context, then no security layer
+       can be offered or accepted.  If the conf_avail flag is not set in the
+       context, then no security layer with confidentiality can be offered
+       or accepted. */
+    if ((out_flags & GSS_C_INTEG_FLAG) == 0) {
+	/* if the integ_avail flag is not set in the context,
+	   then no security layer can be offered or accepted. */
+	text->qop = LAYER_NONE;
+    } else if ((out_flags & GSS_C_CONF_FLAG) == 0) {
+	/* If the conf_avail flag is not set in the context,
+	   then no security layer with confidentiality can be offered
 	   or accepted. */
-	if ((out_flags & GSS_C_INTEG_FLAG) == 0) {
-	    /* if the integ_avail flag is not set in the context,
-	       then no security layer can be offered or accepted. */
-	    text->qop = LAYER_NONE;
-	} else if ((out_flags & GSS_C_CONF_FLAG) == 0) {
-	    /* If the conf_avail flag is not set in the context,
-	       then no security layer with confidentiality can be offered
-	       or accepted. */
-	    text->qop = LAYER_NONE | LAYER_INTEGRITY;
-	} else {
-	    text->qop = LAYER_NONE | LAYER_INTEGRITY | LAYER_CONFIDENTIALITY;
-	}
+	text->qop = LAYER_NONE | LAYER_INTEGRITY;
+    } else {
+	text->qop = LAYER_NONE | LAYER_INTEGRITY | LAYER_CONFIDENTIALITY;
+    }
 
-	if ((params->props.security_flags & SASL_SEC_PASS_CREDENTIALS) &&
-	    (!(out_flags & GSS_C_DELEG_FLAG) ||
-	     text->client_creds == GSS_C_NO_CREDENTIAL) )
+    if ((params->props.security_flags & SASL_SEC_PASS_CREDENTIALS) &&
+	(!(out_flags & GSS_C_DELEG_FLAG) ||
+	 text->client_creds == GSS_C_NO_CREDENTIAL) ) 
 	{
 #ifdef _SUN_SDK_
 	    text->utils->seterror(text->utils->conn, SASL_LOG_WARN,
@@ -1009,191 +1003,156 @@ gssapi_server_mech_step(void *conn_context,
 	    /* continue with authentication */
 	}
 
-	if (serveroutlen)
-	    *serveroutlen = output_token->length;
-	if (output_token->value) {
-	    if (serverout) {
-		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
-				      &(text->out_buf_len), *serveroutlen);
-		if (ret != SASL_OK) {
-		    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_buffer(&min_stat, output_token);
-		    GSS_UNLOCK_MUTEX(params->utils);
-		    return ret;
-		}
-		memcpy(text->out_buf, output_token->value, *serveroutlen);
-		*serverout = text->out_buf;
+    if (serveroutlen)
+	*serveroutlen = output_token->length;
+    if (output_token->value) {
+	if (serverout) {
+	    ret = _plug_buf_alloc(text->utils, &(text->out_buf),
+				  &(text->out_buf_len), *serveroutlen);
+	    if(ret != SASL_OK) {
+		GSS_LOCK_MUTEX(params->utils);
+		gss_release_buffer(&min_stat, output_token);
+		GSS_UNLOCK_MUTEX(params->utils);
+		return ret;
 	    }
-	    
-	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_buffer(&min_stat, output_token);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	} else {
-	    /* No output token, send an empty string */
-	    *serverout = GSSAPI_BLANK_STRING;
-#ifndef _SUN_SDK_
-	    *serveroutlen = 0;
-#endif /* !_SUN_SDK_ */
+	    memcpy(text->out_buf, output_token->value, *serveroutlen);
+	    *serverout = text->out_buf;
 	}
-	
-	
-	if (maj_stat == GSS_S_COMPLETE) {
-	    /* Switch to ssf negotiation */
-	    text->state = SASL_GSSAPI_STATE_SSFCAP;
 
-	    if (*serveroutlen != 0) {
-		return SASL_CONTINUE;
-	    }
-
-	    /* Pretend that we just got an empty response from the client */
-	    clientinlen = 0;
-
-	    /* fall through */
-	} else {
-	    return SASL_CONTINUE;
-	}
-	
-	return SASL_CONTINUE;
-
-    case SASL_GSSAPI_STATE_SSFCAP: {
-	unsigned char sasldata[4];
-	gss_buffer_desc name_token;
-#ifndef _SUN_SDK_
-	gss_buffer_desc name_without_realm;
-	gss_name_t without = NULL;
-	int equal;
-#endif /* !_SUN_SDK_ */
-	
-	name_token.value = NULL;
-#ifndef _SUN_SDK_
-	name_without_realm.value = NULL;
-#endif /* !_SUN_SDK_ */
-	
-	if (clientinlen != 0) {
-#ifdef _INTEGRATED_SOLARIS_
-	    SETERROR(text->utils,
-	      gettext("GSSAPI server is not expecting data at this stage"));
-#else
-	    SETERROR(text->utils, "GSSAPI server is not expecting data at this stage");
-#endif
-	    sasl_gss_free_context_contents(text);
-	    return SASL_BADAUTH;
-	}
-	
 	GSS_LOCK_MUTEX(params->utils);
-	maj_stat = gss_display_name (&min_stat,
-				     text->client_name,
-				     &name_token,
-				     NULL);
+	gss_release_buffer(&min_stat, output_token);
 	GSS_UNLOCK_MUTEX(params->utils);
-	
-	if (GSS_ERROR(maj_stat)) {
-#ifdef _INTEGRATED_SOLARIS_
-	    SETERROR(text->utils, gettext("GSSAPI Failure"));
-#else
-	    SETERROR(text->utils, "GSSAPI Failure");
-#endif /* _INTEGRATED_SOLARIS_ */
-	    sasl_gss_free_context_contents(text);
-	    return SASL_BADAUTH;
-	}
-	
+    } else {
+	/* No output token, send an empty string */
+	*serverout = GSSAPI_BLANK_STRING;
 #ifndef _SUN_SDK_
-	/* If the id contains a realm get the identifier for the user
-	   without the realm and see if it's the same id (i.e. 
-	   tmartin == tmartin@ANDREW.CMU.EDU. If this is the case we just want
-	   to return the id (i.e. just "tmartin" */
-	if (strchr((char *) name_token.value, (int) '@') != NULL) {
-	    /* NOTE: libc malloc, as it is freed below by a gssapi internal
-	     *       function! */
-	    name_without_realm.value = params->utils->malloc(strlen(name_token.value)+1);
-	    if (name_without_realm.value == NULL) {
-		if (name_token.value) {
-	    	    GSS_LOCK_MUTEX(params->utils);
-		    gss_release_buffer(&min_stat, &name_token);
-	    	    GSS_UNLOCK_MUTEX(params->utils);
-		}
-		MEMERROR(text->utils);
-		return SASL_NOMEM;
-	    }
-	    
-	    strcpy(name_without_realm.value, name_token.value);
-	    
-	    /* cut off string at '@' */
-	    (strchr(name_without_realm.value,'@'))[0] = '\0';
-	    
-	    name_without_realm.length = strlen( (char *) name_without_realm.value );
-	    
-	    GSS_LOCK_MUTEX(params->utils);
-	    maj_stat = gss_import_name (&min_stat,
-					&name_without_realm,
+	*serveroutlen = 0;
+#endif /* !_SUN_SDK_ */
+    }
+
+    if (maj_stat == GSS_S_CONTINUE_NEEDED) {
+	/* Context isn't complete */
+        return SASL_CONTINUE;
+    }
+
+    VERIFY(maj_stat == GSS_S_COMPLETE);
+
+    GSS_LOCK_MUTEX(params->utils);
+    maj_stat = gss_canonicalize_name(&min_stat,
+				     text->client_name,
+				     mech_type,
+				     &client_name_MN);
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    if (GSS_ERROR(maj_stat)) {
+	SETERROR(text->utils, "GSSAPI Failure: gss_canonicalize_name");
+	sasl_gss_free_context_contents(text);
+	return SASL_BADAUTH;
+    }
+
+    name_token.value = NULL;
+    name_without_realm.value = NULL;
+
+    GSS_LOCK_MUTEX(params->utils);
+    maj_stat = gss_display_name (&min_stat,
+				 client_name_MN,
+				 &name_token,
+				 NULL);
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    if (GSS_ERROR(maj_stat)) {
+#ifdef _INTEGRATED_SOLARIS_
+	SETERROR(text->utils, gettext("GSSAPI Failure: gss_display_name"));
+#else
+	SETERROR(text->utils, "GSSAPI Failure: gss_display_name");
+#endif /* _INTEGRATED_SOLARIS_ */
+	sasl_gss_free_context_contents(text);
+	ret = SASL_BADAUTH;
+	goto cleanup;
+    }
+
+#ifndef _SUN_SDK_
+    /* If the id contains a realm get the identifier for the user
+       without the realm and see if it's the same id (i.e. 
+       tmartin == tmartin@ANDREW.CMU.EDU. If this is the case we just want
+       to return the id (i.e. just "tmartin" */
+    if (strchr((char *) name_token.value, (int) '@') != NULL) {
+	/* NOTE: libc malloc, as it is freed below by a gssapi internal
+	 *       function! */
+	name_without_realm.value = params->utils->malloc(strlen(name_token.value)+1);
+	if (name_without_realm.value == NULL) {
+	    MEMERROR(text->utils);
+	    ret = SASL_NOMEM;
+	    goto cleanup;
+	}
+
+	strcpy(name_without_realm.value, name_token.value);
+
+	/* cut off string at '@' */
+	(strchr(name_without_realm.value,'@'))[0] = '\0';
+
+	name_without_realm.length = strlen( (char *) name_without_realm.value );
+
+	GSS_LOCK_MUTEX(params->utils);
+	maj_stat = gss_import_name (&min_stat,
+				    &name_without_realm,
 	    /* Solaris 8/9 gss_import_name doesn't accept GSS_C_NULL_OID here,
 	       so use GSS_C_NT_USER_NAME instead if available.  */
 #ifdef HAVE_GSS_C_NT_USER_NAME
-					GSS_C_NT_USER_NAME,
+				    GSS_C_NT_USER_NAME,
 #else
-					GSS_C_NULL_OID,
+				    GSS_C_NULL_OID,
 #endif
-					&without);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	    
-	    if (GSS_ERROR(maj_stat)) {
-		params->utils->free(name_without_realm.value);
-		if (name_token.value) {
-	    	    GSS_LOCK_MUTEX(params->utils);
-		    gss_release_buffer(&min_stat, &name_token);
-	    	    GSS_UNLOCK_MUTEX(params->utils);
-		}
-		SETERROR(text->utils, "GSSAPI Failure");
-		sasl_gss_free_context_contents(text);
-		return SASL_BADAUTH;
-	    }
-	    
-	    GSS_LOCK_MUTEX(params->utils);
-	    maj_stat = gss_compare_name(&min_stat,
-					text->client_name,
-					without,
-					&equal);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	    
-	    if (GSS_ERROR(maj_stat)) {
-		params->utils->free(name_without_realm.value);
-		if (name_token.value) {
-	    	    GSS_LOCK_MUTEX(params->utils);
-		    gss_release_buffer(&min_stat, &name_token);
-	    	    GSS_UNLOCK_MUTEX(params->utils);
-		}
-		if (without) {
-	    	    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_name(&min_stat, &without);
-	    	    GSS_UNLOCK_MUTEX(params->utils);
-		}
-		SETERROR(text->utils, "GSSAPI Failure");
-		sasl_gss_free_context_contents(text);
-		return SASL_BADAUTH;
-	    }
-	    
-	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_name(&min_stat,&without);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	} else {
-	    equal = 0;
+				    &without);
+	GSS_UNLOCK_MUTEX(params->utils);
+
+	if (GSS_ERROR(maj_stat)) {
+	    SETERROR(text->utils, "GSSAPI Failure: gss_import_name");
+	    sasl_gss_free_context_contents(text);
+	    ret = SASL_BADAUTH;
+	    goto cleanup;
 	}
-	
-	if (equal) {
-	    text->authid = strdup(name_without_realm.value);
-	    
-	    if (text->authid == NULL) {
-		MEMERROR(params->utils);
-		return SASL_NOMEM;
-	    }
-	} else {
-	    text->authid = strdup(name_token.value);
-	    
-	    if (text->authid == NULL) {
-		MEMERROR(params->utils);
-		return SASL_NOMEM;
-	    }
+
+	GSS_LOCK_MUTEX(params->utils);
+	maj_stat = gss_compare_name(&min_stat,
+				    client_name_MN,
+				    without,
+				    &equal);
+	GSS_UNLOCK_MUTEX(params->utils);
+
+	if (GSS_ERROR(maj_stat)) {
+	    SETERROR(text->utils, "GSSAPI Failure: gss_compare_name");
+	    sasl_gss_free_context_contents(text);
+	    ret = SASL_BADAUTH;
+	    goto cleanup;
 	}
+
+    } else {
+	equal = 0;
+    }
+
+    if (equal) {
+	text->authid = strdup(name_without_realm.value);
+    } else {
+	text->authid = strdup(name_token.value);
+    }
+
+    if (text->authid == NULL) {
+	MEMERROR(params->utils);
+	ret = SASL_NOMEM;
+	goto cleanup;
+    }
+
+    if (text->http_mode) {
+	/* HTTP doesn't do any ssf negotiation */
+	text->state = SASL_GSSAPI_STATE_AUTHENTICATED;
+	ret = SASL_OK;
+    }
+    else {
+	/* Switch to ssf negotiation */
+	text->state = SASL_GSSAPI_STATE_SSFCAP;
+	ret = SASL_CONTINUE;
+    }
 #else
 	{
 	    ret = _plug_strdup(params->utils, name_token.value,
@@ -1201,266 +1160,292 @@ gssapi_server_mech_step(void *conn_context,
 	}
 #endif /* _SUN_SDK_ */
 	
-	if (name_token.value) {
-	    GSS_LOCK_MUTEX(params->utils);
-	    gss_release_buffer(&min_stat, &name_token);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	}
+  cleanup:
+    if (client_name_MN) {
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_name(&min_stat, &client_name_MN);
+	GSS_UNLOCK_MUTEX(params->utils);
+    }
+    if (name_token.value) {
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_buffer(&min_stat, &name_token);
+	GSS_UNLOCK_MUTEX(params->utils);
+    }
+    if (name_without_realm.value) {
+	params->utils->free(name_without_realm.value);
+    }
+    if (without) {
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_name(&min_stat, &without);
+	GSS_UNLOCK_MUTEX(params->utils);
+    }
 
-#ifdef _SUN_SDK_
-	if (ret != SASL_OK)
-	    return (ret);
-#else
-	if (name_without_realm.value) {
-	    params->utils->free(name_without_realm.value);
-	}	
-#endif /* _SUN_SDK_ */
-	
-	
-	/* we have to decide what sort of encryption/integrity/etc.,
-	   we support */
-	if (params->props.max_ssf < params->external_ssf) {
-	    text->limitssf = 0;
-	} else {
-	    text->limitssf = params->props.max_ssf - params->external_ssf;
-	}
-	if (params->props.min_ssf < params->external_ssf) {
-	    text->requiressf = 0;
-	} else {
-	    text->requiressf = params->props.min_ssf - params->external_ssf;
-	}
-	
-	/* build up our security properties token */
-	if (text->requiressf != 0 &&
-	    (text->qop & (LAYER_INTEGRITY|LAYER_CONFIDENTIALITY))) {
-	    if (params->props.maxbufsize > 0xFFFFFF) {
-		/* make sure maxbufsize isn't too large */
-		/* maxbufsize = 0xFFFFFF */
-		sasldata[1] = sasldata[2] = sasldata[3] = 0xFF;
-	    } else {
-		sasldata[1] = (params->props.maxbufsize >> 16) & 0xFF;
-		sasldata[2] = (params->props.maxbufsize >> 8) & 0xFF;
-		sasldata[3] = (params->props.maxbufsize >> 0) & 0xFF;
-	    }
-	} else {
-	    /* From RFC 4752: "The client verifies that the server maximum buffer is 0
-	       if the server does not advertise support for any security layer." */
-	    sasldata[1] = sasldata[2] = sasldata[3] = 0;
-	}
+    return ret;
+}
 
-	sasldata[0] = 0;
-	if(text->requiressf != 0 && !params->props.maxbufsize) {
+static int 
+gssapi_server_mech_ssfcap(context_t *text,
+			  sasl_server_params_t *params,
+			  const char *clientin __attribute__((unused)),
+			  unsigned clientinlen,
+			  const char **serverout,
+			  unsigned *serveroutlen,
+			  sasl_out_params_t *oparams __attribute__((unused)))
+{
+    gss_buffer_t input_token, output_token;
+    gss_buffer_desc real_input_token, real_output_token;
+    OM_uint32 maj_stat = 0, min_stat = 0;
+    unsigned char sasldata[4];
+    int ret;
+
+    input_token = &real_input_token;
+    output_token = &real_output_token;
+    output_token->value = NULL; output_token->length = 0;
+    
+
+    if (clientinlen != 0) {
+	SETERROR(text->utils, "GSSAPI server is not expecting data at this stage");
+	sasl_gss_free_context_contents(text);
+	return SASL_BADAUTH;
+    }
+
+    /* we have to decide what sort of encryption/integrity/etc.,
+       we support */
+    if (params->props.max_ssf < params->external_ssf) {
+	text->limitssf = 0;
+    } else {
+	text->limitssf = params->props.max_ssf - params->external_ssf;
+    }
+    if (params->props.min_ssf < params->external_ssf) {
+	text->requiressf = 0;
+    } else {
+	text->requiressf = params->props.min_ssf - params->external_ssf;
+    }
+
+    /* build up our security properties token */
+    if (text->requiressf != 0 &&
+	(text->qop & (LAYER_INTEGRITY|LAYER_CONFIDENTIALITY))) {
+	if (params->props.maxbufsize > 0xFFFFFF) {
+	    /* make sure maxbufsize isn't too large */
+	    /* maxbufsize = 0xFFFFFF */
+	    sasldata[1] = sasldata[2] = sasldata[3] = 0xFF;
+	} else {
+	    sasldata[1] = (params->props.maxbufsize >> 16) & 0xFF;
+	    sasldata[2] = (params->props.maxbufsize >> 8) & 0xFF;
+	    sasldata[3] = (params->props.maxbufsize >> 0) & 0xFF;
+	}
+    } else {
+	/* From RFC 4752: "The client verifies that the server maximum buffer is 0
+	   if the server does not advertise support for any security layer." */
+	sasldata[1] = sasldata[2] = sasldata[3] = 0;
+    }
+
+    sasldata[0] = 0;
+    if(text->requiressf != 0 && !params->props.maxbufsize) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
 		"GSSAPI needs a security layer but one is forbidden");
 #else
-	    params->utils->seterror(params->utils->conn, 0,
-				    "GSSAPI needs a security layer but one is forbidden");
-#endif /* _SUN_SDK_ */
-	    return SASL_TOOWEAK;
-	}
-	
-	if (text->requiressf == 0) {
-	    sasldata[0] |= LAYER_NONE; /* authentication */
-	}
-	if ((text->qop & LAYER_INTEGRITY) &&
-	    text->requiressf <= 1 &&
-	    text->limitssf >= 1 &&
-	    params->props.maxbufsize) {
-	    sasldata[0] |= LAYER_INTEGRITY;
-	}
-	if ((text->qop & LAYER_CONFIDENTIALITY) &&
-	    text->requiressf <= K5_MAX_SSF &&
-	    text->limitssf >= K5_MAX_SSF &&
-	    params->props.maxbufsize) {
-	    sasldata[0] |= LAYER_CONFIDENTIALITY;
-	}
-	
-	real_input_token.value = (void *)sasldata;
-	real_input_token.length = 4;
-	
-	GSS_LOCK_MUTEX(params->utils);
-	maj_stat = gss_wrap(&min_stat,
-			    text->gss_ctx,
-			    0, /* Just integrity checking here */
-			    GSS_C_QOP_DEFAULT,
-			    input_token,
-			    NULL,
-			    output_token);
-	GSS_UNLOCK_MUTEX(params->utils);
-	
-	if (GSS_ERROR(maj_stat)) {
-	    sasl_gss_seterror(text->utils, maj_stat, min_stat);
-	    if (output_token->value) {
-		GSS_LOCK_MUTEX(params->utils);
- 		gss_release_buffer(&min_stat, output_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-	    }
-	    sasl_gss_free_context_contents(text);
-	    return SASL_FAIL;
-	}
-	
-	
-	if (serveroutlen)
-	    *serveroutlen = output_token->length;
-	if (output_token->value) {
-	    if (serverout) {
-		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
-				      &(text->out_buf_len), *serveroutlen);
-		if (ret != SASL_OK) {
-		    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_buffer(&min_stat, output_token);
-		    GSS_UNLOCK_MUTEX(params->utils);
-		    return ret;
-		}
-		memcpy(text->out_buf, output_token->value, *serveroutlen);
-		*serverout = text->out_buf;
-	    }
-	    
-	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_buffer(&min_stat, output_token);
-	    GSS_UNLOCK_MUTEX(params->utils);
-	}
-	
-	/* Remember what we want and can offer */
-	text->qop = sasldata[0];
-
-	/* Wait for ssf request and authid */
-	text->state = SASL_GSSAPI_STATE_SSFREQ; 
-	
-	return SASL_CONTINUE;
+	params->utils->seterror(params->utils->conn, 0,
+				"GSSAPI needs a security layer but one is forbidden");
+	return SASL_TOOWEAK;
     }
 
-    case SASL_GSSAPI_STATE_SSFREQ: {
-	int layerchoice;
-	
-	real_input_token.value = (void *)clientin;
-	real_input_token.length = clientinlen;
-	
-	GSS_LOCK_MUTEX(params->utils);
-	maj_stat = gss_unwrap(&min_stat,
-			      text->gss_ctx,
-			      input_token,
-			      output_token,
-			      NULL,
-			      NULL);
-	GSS_UNLOCK_MUTEX(params->utils);
-	
-	if (GSS_ERROR(maj_stat)) {
-	    sasl_gss_seterror(text->utils, maj_stat, min_stat);
-	    sasl_gss_free_context_contents(text);
-	    return SASL_FAIL;
-	}
+    if (text->requiressf == 0) {
+	sasldata[0] |= LAYER_NONE; /* authentication */
+    }
+    if ((text->qop & LAYER_INTEGRITY) &&
+	text->requiressf <= 1 &&
+	text->limitssf >= 1 &&
+	params->props.maxbufsize) {
+	sasldata[0] |= LAYER_INTEGRITY;
+    }
+    if ((text->qop & LAYER_CONFIDENTIALITY) &&
+	text->requiressf <= K5_MAX_SSF &&
+	text->limitssf >= K5_MAX_SSF &&
+	params->props.maxbufsize) {
+	sasldata[0] |= LAYER_CONFIDENTIALITY;
+    }
 
-	if (output_token->length < 4) {
-	    SETERROR(text->utils,
-		     "token too short");
+    /* Remember what we want and can offer */
+    text->qop = sasldata[0];
+
+    real_input_token.value = (void *)sasldata;
+    real_input_token.length = 4;
+
+    GSS_LOCK_MUTEX(params->utils);
+    maj_stat = gss_wrap(&min_stat,
+			text->gss_ctx,
+			0, /* Just integrity checking here */
+			GSS_C_QOP_DEFAULT,
+			input_token,
+			NULL,
+			output_token);
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    if (GSS_ERROR(maj_stat)) {
+	sasl_gss_seterror(text->utils, maj_stat, min_stat);
+	if (output_token->value) {
 	    GSS_LOCK_MUTEX(params->utils);
 	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(params->utils);
-	    sasl_gss_free_context_contents(text);
-	    return SASL_FAIL;
 	}
+	sasl_gss_free_context_contents(text);
+	return SASL_FAIL;
+    }
+
+
+    if (serveroutlen)
+	*serveroutlen = output_token->length;
+    if (output_token->value) {
+	if (serverout) {
+	    ret = _plug_buf_alloc(text->utils, &(text->out_buf),
+				  &(text->out_buf_len), *serveroutlen);
+	    if(ret != SASL_OK) {
+		GSS_LOCK_MUTEX(params->utils);
+		gss_release_buffer(&min_stat, output_token);
+		GSS_UNLOCK_MUTEX(params->utils);
+		return ret;
+	    }
+	    memcpy(text->out_buf, output_token->value, *serveroutlen);
+	    *serverout = text->out_buf;
+	}
+
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_buffer(&min_stat, output_token);
+	GSS_UNLOCK_MUTEX(params->utils);
+    }
+
+    /* Wait for ssf request and authid */
+    text->state = SASL_GSSAPI_STATE_SSFREQ; 
 	
-	layerchoice = (int)(((char *)(output_token->value))[0]);
-	if (layerchoice == LAYER_NONE &&
-	    (text->qop & LAYER_NONE)) { /* no encryption */
-	    oparams->encode = NULL;
-	    oparams->decode = NULL;
-	    oparams->mech_ssf = 0;
-	} else if (layerchoice == LAYER_INTEGRITY &&
-		   (text->qop & LAYER_INTEGRITY)) { /* integrity */
-	    oparams->encode = &gssapi_integrity_encode;
-	    oparams->decode = &gssapi_decode;
-	    oparams->mech_ssf = 1;
-	} else if ((layerchoice == LAYER_CONFIDENTIALITY ||
-		    /* For compatibility with broken clients setting both bits */
-		    layerchoice == (LAYER_CONFIDENTIALITY|LAYER_INTEGRITY)) &&
-		   (text->qop & LAYER_CONFIDENTIALITY)) { /* privacy */
-	    oparams->encode = &gssapi_privacy_encode;
-	    oparams->decode = &gssapi_decode;
-	    /* FIX ME: Need to extract the proper value here */
-	    oparams->mech_ssf = K5_MAX_SSF;
-	} else {
-	    /* not a supported encryption layer */
+    return SASL_CONTINUE;
+}
+
+static int 
+gssapi_server_mech_ssfreq(context_t *text,
+			  sasl_server_params_t *params,
+			  const char *clientin,
+			  unsigned clientinlen,
+			  const char **serverout __attribute__((unused)),
+			  unsigned *serveroutlen __attribute__((unused)),
+			  sasl_out_params_t *oparams)
+{
+    gss_buffer_t input_token, output_token;
+    gss_buffer_desc real_input_token, real_output_token;
+    OM_uint32 maj_stat = 0, min_stat = 0;
+    OM_uint32 max_input;
+    int layerchoice;
+	
+    input_token = &real_input_token;
+    output_token = &real_output_token;
+    output_token->value = NULL; output_token->length = 0;
+
+    real_input_token.value = (void *)clientin;
+    real_input_token.length = clientinlen;
+
+    GSS_LOCK_MUTEX(params->utils);
+    maj_stat = gss_unwrap(&min_stat,
+			  text->gss_ctx,
+			  input_token,
+			  output_token,
+			  NULL,
+			  NULL);
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    if (GSS_ERROR(maj_stat)) {
+	sasl_gss_seterror(text->utils, maj_stat, min_stat);
+	sasl_gss_free_context_contents(text);
+	return SASL_FAIL;
+    }
+
+    if (output_token->length < 4) {
+	SETERROR(text->utils,
+		 "token too short");
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_buffer(&min_stat, output_token);
+	GSS_UNLOCK_MUTEX(params->utils);
+	sasl_gss_free_context_contents(text);
+	return SASL_FAIL;
+    }
+
+    layerchoice = (int)(((char *)(output_token->value))[0]);
+    if (layerchoice == LAYER_NONE &&
+	(text->qop & LAYER_NONE)) { /* no encryption */
+	oparams->encode = NULL;
+	oparams->decode = NULL;
+	oparams->mech_ssf = 0;
+    } else if (layerchoice == LAYER_INTEGRITY &&
+	       (text->qop & LAYER_INTEGRITY)) { /* integrity */
+	oparams->encode = &gssapi_integrity_encode;
+	oparams->decode = &gssapi_decode;
+	oparams->mech_ssf = 1;
+    } else if ((layerchoice == LAYER_CONFIDENTIALITY ||
+		/* For compatibility with broken clients setting both bits */
+		layerchoice == (LAYER_CONFIDENTIALITY|LAYER_INTEGRITY)) &&
+	       (text->qop & LAYER_CONFIDENTIALITY)) { /* privacy */
+	oparams->encode = &gssapi_privacy_encode;
+	oparams->decode = &gssapi_decode;
+	/* FIX ME: Need to extract the proper value here */
+	oparams->mech_ssf = K5_MAX_SSF;
+    } else {
+	/* not a supported encryption layer */
 #ifdef _SUN_SDK_
 	    text->utils->log(text->utils->conn, SASL_LOG_ERR,
 		"protocol violation: client requested invalid layer");
 #else
-	    SETERROR(text->utils,
-		     "protocol violation: client requested invalid layer");
+	SETERROR(text->utils,
+		 "protocol violation: client requested invalid layer");
 #endif /* _SUN_SDK_ */
-	    /* Mark that we attempted negotiation */
-	    oparams->mech_ssf = 2;
-	    if (output_token->value) {
-		GSS_LOCK_MUTEX(params->utils);
- 		gss_release_buffer(&min_stat, output_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-	    }
+	/* Mark that we attempted negotiation */
+	oparams->mech_ssf = 2;
+	if (output_token->value) {
+	    GSS_LOCK_MUTEX(params->utils);
+	    gss_release_buffer(&min_stat, output_token);
+	    GSS_UNLOCK_MUTEX(params->utils);
+	}
+	sasl_gss_free_context_contents(text);
+	return SASL_FAIL;
+    }
+
+    if (output_token->length > 4) {
+	int ret;
+
+	ret = params->canon_user(params->utils->conn,
+				 ((char *) output_token->value) + 4,
+				 (output_token->length - 4) * sizeof(char),
+				 SASL_CU_AUTHZID, oparams);
+	
+	if (ret != SASL_OK) {
 	    sasl_gss_free_context_contents(text);
-	    return SASL_FAIL;
+	    return ret;
 	}
+    }
 	
-	if (output_token->length > 4) {
-	    int ret;
-	    
-	    ret = params->canon_user(params->utils->conn,
-				     ((char *) output_token->value) + 4,
-				     (output_token->length - 4) * sizeof(char),
-				     SASL_CU_AUTHZID, oparams);
-	    
-	    if (ret != SASL_OK) {
-		sasl_gss_free_context_contents(text);
-		return ret;
-	    }
-	    
-	    ret = params->canon_user(params->utils->conn,
-				     text->authid,
-				     0, /* strlen(text->authid) */
-				     SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED, oparams);
-	    if (ret != SASL_OK) {
-		sasl_gss_free_context_contents(text);
-		return ret;
-	    }
-	} else /* if (output_token->length == 4) */ {
-	    /* null authzid */
-	    int ret;
-	    
-	    ret = params->canon_user(params->utils->conn,
-				     text->authid,
-				     0, /* strlen(text->authid) */
-				     SASL_CU_AUTHZID | SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED,
-				     oparams);
-	    
-	    if (ret != SASL_OK) {
-		sasl_gss_free_context_contents(text);
-		return ret;
-	    }
-	}
-	
-	/* No matter what, set the rest of the oparams */
+    /* No matter what, set the rest of the oparams */
 
-	if (text->client_creds != GSS_C_NO_CREDENTIAL)	{
-	    oparams->client_creds =  &text->client_creds;
-	}
-	else {
-	    oparams->client_creds = NULL;
-	}
+    oparams->maxoutbuf =
+	(((unsigned char *) output_token->value)[1] << 16) |
+	(((unsigned char *) output_token->value)[2] << 8) |
+	(((unsigned char *) output_token->value)[3] << 0);
 
-        oparams->maxoutbuf =
-	    (((unsigned char *) output_token->value)[1] << 16) |
-            (((unsigned char *) output_token->value)[2] << 8) |
-            (((unsigned char *) output_token->value)[3] << 0);
+    if (oparams->mech_ssf) {
+	maj_stat = gss_wrap_size_limit( &min_stat,
+					text->gss_ctx,
+#ifdef _SUN_SDK_
+					oparams->mech_ssf > 1,
+#else
+					1,
+#endif
+					GSS_C_QOP_DEFAULT,
+					(OM_uint32) oparams->maxoutbuf,
+#ifdef _SUN_SDK_
+					&max_input_size);
+#else
+					&max_input);
+#endif
 
 #ifdef _SUN_SDK_
-	if (oparams->mech_ssf) {
-	    oparams->maxoutbuf -= 4;	/* Allow for 4 byte tag */
-	    maj_stat = gss_wrap_size_limit(&min_stat,
-					text->gss_ctx,
-					oparams->mech_ssf > 1,
-					GSS_C_QOP_DEFAULT,
-					oparams->maxoutbuf,
-					&max_input_size);
 	    if (GSS_ERROR(maj_stat)) {
 		sasl_gss_seterror(text->utils, maj_stat, min_stat);
 		GSS_LOCK_MUTEX(params->utils);
@@ -1479,57 +1464,109 @@ gssapi_server_mech_step(void *conn_context,
 	    else {
 		oparams->maxoutbuf = 0;
 	    }
-	}
 #else
-	if (oparams->mech_ssf) {
- 	    maj_stat = gss_wrap_size_limit( &min_stat,
-					    text->gss_ctx,
-					    1,
-					    GSS_C_QOP_DEFAULT,
-					    (OM_uint32) oparams->maxoutbuf,
-					    &max_input);
-
-	    if(max_input > oparams->maxoutbuf) {
-		/* Heimdal appears to get this wrong */
-		oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
-	    } else {
-		/* This code is actually correct */
-		oparams->maxoutbuf = max_input;
-	    }
-	}
-#endif /* _SUN_SDK_ */
-	
-	GSS_LOCK_MUTEX(params->utils);
- 	gss_release_buffer(&min_stat, output_token);
-	GSS_UNLOCK_MUTEX(params->utils);
-	
-	text->state = SASL_GSSAPI_STATE_AUTHENTICATED;
-	
-	/* used by layers */
-	_plug_decode_init(&text->decode_context,
-			  text->utils,
-			  (params->props.maxbufsize > 0xFFFFFF) ? 0xFFFFFF :
-			  params->props.maxbufsize);
-
-	oparams->doneflag = 1;
-	
-	return SASL_OK;
+	if(max_input > oparams->maxoutbuf) {
+	    /* Heimdal appears to get this wrong */
+	    oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
+	} else {
+	    /* This code is actually correct */
+	    oparams->maxoutbuf = max_input;
+	}    
     }
-    
+#endif
+	
+    GSS_LOCK_MUTEX(params->utils);
+    gss_release_buffer(&min_stat, output_token);
+    GSS_UNLOCK_MUTEX(params->utils);
+
+    text->state = SASL_GSSAPI_STATE_AUTHENTICATED;
+
+    /* used by layers */
+    _plug_decode_init(&text->decode_context,
+		      text->utils,
+		      (params->props.maxbufsize > 0xFFFFFF) ? 0xFFFFFF :
+		      params->props.maxbufsize);
+	
+    return SASL_OK;
+}
+
+static int 
+gssapi_server_mech_step(void *conn_context,
+			sasl_server_params_t *params,
+			const char *clientin,
+			unsigned clientinlen,
+			const char **serverout,
+			unsigned *serveroutlen,
+			sasl_out_params_t *oparams)
+{
+    context_t *text = (context_t *) conn_context;
+    int ret;
+
+    if (!serverout) {
+	PARAMERROR(text->utils);
+	return SASL_BADPARAM;
+    }
+
+    *serverout = NULL;
+    *serveroutlen = 0;
+
+    if (text == NULL) return SASL_BADPROT;
+
+    params->utils->log(NULL, SASL_LOG_DEBUG,
+		       "GSSAPI server step %d\n", text->state);
+
+    switch (text->state) {
+
+    case SASL_GSSAPI_STATE_AUTHNEG:
+	ret = gssapi_server_mech_authneg(text, params, clientin, clientinlen,
+					 serverout, serveroutlen, oparams);
+	if (ret != SASL_CONTINUE || *serveroutlen) break;
+
+	/* Pretend that we just got an empty response from the client */
+	clientinlen = 0;
+
+	/* fall through */
+
+    case SASL_GSSAPI_STATE_SSFCAP:
+	ret = gssapi_server_mech_ssfcap(text, params, clientin, clientinlen,
+					serverout, serveroutlen, oparams);
+	break;
+
+    case SASL_GSSAPI_STATE_SSFREQ:
+	ret = gssapi_server_mech_ssfreq(text, params, clientin, clientinlen,
+					serverout, serveroutlen, oparams);
+	break;
+
     default:
-#ifdef _SUN_SDK_
-	params->utils->log(text->utils->conn, SASL_LOG_ERR,
-			   "Invalid GSSAPI server step %d", text->state);
-#else
 	params->utils->log(NULL, SASL_LOG_ERR,
 			   "Invalid GSSAPI server step %d\n", text->state);
-#endif /* _SUN_SDK_ */
 	return SASL_FAIL;
     }
+
+    if (ret == SASL_OK) {
+	ret = params->canon_user(params->utils->conn,
+				 text->authid,
+				 0, /* strlen(text->authid) */
+				 (oparams->user ? 0 : SASL_CU_AUTHZID)
+				 | SASL_CU_AUTHID | SASL_CU_EXTERNALLY_VERIFIED,
+				 oparams);
+
+	if (ret != SASL_OK) {
+	    sasl_gss_free_context_contents(text);
+	    return ret;
+	}
+
+	if (text->client_creds != GSS_C_NO_CREDENTIAL)	{
+	    oparams->client_creds =  &text->client_creds;
+	}
+	else {
+	    oparams->client_creds = NULL;
+	}
+
+	oparams->doneflag = 1;
+    }
     
-#ifndef _SUN_SDK_
-    return SASL_FAIL; /* should never get here */
-#endif /* !_SUN_SDK_ */
+    return ret;
 }
 
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
@@ -1583,6 +1620,35 @@ static sasl_server_plug_t gssapi_server_plugins[] =
 	NULL,				/* mech_avail */
 	NULL				/* spare */
     }
+#ifdef HAVE_GSS_SPNEGO
+    ,{
+	"GSS-SPNEGO",			/* mech_name */
+	K5_MAX_SSF,			/* max_ssf */
+	SASL_SEC_NOPLAINTEXT
+	| SASL_SEC_NOACTIVE
+	| SASL_SEC_NOANONYMOUS
+	| SASL_SEC_MUTUAL_AUTH		/* security_flags */
+	| SASL_SEC_PASS_CREDENTIALS,
+	SASL_FEAT_WANT_CLIENT_FIRST
+	| SASL_FEAT_ALLOWS_PROXY
+	| SASL_FEAT_DONTUSE_USERPASSWD
+	| SASL_FEAT_SUPPORTS_HTTP,	/* features */
+	NULL,				/* glob_context */
+	&gssapi_server_mech_new,	/* mech_new */
+#if defined _SUN_SDK_ && defined GSSAPI_PROTECT
+	&_gssapi_server_mech_step,	/* mech_step */
+#else
+	&gssapi_server_mech_step,	/* mech_step */
+#endif
+	&gssapi_common_mech_dispose,	/* mech_dispose */
+	&gssapi_common_mech_free,	/* mech_free */
+	NULL,				/* setpass */
+	NULL,				/* user_query */
+	NULL,				/* idle */
+	NULL,				/* mech_avail */
+	NULL				/* spare */
+    }
+#endif
 };
 
 int gssapiv2_server_plug_init(
@@ -1645,7 +1711,11 @@ int gssapiv2_server_plug_init(
 
     *out_version = SASL_SERVER_PLUG_VERSION;
     *pluglist = gssapi_server_plugins;
+#ifdef HAVE_GSS_SPNEGO
+    *plugcount = 2;
+#else
     *plugcount = 1;  
+#endif
 
 #ifdef GSS_USE_MUTEXES
     if (!gss_mutex) {
@@ -1661,7 +1731,7 @@ int gssapiv2_server_plug_init(
 
 /*****************************  Client Section  *****************************/
 
-static int gssapi_client_mech_new(void *glob_context __attribute__((unused)), 
+static int gssapi_client_mech_new(void *glob_context,
 				  sasl_client_params_t *params,
 				  void **conn_context)
 {
@@ -1687,10 +1757,13 @@ static int gssapi_client_mech_new(void *glob_context __attribute__((unused)),
     }
     
     text->state = SASL_GSSAPI_STATE_AUTHNEG;
+    text->mech_type = (gss_OID) glob_context;
     text->gss_ctx = GSS_C_NO_CONTEXT;
     text->client_name = GSS_C_NO_NAME;
     text->server_creds = GSS_C_NO_CREDENTIAL;
     text->client_creds  = GSS_C_NO_CREDENTIAL;
+
+    text->http_mode = (params->flags & SASL_NEED_HTTP);
 
 #ifdef _SUN_SDK_
     params->utils->getopt(params->utils->getopt_context,
@@ -1735,6 +1808,11 @@ static int gssapi_client_mech_step(void *conn_context,
     *clientout = NULL;
     *clientoutlen = 0;
     
+#ifndef _INTEGRATED_SOLARIS_    
+    params->utils->log(NULL, SASL_LOG_DEBUG,
+		       "GSSAPI client step %d", text->state);
+#endif
+
     switch (text->state) {
 
     case SASL_GSSAPI_STATE_AUTHNEG:
@@ -1895,11 +1973,11 @@ static int gssapi_client_mech_step(void *conn_context,
 	     * which discards our first output, this happens all the time.
 	     * Throw away the context and try again. */
 	    GSS_LOCK_MUTEX(params->utils);
- 	    maj_stat = gss_delete_sec_context (&min_stat,&text->gss_ctx,GSS_C_NO_BUFFER);
+	    maj_stat = gss_delete_sec_context (&min_stat,&text->gss_ctx,GSS_C_NO_BUFFER);
 	    GSS_UNLOCK_MUTEX(params->utils);
 	    text->gss_ctx = GSS_C_NO_CONTEXT;
 	}
-	    
+
 	/* Setup req_flags properly */
 	req_flags = GSS_C_INTEG_FLAG;
 	if (params->props.max_ssf > params->external_ssf) {
@@ -1942,7 +2020,7 @@ static int gssapi_client_mech_step(void *conn_context,
 		return SASL_FAIL;
 	    }
 
-	    if (text->mech_oid != GSS_C_NULL_OID) {
+	    if (text->mech_type != GSS_C_NULL_OID) {
 		ret = add_mech_to_set(text, &desired_mechs);
 		if (ret != SASL_OK)
 		    return (ret);
@@ -1978,11 +2056,7 @@ static int gssapi_client_mech_step(void *conn_context,
 					client_creds, /* GSS_C_NO_CREDENTIAL */
 					&text->gss_ctx,
 					text->server_name,
-#ifdef _SUN_SDK_
-					text->mech_oid,
-#else
-					GSS_C_NO_OID,
-#endif /* _SUN_SDK_ */
+					text->mech_type,
 					req_flags,
 					0,
 					GSS_C_NO_CHANNEL_BINDINGS,
@@ -1997,7 +2071,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    sasl_gss_seterror(text->utils, maj_stat, min_stat);
 	    if (output_token->value) {
 		GSS_LOCK_MUTEX(params->utils);
- 		gss_release_buffer(&min_stat, output_token);
+		gss_release_buffer(&min_stat, output_token);
 		GSS_UNLOCK_MUTEX(params->utils);
 	    }
 	    sasl_gss_free_context_contents(text);
@@ -2026,16 +2100,16 @@ static int gssapi_client_mech_step(void *conn_context,
 #endif /* _INTEGRATED_SOLARIS_ */
 	    /* not a fatal error */
 	}
-
+  	    
 	*clientoutlen = output_token->length;
 	    
 	if (output_token->value) {
 	    if (clientout) {
 		ret = _plug_buf_alloc(text->utils, &(text->out_buf),
 				      &(text->out_buf_len), *clientoutlen);
-		if (ret != SASL_OK) {
+		if(ret != SASL_OK) {
 		    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_buffer(&min_stat, output_token);
+		    gss_release_buffer(&min_stat, output_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
 		    return ret;
 		}
@@ -2044,7 +2118,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    }
 	    
 	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_buffer(&min_stat, output_token);
+	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(params->utils);
 	}
 	
@@ -2079,7 +2153,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    if (GSS_ERROR(maj_stat)) {
 		if (name_token.value) {
 		    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_buffer(&min_stat, &name_token);
+		    gss_release_buffer(&min_stat, &name_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
 		}
 #ifdef _INTEGRATED_SOLARIS_
@@ -2106,11 +2180,18 @@ static int gssapi_client_mech_step(void *conn_context,
 					 oparams);
 	    }
 	    GSS_LOCK_MUTEX(params->utils);
- 	    gss_release_buffer(&min_stat, &name_token);
+	    gss_release_buffer(&min_stat, &name_token);
 	    GSS_UNLOCK_MUTEX(params->utils);
 	    
 	    if (ret != SASL_OK) return ret;
 	    
+	    if (text->http_mode) {
+		/* HTTP doesn't do any ssf negotiation */
+		text->state = SASL_GSSAPI_STATE_AUTHENTICATED;
+		oparams->doneflag = 1;
+		return SASL_OK;
+	    }
+
 	    /* Switch to ssf negotiation */
 	    text->state = SASL_GSSAPI_STATE_SSFCAP;
 	}
@@ -2140,7 +2221,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    sasl_gss_free_context_contents(text);
 	    if (output_token->value) {
 		GSS_LOCK_MUTEX(params->utils);
- 		gss_release_buffer(&min_stat, output_token);
+		gss_release_buffer(&min_stat, output_token);
 		GSS_UNLOCK_MUTEX(params->utils);
 	    }
 	    return SASL_FAIL;
@@ -2175,7 +2256,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    /* good to go */
 	    need = 0;
 	}
-	
+
 	/* bit mask of server support */
 	serverhas = ((char *)output_token->value)[0];
 	
@@ -2218,9 +2299,11 @@ static int gssapi_client_mech_step(void *conn_context,
 	    oparams->mech_ssf = 1;
 	    mychoice = LAYER_INTEGRITY;
 #ifdef _SUN_SDK_
-	} else if (need == 0 && (serverhas & LAYER_NONE)) {
+	} else if ((text->qop & LAYER_NONE) &&
+		   need == 0 && (serverhas & LAYER_NONE)) {
 #else
-	} else if (need <= 0 && (serverhas & LAYER_NONE)) {
+	} else if ((text->qop & LAYER_NONE) &&
+		   need <= 0 && (serverhas & LAYER_NONE)) {
 #endif /* _SUN_SDK_ */
 	    /* no layer */
 	    oparams->encode = NULL;
@@ -2238,24 +2321,23 @@ static int gssapi_client_mech_step(void *conn_context,
             (((unsigned char *) output_token->value)[2] << 8) |
             (((unsigned char *) output_token->value)[3] << 0);
 
+	if (oparams->mech_ssf) {
+            maj_stat = gss_wrap_size_limit( &min_stat,
+                                            text->gss_ctx,
 #ifdef _SUN_SDK_
-	if (oparams->mech_ssf > 0) {
-	    oparams->maxoutbuf -= 4;	/* Space for 4 byte length header */
-	    maj_stat = gss_wrap_size_limit(&min_stat,
-					text->gss_ctx,
-					oparams->mech_ssf > 1,
-					GSS_C_QOP_DEFAULT,
-					oparams->maxoutbuf,
-					&max_input_size);
-	    if (GSS_ERROR(maj_stat)) {
-		sasl_gss_seterror(text->utils, maj_stat, min_stat);
-		GSS_LOCK_MUTEX(params->utils);
-		(void) gss_release_buffer(&min_stat, output_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-		sasl_gss_free_context_contents(text);
-		return (SASL_FAIL);
-	    }
+                                            oparams->mech_ssf > 1,
+#else
+                                            1,
+#endif
+                                            GSS_C_QOP_DEFAULT,
+                                            (OM_uint32) oparams->maxoutbuf,
+#ifdef _SUN_SDK_
+                                            &max_input_size);
+#else
+                                            &max_input);
+#endif
 
+#ifdef _SUN_SDK_
 	/*
 	 * This is a workaround for a Solaris bug where
 	 * gss_wrap_size_limit may return very big sizes for
@@ -2266,16 +2348,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    else {
 		oparams->maxoutbuf = 0;
 	    }
-	}
 #else
-	if (oparams->mech_ssf) {
-            maj_stat = gss_wrap_size_limit( &min_stat,
-                                            text->gss_ctx,
-                                            1,
-                                            GSS_C_QOP_DEFAULT,
-                                            (OM_uint32) oparams->maxoutbuf,
-                                            &max_input);
-
 	    if (max_input > oparams->maxoutbuf) {
 		/* Heimdal appears to get this wrong */
 		oparams->maxoutbuf -= (max_input - oparams->maxoutbuf);
@@ -2283,11 +2356,11 @@ static int gssapi_client_mech_step(void *conn_context,
 		/* This code is actually correct */
 		oparams->maxoutbuf = max_input;
 	    }
+#endif
 	}
-#endif /* _SUN_SDK_ */
 	
 	GSS_LOCK_MUTEX(params->utils);
- 	gss_release_buffer(&min_stat, output_token);
+	gss_release_buffer(&min_stat, output_token);
 	GSS_UNLOCK_MUTEX(params->utils);
 	
 	/* oparams->user is always set, due to canon_user requirements.
@@ -2295,9 +2368,9 @@ static int gssapi_client_mech_step(void *conn_context,
 	 * if our context was set.
 	 */
 	if (text->user && text->user[0]) {
- 	    alen = strlen(oparams->user);
+	    alen = strlen(oparams->user);
 	} else {
- 	    alen = 0;
+	    alen = 0;
 	}
 	
 	input_token->length = 4 + alen;
@@ -2359,7 +2432,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	}
 	
 	if (clientoutlen) {
- 	    *clientoutlen = output_token->length;
+	    *clientoutlen = output_token->length;
 	}
 	if (output_token->value) {
 	    if (clientout) {
@@ -2369,7 +2442,7 @@ static int gssapi_client_mech_step(void *conn_context,
 				      *clientoutlen);
 		if (ret != SASL_OK) {
 		    GSS_LOCK_MUTEX(params->utils);
- 		    gss_release_buffer(&min_stat, output_token);
+		    gss_release_buffer(&min_stat, output_token);
 		    GSS_UNLOCK_MUTEX(params->utils);
 		    return ret;
 		}
@@ -2380,6 +2453,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	    GSS_LOCK_MUTEX(params->utils);
 	    gss_release_buffer(&min_stat, output_token);
 	    GSS_UNLOCK_MUTEX(params->utils);
+
 	}
 	
 	text->state = SASL_GSSAPI_STATE_AUTHENTICATED;
@@ -2390,7 +2464,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	_plug_decode_init(&text->decode_context, text->utils,
 			  (params->props.maxbufsize > 0xFFFFFF) ? 0xFFFFFF :
 			  params->props.maxbufsize);
-
+	
 	return SASL_OK;
     }
 	
@@ -2410,11 +2484,7 @@ static int gssapi_client_mech_step(void *conn_context,
 #endif /* !_SUN_SDK_ */
 }
 
-#ifdef _SUN_SDK_
 static const unsigned long gssapi_required_prompts[] = {
-#else
-static const long gssapi_required_prompts[] = {
-#endif /* _SUN_SDK_ */
     SASL_CB_LIST_END
 };  
 
@@ -2449,13 +2519,13 @@ static sasl_client_plug_t gssapi_client_plugins[] =
 	SASL_SEC_NOPLAINTEXT
 	| SASL_SEC_NOACTIVE
 	| SASL_SEC_NOANONYMOUS
-	| SASL_SEC_MUTUAL_AUTH
+	| SASL_SEC_MUTUAL_AUTH 
 	| SASL_SEC_PASS_CREDENTIALS,    /* security_flags */
 	SASL_FEAT_NEEDSERVERFQDN
 	| SASL_FEAT_WANT_CLIENT_FIRST
 	| SASL_FEAT_ALLOWS_PROXY,	/* features */
 	gssapi_required_prompts,	/* required_prompts */
-	NULL,				/* glob_context */
+	GSS_C_NO_OID,			/* glob_context */
 	&gssapi_client_mech_new,	/* mech_new */
 #if defined _SUN_SDK_ && defined GSSAPI_PROTECT
 	&_gssapi_client_mech_step,	/* mech_step */
@@ -2468,6 +2538,34 @@ static sasl_client_plug_t gssapi_client_plugins[] =
 	NULL,				/* spare */
 	NULL				/* spare */
     }
+#ifdef HAVE_GSS_SPNEGO
+    ,{
+	"GSS-SPNEGO",			/* mech_name */
+	K5_MAX_SSF,			/* max_ssf */
+	SASL_SEC_NOPLAINTEXT
+	| SASL_SEC_NOACTIVE
+	| SASL_SEC_NOANONYMOUS
+	| SASL_SEC_MUTUAL_AUTH 
+	| SASL_SEC_PASS_CREDENTIALS,    /* security_flags */
+	SASL_FEAT_NEEDSERVERFQDN
+	| SASL_FEAT_WANT_CLIENT_FIRST
+	| SASL_FEAT_ALLOWS_PROXY
+	| SASL_FEAT_SUPPORTS_HTTP,	/* features */
+	gssapi_required_prompts,	/* required_prompts */
+	&gss_spnego_oid,		/* glob_context */
+	&gssapi_client_mech_new,	/* mech_new */
+#if defined _SUN_SDK_ && defined GSSAPI_PROTECT
+	&_gssapi_client_mech_step,	/* mech_step */
+#else
+	&gssapi_client_mech_step,	/* mech_step */
+#endif /* _SUN_SDK_ && GSSAPI_PROTECT */
+	&gssapi_common_mech_dispose,	/* mech_dispose */
+	&gssapi_common_mech_free,	/* mech_free */
+	NULL,				/* idle */
+	NULL,				/* spare */
+	NULL				/* spare */
+    }
+#endif
 };
 
 int gssapiv2_client_plug_init(const sasl_utils_t *utils __attribute__((unused)), 
@@ -2491,7 +2589,11 @@ int gssapiv2_client_plug_init(const sasl_utils_t *utils __attribute__((unused)),
 
     *out_version = SASL_CLIENT_PLUG_VERSION;
     *pluglist = gssapi_client_plugins;
+#ifdef HAVE_GSS_SPNEGO
+    *plugcount = 2;
+#else
     *plugcount = 1;
+#endif
 
 #ifdef GSS_USE_MUTEXES
     if(!gss_mutex) {
