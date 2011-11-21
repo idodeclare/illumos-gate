@@ -6,7 +6,7 @@
 /* GSSAPI SASL plugin
  * Leif Johansson
  * Rob Siemborski (SASL v2 Conversion)
- * $Id: gssapi.c,v 1.114 2011/11/09 15:49:47 murch Exp $
+ * $Id: gssapi.c,v 1.115 2011/11/21 15:12:35 mel Exp $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -91,7 +91,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: gssapi.c,v 1.114 2011/11/09 15:49:47 murch Exp $";
+static const char plugin_id[] = "$Id: gssapi.c,v 1.115 2011/11/21 15:12:35 mel Exp $";
 #endif /* !_SUN_SDK_ */
 
 static const char * GSSAPI_BLANK_STRING = "";
@@ -969,6 +969,41 @@ gssapi_server_mech_authneg(context_t *text,
 	return SASL_BADAUTH;
     }
 
+    if (serveroutlen) {
+	*serveroutlen = output_token->length;
+    }
+    if (output_token->value) {
+	if (serverout) {
+	    ret = _plug_buf_alloc(text->utils, &(text->out_buf),
+				  &(text->out_buf_len), *serveroutlen);
+	    if(ret != SASL_OK) {
+		GSS_LOCK_MUTEX(params->utils);
+		gss_release_buffer(&min_stat, output_token);
+		GSS_UNLOCK_MUTEX(params->utils);
+		return ret;
+	    }
+	    memcpy(text->out_buf, output_token->value, *serveroutlen);
+	    *serverout = text->out_buf;
+	}
+
+	GSS_LOCK_MUTEX(params->utils);
+	gss_release_buffer(&min_stat, output_token);
+	GSS_UNLOCK_MUTEX(params->utils);
+    } else {
+	/* No output token, send an empty string */
+	*serverout = GSSAPI_BLANK_STRING;
+#ifndef _SUN_SDK_
+	*serveroutlen = 0;
+#endif /* !_SUN_SDK_ */
+    }
+
+    if (maj_stat == GSS_S_CONTINUE_NEEDED) {
+	/* Context isn't complete */
+        return SASL_CONTINUE;
+    }
+
+    VERIFY(maj_stat == GSS_S_COMPLETE);
+
     /* When GSS_Accept_sec_context returns GSS_S_COMPLETE, the server
        examines the context to ensure that it provides a level of protection
        permitted by the server's security policy.  In particular, if the
@@ -1002,40 +1037,6 @@ gssapi_server_mech_authneg(context_t *text,
 #endif
 	    /* continue with authentication */
 	}
-
-    if (serveroutlen)
-	*serveroutlen = output_token->length;
-    if (output_token->value) {
-	if (serverout) {
-	    ret = _plug_buf_alloc(text->utils, &(text->out_buf),
-				  &(text->out_buf_len), *serveroutlen);
-	    if(ret != SASL_OK) {
-		GSS_LOCK_MUTEX(params->utils);
-		gss_release_buffer(&min_stat, output_token);
-		GSS_UNLOCK_MUTEX(params->utils);
-		return ret;
-	    }
-	    memcpy(text->out_buf, output_token->value, *serveroutlen);
-	    *serverout = text->out_buf;
-	}
-
-	GSS_LOCK_MUTEX(params->utils);
-	gss_release_buffer(&min_stat, output_token);
-	GSS_UNLOCK_MUTEX(params->utils);
-    } else {
-	/* No output token, send an empty string */
-	*serverout = GSSAPI_BLANK_STRING;
-#ifndef _SUN_SDK_
-	*serveroutlen = 0;
-#endif /* !_SUN_SDK_ */
-    }
-
-    if (maj_stat == GSS_S_CONTINUE_NEEDED) {
-	/* Context isn't complete */
-        return SASL_CONTINUE;
-    }
-
-    VERIFY(maj_stat == GSS_S_COMPLETE);
 
     GSS_LOCK_MUTEX(params->utils);
     maj_stat = gss_canonicalize_name(&min_stat,
