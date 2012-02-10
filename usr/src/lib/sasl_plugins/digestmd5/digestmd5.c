@@ -3169,7 +3169,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 #endif
     }
 
-    if (text->state == 1 || !text->nonce) {
+    if (!text->nonce) {
 	unsigned val = hash((char *) nonce) % text->reauth->size;
 
 	/* reauth attempt or continuation of HTTP Digest on a
@@ -3197,9 +3197,12 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	}
 
 	if (!text->nonce) {
-	    /* we don't have any reauth info, so bail */
+	    /* we don't have any reauth info */
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_DEBUG,
 				"No reauth info for '%s' found", nonce);
+
+	    /* we will continue processing the response to determine
+	       if the client knows the password and return stale accordingly */
 	}
     }
 
@@ -3233,6 +3236,9 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
+#if 0	/* XXX  Possible replay attack, but we will continue processing
+	 * the response to determine if the client knows the password and
+	 return stale accordingly */
 	if (noncecount != text->nonce_count) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
@@ -3244,6 +3250,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
+#endif
 #if 0	/* XXX  Neither RFC 2617 nor RFC 2831 state that the cnonce
 	   needs to remain constant for subsequent authentication to work */
 	if (text->cnonce && strcmp((char *) cnonce, (char *) text->cnonce) != 0) {
@@ -3590,6 +3597,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 
     /* see if our nonce expired */
     if (!text->nonce ||
+	(noncecount != text->nonce_count) ||
 	(text->reauth->timeout &&
 	 time(0) - stext->timestamp > text->reauth->timeout)) {
 #ifdef _INTEGRATED_SOLARIS_
@@ -3598,9 +3606,14 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 #else
 	if (!text->nonce) SETERROR(sparams->utils, "no cached server nonce");
 #endif /* _INTEGRATED_SOLARIS_ */
+	else if (noncecount != text->nonce_count)
 #ifdef _INTEGRATED_SOLARIS_
-	else SETERROR(sparams->utils,
-	  gettext("server nonce expired"));
+	    SETERROR(sparams->utils, gettext("incorrect nonce-count"));
+#else
+	    SETERROR(sparams->utils, "incorrect nonce-count");
+#endif /* _INTEGRATED_SOLARIS_ */
+#ifdef _INTEGRATED_SOLARIS_
+	else SETERROR(sparams->utils, gettext("server nonce expired"));
 #else
 	else SETERROR(sparams->utils, "server nonce expired");
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -3608,7 +3621,7 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	result = SASL_BADAUTH;
 
 	goto FreeAllMem;
-     }
+    }
 
     /*
      * nothing more to do; authenticated set oparams information
@@ -3881,6 +3894,9 @@ static int digestmd5_server_mech_step(void *conn_context,
 
 	    /* re-initialize everything for a fresh start */
 	    memset(oparams, 0, sizeof(sasl_out_params_t));
+	    if (text->nonce) sparams->utils->free(text->nonce);
+	    if (text->realm) sparams->utils->free(text->realm);
+	    text->nonce = text->realm = NULL;
 
 	    /* fall through and issue challenge */
 	}
