@@ -2566,6 +2566,7 @@ digestmd5_server_mech_step1(server_context_t *stext,
     }
     
     resplen = 0;
+    if (text->out_buf) params->utils->free(text->out_buf);
     text->out_buf = NULL;
     text->out_buf_len = 0;
     if (add_to_challenge(sparams->utils,
