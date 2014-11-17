@@ -5661,6 +5661,8 @@ static void digestmd5_client_mech_dispose(void *conn_context,
 #endif /* _INTEGRATED_SOLARIS_ */
 
     if (ctext->free_password) _plug_free_secret(utils, &ctext->password);
+    if (ctext->algorithm) utils->free(ctext->algorithm);
+    if (ctext->opaque) utils->free(ctext->opaque);
 
     utils->log(utils->conn, SASL_LOG_DEBUG,
 	       "DIGEST-MD5 client mech dispose");
