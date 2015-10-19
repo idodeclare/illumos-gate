@@ -1251,7 +1251,7 @@ gssapi_server_mech_ssfcap(context_t *text,
     if(text->requiressf != 0 && !params->props.maxbufsize) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		"GSSAPI needs a security layer but one is forbidden");
+		"GSSAPI needs a security layer but one is forbidden\n");
 #else
 	params->utils->seterror(params->utils->conn, 0,
 				"GSSAPI needs a security layer but one is forbidden");
@@ -1519,7 +1519,7 @@ gssapi_server_mech_step(void *conn_context,
 
     if (text == NULL) return SASL_BADPROT;
 
-    params->utils->log(NULL, SASL_LOG_DEBUG,
+    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
 		       "GSSAPI server step %d\n", text->state);
 
     switch (text->state) {
@@ -1545,7 +1545,7 @@ gssapi_server_mech_step(void *conn_context,
 	break;
 
     default:
-	params->utils->log(NULL, SASL_LOG_ERR,
+	params->utils->log(params->utils->conn, SASL_LOG_ERR,
 			   "Invalid GSSAPI server step %d\n", text->state);
 	return SASL_FAIL;
     }
@@ -1816,8 +1816,8 @@ static int gssapi_client_mech_step(void *conn_context,
     *clientoutlen = 0;
     
 #ifndef _INTEGRATED_SOLARIS_    
-    params->utils->log(NULL, SASL_LOG_DEBUG,
-		       "GSSAPI client step %d", text->state);
+    params->utils->log(params->utils->conn, SASL_LOG_DEBUG,
+		       "GSSAPI client step %d\n", text->state);
 #endif
 
     switch (text->state) {
@@ -2476,13 +2476,8 @@ static int gssapi_client_mech_step(void *conn_context,
     }
 	
     default:
-#ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "Invalid GSSAPI client step %d", text->state);
-#else
-	params->utils->log(NULL, SASL_LOG_ERR,
 			   "Invalid GSSAPI client step %d\n", text->state);
-#endif /* _SUN_SDK_ */
 	return SASL_FAIL;
     }
     
