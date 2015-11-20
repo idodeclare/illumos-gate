@@ -253,7 +253,8 @@ sasl_gss_seterror_(const sasl_utils_t *utils, OM_uint32 maj, OM_uint32 min,
     const sasl_utils_t *utils = text->utils;
     char *prefix = dgettext(TEXT_DOMAIN, "GSSAPI Error: ");
 #else
-    size_t len, curlen = 0;
+    size_t len;
+    unsigned curlen = 0;
     const char prefix[] = "GSSAPI Error: ";
 #endif /* _SUN_SDK_ */
 
