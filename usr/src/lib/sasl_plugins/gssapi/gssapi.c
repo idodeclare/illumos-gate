@@ -56,6 +56,8 @@
 #include <gssapi/gssapi.h>
 #endif
 
+#include <gssapi/gssapi_krb5.h>
+
 #ifdef WIN32
 #  include <winsock2.h>
 
