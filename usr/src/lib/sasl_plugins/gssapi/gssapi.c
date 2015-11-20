@@ -1189,6 +1189,12 @@ gssapi_server_mech_authneg(context_t *text,
 	}
 #endif /* _SUN_SDK_ */
 	
+    /* Release server creds which are no longer needed */
+     if ( text->server_creds != GSS_C_NO_CREDENTIAL) {
+        maj_stat = gss_release_cred(&min_stat, &text->server_creds);
+        text->server_creds = GSS_C_NO_CREDENTIAL;
+     }
+
   cleanup:
     if (text->server_creds != GSS_C_NO_CREDENTIAL) {
 	GSS_LOCK_MUTEX(params->utils);
