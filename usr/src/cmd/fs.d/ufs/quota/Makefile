@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # cmd/fs.d/ufs/quota/Makefile
 
@@ -35,6 +36,7 @@ include		../../Makefile.fstype
 
 OBJS=		quota.o rquota_xdr.o replica.o
 SRCS=		$(OBJS:%.o=%.c)
+CLEANFILES +=	rquota_xdr.c
 XFILE=		$(ROOT)/usr/include/rpcsvc/rquota.x
 CPPFLAGS +=	-I $(ROOT)/usr/include/sys -D_LARGEFILE64_SOURCE
 LDLIBS +=		-lnsl
@@ -52,7 +54,7 @@ $(LIBPROG):	$(OBJS)
 lint:		lint_PROG
 
 clean:
-		$(RM) $(OBJS) rquota_xdr.c
+		$(RM) $(OBJS) $(CLEANFILES)
 
 $(ROOTUSRSBIN)/$(LIBPROG):
 		-$(RM) $@; $(SYMLINK) $(LINKVALUE) $@

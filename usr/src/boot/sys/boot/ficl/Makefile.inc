@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -65,5 +66,7 @@ $(OBJECTS): machine x86
 #
 #       generic cleanup code
 #
+CLOBBERFILES +=	*.o *.a libficl.* ficl machine x86
+
 clobber clean:	FRC
-	$(RM) *.o *.a libficl.* ficl machine x86
+	$(RM) $(CLOBBERFILES)

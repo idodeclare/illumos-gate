@@ -12,6 +12,7 @@
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -20,11 +21,13 @@ CFLAGS= -O2 -I../../../../include -I../../..
 CFLAGS += -DLOADER_ZFS_SUPPORT
 CPPFLAGS=
 
+CLEANFILES +=	machine x86 libi386.a
+
 all: libi386.a
 
 clean: clobber
 clobber:
-	$(RM) machine x86 $(OBJS) libi386.a
+	$(RM) $(CLEANFILES) $(OBJS)
 
 AS=	$(GNU_ROOT)/bin/gas
 CC=	$(GCC_ROOT)/bin/gcc
@@ -85,8 +88,6 @@ CFLAGS +=	-I../../../../lib/libstand/
 # Handle FreeBSD specific %b and %D printf format specifiers
 #FORMAT_EXTENSIONS=-D__printf__=__freebsd_kprintf__
 #CFLAGS += ${FORMAT_EXTENSIONS}
-
-CLEANFILES +=	machine x86
 
 # XXX: clang integrated-as doesn't grok .codeNN directives yet
 # CFLAGS.amd64_tramp.S=	${CLANG_NO_IAS}

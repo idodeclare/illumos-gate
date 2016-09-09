@@ -21,6 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include ../Makefile.cmd
@@ -61,6 +62,7 @@ LDFLAGS +=	$(MAPOPTS)
 OBJS =          $(C_OBJS) $(PSRC_Y:%.y=%.o) $(LEXOBJS)
 PSRC_C =        $(PSRC_Y:%.y=%.c)
 SRCS =          $(C_OBJS:%.o=%.c) $(PSRC_C) $(LEXINTSRCS)
+CLEANFILES +=   y.tab.h *.po
 
 .KEEP_STATE:
 
@@ -95,6 +97,6 @@ lint:	$(LEXINTSRCS) $(PSRC_C)
 	$(LINT.c) $(LEXINTSRCS) $(PSRC_C) $(LINTSUPPRESS) $(LDLIBS)
 
 clean:
-	$(RM) $(OBJS) $(PSRC_C) $(LEXINTSRCS) y.tab.h *.po
+	$(RM) $(OBJS) $(PSRC_C) $(LEXINTSRCS) $(CLEANFILES)
 
 include ../Makefile.targ

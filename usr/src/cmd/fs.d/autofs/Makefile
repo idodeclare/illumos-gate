@@ -22,6 +22,7 @@
 #
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2015 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 FSTYPE=		autofs
@@ -144,6 +145,8 @@ XFILE=$(BUILDDIR)/malloc_dump.x
 XLINE= "program DUMP { version VERS \
 	{ void DUMP_IT(void) = 1000000; } = 2; } = 100099;"
 
+CLEANFILES += webnfs_xdr.c webnfs_client.c webnfs.h webnfs.x
+
 $(XFILE):	$(BUILDDIR)
 		$(RM) $(XFILE)
 		echo $(XLINE) > $(XFILE)
@@ -212,6 +215,6 @@ lint:
 	$(LINT.c) $(TYPESRCS)
 
 clean:	clean_dump
-	$(RM) $(OBJS) webnfs_xdr.c webnfs_client.c webnfs.h webnfs.x
+	$(RM) $(OBJS) $(CLEANFILES)
 
 check:	$(CHKMANIFEST)

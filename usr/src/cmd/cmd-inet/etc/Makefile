@@ -19,6 +19,8 @@
 # CDDL HEADER END
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+#
 
 SYMPROG= hosts inetd.conf networks protocols services netmasks
 
@@ -28,6 +30,8 @@ PROG= datemsk.ndpd ipsecinit.sample ipqosconf.1.sample ipqosconf.2.sample \
     ipqosconf.3.sample wanboot.conf.sample
 ETCPROG= $(SYMPROG) $(EDITPROG) $(PROG)
 SUBDIRS= default dhcp init.d ike nca ppp secret sock2path.d
+
+CLEANFILES += datemsk.ndpd
 
 include ../../Makefile.cmd
 
@@ -84,6 +88,6 @@ datemsk.ndpd: datemsk.template
 	@while read i; do echo $$i; done < datemsk.template > $@
 
 clean clobber:
-	$(RM) datemsk.ndpd
+	$(RM) $(CLEANFILES)
 
 lint:

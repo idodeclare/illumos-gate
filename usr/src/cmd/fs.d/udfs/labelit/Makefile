@@ -21,6 +21,7 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright 2017 Joyent, Inc.
 #
@@ -29,6 +30,7 @@ FSTYPE=		udfs
 LIBPROG=	labelit
 SRCS=		labelit.c ud_lib.c
 ATTMK=		$(LIBPROG)
+CLEANFILES +=	labelit.o ud_lib.o ud_lib.c ud_lib.h
 
 include		../../Makefile.fstype
 
@@ -50,11 +52,11 @@ labelit.o : labelit.c ud_lib.h
 ud_lib.o : ud_lib.c ud_lib.h
 
 ud_lib.h : ../fstyp/ud_lib.h
-	rm -f ud_lib.h
+	$(RM) ud_lib.h
 	cp ../fstyp/ud_lib.h ud_lib.h
 
 ud_lib.c : ../fstyp/ud_lib.c
-	rm -f ud_lib.c
+	$(RM) ud_lib.c
 	cp ../fstyp/ud_lib.c ud_lib.c
 
 # for messaging catalog
@@ -73,11 +75,10 @@ $(POFILE):	$(SRCS) ud_lib.h
 	$(RM) $(POFILE).i messages.po
 
 clean :
-	rm -f labelit.o ud_lib.o
-	rm -f ud_lib.c ud_lib.h
+	$(RM) $(CLEANFILES)
 
 lint:
-	rm -f ud_lib.h
+	$(RM) ud_lib.h
 	cp ../fstyp/ud_lib.h ud_lib.h
 	cp ../fstyp/ud_lib.c ud_lib.c
 	$(LINT.c) -mu $(SRCS)
