@@ -12,8 +12,7 @@
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
-#
-
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -80,15 +79,15 @@ gptzfsboot: gptldr.bin gptzfsboot.bin $(BTXKERN)
 	$(BTXLD) -E $(ORG2) -f bin -b $(BTXKERN) -V $(BOOT_VERSION) -l \
 		gptldr.bin -o $@ gptzfsboot.bin
 
-CLEANFILES +=	gptldr.bin gptldr.out gptldr.o
+CLEANFILES +=	gptldr.bin gptldr.out gptldr.o gptzfsboot.bin gptzfsboot.out
+
+CLOBBERFILES +=	machine x86
 
 gptldr.bin: gptldr.out
 	$(OBJCOPY) -S -O binary gptldr.out $@
 
 gptldr.out: gptldr.o
 	$(GLD) $(LD_FLAGS) -e start -Ttext $(ORG1) -o $@ gptldr.o
-
-CLEANFILES +=	gptzfsboot.bin gptzfsboot.out
 
 gptzfsboot.bin: gptzfsboot.out
 	$(OBJCOPY) -S -O binary gptzfsboot.out $@
@@ -116,6 +115,7 @@ $(OBJS): machine x86
 	$(COMPILE.S) $<
 
 clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 clean:
-	$(RM) $(CLEANFILES) machine x86
+	$(RM) $(CLEANFILES)
