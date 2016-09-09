@@ -22,6 +22,7 @@
 #
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # ident	"%Z%%M%	%I%	%E% SMI"
 #
@@ -29,6 +30,9 @@
 include ../Makefile.com
 
 PROG=		bootlog-cgi
+
+# $(SRC)/cmd/Makefile.cmd clobbers $(PROG), but the following is committed:
+UNIGNOREFILES=	bootlog-cgi
 
 all:		$(PROG)
 

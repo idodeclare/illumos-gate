@@ -22,6 +22,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
 #
@@ -41,6 +42,9 @@ ao_gendisp.pl: $(AO_GENDISP_PL)
 	$(SYMLINK) $(AO_GENDISP_PL) $@
 
 clean clobber:
-	$(RM) ao_gendisp.pl $(PERLFILES)
+	$(RM) $(CLEANFILES) $(PERLFILES)
 
 include ../../../Makefile.targ
+
+# do this late after all includes
+CLEANFILES += ao_gendisp.pl

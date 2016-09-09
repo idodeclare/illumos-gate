@@ -23,6 +23,7 @@
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright 2016 Nexenta Systems, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include ../../Makefile.cmd
@@ -115,9 +116,13 @@ SEEDFILEMODE = 0444		# seeds are not intended for editing, but may
 CONFIGD = ../configd/svc.configd-native
 SVCCFG = ../svccfg/svccfg-native
 
+SEED_DBFILES = global.db nonglobal.db miniroot.db
+CLEANFILES += common.db
+CLOBBERFILES += common.db $(SEED_DBFILES)
+
 .KEEP_STATE:
 
-all: global.db nonglobal.db miniroot.db
+all: $(SEED_DBFILES)
 
 $(CONFIGD): FRC
 	@cd ../configd; pwd; $(MAKE) $(MFLAGS) native
@@ -205,9 +210,9 @@ $(INSTALLSEED):
 	$(INS.dir)
 
 clean lint:
-	$(RM) common.db
+	$(RM) $(CLEANFILES)
 
 clobber:
-	$(RM) common.db global.db nonglobal.db miniroot.db
+	$(RM) $(CLOBBERFILES)
 
 FRC:
