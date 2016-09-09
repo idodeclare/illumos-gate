@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/boot/Makefile.inc
@@ -37,6 +38,8 @@ HEADERS= $(FICLDIR)/ficl.h $(FICLDIR)/ficlplatform/unix.h ../ficllocal.h
 objs/vm.o := SMOFF += check_check_deref
 pics/vm.o := SMOFF += check_check_deref
 
+CLOBBERFILES +=	libficl.a ficl machine x86
+
 MAJOR = 4
 MINOR = 1.0
 
@@ -60,5 +63,8 @@ objs/%.o pics/%.o:	$(FICLDIR)/ficlplatform/%.c $(HEADERS)
 #
 #       generic cleanup code
 #
-clobber clean:	FRC
-	$(RM) $(CLEANFILES) machine x86
+clean:	FRC
+	$(RM) $(CLEANFILES)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)

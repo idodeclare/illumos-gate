@@ -11,6 +11,7 @@
 
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -61,7 +62,8 @@ install: all $(ROOTBOOTPROG)
 
 OBJS= mb_header.o isoboot.o sio.o drv.o cons.o gptldr.o
 
-CLEANFILES += isoboot
+CLEANFILES +=	$(OBJS)
+CLOBBERFILES +=	isoboot machine x86
 
 isoboot: gptldr.bin isoboot.bin $(BTXKERN)
 	$(BTXLD) -v -E $(ORG2) -f bin -b $(BTXKERN) -V $(BOOT_VERSION) -l \
@@ -69,7 +71,7 @@ isoboot: gptldr.bin isoboot.bin $(BTXKERN)
 	@set -- `ls -l $@`; x=$$(($(ISOBOOTSIZE)-$$5)); \
 	    echo "$$x bytes available"; test $$x -ge 0
 
-CLEANFILES += gptldr.bin gptldr.out gptldr.o
+CLOBBERFILES +=	gptldr.bin gptldr.out gptldr.o
 
 gptldr.bin: gptldr.out
 	$(OBJCOPY) -S -O binary gptldr.out $@
@@ -77,7 +79,7 @@ gptldr.bin: gptldr.out
 gptldr.out:	gptldr.o
 	$(GLD) $(LD_FLAGS) -e start -Ttext $(ORG1) -o $@ gptldr.o
 
-CLEANFILES += isoboot.bin isoboot.out $(OBJS)
+CLOBBERFILES +=	isoboot.bin isoboot.out
 
 isoboot.bin: isoboot.out
 	$(OBJCOPY) -S -O binary isoboot.out $@
@@ -108,6 +110,7 @@ $(OBJS): machine x86
 	$(COMPILE.c) $<
 
 clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 clean:
-	$(RM) $(CLEANFILES) machine x86
+	$(RM) $(CLEANFILES)

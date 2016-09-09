@@ -23,11 +23,14 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2020 OmniOS Community Edition (OmniOSce) Association.
-
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 PROG=		passmgmt
 FILE=		datemsk
 TXTS=		$(FILE)
+
+CLOBBERFILES +=	$(FILE)
 
 include ../Makefile.cmd
 
@@ -63,6 +66,5 @@ datemsk: datemsk.template
 	@while read i; do echo $$i; done < datemsk.template > $@
 
 clean:
-	$(RM) datemsk
 
 include ../Makefile.targ

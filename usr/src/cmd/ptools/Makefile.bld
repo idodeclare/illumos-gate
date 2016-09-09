@@ -24,6 +24,8 @@
 # Use is subject to license terms.
 #
 # Copyright 2019 Joyent, Inc.
+# Copyright 2016, 2019 Chris Fraire <cfraire@me.com>
+#
 
 PROG:sh = basename `cd ..; pwd`
 
@@ -32,6 +34,10 @@ include ../../../Makefile.ctf
 OBJS = $(PROG).o
 
 SRCS = ../$(PROG).c
+
+# PROG would normally be clobbered not cleaned but ptools targets are hairy--
+# so *shrug*
+CLEANFILES +=	$(OBJS) $(PROG) $(LN_$(PROG))
 
 FILEMODE = 0555
 
@@ -154,4 +160,4 @@ $(ROOTBINLN): $(ROOTPROG)
 	$(RM) $@; $(LN) $(ROOTPROG) $@
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(CLEANFILES)

@@ -23,6 +23,8 @@
 # Copyright (c) 1989 by Sun Microsystems, Inc.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 FSTYPE=		nfs
 TYPEPROG=	rquotad
@@ -33,6 +35,8 @@ include ../../Makefile.fstype
 OBJS=	rpc.rquotad.o rquota_xdr.o
 SRCS=	$(OBJS:%.o=%.c)
 XFILE=	$(ROOT)/usr/include/rpcsvc/rquota.x
+
+CLOBBERFILES +=	rquota_xdr.c
 
 CPPFLAGS += -D_LARGEFILE64_SOURCE
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
@@ -47,7 +51,7 @@ $(TYPEPROG):	$(OBJS)
 		$(POST_PROCESS)
 
 clean:
-		$(RM) $(OBJS) rquota_xdr.c
+		$(RM) $(OBJS)
 
 rquota_xdr.c:	$(XFILE)
 		$(RPCGEN) -c $(XFILE) -o $@
