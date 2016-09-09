@@ -12,6 +12,7 @@
 #
 # Copyright 2020 Tintri by DDN, Inc. All rights reserved.
 # Copyright 2017 RackTop Systems.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 LIBRARY =	libfakekernel.a
@@ -51,6 +52,7 @@ SRCDIR=		../common
 
 LIBS =		$(DYNLIB)
 SRCS=   $(COBJS:%.o=$(SRCDIR)/%.c)
+DUPLICATE_SRC += $(SRCDIR)/sid.c
 
 CSTD =       $(CSTD_GNU99)
 
