@@ -22,6 +22,7 @@
 #
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 .KEEP_STATE:
@@ -41,6 +42,7 @@ EFTCLASS = writer
 LOCALOBJS = escmain.o
 OBJS = $(LOCALOBJS) $(COMMONOBJS)
 SRCS = $(LOCALOBJS:.o=.c) $(COMMONSRCS)
+CLEANFILES += y.output y.tab.c y.tab.h
 
 CPPFLAGS = $(NATIVE_CPPFLAGS) $(BASECPPFLAGS) -I../../esc/common
 CFLAGS = $(NATIVE_CFLAGS) -DESC $(CTF_FLAGS)
@@ -57,7 +59,7 @@ $(PROG): $(OBJS)
 	$(POST_PROCESS)
 
 clean:
-	$(RM) $(OBJS) y.output y.tab.c y.tab.h
+	$(RM) $(OBJS) $(CLEANFILES)
 
 clobber: clean
 	$(RM) $(PROG)
