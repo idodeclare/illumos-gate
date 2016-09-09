@@ -22,9 +22,13 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
+
+CLEANFILES +=	$(OBJS) gen_layout_obj.o struct_layout_$(ARCH).tmp
+
+CLOBBERFILES +=	gen_struct_layout check_struct_layout
 
 %.o:		../common/%.c
 		$(COMPILE.c) -o $@ $<
@@ -69,9 +73,7 @@ gen_struct_layout:	../common/gen_struct_layout.c
 			../common/gen_struct_layout.c -lctf
 
 clean:
-		$(RM) $(OBJS) $(CLEANFILES) gen_struct_layout \
-		  check_struct_layout gen_layout_obj.o \
-		  struct_layout_$(ARCH).tmp
+		$(RM) $(CLEANFILES)
 
 delete:
 		$(RM) $(PROG)

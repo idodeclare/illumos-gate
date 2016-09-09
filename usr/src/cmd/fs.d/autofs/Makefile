@@ -22,6 +22,7 @@
 #
 # Copyright (c) 1992, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2015 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 FSTYPE=		autofs
@@ -78,6 +79,8 @@ TYPEOBJS=	$(LOCAL) $(COMMON) replica.o nfs_sec.o nfs_resolve.o nfs_subr.o \
 SHAREOBJS=	$(SHARESRCS:%.c=%.o)
 
 UNSHAREOBJS=	$(UNSHARESRCS:%.c=%.o)
+
+CLOBBERFILES +=	webnfs_xdr.c webnfs_client.c webnfs.h webnfs.x
 
 POFILE= autofs.po
 GREP= egrep
@@ -212,6 +215,6 @@ lint:
 	$(LINT.c) $(TYPESRCS)
 
 clean:	clean_dump
-	$(RM) $(OBJS) webnfs_xdr.c webnfs_client.c webnfs.h webnfs.x
+	$(RM) $(OBJS)
 
 check:	$(CHKMANIFEST)

@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -33,7 +34,8 @@ GREP=		grep
 include ../Makefile.cmd
 
 CLOBBERFILES=	$(PROG)
-CLEANFILES=	$(MAILOBJS)
+
+CLEANFILES =	$(OBJS) $(MAILOBJS)
 
 MAILOBJS= 	add_recip.o cat.o ckdlivopts.o \
 		cksaved.o clr_hinfo.o copyback.o copylet.o \
@@ -121,7 +123,7 @@ lint:
 	$(LINT.c) $(MAILSRC)
 
 clean:
-	$(RM) $(OBJS) $(MAILOBJS)
+	$(RM) $(CLEANFILES)
 
-clobber:
-	$(RM) $(OBJS) $(MAILOBJS) mail
+clobber: clean
+	$(RM) $(CLOBBERFILES)

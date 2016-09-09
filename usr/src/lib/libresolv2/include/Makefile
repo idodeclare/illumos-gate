@@ -22,12 +22,15 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include		../../../Makefile.master
 
 HDRS=		os_version.h port_ipv6.h
 TMPHDRS=	new_os_version.h new_port_ipv6.h
+
+CLOBBERFILES +=	make_os_version probe_ipv6
 
 all :=		TARGET= all
 clean :=	TARGET= clean
@@ -44,7 +47,7 @@ clean:
 	$(RM) $(HDRS) $(TMPHDRS)
 
 clobber: clean
-	$(RM) make_os_version probe_ipv6
+	$(RM) $(CLOBBERFILES)
 
 # os_version.h and port_ipv6.h should be rebuilt when you change OS
 # revision. Since that's not easily expressed as a dependency, we

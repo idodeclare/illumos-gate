@@ -22,8 +22,8 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright 2013 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PERLFILES= \
@@ -40,7 +40,12 @@ AO_GENDISP_PL=../../../i86pc/cpu/scripts/ao_gendisp.pl
 ao_gendisp.pl: $(AO_GENDISP_PL)
 	$(SYMLINK) $(AO_GENDISP_PL) $@
 
-clean clobber:
-	$(RM) ao_gendisp.pl $(PERLFILES)
+clean:
+	$(RM) $(CLEANFILES) $(PERLFILES)
+
+clobber: clean
 
 include ../../../Makefile.targ
+
+# append this value late after all include statements
+CLEANFILES +=	ao_gendisp.pl

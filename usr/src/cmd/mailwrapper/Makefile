@@ -12,6 +12,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Copyright 2014 Alexander Pyhalov
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -22,9 +23,6 @@ PROG= 	       $(LIBPROG)
 include ../Makefile.cmd
 
 MWOBJS=		fgetln.o fparseln.o mailwrapper.o
-
-CLOBBERFILES=	$(PROG)
-CLEANFILES=	$(MWOBJS)
 
 SRCS=	 	$(MWOBJS:%.o=%.c)
 
@@ -44,6 +42,10 @@ ROOTSYMLINKS=	$(ROOTBIN)/mailq \
 		$(ROOTLIB)/sendmail \
 		$(ROOTUSRSBIN)/newaliases \
 		$(ROOTUSRSBIN)/sendmail
+
+CLEANFILES=	$(OBJS) $(MWOBJS)
+
+CLOBBERFILES=	$(PROG) $(ROOTSYMLINKS) $(ROOTLIBPROG) $(ROOTETCFILES)
 
 CPPFLAGS =	-I. $(CPPFLAGS.master)
 
@@ -94,7 +96,7 @@ lint:
 	$(LINT.c) $(SRCS)
 
 clean:
-	$(RM) $(OBJS) $(MWOBJS) mailwrapper
+	$(RM) $(CLEANFILES)
 
 clobber: clean
-	$(RM) $(ROOTSYMLINKS) $(ROOTLIBPROG) $(ROOTETCFILES)
+	$(RM) $(CLOBBERFILES)

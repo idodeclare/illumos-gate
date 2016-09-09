@@ -21,8 +21,8 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright (c) 2015 by Delphix. All rights reserved.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 # cmd/Makefile.targ
 # common target definitions for command builds
@@ -35,8 +35,15 @@
 $(ROOTMANIFEST) :=	FILEMODE= 444
 $(ROOTSVCBIN) :=	FILEMODE= 544
 
+#
+# Define a special macro for clobbering to allow a few special, dependent
+# Makefiles that actually have committed elements of $(PROG) which should not
+# be deleted to override the definition of CMDCLOBBEREES
+#
+CMDCLOBBEREES =	$(PROG) $(CLOBBERFILES) $(CLOBBERDIRS)
+
 clobber: clean
-	-$(RM) $(PROG) $(CLOBBERFILES)
+	-$(RM) -r $(CMDCLOBBEREES)
 
 lint_PROG:	$$(PROG).c
 	$(LINT.c) $(PROG).c $(LDLIBS)

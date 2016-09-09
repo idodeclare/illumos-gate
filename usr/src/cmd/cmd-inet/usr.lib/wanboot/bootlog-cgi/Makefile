@@ -22,13 +22,18 @@
 #
 # Copyright 2003 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# ident	"%Z%%M%	%I%	%E% SMI"
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include ../Makefile.com
 
 PROG=		bootlog-cgi
+
+# $(SRC)/cmd/Makefile.targ clobbers $(PROG), but every element of PROG here is
+# committed. Redefine therefore the cmd clobber macro to exclude $(PROG), and
+# define UNIGNOREFILES as an explicit accounting of the committed state.
+CMDCLOBBEREES=	$(CLOBBERFILES)
+UNIGNOREFILES=	bootlog-cgi
 
 all:		$(PROG)
 

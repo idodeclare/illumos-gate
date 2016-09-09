@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/tools/Makefile.tools
@@ -29,6 +30,9 @@ SOURCES=	$(FR:%=$(SOFTCORE)/%)
 
 OBJS=	makesoftcore.o lz4.o
 SRCS=	makesoftcore.c lz4.c
+
+CLOBBERFILES +=	$(PROG) softcore.c
+
 LDLIBS= -lumem
 
 CPPFLAGS += -I.. -I$(SRC)/common/ficl
@@ -42,5 +46,8 @@ $(PROG): $(OBJS)
 %.o: $(SOFTCORE)/%.c
 	$(COMPILE.c) $<
 
-clobber clean:
-	$(RM) softcore.c $(OBJS) $(PROG)
+clean:
+	$(RM) $(OBJS)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)

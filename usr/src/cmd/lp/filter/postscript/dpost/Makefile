@@ -23,6 +23,7 @@
 # Copyright 1989-2002 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # cmd/lp/filter/postscript/dpost/Makefile
 #
@@ -32,6 +33,8 @@ include         ../../../Makefile.lp
 PROG=           dpost
 
 SRCS =		dpost.c draw.c color.c pictures.c ps_include.c
+
+CLOBBERFILES +=	ps_include.h
 
 OBJS =		$(SRCS:%.c=%.o)
 
@@ -72,7 +75,7 @@ ps_include.h:	ps_include.ps ps_include.awk
 		$(RM) $@; $(AWK) -f ps_include.awk ps_include.ps >$@
 
 clean:
-		$(RM) $(OBJS) ps_include.h
+		$(RM) $(OBJS)
 
 strip:
 		$(STRIP) $(PROG)
