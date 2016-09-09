@@ -12,6 +12,7 @@
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -22,9 +23,11 @@ CPPFLAGS += -I$(ZFSSRC)
 
 all install: libi386.a
 
-clean: clobber
-clobber:
-	$(RM) machine x86 $(OBJS) libi386.a
+clean:
+	$(RM) $(OBJS)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 SRCS=	\
 	amd64_tramp.S \
@@ -102,6 +105,8 @@ pnglite.o := CPPFLAGS += -I$(ZLIB)
 SRCS +=	$(ZFSSRC)/devicename_stubs.c
 OBJS +=	devicename_stubs.o
 
+CLOBBERFILES +=	machine x86 libi386.a
+
 BOOT_COMCONSOLE_PORT= 0x3f8
 CPPFLAGS +=	-DCOMPORT=${BOOT_COMCONSOLE_PORT}
 
@@ -126,8 +131,6 @@ multiboot.o := CPPFLAGS += -I../../sys/cddl/boot/zfs
 multiboot2.o := CPPFLAGS += -I../../sys/cddl/boot/zfs
 devicename.o := CPPFLAGS += -I../../sys/cddl/boot/zfs
 devicename_stubs.o := CPPFLAGS += -I../../sys/cddl/boot/zfs
-
-CLEANFILES +=	machine x86
 
 include ../Makefile.inc
 
