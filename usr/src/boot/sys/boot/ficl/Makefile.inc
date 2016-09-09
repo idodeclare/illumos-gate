@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -33,6 +34,10 @@ OBJECTS= dictionary.o system.o fileaccess.o float.o double.o prefix.o search.o
 OBJECTS += softcore.o stack.o tools.o vm.o primitives.o unix.o utility.o
 OBJECTS += hash.o callback.o word.o loader.o
 HEADERS= $(FICLDIR)/ficl.h $(FICLDIR)/ficlplatform/unix.h ../ficllocal.h
+
+CLEANFILES +=	*.o
+
+CLOBBERFILES +=	*.a libficl.* ficl machine x86
 #
 
 MAJOR = 4
@@ -66,5 +71,8 @@ $(OBJECTS): machine x86
 #
 #       generic cleanup code
 #
-clobber clean:	FRC
-	$(RM) *.o *.a libficl.* ficl machine x86
+clean:		FRC
+	$(RM) $(CLEANFILES)
+
+clobber:	FRC clean
+	$(RM) $(CLOBBERFILES)

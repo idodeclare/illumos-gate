@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -21,6 +22,8 @@ LD=	$(GNU_ROOT)/bin/gld
 CC=	$(GCC_ROOT)/bin/gcc
 
 LIBRARY=	libstand.a
+
+CLOBBERFILES +=	$(LIBRARY) machine x86
 
 all install: $(LIBRARY)
 
@@ -42,9 +45,11 @@ include ${LIBSTAND_SRC}/Makefile.inc
 $(LIBRARY): $(SRCS) $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
 
-clean: clobber
-clobber:
-	$(RM) $(CLEANFILES) $(OBJS) machine x86 libstand.a
+clean:
+	$(RM) $(CLEANFILES) $(OBJS)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 machine:
 	$(RM) machine

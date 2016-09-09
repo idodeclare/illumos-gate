@@ -9,6 +9,7 @@
 # http://www.illumos.org/license/CDDL.
 #
 # Copyright 2016 Joyent, Inc.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 LIBRARY =	acpi.a
@@ -19,6 +20,8 @@ OBJECTS= getopt.o osl.o utascii.o utdebug.o utexcep.o utglobal.o  utmath.o \
 	utnonansi.o utprint.o utxferror.o
 SRCS = $(OBJECTS:.o=.c)
 
+CLOBBERFILES +=	$(LIBRARY)
+
 CERRWARN += -_gcc=-Wno-unused-function
 
 CPPFLAGS += -I$(SRC)/uts/intel/sys/acpi -DACPI_APPLICATION
@@ -27,8 +30,6 @@ LDLIBS += -lc
 
 HSONAME=
 MAPFILES = mapfile-vers
-
-CLOBBERFILES= $(LIBRARY)
 
 .KEEP_STATE:
 

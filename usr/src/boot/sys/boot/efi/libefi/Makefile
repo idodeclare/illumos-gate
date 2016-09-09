@@ -12,6 +12,7 @@
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -35,6 +36,8 @@ SRCS=	delay.c devicename.c devpath.c efi_console.c efi_driver_utils.c \
 #.endif
 
 OBJS=	$(SRCS:%.c=%.o)
+
+CLOBBERFILES=	machine x86 lib$(LIB).a
 
 CPPFLAGS= -D_STANDALONE
 CFLAGS = -O2
@@ -69,7 +72,7 @@ lib$(LIB).a: $(SRCS) $(OBJS)
 
 clean: clobber
 clobber:
-	$(RM) $(CLEANFILES) $(OBJS) machine x86 lib$(LIB).a
+	$(RM) $(CLEANFILES) $(OBJS) $(CLOBBERFILES)
 
 machine:
 	$(RM) machine

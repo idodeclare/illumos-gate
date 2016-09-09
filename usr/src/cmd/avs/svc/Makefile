@@ -20,12 +20,15 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include ../../Makefile.cmd
 
 XML = nws_scm.xml nws_sv.xml nws_ii.xml nws_rdc.xml nws_rdcsyncd.xml
 SHFILES = $(XML)
+
+CLEANFILES +=	*.xml
 
 ROOTSVCSYSFILES = $(XML:%=$(ROOTSVCSYSTEM)/%)
 
@@ -40,7 +43,7 @@ lint:
 install: all $(ROOTSVCSYSFILES)
 
 clean:
-	$(RM) *.xml
+	$(RM) $(CLEANFILES)
 
 $(SHFILES): $(XML:%=manifest/%)
 	$(RM) $(@F)

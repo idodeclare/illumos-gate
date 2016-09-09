@@ -21,15 +21,15 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright (c) 2015 by Delphix. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PROG:sh=	basename `pwd`
 BASHPROG=	zloop
 ROOTBASHPROG=	$(ROOTBIN)/$(BASHPROG)
 
-CLOBBERFILES=	$(BASHPROG)
+CLOBBERFILES +=	$(BASHPROG) $(ROOTBASHPROG)
 
 include ../Makefile.cmd
 

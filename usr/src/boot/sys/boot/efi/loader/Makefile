@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -131,6 +132,7 @@ loader.sym:	$(OBJS) $(DPADD)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)
 
 CLEANFILES +=   machine x86
+CLOBBERFILES += loader.sym loader.efi
 
 machine:
 	$(RM) machine
@@ -143,7 +145,7 @@ x86:
 $(OBJS): machine x86
 
 clean clobber:
-	$(RM) $(CLEANFILES) $(OBJS) loader.sym loader.efi
+	$(RM) $(CLEANFILES) $(OBJS) $(CLOBBERFILES)
 
 %.o:	%.c
 	$(COMPILE.c) $<

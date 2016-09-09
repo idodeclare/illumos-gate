@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -118,6 +119,9 @@ LINTFILES = $(SRCS:%.c=%.ln)
 PROG = mdb
 OBJS = $(SRCS:%.c=%.o) mdb_lex.o mdb_grammar.o
 
+CLEANFILES +=	$(OBJS) mdb_lex.c mdb_grammar.c mdb_grammar.h \
+    y.tab.h y.tab.c y.output
+
 LINK = adb
 ROOTLINK = $(ROOTBIN)/$(LINK)
 ROOTLINK32 = $(LINK:%=$(ROOTBIN32)/%)
@@ -181,8 +185,7 @@ clean.lint:
 	$(RM) $(LINTFILES)
 
 clean:
-	$(RM) $(OBJS)
-	$(RM) mdb_lex.c mdb_grammar.c mdb_grammar.h y.tab.h y.tab.c y.output
+	$(RM) $(CLEANFILES)
 
 clobber: clean clean.lint
 	$(RM) $(PROG)
