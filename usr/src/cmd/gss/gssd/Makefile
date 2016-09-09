@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -51,7 +52,7 @@ SRCS	= $(OBJS:.o=.c)
 RSRC	= $(ROBJS:.o=.c)
 RSRC 	+= gssd.h
 
-CLOBBERFILES += $(TESTPROG)
+CLOBBERFILES +=	$(TESTPROG) $(RSRC) gssd.x
 
 include ../../Makefile.cmd
 
@@ -138,7 +139,7 @@ install: all $(DIRS) $(ROOTLIBPROG) $(ROOTMANIFEST)
 install_h:
 
 clean:
-	$(RM) $(OBJS) $(RSRC) gssd.x
+	$(RM) $(OBJS)
 
 lint_gssd:
 	$(LINT.c) $(GSSD_LINTS)

@@ -21,6 +21,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -57,6 +58,10 @@ MAPFILE.INT =	../expr/mapfile-intf
 LDFLAGS +=	$(MAPFILE.INT:%=-M%)
 
 POFILE= ed_cmd.po
+
+CLOBBERFILES +=	$(XPG4) $(XPG6) compile.c.i
+
+CLOBBERDIRS +=	edobjs.xpg4 edobjs.xpg6
 
 %.po: ../expr/%.c
 	$(COMPILE.cpp) $< > $*.c.i
@@ -115,8 +120,7 @@ values-xpg6.o: ../../lib/crt/common/values-xpg6.c
 	$(COMPILE.c) -o $@ ../../lib/crt/common/values-xpg6.c
 
 clean:
-	-@rm -rf $(OBJS) $(XPG4) $(XPG6) edobjs.xpg4 edobjs.xpg6 \
-		compile.c.i
+	-$(RM) $(OBJS)
 
 lint:	lint_PROG
 

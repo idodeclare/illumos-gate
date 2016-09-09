@@ -23,6 +23,7 @@
 # Copyright 2016 RackTop Systems.
 # Copyright 2017 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include		$(SRC)/cmd/Makefile.cmd
@@ -83,6 +84,8 @@ SUBDIRS-i386=
 SUBDIRS-sparc=	rtld.4.x
 
 SUBDIRS=	$(SUBDIRS-common) $(SUBDIRS-$(MACH))
+
+PROTODIR=	proto/$(MACH)
 
 # Messaging support
 #
@@ -173,7 +176,7 @@ native-add:	FRC
 
 native-clobber:
 		@ cd tools; pwd; $(MAKE) $(TARGET)
-		$(RM) -r proto/$(MACH)
+		$(RM) -r $(PROTODIR)
 
 FRC:
 

@@ -11,6 +11,7 @@
 
 #
 # Copyright 2018 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -27,8 +28,10 @@ FR = softcore.fr ifbrack.fr prefix.fr ficl.fr jhlocal.fr marker.fr
 FR += freebsd.fr ficllocal.fr oo.fr classes.fr string.fr wordsets.fr
 SOURCES=	$(FR:%=$(SOFTCORE)/%)
 
+CLOBBERFILES +=	softcore.c
+
 softcore.c: $(SOURCES)
 	$(PROG) $(SOURCES)
 
 clobber clean:
-	$(RM) softcore.c
+	$(RM) $(CLOBBERFILES)

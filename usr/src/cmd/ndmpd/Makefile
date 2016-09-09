@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -117,6 +118,8 @@ TLM_OBJ = \
 
 SRCS= $(NDMP_OBJ:%.o=$(NDMP_DIR)/%.c) $(TLM_OBJ:%.o=$(TLM_DIR)/%.c)
 
+CLEANFILES +=	$(NDMP_DIR)/*.o $(TLM_DIR)/*.o
+
 SVCMETHOD = svc-ndmp
 $(ROOTSVCMETHOD) := FILEMODE = 0555
 
@@ -144,8 +147,6 @@ install: all $(ROOTNDMPDDIR)  $(ROOTNDMPDFILE) $(ROOTSVCMETHOD) $(ROOTMANIFEST)
 
 check:	$(CHKMANIFEST)
 
-clobber:
-
 $(PROG) : $(OBJS)
 	$(LINK.c) -o $@  $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
@@ -159,6 +160,8 @@ $(TLM_DIR)/%.o : $(TLM_DIR)/%.c
 lint:	lint_SRCS
 
 clean:  rpcclean
-	rm -f $(NDMP_DIR)/*.o $(TLM_DIR)/*.o
+	$(RM) $(CLEANFILES)
+
+clobber: clean
 
 include $(SRC)/cmd/Makefile.targ

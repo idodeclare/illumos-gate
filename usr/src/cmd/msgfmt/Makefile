@@ -26,6 +26,7 @@
 #         All Rights Reserved
 #
 # Copyright 2017 Joyent, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 # cmd/msgfmt/Makefile
@@ -59,7 +60,7 @@ POFILE= msgfmt_all.po
 POFILES= $(SOBJS:%.o=%.po) $(GOBJS:%.o=%.po) $(COBJS:%.o=%.po) \
 	$(BOBJS:%.o=%.po) $(YOBJS:%.o=%.po)
 
-CLOBBERFILES += gmsgfmt_rev
+CLOBBERFILES += gmsgfmt_rev gnu_po.c y.tab.h xgettext.lx.c
 
 ROOTBINPROG= $(BINPROG:%=$(ROOTBIN)/%)
 ROOTLIBPROG= $(LIBPROG:%=$(ROOTLIB)/%)
@@ -103,7 +104,7 @@ install: all $(ROOTBINPROG) $(ROOTLIBPROG)
 clean:  
 	$(RM) $(SOBJS) $(GOBJS) $(YOBJS) $(COBJS) \
 		$(XOBJS) $(LXOBJS) $(BOBJS) $(LOBJS) \
-		$(POFILE) $(POFILES) gnu_po.c y.tab.h xgettext.lx.c
+		$(POFILE) $(POFILES)
 
 lint:	gnu_po.c y.tab.h
 	$(LINT.c) $(SOBJS:%.o=%.c) $(COBJS:%.o=%.c) $(LDLIBS)

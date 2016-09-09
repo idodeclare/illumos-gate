@@ -22,6 +22,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -30,6 +31,10 @@ PROG:sh = basename `cd ..; pwd`
 OBJS = $(PROG).o
 
 SRCS = ../$(PROG).c
+
+# PROG would normally be clobbered not cleaned but ptools targets are hairy--
+# so *shrug*
+CLEANFILES +=	$(OBJS) $(PROG)
 
 FILEMODE = 0555
 
@@ -148,7 +153,7 @@ $(LN_$(PROG)): $(PROG)
 	-$(LN) $(PROG) $@
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(CLEANFILES)
 
 lint:
 	$(LINT.c) $(SRCS) $(LDLIBS)

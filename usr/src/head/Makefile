@@ -25,6 +25,7 @@
 # Copyright 2013 Garrett D'Amore <garrett@damore.org>
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2017 Nexenta Systems, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 # include global definitions
@@ -286,6 +287,8 @@ RPCSVC_GEN_HDRS = \
 	ufs_prot.h	\
 	nfs_acl.h
 
+REL_RPCSVC_GEN_HDRS =	$(RPCSVC_GEN_HDRS:%=rpcsvc/%)
+
 SYMHDRASSERT = $(ROOT)/usr/include/iso/assert_iso.h
 SYMHDRERRNO = $(ROOT)/usr/include/iso/errno_iso.h
 SYMHDRFLOAT = $(ROOT)/usr/include/iso/float_iso.h
@@ -415,8 +418,10 @@ install_h: 	$(ROOTDIRS) .WAIT $(ROOTHDRS) $(SYMHDRASSERT) $(SYMHDRERRNO) \
 
 check:	$(CHECKHDRS)
 
-clean clobber:
-	cd rpcsvc ; $(RM) $(RPCSVC_GEN_HDRS)
+clean:
+	$(RM) $(REL_RPCSVC_GEN_HDRS);
+
+clobber: clean
 
 $(ROOTDIRS):
 	$(INS.dir)

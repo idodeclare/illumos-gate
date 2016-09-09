@@ -22,6 +22,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -70,14 +71,16 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 # not linted
 SMATCH=off
 
+CLOBBERFILES += \
+    $(CSRCS:%.c=%.exe) $(CSRCS:%.c=%.o) \
+    $(SSRCS:%.s=%.exe) $(SSRCS:%.s=%.o) \
+    $(DSRCS:%.d=%.o)
+
 all: $(EXES)
 
 clean lint:
 
 clobber: FRC
-	-$(RM) $(CSRCS:%.c=%.exe) $(CSRCS:%.c=%.o)
-	-$(RM) $(SSRCS:%.s=%.exe) $(SSRCS:%.s=%.o)
-	-$(RM) $(DSRCS:%.d=%.o)
 	-$(RM) $(CLOBBERFILES)
 
 install: $(ROOT_TSTS) $(ROOT_EXES)

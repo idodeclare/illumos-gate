@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2010 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 ETCFILES= ioctl.syscon passwd shadow motd
@@ -42,6 +43,7 @@ ROOTETCFTPUSERSLINK= $(ROOTETC)/ftpusers
 $(ROOTETC)/shadow 	:=	FILEMODE =	400
 $(ROOTVARSMB)/smbpasswd :=	FILEMODE =	0400
 
+CLOBBERFILES +=	$(ROOTETCFTPUSERSLINK) motd smbpasswd
 
 .KEEP_STATE:
 
@@ -51,13 +53,6 @@ $(ROOTETCFTPUSERSLINK):	$(ROOTETCFTPDFILES)
 all: $(ETCFILES) $(KVMFILES) $(SMBFILES) $(FTPDFILES)
 
 install: all $(ROOTETCFILES) $(ROOTETCFTPDFILES) $(ROOTUSRKVMFILES) $(ROOTVARSMBFILES) $(ROOTETCFTPUSERSLINK)
-
-clean:
-	$(RM) $(ROOTETCFTPUSERSLINK)
-
-lint:
-
-clobber:
 
 motd:	FRC
 	@-$(ECHO) "rebuilding motd"
@@ -74,6 +69,6 @@ clean:
 lint:
 
 clobber:
-	$(RM) motd smbpasswd
+	$(RM) $(CLOBBERFILES)
 
 FRC:

@@ -22,6 +22,7 @@
 # Copyright 2015 Gary Mills
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -49,6 +50,8 @@ LIBPROG=	acctcms acctcon acctcon1 acctcon2 acctdisk \
 		ptecms.awk ptelus.awk
 ETCPROG=	holidays
 INITPROG=	acct
+
+CLOBBERFILES +=	$(PROG) $(SHFILE1) holidays
 
 include		../Makefile.cmd
 
@@ -153,7 +156,7 @@ FRC:
 clean: $(SUBDIRS)
 
 clobber: $(SUBDIRS)
-	$(RM) $(PROG) $(SHFILE1) holidays
+	$(RM) $(CLOBBERFILES)
 
 lint:	$(SUBDIRS)
 	$(LINT.c) $(SRCS)

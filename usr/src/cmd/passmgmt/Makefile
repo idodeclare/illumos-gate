@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -27,6 +28,8 @@
 PROG= 		passmgmt
 FILE= 		datemsk
 TXTS= 		$(FILE)
+
+CLOBBERFILES +=	$(FILE)
 
 include ../Makefile.cmd
 
@@ -62,7 +65,6 @@ datemsk: datemsk.template
 	@while read i; do echo $$i; done < datemsk.template > $@
 
 clean:
-	$(RM) datemsk
 
 lint:	lint_PROG
 
