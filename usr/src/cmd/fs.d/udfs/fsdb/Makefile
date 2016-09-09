@@ -21,6 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 FSTYPE=		udfs
@@ -50,6 +51,9 @@ CERRWARN +=	-_gcc=-Wno-unused-value
 CERRWARN +=	-_gcc=-Wno-unused-function
 
 SRCS=	fsdb.c ud_lib.c
+
+CLEANFILES += ud_lib.c ud_lib.h fsdb.o ud_lib.o fsdb_yacc.o fsdb_lex.o \
+	fsdb_yacc.c fsdb_lex.c y.tab.c y.tab.h lex.yy.c
 
 fsdb : fsdb_yacc.o fsdb_lex.o ud_lib.o fsdb.o $(MAPFILES)
 	$(LINK.c) -o $@ fsdb.o fsdb_yacc.o fsdb_lex.o \
@@ -87,8 +91,7 @@ fsdb_lex.o : lex.yy.c
 	$(POST_PROCESS_O)
 
 clean :
-	$(RM) ud_lib.c ud_lib.h fsdb.o ud_lib.o fsdb_yacc.o fsdb_lex.o
-	$(RM) fsdb_yacc.c fsdb_lex.c y.tab.c y.tab.h lex.yy.c
+	$(RM) $(CLEANFILES)
 
 # for messaging catalog
 #

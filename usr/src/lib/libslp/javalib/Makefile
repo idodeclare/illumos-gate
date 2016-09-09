@@ -24,11 +24,20 @@
 #
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Makefile for building SLP API and slpd.
 
 include $(SRC)/Makefile.master
 include Makefile.conf
+
+CLEANFILES +=	$(CLASSES)/$(PKGPATH)/*.class $(CLASSES)/$(PKGPATH)/*.properties \
+  $(CLASSES)/manifest* \
+  manifest_slpd.template manifest_slp.template
+CLEANDIRS +=	$(DOC)/*
+
+CLOBBERFILES +=	$(CLASSES)/*.jar
+CLOBBERDIRS +=	$(CLASSES)/META_INF
 
 #Compile and create basic library.
 
@@ -40,14 +49,12 @@ include Makefile.conf
 all:            $(CLASSES) $(ALL_SLP_CLASSES)
 
 clean:
-		-$(RM) $(CLASSES)/$(PKGPATH)/*.class $(CLASSES)/$(PKGPATH)/*.properties
-		-$(RM) $(CLASSES)/manifest*
-		-$(RM) -r $(DOC)/*
-		-$(RM) manifest_slpd.template manifest_slp.template
+		-$(RM) $(CLEANFILES)
+		-$(RM) -r $(CLEANDIRS)
 
 clobber:	clean
-		-$(RM) $(CLASSES)/*.jar
-		-$(RM) -r $(CLASSES)/META_INF
+		-$(RM) $(CLOBBERFILES)
+		-$(RM) -r $(CLOBBERDIRS)
 
 # Make the class dir, if it doesn't exist
 $(CLASSES):

@@ -21,6 +21,7 @@
 #
 #
 # Copyright (c) 1989 by Sun Microsystems, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 FSTYPE=		nfs
@@ -38,6 +39,8 @@ CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += -_gcc=-Wno-unused-variable
 LDLIBS += -lnsl
 
+CLEANFILES += rquota_xdr.c
+
 $(TYPEPROG):	$(OBJS)
 		$(LINK.c) -o $@ $(LDLIBS) $(OBJS)
 		$(POST_PROCESS)
@@ -45,7 +48,7 @@ $(TYPEPROG):	$(OBJS)
 lint:		lint_SRCS
 
 clean:
-		$(RM) $(OBJS) rquota_xdr.c
+		$(RM) $(OBJS) $(CLEANFILES)
 
 rquota_xdr.c:	$(XFILE)
 		$(RPCGEN) -c $(XFILE) -o $@
