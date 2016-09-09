@@ -11,6 +11,7 @@
 
 #
 # Copyright 2020 Robert Mustacchi
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
@@ -94,6 +95,6 @@ $(ROOTOPTSTDIO)/%: %
 	$(POST_PROCESS)
 
 clobber:
-	$(RM) $(PROGS32) $(PROGS64)
+	$(RM) $(PROGS32) $(PROGS64) $(PROGSLFS)
 
 FRC:
