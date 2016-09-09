@@ -21,8 +21,8 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright 2017 Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 FSTYPE=		udfs
@@ -31,6 +31,8 @@ SRCS=		labelit.c
 ATTMK=		$(LIBPROG)
 
 include		../../Makefile.fstype
+
+CLEANFILES +=	labelit.o ud_lib.o
 
 LDLIBS += -ladm
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
@@ -63,5 +65,5 @@ $(POFILE):	$(SRCS) ../common/ud_lib.h
 	sed "/^domain/d" messages.po > $@
 	$(RM) $(POFILE).i messages.po
 
-clean :
-	rm -f labelit.o ud_lib.o
+clean:
+	$(RM) $(CLEANFILES)

@@ -24,6 +24,7 @@
 # Use is subject to license terms.
 # Copyright 2016 Nexenta Systems, Inc.
 # Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 include ../../Makefile.cmd
@@ -137,9 +138,18 @@ SEEDFILEMODE = 0444
 CONFIGD = ../configd/svc.configd-native
 SVCCFG = ../svccfg/svccfg-native
 
+SEED_DBFILES =	global.db nonglobal.db miniroot.db
+
+CLEANFILES +=	common.db $(COMMON_DESCRIPTIONS) $(GLOBAL_ZONE_DESCRIPTIONS) \
+	$(NON_GLOBAL_ZONE_DESCRIPTIONS) $(MINIROOT_DESCRIPTIONS)
+
+CLOBBERFILES +=	$(SEED_DBFILES)
+
+CLOBBERDIRS +=	lib/
+
 .KEEP_STATE:
 
-all: global.db nonglobal.db miniroot.db
+all: $(SEED_DBFILES)
 
 $(CONFIGD): FRC
 	@cd ../configd; pwd; $(MAKE) native
@@ -207,13 +217,11 @@ $(INSTALLSEED):
 	$(INS.dir)
 
 clean:
-	$(RM) common.db
-	$(RM) $(COMMON_DESCRIPTIONS) $(GLOBAL_ZONE_DESCRIPTIONS)
-	$(RM) $(NON_GLOBAL_ZONE_DESCRIPTIONS) $(MINIROOT_DESCRIPTIONS)
+	$(RM) $(CLEANFILES)
 
-clobber:
-	$(RM) common.db global.db nonglobal.db miniroot.db
-	$(RM) -r lib/
+clobber: clean
+	$(RM) $(CLOBBERFILES)
+	$(RM) -r $(CLOBBERDIRS)
 
 $(MFST_DIRS): FRC
 	$(INS.dir)

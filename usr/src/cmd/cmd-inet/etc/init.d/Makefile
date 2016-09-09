@@ -20,6 +20,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # Copyright 2022 Garrett D'Amore
 #
@@ -27,6 +28,12 @@
 
 PPPD=	pppd
 PROG=	$(PPPD)
+
+# $(SRC)/cmd/Makefile.targ clobbers $(PROG), but every element of PROG here is
+# committed. Redefine therefore the cmd clobber macro to exclude $(PROG), and
+# define UNIGNOREFILES as an explicit accounting of the committed state.
+CMDCLOBBEREES=	$(CLOBBERFILES)
+UNIGNOREFILES=	$(PROG4) $(PROG5) $(PPPD)
 
 include ../../../Makefile.cmd
 

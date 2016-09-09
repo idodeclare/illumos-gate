@@ -21,7 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 # Copyright (c) 2018, Joyent, Inc.
 #
 
@@ -54,6 +54,10 @@ SMATCH=off
 
 SRCS=	fsdb.c ../common/ud_lib.c
 
+CLEANFILES += fsdb.o ud_lib.o fsdb_yacc.o fsdb_lex.o
+
+CLOBBERFILES += fsdb_yacc.c fsdb_lex.c y.tab.c y.tab.h lex.yy.c
+
 fsdb : fsdb_yacc.o fsdb_lex.o ud_lib.o fsdb.o $(MAPFILES)
 	$(LINK.c) -o $@ fsdb.o fsdb_yacc.o fsdb_lex.o \
 			ud_lib.o $(LDLIBS)
@@ -82,8 +86,6 @@ fsdb_lex.o : lex.yy.c
 	$(POST_PROCESS_O)
 
 clean :
-	$(RM) fsdb.o ud_lib.o fsdb_yacc.o fsdb_lex.o
-	$(RM) fsdb_yacc.c fsdb_lex.c y.tab.c y.tab.h lex.yy.c
 
 # for messaging catalog
 #

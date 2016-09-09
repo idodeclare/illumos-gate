@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # Copyright 2020 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
@@ -121,7 +122,7 @@ OBJS =		$(NOBJS) $(XPG4COMMONOBJS) $(XPG4ATOBJS) $(XPG4CTOBJS) \
 
 SRCS =		$(NOBJS:%.o=%.c) $(GETRESPSRC)
 
-CLOBBERFILES +=	$(SCRIPT) $(XPG4SCRIPT)
+CLOBBERFILES +=	$(SCRIPT) $(XPG4SCRIPT) att1.h att1.c att2.c
 
 $(ROOTLIBCRON) :=		SYMLNKDEST = ../../etc/cron.d
 $(ROOTETC)/cron :=		SYMLNKDEST = ../usr/sbin/cron
@@ -223,7 +224,7 @@ $(POFILE):	$(POFILES)
 	$(RM) $@; cat $(POFILES) > $@
 
 clean :
-		$(RM) $(OBJS) att1.h att1.c att2.c
+		$(RM) $(OBJS)
 
 strip :
 		$(STRIP) $(PROG) $(XPG4) $(XPG6)

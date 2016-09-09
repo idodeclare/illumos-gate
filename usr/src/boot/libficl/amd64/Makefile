@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -24,7 +25,7 @@ all install: $(DYNLIB)
 include ../Makefile.com
 
 CFLAGS += -m64 $(CFLAGS64)
-
+#CLOBBERFILES +=	machine x86 sha1-x86_64.s libcrypto.a
 include $(BOOTSRC)/Makefile.lib
 
 FRC:

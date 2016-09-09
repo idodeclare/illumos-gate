@@ -11,6 +11,7 @@
 
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -59,7 +60,7 @@ install: all $(ROOTBOOTPROG)
 
 OBJS= mb_header.o isoboot.o sio.o drv.o cons.o gptldr.o
 
-CLEANFILES += isoboot
+CLEANFILES += isoboot machine x86
 
 isoboot: gptldr.bin isoboot.bin $(BTXKERN)
 	$(BTXLD) -v -E $(ORG2) -f bin -b $(BTXKERN) -V $(BOOT_VERSION) -l \
@@ -108,4 +109,4 @@ $(OBJS): machine x86
 clobber: clean
 
 clean:
-	$(RM) $(CLEANFILES) machine x86
+	$(RM) $(CLEANFILES)
