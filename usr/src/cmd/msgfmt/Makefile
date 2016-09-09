@@ -21,6 +21,7 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 #       Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T
 #         All Rights Reserved
@@ -67,6 +68,8 @@ CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-unused-variable
 
+CLEANFILES += gnu_po.c y.tab.h xgettext.lx.c
+
 .KEEP_STATE:
 
 .PARALLEL:	$(SOBJS) $(GOBJS) $(YOBJS) $(COBJS) $(BOBJS) $(LOBJS) \
@@ -99,7 +102,7 @@ install: all $(ROOTBINPROG) $(ROOTLIBPROG)
 clean:  
 	$(RM) $(SOBJS) $(GOBJS) $(YOBJS) $(COBJS) \
 		$(XOBJS) $(LXOBJS) $(BOBJS) $(LOBJS) \
-		$(POFILE) $(POFILES) gnu_po.c y.tab.h xgettext.lx.c
+		$(POFILE) $(POFILES) $(CLEANFILES)
 
 lint:	gnu_po.c y.tab.h
 	$(LINT.c) $(SOBJS:%.o=%.c) $(COBJS:%.o=%.c) $(LDLIBS)

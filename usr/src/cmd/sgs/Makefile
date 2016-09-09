@@ -21,6 +21,7 @@
 #
 # Copyright (c) 1991, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include		$(SRC)/cmd/Makefile.cmd
@@ -81,6 +82,8 @@ SUBDIRS-i386=
 SUBDIRS-sparc=	rtld.4.x
 
 SUBDIRS=	$(SUBDIRS-common) $(SUBDIRS-$(MACH))
+
+PROTODIR=	proto/$(MACH)
 
 # Messaging support
 #
@@ -170,13 +173,13 @@ native-add:	native-proto FRC
 
 native-clobber:
 		@ cd tools; pwd; $(MAKE) $(TARGET)
-		$(RM) -r proto/$(MACH)
+		$(RM) -r $(PROTODIR)
 
 native-proto:
-		-@mkdir -p proto/$(MACH)
-		-@mkdir -p proto/$(MACH)/lib
-		-@mkdir -p proto/$(MACH)/usr
-		-@mkdir -p proto/$(MACH)/usr/bin
+		-@mkdir -p $(PROTODIR)
+		-@mkdir -p $(PROTODIR)/lib
+		-@mkdir -p $(PROTODIR)/usr
+		-@mkdir -p $(PROTODIR)/usr/bin
 
 FRC:
 

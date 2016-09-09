@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 # Suffixes for files that flag a particular check
@@ -35,6 +36,8 @@ check     := TARGET = check
 cstyle    := TARGET = cstyle
 hdrchk    := TARGET = hdrchk
 lint      := TARGET = lint
+
+CLEANFILES += *.o *.ln *.i *.lint
 
 .KEEP_STATE:
 
@@ -94,7 +97,7 @@ check: cstyle hdrchk
 clobber: ${SUBDIRS}
 
 clean: ${SUBDIRS}
-	$(RM) *.o *.ln *.i *.lint $(CLEANFILES)
+	$(RM) $(CLEANFILES)
 
 catalog: $(POFILE)
 
