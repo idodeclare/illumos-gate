@@ -23,6 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 TESTPROG = gssdtest
 
@@ -48,7 +50,7 @@ SRCS	= $(OBJS:.o=.c)
 RSRC	= $(ROBJS:.o=.c)
 RSRC	+= gssd.h
 
-CLOBBERFILES += $(TESTPROG)
+CLOBBERFILES +=	$(TESTPROG) $(RSRC) gssd.x
 
 include ../../Makefile.cmd
 
@@ -134,7 +136,7 @@ install: all $(DIRS) $(ROOTLIBPROG) $(ROOTMANIFEST)
 install_h:
 
 clean:
-	$(RM) $(OBJS) $(RSRC) gssd.x
+	$(RM) $(OBJS)
 
 check:	$(CHKMANIFEST)
 
