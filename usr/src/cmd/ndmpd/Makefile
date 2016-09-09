@@ -1,5 +1,6 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -132,6 +133,8 @@ $(ROOTNDMPDDIR):
 $(ROOTNDMPDDIR)/%: %
 	$(INS.file)
 
+CLEANFILES += $(NDMP_DIR)/*.o $(TLM_DIR)/*.o
+
 .KEEP_STATE:
 
 all: $(PROG)
@@ -155,6 +158,6 @@ $(TLM_DIR)/%.o : $(TLM_DIR)/%.c
 lint:	lint_SRCS
 
 clean:  rpcclean
-	rm -f $(NDMP_DIR)/*.o $(TLM_DIR)/*.o
+	$(RM) $(CLEANFILES)
 
 include $(SRC)/cmd/Makefile.targ

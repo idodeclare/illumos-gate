@@ -22,6 +22,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PROG:sh = basename `cd ..; pwd`
@@ -116,6 +117,8 @@ $(PROG): $$(OBJS)
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
+CLEANFILES += $(PROG)
+
 #
 # Install the ptool, symlinking it into /usr/proc/bin if PTOOL_TYPE is set
 # to LEGACY.
@@ -126,7 +129,7 @@ install: all $(ROOTISAPROG)
 	-$(INSTALL_$(PTOOL_TYPE))
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(CLEANFILES)
 
 lint:
 	$(LINT.c) $(SRCS) $(LDLIBS)
