@@ -12,6 +12,7 @@
 #
 # Copyright 2015 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -85,7 +86,7 @@ gptzfsboot: gptldr.bin gptzfsboot.bin ${BTXKERN}
 	$(BTXLD) -E ${ORG2} -f bin -b ${BTXKERN} -V ${BOOT_VERSION} -l \
 		gptldr.bin -o $@ gptzfsboot.bin
 
-CLEANFILES +=	gptldr.bin gptldr.out gptldr.o
+CLEANFILES +=	gptldr.bin gptldr.out gptldr.o machine x86
 
 gptldr.bin: gptldr.out
 	${OBJCOPY} -S -O binary gptldr.out $@
@@ -141,4 +142,4 @@ time.o: ../libi386/time.c
 clobber: clean
 
 clean:
-	$(RM) $(CLEANFILES) machine x86
+	$(RM) $(CLEANFILES)

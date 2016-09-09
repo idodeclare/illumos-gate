@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 TESTPROG = gssdtest
@@ -50,6 +51,7 @@ SRCS	= $(OBJS:.o=.c)
 RSRC	= $(ROBJS:.o=.c)
 RSRC 	+= gssd.h
 
+CLEANFILES += gssd.x
 CLOBBERFILES += $(TESTPROG)
 
 include ../../Makefile.cmd
@@ -134,7 +136,7 @@ install: all $(DIRS) $(ROOTLIBPROG) $(ROOTMANIFEST)
 install_h:
 
 clean:
-	$(RM) $(OBJS) $(RSRC) gssd.x
+	$(RM) $(OBJS) $(RSRC) $(CLEANFILES)
 
 lint_gssd:
 	$(LINT.c) $(GSSD_LINTS)

@@ -22,6 +22,7 @@
 #
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 .KEEP_STATE:
@@ -39,6 +40,8 @@ CPPFLAGS += -I../common
 CFLAGS += -DESC $(CTF_FLAGS)
 LDLIBS += -lumem
 
+CLEANFILES += y.output y.tab.c y.tab.h
+
 all debug: $(PROG)
 
 install: all $(ROOTPROG)
@@ -51,7 +54,7 @@ $(PROG): $(OBJS)
 	$(POST_PROCESS)
 
 clean:
-	$(RM) $(OBJS) y.output y.tab.c y.tab.h
+	$(RM) $(OBJS) $(CLEANFILES)
 
 clobber: clean
 	$(RM) $(PROG)

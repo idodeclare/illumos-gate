@@ -20,6 +20,7 @@
 #
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -42,6 +43,8 @@ CERRWARN +=	-_gcc=-Wno-type-limits
 CERRWARN +=	-_gcc=-Wno-implicit-function-declaration
 CERRWARN +=	-_gcc=-Wno-uninitialized
 
+CLEANFILES += datemsk
+
 all: $(PROG) $(TXTS)
 
 XGETFLAGS= -a -x $(PROG).xcl 
@@ -58,7 +61,7 @@ datemsk: datemsk.template
 	@while read i; do echo $$i; done < datemsk.template > $@
 
 clean:
-	$(RM) datemsk
+	$(RM) $(CLEANFILES)
 
 lint:	lint_PROG
 

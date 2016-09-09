@@ -21,12 +21,15 @@
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2010 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 ETCFILES= ioctl.syscon passwd shadow motd
 FTPDFILES= ftpusers
 KVMFILES= README
 SMBFILES= smbpasswd
+
+CLOBBERFILES +=	motd smbpasswd
 
 include ../../Makefile.cmd
 
@@ -74,6 +77,6 @@ clean:
 lint:
 
 clobber:
-	$(RM) motd smbpasswd
+	$(RM) $(CLOBBERFILES)
 
 FRC:

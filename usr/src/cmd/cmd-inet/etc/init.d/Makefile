@@ -20,6 +20,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # cmd/cmd-inet/etc/init.d/Makefile
 
@@ -27,6 +28,9 @@ PROG4=	ncalogd
 PROG5=	ncakmod
 PPPD=	pppd
 PROG=	$(PROG4) $(PROG5) $(PPPD)
+
+# $(SRC)/cmd/Makefile.cmd clobbers $(PROG), but the following are committed:
+UNIGNOREFILES=	ncalogd ncakmod pppd
 
 include ../../../Makefile.cmd
 
