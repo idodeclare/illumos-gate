@@ -21,31 +21,7 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
-# ident	"%Z%%M%	%I%	%E% SMI"
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 # 
 
-i386_SUBDIRS=           \
-	i386
-
-sparc_SUBDIRS=		\
-	sparc
-
-all:=		TARGET= all
-install:=	TARGET= install
-clean:=		TARGET= clean
-clobber:=	TARGET= clobber
-check:=		TARGET= check
-
-.KEEP_STATE:
-
-SUBDIRS = $(COMMON_SUBDIRS) $($(MACH)_SUBDIRS)
-
-all clean clobber check: $(SUBDIRS)
-
-install: $(SUBDIRS)
-
-FRC:
-
-$(SUBDIRS): FRC
-	$(MAKE) -f Makefile.$@ $(TARGET)
+include Makefile.$(MACH)
