@@ -29,6 +29,7 @@
 # Copyright 2019 Joyent, Inc.
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2019 Peter Trible.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Based on the nightly script from the integration folks,
 # Mostly modified and owned by mike_s.
@@ -850,7 +851,7 @@ if [ "$V_FLAG" = "y" ]; then
 	VERSION=$V_ARG
 fi
 
-TMPDIR="/tmp/nightly.tmpdir.$$"
+TMPDIR="${TMPDIR:-/tmp}/nightly.tmpdir.$$"
 export TMPDIR
 rm -rf ${TMPDIR}
 mkdir -p $TMPDIR || exit 1
