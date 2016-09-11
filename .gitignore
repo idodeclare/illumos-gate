@@ -11,14 +11,68 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2016, 2023 Chris Fraire <cfraire@me.com>
 #
 
 # Note: this does not try to ignore all files in a fully built workspace.
 # Rather, you are expected to "make clobber" before running "git status".
-
-/closed
+cscope.files
+cscope.out
+ncscope.out
+cscope.in.out
+cscope.po.out
+.make.dependency.*
+.make.state*
+*.pyc
+/.vscode
+/closed/
+/illumos.sh
 /log
+/nightly.sh
 /packages
 /proto
 /webrev
-/.vscode
+/usr/src/**/*.debug32.diff
+/usr/src/**/*.debug64.diff
+/usr/src/**/*.noexeglobs
+/usr/src/**/*.obj32.diff
+/usr/src/**/*.obj64.diff
+/usr/src/**/*.tmp
+/usr/src/**/*.tmp.diff
+/usr/src/**/*.tmp.new
+/usr/src/**/.gitignore*
+/usr/src/**/kmod/
+/usr/src/**/lint.out
+/usr/src/**/packages.*/
+/usr/src/.build.tstamp
+/usr/src/ELF-data.*
+/usr/src/check-*.out
+/usr/src/**/clobber-*.out
+# the following covers usr/src, usr/src/pkg, usr/src/tools
+/usr/src/**/install-*.out
+/usr/src/lint-*.out
+/usr/src/lint-noise-*.out
+/usr/src/lint-noise-*.ref
+/usr/src/noise-*.out
+/usr/src/noise-*.ref
+/usr/src/tools/proto/
+
+# GRUB has a non-illumos-standard build which is not worth plumbing to support
+# make_gitignore.pl, so just ignore all objects therein.
+/usr/src/grub/**/*.o
+
+# Eclipse stuff
+/.cproject
+/.project
+/.settings/
+
+# From OpenZFS .gitignore, moved to top-level
+/usr/src/test/zfs-tests/cmd/libzfs_input_check/libzfs_input_check
+
+# Moved from smatch .gitignore to top-level
+/usr/src/tools/smatch/src/Documentation/**/build
+/usr/src/tools/smatch/src/Documentation/**/dev-options.1
+# smatch test-suite .gitignore
+/usr/src/tools/smatch/src/validation/**/*.diff
+/usr/src/tools/smatch/src/validation/**/*.got
+/usr/src/tools/smatch/src/validation/**/*.expected
