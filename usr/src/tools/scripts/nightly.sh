@@ -26,6 +26,7 @@
 # Copyright 2011 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2012 Joshua M. Clulow <josh@sysmgr.org>
 # Copyright (c) 2017 by Delphix. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 # Based on the nightly script from the integration folks,
 # Mostly modified and owned by mike_s.
@@ -948,7 +949,7 @@ if [ "$V_FLAG" = "y" ]; then
 	VERSION=$V_ARG
 fi
 
-TMPDIR="/tmp/nightly.tmpdir.$$"
+TMPDIR="${TMPDIR:-/tmp}/nightly.tmpdir.$$"
 export TMPDIR
 rm -rf ${TMPDIR}
 mkdir -p $TMPDIR || exit 1
