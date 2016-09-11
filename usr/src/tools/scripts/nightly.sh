@@ -1710,7 +1710,7 @@ fi
 	touch $TMPDIR/nocompiler
   done
   echo
-) | tee -a $build_environ_file >> $LOGFILE
+) | grep -v make_gitignore.pl | tee -a $build_environ_file >> $LOGFILE
 
 if [ -f $TMPDIR/nocompiler ]; then
 	rm -f $TMPDIR/nocompiler
@@ -1805,6 +1805,7 @@ if [ "$build_ok" = "y" ]; then
 		echo "\n==== Validating manifests against proto area ====\n" \
 		    >> $mail_msg_file
 		( cd $SRC/pkg ; $MAKE -e protocmp ROOT="$checkroot" ) | \
+		    grep -v make_gitignore.pl | \
 		    tee $TMPDIR/protocmp_noise >> $mail_msg_file
 		if [[ -s $TMPDIR/protocmp_noise ]]; then
 			build_extras_ok=n
@@ -2100,7 +2101,9 @@ if [ "$M_FLAG" != "y" -a "$build_ok" = y ]; then
 
 	if [ -n "$abspkg" ]; then
 		for d in "$abspkg"; do
-			( cd $d/pkg ; $MAKE -e pmodes ) >> $mail_msg_file
+			( cd $d/pkg ; $MAKE -e pmodes ) \
+			| grep -v make_gitignore.pl \
+			>> $mail_msg_file
 		done
 	fi
 fi
