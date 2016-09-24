@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -36,6 +37,8 @@ CFLAGS +=	-Wno-pointer-sign -Wno-empty-body -Wno-unused-value \
 		-Wno-unused-function -Wno-switch \
 		-Wno-switch-enum -Wno-parentheses
 
+CLEANFILES +=	machine x86 libstand.a
+
 include ${LIBSTAND_SRC}/Makefile.inc
 
 $(LIBRARY): $(SRCS) $(OBJS)
@@ -43,7 +46,7 @@ $(LIBRARY): $(SRCS) $(OBJS)
 
 clean: clobber
 clobber:
-	$(RM) $(CLEANFILES) $(OBJS) machine x86 libstand.a
+	$(RM) $(CLEANFILES) $(OBJS)
 
 machine:
 	$(RM) machine
