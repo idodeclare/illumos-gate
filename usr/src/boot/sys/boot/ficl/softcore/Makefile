@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/tools/Makefile.tools
@@ -31,6 +32,8 @@ LDLIBS= -lumem
 
 CPPFLAGS += -I.. -I$(SRC)/common/ficl
 
+CLOBBERFILES += softcore.c
+
 all: softcore.c
 
 softcore.c: $(PROG) $(SOURCES)
@@ -43,4 +46,4 @@ $(PROG): $(OBJS)
 	$(COMPILE.c) $<
 
 clobber clean:
-	$(RM) softcore.c $(OBJS) $(PROG)
+	$(RM) $(CLOBBERFILES) $(OBJS) $(PROG)
