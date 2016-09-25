@@ -289,6 +289,7 @@ sub inline_includes {
 		# substitute the values of a few known, external definitions
 		$incl =~ s`\$\(ARCHDIR\)`$archdir`g;
 		$incl =~ s`\$\(MACH\)`$mach`g;
+		$incl =~ s`\$\{MACHINE\}`$mach`g;
 		$incl =~ s`\$\(REL_PATH\)`..\/`g;
 		$incl =~ s`\$\(SRC\)`$usrsrc`g;
 		$incl =~ s`$inclpathadj`` if defined $inclpathadj;
@@ -380,6 +381,7 @@ usr/src/cmd/cvcd/sparc/sun4u/Makefile
 usr/src/cmd/cvcd/sparc/Makefile
 usr/src/cmd/dcs/Makefile
 usr/src/cmd/dcs/sparc/Makefile
+usr/src/cmd/boot/installboot/Makefile
 usr/src/cmd/sendmail/cf/cf/Makefile
 usr/src/cmd/prtdscp/sparc/Makefile
 usr/src/cmd/prtdscp/Makefile
@@ -489,6 +491,12 @@ usr/src/cmd/syseventd/daemons/Makefile
 usr/src/cmd/syseventd/modules/Makefile
 usr/src/cmd/krb5/Makefile
 usr/src/cmd/rcap/Makefile
+usr/src/boot/sys/boot/sparc64/zfsloader/Makefile
+usr/src/boot/sys/boot/sparc64/boot1/Makefile
+usr/src/boot/sys/boot/usb/tools/Makefile
+usr/src/boot/sys/boot/usb/Makefile
+usr/src/boot/sys/boot/userboot/ficl/Makefile
+usr/src/boot/sys/boot/userboot/test/Makefile
 usr/src/man/Makefile
 usr/src/ucblib/Makefile
 usr/src/uts/sparc/dump/Makefile
