@@ -24,4 +24,6 @@
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 # 
 
+include $(SRC)/Makefile.master
+
 include Makefile.$(MACH)
