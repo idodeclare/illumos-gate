@@ -26,4 +26,6 @@
 # ident	"%Z%%M%	%I%	%E% SMI"
 # 
 
+include $(SRC)/Makefile.master
+
 include Makefile.$(MACH)
