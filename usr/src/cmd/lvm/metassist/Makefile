@@ -85,3 +85,6 @@ include $(METASSIST_TOPLEVEL)/Makefile.targ
 # Build master .po file from subdirs' .po files
 $(POFILE): $(POSUBDIRS) .WAIT $(POFILES)
 	$(BUILDPO.pofiles)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

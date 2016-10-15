@@ -17,3 +17,6 @@ PROG = file_write
 
 include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS) $(PROG)

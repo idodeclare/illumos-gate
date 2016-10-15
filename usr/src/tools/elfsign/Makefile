@@ -73,3 +73,6 @@ clean:
 	$(RM) $(CLEANFILES)
 
 include ../../../src/tools/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

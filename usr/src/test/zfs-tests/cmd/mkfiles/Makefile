@@ -21,3 +21,6 @@ LDLIBS += -lc
 C99MODE = -xc99=%all
 
 include ../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS) $(PROG)

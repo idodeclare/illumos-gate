@@ -59,3 +59,6 @@ clean:
 	$(POST_PROCESS_O)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

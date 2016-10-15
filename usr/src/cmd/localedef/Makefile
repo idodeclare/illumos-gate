@@ -397,3 +397,7 @@ $(ROOTLIB)/locale/%/$(OSTMOFILE): $(TRANSDIR)/%.mo
 $(ROOTLIB)/locale/%/$(PRIVFILE): $(TRANSDIR)/%.priv
 	$(INS.rename)
 	$(CHMOD) 0444 $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LOCDIRS) $(NDIR) \
+	  $(STAMPFILES) $(TRANSMOS)

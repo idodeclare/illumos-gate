@@ -51,3 +51,6 @@ CPPFLAGS += -I../../mdb
 LDLIBS += -lsaveargs
 
 install: all $(ISAEXEC) $(ROOTPROG64) $(ROOTLINK64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(LINTFILES) $(OBJS) $(PROG)

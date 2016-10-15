@@ -144,3 +144,6 @@ tran_teardown_pkt.9e		:= LINKSRC = tran_setup_pkt.9e
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

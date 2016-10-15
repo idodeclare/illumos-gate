@@ -58,3 +58,6 @@ $(POFILE): $(POFILES)
 FRC:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(POFILE) $(POFILES) $(PROG)

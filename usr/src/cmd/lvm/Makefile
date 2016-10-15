@@ -70,3 +70,6 @@ _msg:   $(POSUBDIRS) .WAIT $(MSGDOMAINPOFILE)
 FRC:
 
 include $(SRC)/Makefile.msg.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

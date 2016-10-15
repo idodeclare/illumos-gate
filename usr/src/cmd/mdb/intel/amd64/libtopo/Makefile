@@ -36,3 +36,7 @@ include ../../../Makefile.module
 
 CPPFLAGS += -I$(SRC)/lib/fm/topo/libtopo/common
 CERRWARN += -_gcc=-Wno-parentheses
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

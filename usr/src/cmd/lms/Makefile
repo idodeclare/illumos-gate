@@ -80,3 +80,6 @@ include ../Makefile.targ
 #
 
 lint:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LMSOBJS) $(OBJS) $(PROG)

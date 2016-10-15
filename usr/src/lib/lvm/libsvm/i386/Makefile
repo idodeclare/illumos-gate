@@ -29,3 +29,7 @@
 include ../Makefile.com
 
 install debug: $(ROOTLIBDIR) $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

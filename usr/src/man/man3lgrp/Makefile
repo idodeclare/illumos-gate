@@ -46,3 +46,6 @@ lgrp_latency_cookie.3lgrp	:= LINKSRC = lgrp_latency.3lgrp
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

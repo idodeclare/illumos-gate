@@ -59,3 +59,6 @@ $(AWK) '/^#include/ {\
 {   print $0; }' > $@
 
 .KEEP_STATE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_FILES)

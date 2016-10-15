@@ -27,3 +27,6 @@
 include ../Makefile.com
 
 install: all $(ROOTUSRSBINPROG32)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

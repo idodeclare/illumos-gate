@@ -118,3 +118,7 @@ generic.po: FRC
 	$(RM) messages.po
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLIENTOBJS) $(CLOBBERFILES) $(COMMONOBJS) \
+	  $(DERIVED_OBJS) $(ISRC) $(PROG) $(SERVEROBJS)

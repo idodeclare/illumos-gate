@@ -101,3 +101,6 @@ $(OBJS_DIR)/arcfour-x86_64.ln: arcfour-x86_64.s
 
 arcfour-x86_64.s: $(COM_DIR)/amd64/arcfour-x86_64.pl
 	$(PERL) $? $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

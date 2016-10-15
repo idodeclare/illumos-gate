@@ -32,3 +32,7 @@ MODULESRCS = fac_prov_mptsas.c
 include ../../Makefile.plugin
 
 CPPFLAGS += -I$(SRC)/uts/common
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	  $(PROG)

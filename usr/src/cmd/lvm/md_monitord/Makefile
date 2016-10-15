@@ -98,3 +98,6 @@ include ../../Makefile.targ
 include $(SRC)/Makefile.msg.targ
 
 $(MDPO) :=	POFILE = $(MDPO)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(MSGFILES) $(PROG)

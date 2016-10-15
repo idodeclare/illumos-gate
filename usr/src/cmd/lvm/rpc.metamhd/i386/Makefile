@@ -126,3 +126,6 @@ metamhd_xdr.c: $(SRC)/head/metamhd.x
 mhdx_xdr.c: $(SRC)/uts/common/sys/lvm/mhdx.x
 	$(RPCGEN) $(RPCGENFLAGS) -c $(SRC)/uts/common/sys/lvm/mhdx.x | \
 	$(AWK) '{sub(/uts\/common\/sys\/lvm/, "head") ; print $$0}' >$@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(DERIVED_FILES) $(OBJECTS) $(PROG)

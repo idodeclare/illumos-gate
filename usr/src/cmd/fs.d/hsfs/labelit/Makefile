@@ -36,3 +36,6 @@ CERRWARN += -_gcc=-Wno-unused-variable
 lint := PROG = $(LIBPROG)
 
 lint:	lint_PROG
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

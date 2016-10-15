@@ -65,3 +65,6 @@ clean:
 	$(RM) $(OBJS) $(POFILE)
 
 .KEEP_STATE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(POFILE) $(PROG)

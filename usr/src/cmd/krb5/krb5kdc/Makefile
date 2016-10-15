@@ -92,3 +92,6 @@ generic.po: FRC
 	$(RM) messages.po
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

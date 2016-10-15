@@ -93,3 +93,6 @@ metad_svc.c: $(SRC)/head/metad.x
 	$(CP) $(SRC)/head/metad.x .
 	$(RPCGEN) $(RPCGENFLAGS_SERVER) -DDEBUG metad.x -o $@
 	${RM} metad.x
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(DERIVED_FILES) $(OBJS) $(PROG)

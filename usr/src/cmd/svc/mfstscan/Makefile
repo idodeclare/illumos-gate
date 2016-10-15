@@ -75,3 +75,6 @@ lint: lint_SRCS
 	$(POST_PROCESS_O)
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

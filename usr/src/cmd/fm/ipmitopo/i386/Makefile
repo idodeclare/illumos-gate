@@ -26,3 +26,6 @@
 
 include ../../../Makefile.cmd
 include ../Makefile.com
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

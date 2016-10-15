@@ -36,3 +36,7 @@ include ../../Makefile.ia32
 CPPFLAGS += -I$(SRC)/uts/common/inet
 
 include ../../../Makefile.module
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

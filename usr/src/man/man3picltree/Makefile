@@ -76,3 +76,6 @@ ptree_update_propval_by_name.3picltree	:= LINKSRC = ptree_update_propval.3picltr
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

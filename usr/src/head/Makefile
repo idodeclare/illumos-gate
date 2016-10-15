@@ -510,3 +510,6 @@ metacl.h:	metacl.x
 	/<thread.h>/ { print "#ifdef _REENTRANT"; print $$0; print "#endif\t/* _REENTRANT */"; next } \
 	{ print $0 } \
 	' > $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LVMRPCHDRS) $(REL_RPCSVC_GEN_HDRS)

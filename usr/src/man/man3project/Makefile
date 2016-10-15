@@ -46,3 +46,6 @@ setprojent.3project		:= LINKSRC = getprojent.3project
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

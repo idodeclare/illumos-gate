@@ -740,3 +740,6 @@ i386/% sparc/%:
 i386 sparc: $$(@)/install
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

@@ -30,3 +30,6 @@
 # cmd/lvm/util/i386/Makefile
 
 include ../Makefile.com
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJECTS) $(PROG)

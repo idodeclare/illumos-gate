@@ -67,3 +67,6 @@ cstyle:
 
 hdrchk:
 	$(HDRCHK) $(HDRCHK_FLAGS) $(HDRS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

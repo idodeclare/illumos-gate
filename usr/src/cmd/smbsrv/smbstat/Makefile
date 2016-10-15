@@ -34,3 +34,6 @@ include ../Makefile.smbsrv.defs
 LDLIBS += -lkstat -lm -lumem
 include ../Makefile.smbsrv.targ
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

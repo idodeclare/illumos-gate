@@ -402,3 +402,6 @@ ldap_url_search_st.3ldap		:= LINKSRC = ldap_url.3ldap
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

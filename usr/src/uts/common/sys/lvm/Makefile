@@ -86,3 +86,6 @@ md_mdiox.h:	mdiox.x
 
 mdmn_commd.h:	mdmn_commd.x
 	$(RPCGEN) -h mdmn_commd.x > $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_FILES)

@@ -91,3 +91,6 @@ $(POFILE):	$(POFILES)
 	cd ../lib ; pwd ; $(MAKE)  libdump.po
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(DEBUGOBJS) $(OBJECTS) $(PROG)

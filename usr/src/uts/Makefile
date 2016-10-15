@@ -223,3 +223,6 @@ cscope.out tags: FRC
 	$(XREF) -x $@
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(PMTMO_FILE)

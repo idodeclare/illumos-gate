@@ -81,3 +81,6 @@ $(XD):
 
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(EXOBJS) $(PROG) $(XD) $(XPG6)

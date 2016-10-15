@@ -141,3 +141,6 @@ lint:
 	$(LINT.c) fx$(PRIOCNTLSRC) $(LDLIBS)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

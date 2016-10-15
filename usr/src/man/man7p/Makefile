@@ -80,3 +80,6 @@ UDP.7p		:= LINKSRC = udp.7p
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

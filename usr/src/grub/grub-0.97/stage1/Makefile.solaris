@@ -72,3 +72,6 @@ clobber: clean
 	$(RM) $(DATA)
 
 _FORCE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DATA) $(PROGRAMS)

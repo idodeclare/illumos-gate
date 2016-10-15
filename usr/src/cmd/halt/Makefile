@@ -89,3 +89,6 @@ check: $(CHKMANIFEST)
 FRC:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

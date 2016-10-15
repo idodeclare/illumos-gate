@@ -56,3 +56,6 @@ _dc:
 include ../Makefile.targ
 
 .KEEP_STATE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

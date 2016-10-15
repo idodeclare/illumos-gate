@@ -106,3 +106,6 @@ $(ROOTLINK): $(ROOTUSRSBIN) $(ROOTBIN)/scmadm
 include ../../Makefile.targ
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

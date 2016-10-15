@@ -72,3 +72,6 @@ check:		$(CHKMANIFEST)
 
 include $(SRC)/cmd/Makefile.targ
 include $(SRC)/Makefile.msg.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -33,3 +33,7 @@ include ../../Makefile.plugin
 
 LDLIBS += -lsocket -lnsl
 CERRWARN += -_gcc=-Wno-uninitialized
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	  $(DMOD_OBJS) $(LINTFILES) $(OBJS) $(PROG)

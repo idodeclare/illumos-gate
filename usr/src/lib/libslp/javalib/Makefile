@@ -107,3 +107,7 @@ install_h lint:
 
 check:
 	$(JSTYLE) -p $(PKGPATH)/*.java
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANDIRS) $(CLEANFILES) $(CLOBBERDIRS) \
+	  $(CLOBBERFILES)

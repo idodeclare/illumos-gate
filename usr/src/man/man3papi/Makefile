@@ -174,3 +174,6 @@ papiServiceSetUserName.3papi		:= LINKSRC = papiServiceCreate.3papi
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -52,3 +52,7 @@ include ../../../Makefile.mdb_ks
 # kludge until we invent -DDONTINCLUDEMACHPARAM or something.
 #
 CPPFLAGS += -I$(SRC)/uts/i86pc
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -30,3 +30,7 @@
 # cmd/lvm/rpc.metamedd/i386/Makefile
 
 include ../Makefile.com
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_OBJS) $(DERIVED_SRCS) $(LOCAL_OBJS) \
+	  $(PROG) $(RPC_OBJS)

@@ -65,3 +65,6 @@ TXTRecordSetValue.3dns_sd	:= LINKSRC = TXTRecordCreate.3dns_sd
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

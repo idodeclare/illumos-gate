@@ -117,3 +117,6 @@ lint:	llib-lsubr.ln
 	$(LINT.c) tsdispadmin.c $(LDLIBS)
  
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJECTS) $(PROG) $(PROGS)

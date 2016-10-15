@@ -28,3 +28,6 @@ CPPFLAGS += -I../../../../src/uts/i86pc
 LINTFLAGS 	+= -erroff=E_STATIC_UNUSED
 
 install: all $(ROOTUSRSBINPROG) $(ROOTMAN1MFILES)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

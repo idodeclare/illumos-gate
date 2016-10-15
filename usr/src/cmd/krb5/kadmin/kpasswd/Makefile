@@ -67,3 +67,5 @@ generic.po:
 	$(SED) "/^domain/d" messages.po > $@
 	$(RM) messages.po
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

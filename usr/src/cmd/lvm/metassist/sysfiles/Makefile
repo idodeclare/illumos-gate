@@ -46,3 +46,6 @@ STYLEFILES = \
 	volume-command.xsl
 
 include $(METASSIST_TOPLEVEL)/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

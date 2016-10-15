@@ -47,3 +47,6 @@ $(PROG): $(OBJS)
 
 clobber clean:
 	$(RM) $(CLOBBERFILES) $(OBJS) $(PROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

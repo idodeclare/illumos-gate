@@ -58,3 +58,6 @@ $(ROOTBIN):
 
 $(ROOTBIN)/%: %
 	$(INS.file)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(SRCS)

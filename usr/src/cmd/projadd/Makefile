@@ -55,3 +55,6 @@ clobber: clean
 
 $(ROOTUSRSBIN)/% : %
 	$(INS.file)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

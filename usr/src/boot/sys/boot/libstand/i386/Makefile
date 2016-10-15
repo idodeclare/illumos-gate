@@ -28,3 +28,6 @@ $(LIBRARY): $(SRCS) $(OBJS)
 
 %.o: $(LIBSTAND_SRC)/i386/%.S
 	$(COMPILE.S) $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)

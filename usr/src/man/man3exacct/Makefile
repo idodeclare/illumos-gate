@@ -74,3 +74,6 @@ ea_strfree.3exacct		:= LINKSRC = ea_set_item.3exacct
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)
