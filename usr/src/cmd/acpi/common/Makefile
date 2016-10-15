@@ -28,6 +28,8 @@ LDLIBS += -lc
 HSONAME=
 MAPFILES = mapfile-vers
 
+CLEANFILES += $(LIBRARY)
+
 .KEEP_STATE:
 
 all: $(LIBRARY)
