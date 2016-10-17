@@ -7,9 +7,8 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,v 1.67 2009/06/10 16:05:19 mel Exp $
+ * $Id: plain.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
-
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
  *
@@ -58,13 +57,6 @@
 
 #include "plugin_common.h"
 
-#ifndef _SUN_SDK_
-#ifdef WIN32
-/* This must be after sasl.h */
-# include "saslPLAIN.h"
-#endif /* WIN32 */
-#endif /* !_SUN_SDK_ */
-
 #ifdef macintosh 
 #include <sasl_plain_plugin_decl.h> 
 #endif 
@@ -72,7 +64,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: plain.c,v 1.61 2003/03/26 17:18:04 rjs3 Exp $";
+static const char plugin_id[] = "$Id: plain.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
@@ -138,11 +130,10 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
     if (lup >= clientinlen) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			"Can only find author/en (no password)");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"Can only find author/en (no password)");
 #endif /* _SUN_SDK_ */
+				"Can only find author/en (no password)");
 	return SASL_BADPROT;
     }
     
@@ -156,11 +147,10 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
     if (lup != clientinlen) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		"Got more data than we were expecting in the PLAIN plugin");
 #else
 	SETERROR(params->utils,
-		 "Got more data than we were expecting in the PLAIN plugin\n");
 #endif /* _SUN_SDK_ */
+		 "Got more data than we were expecting in the PLAIN plugin\n");
 	return SASL_BADPROT;
     }
     

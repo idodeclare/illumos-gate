@@ -8,7 +8,7 @@
  * Rob Siemborski (SASLv2 Conversion)
  * contributed by Rainer Schoepf <schoepf@uni-mainz.de>
  * based on PLAIN, by Tim Martin <tmartin@andrew.cmu.edu>
- * $Id: login.c,v 1.25 2003/02/13 19:56:04 rjs3 Exp $
+ * $Id: login.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -58,17 +58,10 @@
 
 #include "plugin_common.h"
 
-#ifndef _SUN_SDK_
-#ifdef WIN32
-/* This must be after sasl.h */
-# include "saslLOGIN.h"
-#endif /* WIN32 */
-#endif /* !_SUN_SDK_ */
-
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: login.c,v 1.25 2003/02/13 19:56:04 rjs3 Exp $";
+static const char plugin_id[] = "$Id: login.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
@@ -77,7 +70,7 @@ typedef struct context {
     int state;
 
     char *username;
-    size_t username_len;
+    unsigned username_len;
 } server_context_t;
 
 static int login_server_mech_new(void *glob_context __attribute__((unused)), 
@@ -120,6 +113,10 @@ static int login_server_mech_step(void *conn_context,
     *serverout = NULL;
     *serveroutlen = 0;
     
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     switch (text->state) {
 
     case 1:
@@ -130,7 +127,7 @@ static int login_server_mech_step(void *conn_context,
 	if (clientinlen == 0) {
 	    /* demand username */
 	    
-	    *serveroutlen = strlen(USERNAME_CHALLENGE);
+	    *serveroutlen = (unsigned) strlen(USERNAME_CHALLENGE);
 	    *serverout = USERNAME_CHALLENGE;
 
 	    return SASL_CONTINUE;
@@ -162,7 +159,7 @@ static int login_server_mech_step(void *conn_context,
 	text->username[clientinlen] = '\0';
 	
 	/* demand password */
-	*serveroutlen = strlen(PASSWORD_CHALLENGE);
+	*serveroutlen = (unsigned) strlen(PASSWORD_CHALLENGE);
 	*serverout = PASSWORD_CHALLENGE;
 	
 	text->state = 3;
@@ -178,11 +175,10 @@ static int login_server_mech_step(void *conn_context,
 	if (clientinlen > 1024) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		     "clientinlen is > 1024 characters in LOGIN plugin");
 #else
 	    SETERROR(params->utils,
-		     "clientinlen is > 1024 characters in LOGIN plugin");
 #endif	/* _SUN_SDK_ */
+		     "clientinlen is > 1024 characters in LOGIN plugin");
 	    return SASL_BADPROT;
 	}
 	
@@ -194,7 +190,7 @@ static int login_server_mech_step(void *conn_context,
 	    return SASL_NOMEM;
 	}
 	
-	strncpy((char *)password->data, clientin, clientinlen);
+	strncpy((char *) password->data, clientin, clientinlen);
 	password->data[clientinlen] = '\0';
 	password->len = clientinlen;
 
@@ -205,25 +201,31 @@ static int login_server_mech_step(void *conn_context,
 				    text->username_len,
 				    SASL_CU_AUTHID | SASL_CU_AUTHZID | SASL_CU_EXTERNALLY_VERIFIED,
 				    oparams);
+#ifdef _SUN_SDK_
 	if (result != SASL_OK) {
 		_plug_free_secret(params->utils, &password);
 		return result;
 	}
+#else
+	if (result != SASL_OK) return result;
+#endif /* _SUN_SDK_ */
 	
 	/* verify_password - return sasl_ok on success */
 	result = params->utils->checkpass(params->utils->conn,
-					oparams->authid, oparams->alen,
-					(char *)password->data, password->len);
+					  oparams->authid, oparams->alen,
+					  (char *) password->data, password->len);
 	
 	if (result != SASL_OK) {
 	    _plug_free_secret(params->utils, &password);
 	    return result;
 	}
 	
+#ifdef _SUN_SDK_
 	if (params->transition) {
 	    params->transition(params->utils->conn,
 			       (char *)password->data, password->len);
 	}
+#endif
 	
 	_plug_free_secret(params->utils, &password);
 	
@@ -269,7 +271,8 @@ static sasl_server_plug_t login_server_plugins[] =
     {
 	"LOGIN",			/* mech_name */
 	0,				/* max_ssf */
-	SASL_SEC_NOANONYMOUS,		/* security_flags */
+	SASL_SEC_NOANONYMOUS
+	| SASL_SEC_PASS_CREDENTIALS,	/* security_flags */
 	0,				/* features */
 	NULL,				/* glob_context */
 	&login_server_mech_new,		/* mech_new */
@@ -353,7 +356,7 @@ static int login_client_mech_step(void *conn_context,
     switch (text->state) {
 
     case 1: {
-	const char *user;
+	const char *user = NULL;
 	int auth_result = SASL_OK;
 	int pass_result = SASL_OK;
 	int result;
@@ -362,7 +365,7 @@ static int login_client_mech_step(void *conn_context,
 	if (params->props.min_ssf > params->external_ssf) {
 #ifdef _INTEGRATED_SOLARIS_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		gettext("SSF requested of LOGIN plugin"));
+	    	"SSF requested of LOGIN plugin");
 #else
 	    SETERROR( params->utils, "SSF requested of LOGIN plugin");
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -439,11 +442,10 @@ static int login_client_mech_step(void *conn_context,
 	if (!serverin) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		      "Server didn't issue challenge for USERNAME");
 #else
 	    SETERROR( params->utils,
-		      "Server didn't issue challenge for USERNAME");
 #endif /* _SUN_SDK_ */
+		      "Server didn't issue challenge for USERNAME");
 	    return SASL_BADPROT;
 	}
 	
@@ -465,11 +467,10 @@ static int login_client_mech_step(void *conn_context,
 	if (!serverin) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		      "Server didn't issue challenge for PASSWORD");
 #else
 	    SETERROR( params->utils,
-		      "Server didn't issue challenge for PASSWORD");
 #endif /* _SUN_SDK_ */
+		      "Server didn't issue challenge for PASSWORD");
 	    return SASL_BADPROT;
 	}
 	
@@ -479,7 +480,7 @@ static int login_client_mech_step(void *conn_context,
 	}
 	
 	if (clientoutlen) *clientoutlen = text->password->len;
-	*clientout = (char *)text->password->data;
+	*clientout = (char *) text->password->data;
 	
 	/* set oparams */
 	oparams->doneflag = 1;
@@ -523,7 +524,8 @@ static sasl_client_plug_t login_client_plugins[] =
     {
 	"LOGIN",			/* mech_name */
 	0,				/* max_ssf */
-	SASL_SEC_NOANONYMOUS,		/* security_flags */
+	SASL_SEC_NOANONYMOUS
+	| SASL_SEC_PASS_CREDENTIALS,	/* security_flags */
 	SASL_FEAT_SERVER_FIRST,		/* features */
 	NULL,				/* required_prompts */
 	NULL,				/* glob_context */

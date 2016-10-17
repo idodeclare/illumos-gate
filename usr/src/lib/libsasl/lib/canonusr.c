@@ -6,7 +6,7 @@
 
 /* canonusr.c - user canonicalization support
  * Rob Siemborski
- * $Id: canonusr.c,v 1.22 2011/09/01 16:33:42 mel Exp $
+ * $Id: canonusr.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -217,7 +217,11 @@ int _sasl_canon_user(sasl_conn_t *conn,
 	oparams->user = conn->user_buf;
     }
 
+#ifdef _SUN_SDK_
+    return (result);
+#else
     RETURN(conn, result);
+#endif /* _SUN_SDK_ */
 }
 
 /* Lookup all properties for authentication and/or authorization identity. */
@@ -266,7 +270,18 @@ static int _sasl_auxprop_lookup_user_props (sasl_conn_t *conn,
 		   already contains an error */
 		result = authz_result;
 	    }
-  	}
+	}
+
+	if ((flags & SASL_CU_EXTERNALLY_VERIFIED) && (result == SASL_NOUSER || result == SASL_NOMECH)) {
+	    /* The called has explicitly told us that the authentication identity
+	       was already verified or will be verified independently.
+	       So a failure to retrieve any associated properties
+	       is not an error. For example the caller is using Kerberos to verify user,
+	       but the LDAPDB/SASLDB auxprop plugin doesn't contain any auxprops for
+	       the user.
+	       Another case is PLAIN/LOGIN not using auxprop to verify user passwords. */
+	    result = SASL_OK;
+	}	
     }
 #endif
 
@@ -374,15 +389,6 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	if (strcmp(plugname, l->name) == 0) {
 	    return SASL_OK;
 	}
-
-	if (result == SASL_NOUSER && (flags & SASL_CU_EXTERNALLY_VERIFIED)) {
-	    /* The called has explicitly told us that the authentication identity
-	       was already verified. So a failure to retrieve any associated properties
-	       is not an error. For example the caller is using Kerberos to verify user,
-	       but the LDAPDB/SASLDB auxprop plugin doesn't contain any auxprops for
-	       the user. */
-	    result = SASL_OK;
-	}	
     }
     sasl_global_utils = gctx->sasl_canonusr_global_utils;
 #endif /* _SUN_SDK_ */
@@ -401,9 +407,11 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks == NULL ?
 	    	   gctx->client_global_callbacks.callbacks :
 	    	   gctx->server_global_callbacks.callbacks,
-		   SASL_LOG_ERR, "canonuserfunc error %i\n",result);
+		   SASL_LOG_ERR, "%s_canonuser_plug_init() failed in sasl_canonuser_add_plugin(): %z\n",
+		  plugname, result);
 #else
-	_sasl_log(NULL, SASL_LOG_ERR, "canonuserfunc error %i\n",result);
+	_sasl_log(NULL, SASL_LOG_ERR, "%s_canonuser_plug_init() failed in sasl_canonuser_add_plugin(): %z\n",
+		  plugname, result);
 #endif /* _SUN_SDK_ */
 	return result;
     }
@@ -414,11 +422,10 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks == NULL ?
 	    	   gctx->client_global_callbacks.callbacks :
 	    	   gctx->server_global_callbacks.callbacks, SASL_LOG_ERR,
-		   "canonuser plugin without either client or server side");
 #else
 	_sasl_log(NULL, SASL_LOG_ERR,
-		  "canonuser plugin without either client or server side");
 #endif /* _SUN_SDK_ */
+		  "canonuser plugin '%s' without either client or server side", plugname);
 	return SASL_BADPROT;
     }
     

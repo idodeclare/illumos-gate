@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: checkpw.c,v 1.79 2009/05/08 00:43:44 murch Exp $
+ * $Id: checkpw.c,aacd3d0 2016-01-30 10:06:22 -0500 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -133,9 +133,9 @@ static int _sasl_make_plain_secret(const char *salt,
     }
 
     _sasl_MD5Init(&ctx);
-    _sasl_MD5Update(&ctx, salt, 16);
-    _sasl_MD5Update(&ctx, "sasldb", 6);
-    _sasl_MD5Update(&ctx, passwd, (unsigned int) passlen);
+    _sasl_MD5Update(&ctx, (const unsigned char *) salt, 16);
+    _sasl_MD5Update(&ctx, (const unsigned char *) "sasldb", 6);
+    _sasl_MD5Update(&ctx, (const unsigned char *) passwd, (unsigned int) passlen);
     memcpy((*secret)->data, salt, 16);
     (*secret)->data[16] = '\0';
     _sasl_MD5Final((*secret)->data + 17, &ctx);
@@ -351,7 +351,6 @@ static int auxprop_verify_password_hashed(sasl_conn_t *conn,
     }
 
  done:
-
     /* We're not going to erase the property here because other people
      * may want it */
     return ret;
@@ -406,8 +405,8 @@ int _sasl_auxprop_verify_apop(sasl_conn_t *conn,
     }
     
     _sasl_MD5Init(&ctx);
-    _sasl_MD5Update(&ctx, challenge, strlen(challenge));
-    _sasl_MD5Update(&ctx, auxprop_values[0].values[0],
+    _sasl_MD5Update(&ctx, (const unsigned char *) challenge, strlen(challenge));
+    _sasl_MD5Update(&ctx, (const unsigned char *) auxprop_values[0].values[0],
 		    strlen(auxprop_values[0].values[0]));
     _sasl_MD5Final(digest, &ctx);
 
@@ -428,11 +427,10 @@ int _sasl_auxprop_verify_apop(sasl_conn_t *conn,
     }
 
  done:
-#ifdef _INTEGRATED_SOLARIS_
     if (ret == SASL_BADAUTH) sasl_seterror(conn, SASL_NOLOG,
+#ifdef _INTEGRATED_SOLARIS_
 					   gettext("login incorrect"));
 #else
-    if (ret == SASL_BADAUTH) sasl_seterror(conn, SASL_NOLOG,
 					   "login incorrect");
 #endif /* _INTEGRATED_SOLARIS_ */
 #ifdef _SUN_SDK_
@@ -706,7 +704,8 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 #endif
 
     /* check to see if the user configured a rundir */
-    if (_sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
+    if (_sasl_getcallback(conn, SASL_CB_GETOPT,
+                          (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
 	getopt(context, NULL, "saslauthd_path", &p, NULL);
     }
     if (p) {
@@ -896,7 +895,11 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 
  toobig:
     /* request just too damn big */
+#ifdef _SUN_SDK_
+    sasl_seterror(conn, 0, gettext("saslauthd request too large"));
+#else
     sasl_seterror(conn, 0, "saslauthd request too large");
+#endif /* _SUN_SDK_ */
 
  fail:
     if (freeme) free(freeme);
@@ -947,13 +950,22 @@ static int authdaemon_connect(sasl_conn_t *conn, const char *path)
     struct sockaddr_un srvaddr;
 
     if (strlen(path) >= sizeof(srvaddr.sun_path)) {
+#ifdef _SUN_SDK_
+	sasl_seterror(conn, 0, gettext("unix socket path too large"), errno);
+#else
 	sasl_seterror(conn, 0, "unix socket path too large", errno);
+#endif /* _SUN_SDK_ */
 	goto fail;
     }
 
     s = socket(AF_UNIX, SOCK_STREAM, 0);
     if (s == -1) {
+#ifdef _SUN_SDK_
+	sasl_seterror(conn, 0, gettext("cannot create socket for connection"
+	  " to Courier authdaemond: %m"), errno);
+#else
 	sasl_seterror(conn, 0, "cannot create socket for connection to Courier authdaemond: %m", errno);
+#endif /* _SUN_SDK_ */
 	goto fail;
     }
 
@@ -963,18 +975,32 @@ static int authdaemon_connect(sasl_conn_t *conn, const char *path)
 
     /* Use nonblocking unix socket connect(2). */
     if (authdaemon_blocking(s, 0)) {
+#ifdef _SUN_SDK_
+	sasl_seterror(conn, 0, gettext("cannot set nonblocking bit: %m"), errno);
+#else
 	sasl_seterror(conn, 0, "cannot set nonblocking bit: %m", errno);
+#endif /* _SUN_SDK_ */
 	goto fail;
     }
 
     r = connect(s, (struct sockaddr *) &srvaddr, sizeof(srvaddr));
     if (r == -1) {
+#ifdef _SUN_SDK_
+	sasl_seterror(conn, 0,
+	  gettext("cannot connect to Courier authdaemond: %m"), errno);
+#else
 	sasl_seterror(conn, 0, "cannot connect to Courier authdaemond: %m", errno);
+#endif /* _SUN_SDK_ */
 	goto fail;
     }
 
     if (authdaemon_blocking(s, 1)) {
+#ifdef _SUN_SDK_
+	sasl_seterror(conn, 0, gettext("cannot clear nonblocking bit: %m"),
+	  errno);
+#else
 	sasl_seterror(conn, 0, "cannot clear nonblocking bit: %m", errno);
+#endif /* _SUN_SDK_ */
 	goto fail;
     }
 
@@ -1064,13 +1090,21 @@ static int authdaemon_talk(sasl_conn_t *conn, int sock, char *authreq)
 	}
 	if (strcmp(sub, "FAIL") == 0) {
 	    /* passwords do not match */
+#ifdef _SUN_SDK_
+	    sasl_seterror(conn, SASL_NOLOG, gettext("authentication failed"));
+#else
 	    sasl_seterror(conn, SASL_NOLOG, "authentication failed");
+#endif /* _SUN_SDK_ */
 	    return SASL_BADAUTH;
 	}
     }
 _err_out:
     /* catchall: authentication error */
+#ifdef _SUN_SDK_
+    sasl_seterror(conn, 0, gettext("could not verify password"));
+#else
     sasl_seterror(conn, 0, "could not verify password");
+#endif /* _SUN_SDK_ */
     return SASL_FAIL;
 }
 
@@ -1088,7 +1122,8 @@ static int authdaemon_verify_password(sasl_conn_t *conn,
     int sock = -1;
 
     /* check to see if the user configured a rundir */
-    if (_sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
+    if (_sasl_getcallback(conn, SASL_CB_GETOPT,
+                          (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
 	getopt(context, NULL, "authdaemond_path", &p, NULL);
     }
     if (!p) {

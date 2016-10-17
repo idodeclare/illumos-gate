@@ -10,7 +10,7 @@
  * Rob Siemborski
  * Tim Martin
  * split from common.c by Rolf Braun
- * $Id: seterror.c,v 1.10 2011/09/01 14:12:53 mel Exp $
+ * $Id: seterror.c,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 
 /* 
@@ -174,8 +174,8 @@ void sasl_seterror(sasl_conn_t *conn,
     utils = NULL;
 
   if (utils != NULL) {
-    ret = utils->getcallback(conn, SASL_CB_LANGUAGE, &simple_cb,
-	&simple_context);
+    ret = utils->getcallback(conn, SASL_CB_LANGUAGE,
+      (sasl_callback_ft *)&simple_cb, &simple_context);
 
     if (ret == SASL_OK && simple_cb)
 	(void) simple_cb(simple_context, SASL_CB_LANGUAGE, &lang, NULL);
@@ -257,13 +257,11 @@ void sasl_seterror(sasl_conn_t *conn,
 	    break;
 
 	  case 'z': /* insert the sasl error string */
-#ifdef _INTEGRATED_SOLARIS_
 	    result = _sasl_add_string(error_buf, error_buf_len,	&outlen,
 			 (char *)sasl_errstring(_sasl_seterror_usererr(
+#ifdef _INTEGRATED_SOLARIS_
 					        va_arg(ap, int)), lang, NULL));
 #else
-	    result = _sasl_add_string(error_buf, error_buf_len,	&outlen,
-			 (char *)sasl_errstring(_sasl_seterror_usererr(
 					        va_arg(ap, int)),NULL,NULL));
 #endif /* _INTEGRATED_SOLARIS_ */
 	    if (result != SASL_OK)
@@ -275,7 +273,7 @@ void sasl_seterror(sasl_conn_t *conn,
 #ifndef _SUN_SDK_
 	    frmt[frmtpos++]=fmt[pos];
 	    frmt[frmtpos]=0;
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
 	    tempbuf[0] = (char) va_arg(ap, int); /* get the next arg */
 	    tempbuf[1]='\0';
 	    

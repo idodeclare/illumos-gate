@@ -7,7 +7,7 @@
 /* dlopen.c--Unix dlopen() dynamic loader interface
  * Rob Siemborski
  * Rob Earhart
- * $Id: dlopen.c,v 1.52 2009/04/11 10:21:43 mel Exp $
+ * $Id: dlopen.c,a99f8b2 2009-04-11 10:21:43 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -207,7 +207,7 @@ int _sasl_locate_entry(void *library, const char *entryname,
 #ifndef _SUN_SDK_
 	_sasl_log(NULL, SASL_LOG_ERR,
 		  "no entryname in _sasl_locate_entry");
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
 	return SASL_BADPARAM;
     }
 
@@ -215,7 +215,7 @@ int _sasl_locate_entry(void *library, const char *entryname,
 #ifndef _SUN_SDK_
 	_sasl_log(NULL, SASL_LOG_ERR,
 		  "no library in _sasl_locate_entry");
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
 	return SASL_BADPARAM;
     }
 
@@ -223,7 +223,7 @@ int _sasl_locate_entry(void *library, const char *entryname,
 #ifndef _SUN_SDK_
 	_sasl_log(NULL, SASL_LOG_ERR,
 		  "no entrypoint output pointer in _sasl_locate_entry");
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
 	return SASL_BADPARAM;
     }
 
@@ -278,13 +278,11 @@ static int _sasl_plugin_load(char *plugin, void *library,
 	    	       gctx->client_global_callbacks.callbacks :
 	    	       gctx->server_global_callbacks.callbacks,
 	    	       SASL_LOG_DEBUG,
-		       "_sasl_plugin_load failed on %s for plugin: %s\n",
-		       entryname, plugin);
 #else
 	    _sasl_log(NULL, SASL_LOG_DEBUG,
+#endif /* _SUN_SDK_ */
 		      "_sasl_plugin_load failed on %s for plugin: %s\n",
 		      entryname, plugin);
-#endif /* _SUN_SDK_ */
     }
 
     return result;
@@ -320,7 +318,11 @@ static int _parse_la(const char *prefix, const char *in, char *out)
 	    length = strlen(line);
 	    *(line + (length - strlen(SO_SUFFIX))) = '\0';
 	    strcat(line, LA_SUFFIX);
+#ifdef _SUN_SDK_
 	    file = fopen(line, "rF");
+#else
+	    file = fopen(line, "r");
+#endif /* _SUN_SDK_ */
 	    if(file) {
 		/* We'll get it on the .la open */
 		fclose(file);
@@ -335,7 +337,11 @@ static int _parse_la(const char *prefix, const char *in, char *out)
     strcpy(line, prefix);
     strcat(line, in);
 
+#ifdef _SUN_SDK_
     file = fopen(line, "rF");
+#else
+    file = fopen(line, "r");
+#endif /* _SUN_SDK_ */
     if(!file) {
 	_sasl_log(NULL, SASL_LOG_WARN,
 		  "unable to open LA file: %s", line);
@@ -430,11 +436,10 @@ int _sasl_get_plugin(const char *file,
 	    	   gctx->client_global_callbacks.callbacks :
 	    	   gctx->server_global_callbacks.callbacks,
 		   SASL_LOG_ERR,
-		   "unable to dlopen %s: %s", file, dlerror());
 #else
 	_sasl_log(NULL, SASL_LOG_ERR,
-		  "unable to dlopen %s: %s", file, dlerror());
 #endif /* _SUN_SDK_ */
+		  "unable to dlopen %s: %s", file, dlerror());
 	sasl_FREE(newhead);
 	return SASL_FAIL;
     }
@@ -768,11 +773,10 @@ int _sasl_load_plugins(const add_plugin_list_t *entrypoints,
     return SASL_OK;
 }
 
-#ifdef _SUN_SDK_
 int
+#ifdef _SUN_SDK_
 _sasl_done_with_plugins(_sasl_global_context_t *gctx)
 #else
-int
 _sasl_done_with_plugins(void)
 #endif /* _SUN_SDK_ */
 {
@@ -811,59 +815,3 @@ _sasl_done_with_plugins(void)
 #endif /* DO_DLOPEN || WIN_PLUG */ /* _SUN_SDK_ */
     return SASL_OK;
 }
-
-#ifdef WIN_MUTEX
-
-static HANDLE global_mutex = NULL;
-
-int win_global_mutex_lock()
-{
-    DWORD dwWaitResult; 
-
-    if (global_mutex == NULL) {
-	global_mutex = CreateMutex(NULL, FALSE, NULL);
-	if (global_mutex == NULL)
-	    return (-1);
-    }
-
-    dwWaitResult = WaitForSingleObject(global_mutex, INFINITE);
-
-    switch (dwWaitResult) {
-	case WAIT_OBJECT_0: 
-		return (0);
-
-           case WAIT_TIMEOUT: 
-               return (-1); /* Shouldn't happen */
-
-           case WAIT_ABANDONED: 
-               return (-1); /* Shouldn't happen */
-    }
-    return (-1); /* Unexpected result */
-}
-
-int win_global_mutex_unlock()
-{
-    if (global_mutex == NULL)
-	return (-1);
-
-    return (ReleaseMutex(global_mutex) ? 0 : -1);
-}
-
-BOOL APIENTRY DllMain(HANDLE hModule, 
-                         DWORD  ul_reason_for_call, 
-                         LPVOID lpReserved)
-{
-    switch( ul_reason_for_call ) {
-	case DLL_PROCESS_ATTACH:
-	    global_mutex = CreateMutex(NULL, FALSE, NULL);
-	    if (global_mutex == NULL)
-		return (FALSE);
-	    break;
-	case DLL_THREAD_ATTACH:
-	case DLL_THREAD_DETACH:
-	case DLL_PROCESS_DETACH:
-	    break;
-    }
-    return TRUE;
-}
-#endif

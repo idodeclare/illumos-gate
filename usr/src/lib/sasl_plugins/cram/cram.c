@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,v 1.87 2011/09/07 13:19:44 murch Exp $
+ * $Id: cram.c,7506f11 2011-09-07 13:19:44 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,v 1.87 2011/09/07 13:19:44 murch Exp $";
+static const char plugin_id[] = "$Id: cram.c,7506f11 2011-09-07 13:19:44 +0000 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -355,11 +355,10 @@ crammd5_server_mech_step2(server_context_t *text,
     } else {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			    "Have neither type of secret");
 #else
 	sparams->utils->seterror(sparams->utils->conn, 0,
-				 "Have neither type of secret");
 #endif /* _SUN_SDK_ */
+				 "Have neither type of secret");
 	return SASL_FAIL;
     }
     
@@ -467,11 +466,10 @@ static int crammd5_server_mech_step(void *conn_context,
     default: /* should never get here */
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			   "Invalid CRAM-MD5 server step %d", text->state);
 #else
 	sparams->utils->log(NULL, SASL_LOG_ERR,
-			   "Invalid CRAM-MD5 server step %d\n", text->state);
 #endif /* _SUN_SDK_ */
+			   "Invalid CRAM-MD5 server step %d\n", text->state);
 	return SASL_FAIL;
     }
     
@@ -610,11 +608,10 @@ static int crammd5_client_mech_step(void *conn_context,
     if (serverinlen > 1024) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "CRAM-MD5 input longer than 1024 bytes");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"CRAM-MD5 input longer than 1024 bytes");
 #endif /* _SUN_SDK_ */
+				"CRAM-MD5 input longer than 1024 bytes");
 	return SASL_BADPROT;
     }
     

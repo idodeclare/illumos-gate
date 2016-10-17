@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.176 2011/09/01 16:33:10 mel Exp $
+ * $Id: server.c,d66db42 2015-11-20 11:28:58 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -113,7 +113,7 @@ static int _sasl_checkpass(sasl_conn_t *conn,
 #ifndef _SUN_SDK_
 static mech_list_t *mechlist = NULL; /* global var which holds the list */
 
-sasl_global_callbacks_t global_callbacks;
+static sasl_global_callbacks_t global_callbacks;
 #endif /* !_SUN_SDK_ */
 
 /* set the password for a user
@@ -275,11 +275,7 @@ int sasl_setpass(sasl_conn_t *conn,
 
 	tried_setpass++;
 
-#ifdef _SUN_SDK_
-	tmpresult = m->plug->setpass(m->glob_context,
-#else
 	tmpresult = m->plug->setpass(m->plug->glob_context,
-#endif /* _SUN_SDK_ */
 				     ((sasl_server_conn_t *)conn)->sparams,
 				     user,
 				     pass,
@@ -347,7 +343,7 @@ server_dispose_mech_contexts(sasl_conn_t *pconn)
   for(cur = s_conn->mech_contexts; cur; cur=cur_next) {
       cur_next = cur->next;
       if(cur->context)
-	  cur->mech->plug->mech_dispose(cur->context, s_conn->sparams->utils);
+	  cur->mech->m.plug->mech_dispose(cur->context, s_conn->sparams->utils);
       sasl_FREE(cur);
   }  
   s_conn->mech_contexts = NULL;
@@ -359,13 +355,18 @@ static void server_dispose(sasl_conn_t *pconn)
 {
     sasl_server_conn_t *s_conn=  (sasl_server_conn_t *) pconn;
 #ifdef _SUN_SDK_
-  _sasl_global_context_t *gctx = pconn->gctx;
+    _sasl_global_context_t *gctx = pconn->gctx;
+    mech_list_t *mechlist = gctx->mechlist;
 #else
     context_list_t *cur, *cur_next;
 #endif /* _SUN_SDK_ */
 
     /* Just sanity check that sasl_server_done wasn't called yet */
+#ifdef _SUN_SDK_
+    if (gctx->sasl_server_active != 0) {
+#else
     if (_sasl_server_active != 0) {
+#endif /* _SUN_SDK_ */
 	if (s_conn->mech) {
 	    void (*mech_dispose)(void *conn_context, const sasl_utils_t *utils);
 
@@ -464,7 +465,8 @@ static int load_mech(_sasl_global_context_t *gctx, const char *mechname)
 
     /* No sasl_conn_t was given to getcallback, so we provide the
      * global callbacks structure */
-    if (_sasl_getcallback(NULL, SASL_CB_GETOPT, &getopt, &context) == SASL_OK)
+    if (_sasl_getcallback(NULL, SASL_CB_GETOPT, (sasl_callback_ft * )&getopt,
+        &context) == SASL_OK)
 	(void)getopt(&gctx->server_global_callbacks, NULL,
 		"server_load_mech_list", &mlist, NULL);
 
@@ -561,7 +563,7 @@ int _sasl_server_add_plugin(void *ctx,
     /* Check to see if this plugin has already been registered */
     m = mechlist->mech_list;
     for (i = 0; i < mechlist->mech_length; i++) {
-	if (strcmp(plugname, m->plugname) == 0)
+	if (strcmp(plugname, m->m.plugname) == 0)
 		return SASL_OK;
 	m = m->next;
     }
@@ -588,11 +590,11 @@ int _sasl_server_add_plugin(void *ctx,
 	UNLOCK_MUTEX(&server_plug_mutex);
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks,
 		   SASL_LOG_DEBUG,
-		   "server add_plugin entry_point error %z", result);
 #else
 	_sasl_log(NULL, SASL_LOG_DEBUG,
-		  "server add_plugin entry_point error %z\n", result);
 #endif /* _SUN_SDK_ */
+		  "%s_client_plug_init() failed in sasl_server_add_plugin(): %z\n",
+		  plugname, result);
 	return result;
     }
 
@@ -606,7 +608,8 @@ int _sasl_server_add_plugin(void *ctx,
 	_sasl_log(NULL,
 #endif /* _SUN_SDK_ */
 		  SASL_LOG_ERR,
-		  "version mismatch on plugin: %d expected, but %d reported",
+		  "version mismatch on  sasl_server_add_plugin for '%s': %d expected, but %d reported",
+		  plugname,
 		  SASL_SERVER_PLUG_VERSION,
 		  version);
 	return SASL_BADVERS;
@@ -668,7 +671,7 @@ int _sasl_server_add_plugin(void *ctx,
 #endif /* _INTEGRATED_SOLARIS_ */
 
 	/* whether this mech actually has any users in it's db */
-	mech->condition = SASL_OK;
+	mech->m.condition = SASL_OK;
 #else
 	/* whether this mech actually has any users in it's db */
 	mech->m.condition = result; /* SASL_OK, SASL_CONTINUE or SASL_NOUSER */
@@ -702,6 +705,7 @@ int _sasl_server_add_plugin(void *ctx,
 
 int sasl_server_done(void)
 {
+#ifndef _SUN_SDK_
     int result = SASL_CONTINUE;
 
     if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
@@ -722,6 +726,7 @@ int sasl_server_done(void)
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return result;
     }
+#endif /* !_SUN_SDK_ */
     
     sasl_common_done();
 
@@ -740,29 +745,31 @@ static int server_done(void) {
 
 #ifdef _SUN_SDK_
   if(!gctx->sasl_server_active)
-      return SASL_NOTINIT;
-
-  if (LOCK_MUTEX(&server_active_mutex) < 0) {
-	return (SASL_FAIL);
-  }
-  gctx->sasl_server_active--;
-  
-  if(gctx->sasl_server_active) {
-      /* Don't de-init yet! Our refcount is nonzero. */
-      UNLOCK_MUTEX(&server_active_mutex);
-      return SASL_CONTINUE;
-  }
 #else
   if(_sasl_server_active == 0)
+#endif /* _SUN_SDK_ */
       return SASL_NOTINIT;
   else
+#ifdef _SUN_SDK_
+  {
+      if (LOCK_MUTEX(&server_active_mutex) < 0) {
+          return (SASL_FAIL);
+      }
+      gctx->sasl_server_active--;
+  }
+#else
       _sasl_server_active--;
+#endif /* _SUN_SDK_ */
   
+#ifdef _SUN_SDK_
+  if(gctx->sasl_server_active) {
+      UNLOCK_MUTEX(&server_active_mutex);
+#else
   if(_sasl_server_active) {
+#endif /* _SUN_SDK_ */
       /* Don't de-init yet! Our refcount is nonzero. */
       return SASL_CONTINUE;
   }
-#endif /* _SUN_SDK_ */
 
   if (mechlist != NULL)
   {
@@ -774,11 +781,7 @@ static int server_done(void) {
 	  m=m->next;
     
 	  if (prevm->m.plug->mech_free) {
-#ifdef _SUN_SDK_
-	      prevm->plug->mech_free(prevm->glob_context,
-#else
 	      prevm->m.plug->mech_free(prevm->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 				     mechlist->utils);
 	  }
 
@@ -809,11 +812,15 @@ static int server_done(void) {
   }
   gctx->splug_path_info = NULL;
   UNLOCK_MUTEX(&server_active_mutex);
+
+  sasl_config_done(gctx);
 #else
   _sasl_auxprop_free();
 
   global_callbacks.callbacks = NULL;
   global_callbacks.appname = NULL;
+
+  sasl_config_done();
 #endif /* _SUN_SDK_ */
 
   return SASL_OK;
@@ -831,7 +838,7 @@ static int server_idle(sasl_conn_t *conn)
         gctx = _sasl_gbl_ctx();
     else
         gctx = conn->gctx;
-  mechlist = gctx->mechlist;
+    mechlist = gctx->mechlist;
 #endif /* _SUN_SDK_ */
 
     if (! mechlist) {
@@ -842,11 +849,7 @@ static int server_idle(sasl_conn_t *conn)
 	 m != NULL;
 	 m = m->next) {
 	if (m->m.plug->idle
-#ifdef _SUN_SDK_
-	    &&  m->plug->idle(m->glob_context,
-#else
 	    &&  m->m.plug->idle(m->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 				conn,
 				conn ? ((sasl_server_conn_t *)conn)->sparams : NULL)) {
 	    return 1;
@@ -1005,7 +1008,7 @@ static int load_config(const sasl_callback_t *verifyfile_cb)
             goto done;
         }
 
-        snprintf(config_filename, len, "%.*s%c%s.conf", path_len, path_to_config, 
+        snprintf(config_filename, len, "%.*s%c%s.conf", (int)path_len, path_to_config,
 	        HIER_DELIMITER, global_callbacks.appname);
 
         /* Ask the application if it's safe to use this file */
@@ -1095,7 +1098,11 @@ static int parse_mechlist_file(const char *mechlistfile)
     char *t, *ptr;
     int r = 0;
 
+#ifdef _SUN_SDK_
     f = fopen(mechlistfile, "rF");
+#else
+    f = fopen(mechlistfile, "r");
+#endif /* _SUN_SDK_ */
     if (!f) return SASL_FAIL;
 
     r = SASL_OK;
@@ -1228,7 +1235,11 @@ int _sasl_server_init(void *ctx, const sasl_callback_t *callbacks,
 #endif /* _SUN_SDK_ */
 
     /* lock allocation type */
+#ifdef _SUN_SDK_
+    gctx->sasl_allocation_locked++;
+#else
     _sasl_allocation_locked++;
+#endif /* _SUN_SDK_ */
 
     /* we require the appname (if present) to be short enough to be a path */
     if (appname != NULL && strlen(appname) >= PATH_MAX)
@@ -1465,11 +1476,6 @@ _sasl_transition(sasl_conn_t * conn,
 			      NULL, 0, SASL_SET_CREATE | flags);
     }
 
-    /* Do authorization */
-    if(result == SASL_OK) {
-      result = do_authorization((sasl_server_conn_t *)conn);
-    }
-
     RETURN(conn,result);
 }
 
@@ -1530,6 +1536,7 @@ int _sasl_server_new(void *ctx,
 
 #ifdef _SUN_SDK_
   _sasl_global_context_t *gctx = (ctx == NULL) ? _sasl_gbl_ctx() : ctx;
+  mech_list_t *mechlist = gctx->mechlist;
  
   if (gctx->sasl_server_active==0) return SASL_NOTINIT;
 #else
@@ -1582,7 +1589,7 @@ int _sasl_server_new(void *ctx,
   
 #ifdef _SUN_SDK_
   utils->checkpass = &_sasl_checkpass;
-#else /* _SUN_SDK_ */  
+#else
   utils->checkpass = &sasl_checkpass;
 #endif /* _SUN_SDK_ */
 
@@ -1596,12 +1603,14 @@ int _sasl_server_new(void *ctx,
   serverconn->sparams->service = (*pconn)->service;
   serverconn->sparams->servicelen = (unsigned) strlen((*pconn)->service);
 
-  if (global_callbacks.appname && global_callbacks.appname[0] != '\0') {
 #ifdef _SUN_SDK_
+  if (gctx->server_global_callbacks.appname
+    && gctx->server_global_callbacks.appname[0] != '\0') {
     result = _sasl_strdup (gctx->server_global_callbacks.appname,
 			   &serverconn->appname,
 			   NULL);
 #else
+  if (global_callbacks.appname && global_callbacks.appname[0] != '\0') {
     result = _sasl_strdup (global_callbacks.appname,
 			   &serverconn->appname,
 			   NULL);
@@ -1611,11 +1620,7 @@ int _sasl_server_new(void *ctx,
       goto done_error;
     }
     serverconn->sparams->appname = serverconn->appname;
-#ifdef _SUN_SDK_
-    serverconn->sparams->applen = (unsigned) strlen(gctx->server_global_callbacks.appname);
-#else
     serverconn->sparams->applen = (unsigned) strlen(serverconn->sparams->appname);
-#endif /* _SUN_SDK_ */
   } else {
     serverconn->appname = NULL;
     serverconn->sparams->appname = NULL;
@@ -1639,9 +1644,8 @@ int _sasl_server_new(void *ctx,
   serverconn->sparams->iploclen = strlen((*pconn)->iplocalport);
   serverconn->sparams->ipremoteport = (*pconn)->ipremoteport;
   serverconn->sparams->ipremlen = strlen((*pconn)->ipremoteport);
-
-  serverconn->sparams->callbacks = callbacks;
 #endif /* _SUN_SDK_ */
+  serverconn->sparams->callbacks = callbacks;
 
   log_level = auto_trans = NULL;
   if(_sasl_getcallback(*pconn, SASL_CB_GETOPT, (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
@@ -1811,7 +1815,7 @@ static int mech_permitted(sasl_conn_t *conn,
 
     if (plug->mech_avail
 #ifdef _SUN_SDK_
-        && (plug->mech_avail(mech->glob_context,
+        && (ret = plug->mech_avail(mech->glob_context,
 #else
         && (ret = plug->mech_avail(plug->glob_context,
 #endif /* _SUN_SDK_ */
@@ -1923,13 +1927,11 @@ static int mech_permitted(sasl_conn_t *conn,
 	/* We no longer support sasl_server_{get,put}secret */
 #ifdef _SUN_SDK_
 	_sasl_log(conn, SASL_LOG_ERR,
-		  "mech %s requires unprovided secret facility",
-		  plug->mech_name);
 #else
 	sasl_seterror(conn, 0,
+#endif /* _SUN_SDK_ */
 		      "mech %s requires unprovided secret facility",
 		      plug->mech_name);
-#endif /* _SUN_SDK_ */
 	return SASL_NOMECH;
     }
 
@@ -2003,8 +2005,13 @@ int sasl_server_start(sasl_conn_t *conn,
     mech_list_t *mechlist;
  
     if (gctx->sasl_server_active==0) return SASL_NOTINIT;
-    if (! conn)
-	return SASL_BADPARAM;
+#else
+    if (_sasl_server_active==0) return SASL_NOTINIT;
+#endif /* _SUN_SDK_ */
+
+    /* check parameters */
+    if(!conn) return SASL_BADPARAM;
+#ifdef _SUN_SDK_
  
     (void)_load_server_plugins(gctx);
     mechlist = gctx->mechlist;
@@ -2013,11 +2020,6 @@ int sasl_server_start(sasl_conn_t *conn,
 	gctx->server_global_callbacks.callbacks));
     if (result != SASL_OK)
 	return (result);
-#else
-    if (_sasl_server_active==0) return SASL_NOTINIT;
-
-    /* check parameters */
-    if(!conn) return SASL_BADPARAM;
 #endif /* _SUN_SDK_ */
     
     if (!mech || ((clientin == NULL) && (clientinlen > 0)))
@@ -2051,7 +2053,7 @@ int sasl_server_start(sasl_conn_t *conn,
 
 #ifdef _SUN_SDK_
     server_dispose_mech_contexts(conn);
-#endif /*_SUN_SDK_ */
+#endif /* _SUN_SDK_ */
 
     /* Make sure that we're willing to use this mech */
     if ((result = mech_permitted(conn, m)) != SASL_OK) {
@@ -2060,7 +2062,7 @@ int sasl_server_start(sasl_conn_t *conn,
 
 #ifdef _SUN_SDK_
     if(conn->context) {
-	s_conn->mech->plug->mech_dispose(conn->context, s_conn->sparams->utils);
+	s_conn->mech->m.plug->mech_dispose(conn->context, s_conn->sparams->utils);
 	conn->context = NULL;
     }
     memset(&conn->oparams, 0, sizeof(sasl_out_params_t));
@@ -2119,7 +2121,7 @@ int sasl_server_start(sasl_conn_t *conn,
 	    RETURN(conn, result);
 	}
     }
-#endif /* !_SUN_SDK_ */
+#endif /* _SUN_SDK_ */
 
     if (conn->context) {
 	s_conn->mech->m.plug->mech_dispose(conn->context,
@@ -2135,11 +2137,10 @@ int sasl_server_start(sasl_conn_t *conn,
 	    if (!cur->context) {
 #ifdef _SUN_SDK_
 		_sasl_log(conn, SASL_LOG_ERR,
-			  "Got past mech_permitted with a disallowed mech!");
 #else
 		sasl_seterror(conn, 0,
-			      "Got past mech_permitted with a disallowed mech!");
 #endif /* _SUN_SDK_ */
+			      "Got past mech_permitted with a disallowed mech!");
 		return SASL_NOMECH;
 	    }
 	    /* If we find it, we need to pull cur out of the
@@ -2155,11 +2156,7 @@ int sasl_server_start(sasl_conn_t *conn,
     
     if (!conn->context) {
 	/* Note that we don't hand over a new challenge */
-#ifdef _SUN_SDK_
-	result = s_conn->mech->plug->mech_new(s_conn->mech->glob_context,
-#else
 	result = s_conn->mech->m.plug->mech_new(s_conn->mech->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 						s_conn->sparams,
 						NULL,
 						0,
@@ -2176,12 +2173,11 @@ int sasl_server_start(sasl_conn_t *conn,
                  * RFC 2222 says we fail at this point. */
 #ifdef _SUN_SDK_
 		_sasl_log(conn, SASL_LOG_ERR,
-                          "Remote sent first but mech does not allow it.");
 #else
                 sasl_seterror(conn,
 			      0,
-                              "Remote sent first but mech does not allow it.");
 #endif /* _SUN_SDK_ */
+                              "Remote sent first but mech does not allow it.");
                 result = SASL_BADPROT;
             } else {
                 /* Mech wants client-first, so let them have it */
@@ -2340,13 +2336,11 @@ int sasl_server_step(sasl_conn_t *conn,
 	    (conn->oparams.user == NULL || conn->oparams.authid == NULL)) {
 #ifdef _SUN_SDK_
 	    _sasl_log(conn, SASL_LOG_ERR,
-		      "mech did not call canon_user for both authzid "
-		      "and authid");
 #else
 	    sasl_seterror(conn, 0,
+#endif /* _SUN_SDK_ */
 			  "mech did not call canon_user for both authzid " \
 			  "and authid");
-#endif /* _SUN_SDK_ */
 	    ret = SASL_BADPROT;
 	}	
     }
@@ -2369,14 +2363,8 @@ int sasl_server_step(sasl_conn_t *conn,
  * added up 
  */
 
-#ifdef _SUN_SDK_
-static unsigned mech_names_len(_sasl_global_context_t *gctx)
-{
-  mech_list_t *mechlist = gctx->mechlist;
-#else
 static unsigned mech_names_len(mechanism_t *mech_list)
 {
-#endif /* _SUN_SDK_ */
   mechanism_t *listptr;
   unsigned result = 0;
 
@@ -2414,8 +2402,8 @@ int _sasl_server_listmech(sasl_conn_t *conn,
    mech_list_t *mechlist;
  
   if (!conn) return SASL_BADPARAM;
-   /* if there hasn't been a sasl_sever_init() fail */
   gctx = conn->gctx;
+  /* if there hasn't been a sasl_sever_init() fail */
   if (gctx->sasl_server_active==0) return SASL_NOTINIT;
  
   (void)_load_server_plugins(gctx);
@@ -2446,11 +2434,7 @@ int _sasl_server_listmech(sasl_conn_t *conn,
 
   resultlen = (prefix ? strlen(prefix) : 0)
             + (strlen(mysep) * (s_conn->mech_length - 1) * 2)
-#ifdef _SUN_SDK_
-	    + (mech_names_len(gctx) * 2) /* including -PLUS variant */
-#else
 	    + (mech_names_len(s_conn->mech_list) * 2) /* including -PLUS variant */
-#endif /* _SUN_SDK_ */
 	    + (s_conn->mech_length * (sizeof("-PLUS") - 1))
             + (suffix ? strlen(suffix) : 0)
 	    + 1;
@@ -2729,11 +2713,10 @@ int sasl_checkpass(sasl_conn_t *conn,
     /* Check the password and lookup additional properties */
     result = _sasl_checkpass(conn, user, userlen, pass, passlen);
 
-#ifdef _SUN_SDK_
-    if (result == SASL_OK) {
-      result = do_authorization((sasl_server_conn_t *) conn);
+    /* Do authorization */
+    if(result == SASL_OK) {
+      result = do_authorization((sasl_server_conn_t *)conn);
     }
-#endif /* _SUN_SDK_ */
 
     RETURN(conn,result);
 }
@@ -3094,11 +3077,17 @@ _sasl_print_mechanism (
 /* Dump information about available server plugins (separate functions should be
    used for canon and auxprop plugins */
 int sasl_server_plugin_info (
+#ifdef _SUN_SDK_
+  _sasl_global_context_t *gctx,
+#endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   sasl_server_info_callback_t *info_cb,
   void *info_cb_rock
 )
 {
+#ifdef _SUN_SDK_
+    mech_list_t *mechlist = gctx->mechlist;
+#endif /* _SUN_SDK_ */
     mechanism_t *m;
     server_sasl_mechanism_t plug_data;
     char * cur_mech;

@@ -6,7 +6,7 @@
 
 /* auxprop.c - auxilliary property support
  * Rob Siemborski
- * $Id: auxprop.c,v 1.21 2011/09/01 14:12:53 mel Exp $
+ * $Id: auxprop.c,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -860,15 +860,13 @@ int sasl_auxprop_add_plugin(const char *plugname,
     sasl_auxprop_plug_t *plug;
 #ifdef _SUN_SDK_
     _sasl_global_context_t *gctx = ctx == NULL ? _sasl_gbl_ctx() : ctx;
-    auxprop_plug_list_t *auxprop_head;
     const sasl_utils_t *sasl_global_utils;
     auxprop_plug_list_t *l;
 
-    auxprop_head = gctx->auxprop_head;
     sasl_global_utils = gctx->sasl_server_global_utils;
 
   /* Check to see if this plugin has already been registered */
-    for (l = auxprop_head; l != NULL; l = l->next) {
+    for (l = gctx->auxprop_head; l != NULL; l = l->next) {
 	if (strcmp(plugname, l->plugname) == 0) {
 	    return SASL_OK;
 	}
@@ -887,12 +885,11 @@ int sasl_auxprop_add_plugin(const char *plugname,
     if(result != SASL_OK) {
 #ifdef _SUN_SDK_
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks,
-		SASL_LOG_ERR, "auxpropfunc error %i\n",
-		  sasl_errstring(result, NULL, NULL));
+		SASL_LOG_ERR, "auxpropfunc error %s\n",
 #else
 	_sasl_log(NULL, SASL_LOG_ERR, "auxpropfunc error %s\n",
-		  sasl_errstring(result, NULL, NULL));
 #endif /* _SUN_SDK_ */
+		  sasl_errstring(result, NULL, NULL));
 	return result;
     }
 
@@ -919,10 +916,11 @@ int sasl_auxprop_add_plugin(const char *plugname,
 #endif /* _SUN_SDK_ */
     /* These will load from least-important to most important */
     new_item->plug = plug;
-    new_item->next = auxprop_head;
 #ifdef _SUN_SDK_
+    new_item->next = gctx->auxprop_head;
     gctx->auxprop_head = new_item;
 #else
+    new_item->next = auxprop_head;
     auxprop_head = new_item;
 #endif /* _SUN_SDK_ */
 
@@ -1104,6 +1102,10 @@ int sasl_auxprop_store(sasl_conn_t *conn,
     unsigned userlen = 0;
     int num_constraint_violations = 0;
     int total_plugins = 0;
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx;
+    auxprop_plug_list_t *auxprop_head;
+#endif /* _SUN_SDK_ */
 
     if (ctx) {
 	if (!conn || !user)
@@ -1112,6 +1114,10 @@ int sasl_auxprop_store(sasl_conn_t *conn,
 	sparams = ((sasl_server_conn_t *) conn)->sparams;
 	userlen = (unsigned) strlen(user);
     }
+#ifdef _SUN_SDK_
+    gctx = sparams->utils->conn->gctx;
+    auxprop_head = gctx->auxprop_head;
+#endif /* _SUN_SDK_ */
     
     /* Pickup getopt callback from the connection, if conn is not NULL */
     if(_sasl_getcallback(conn, SASL_CB_GETOPT, (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
@@ -1243,6 +1249,9 @@ _sasl_print_mechanism (sasl_auxprop_plug_t *m,
 /* Dump information about available auxprop plugins (separate functions are
    used for canon and server authentication plugins) */
 int auxprop_plugin_info (
+#ifdef _SUN_SDK_
+  const sasl_conn_t *conn,
+#endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   auxprop_info_callback_t *info_cb,
   void *info_cb_rock
@@ -1253,6 +1262,10 @@ int auxprop_plugin_info (
     char * cur_mech;
     char *mech_list = NULL;
     char * p;
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx = conn->gctx;
+    auxprop_plug_list_t *auxprop_head = gctx->auxprop_head;
+#endif /* _SUN_SDK_ */
 
     if (info_cb == NULL) {
 	info_cb = _sasl_print_mechanism;

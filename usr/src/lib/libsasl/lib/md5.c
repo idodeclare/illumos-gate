@@ -5,6 +5,7 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /* MD5C.C - RSA Data Security, Inc., MD5 message-digest algorithm
+ * $Id: md5.c,f246b59 2003-08-29 15:45:12 +0000 cyrus-sasl $
  */
 
 /* Function names changed to avoid namespace collisions: Rob Siemborski */

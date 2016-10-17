@@ -3,11 +3,17 @@
  * Use is subject to license terms.
  */
 
-/* saslplug.h --  API for SASL plug-ins */
+/*
+ * saslplug.h --  API for SASL plug-ins
+ * $Id: saslplug.h,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
+ */
+
+#include <config.h>
 
 #ifndef	_SASL_SASLPLUG_H
 #define	_SASL_SASLPLUG_H
 
+#ifdef _SUN_SDK_
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #ifndef	_SASL_SASL_H
@@ -17,10 +23,32 @@
 #ifndef _MD5_H
 #include <md5.h>
 #endif /* _MD5_H */
+#else
+#ifndef MD5GLOBAL_H
+#include "md5global.h"
+#endif
+#ifndef MD5_H
+#include "md5.h"
+#endif
+#ifndef HMAC_MD5_H
+#include "hmac-md5.h"
+#endif
+#ifndef PROP_H
+#include "prop.h"
+#endif
+#endif /* _SUN_SDK_ */
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
+
+#ifdef _SUN_SDK_
+/*
+ * need to declare _sasl_global_context_s here as incomplete type because
+ * it's only defined later in saslint.h (and aliased as
+ * _sasl_global_context_t)
+ */
+struct _sasl_global_context_s;
 
 /* intermediate MD5 context */
 typedef struct HMAC_MD5_CTX_s {
@@ -35,6 +63,7 @@ typedef struct HMAC_MD5_STATE_s {
     uint32_t istate[4];
     uint32_t ostate[4];
 } HMAC_MD5_STATE;
+#endif /* _SUN_SDK_ */
 
 /*
  * callback to lookup a sasl_callback_t for a connection
@@ -49,6 +78,7 @@ typedef struct HMAC_MD5_STATE_s {
  *  SASL_FAIL -- unable to find a callback of the requested type
  *  SASL_INTERACT -- caller must use interaction to get data
  */
+typedef int (*sasl_callback_ft)(void);
 typedef int sasl_getcallback_t(sasl_conn_t *conn,
 				unsigned long callbackid,
 				sasl_callback_ft * pproc,
@@ -230,6 +260,15 @@ typedef struct sasl_out_params {
     int param_version;
 } sasl_out_params_t;
 
+
+
+/* Used by both client and server side plugins */
+typedef enum  {
+    SASL_INFO_LIST_START = 0,
+    SASL_INFO_LIST_MECH,
+    SASL_INFO_LIST_END
+} sasl_info_callback_stage_t;
+
 /******************************
  * Channel binding macros     **
  ******************************/
@@ -245,14 +284,6 @@ typedef enum {
 /* TRUE if channel binding is marked critical */
 #define SASL_CB_CRITICAL(params)    (SASL_CB_PRESENT(params) && \
 				     (params)->cbinding->critical)
-
-/* Used by both client and server side plugins */
-typedef enum  {
-    SASL_INFO_LIST_START = 0,
-    SASL_INFO_LIST_MECH,
-    SASL_INFO_LIST_END
-} sasl_info_callback_stage_t;
-
 
 
 /*
@@ -503,7 +534,13 @@ typedef void sasl_client_info_callback_t (client_sasl_mechanism_t *m,
 					  void *rock);
 
 /* Dump information about available client plugins */
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_client_plugin_info (
+  struct _sasl_global_context_s *gctx,
+  const char *mech_list,
+#else
 LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_client_info_callback_t *info_cb,
 	void *info_cb_rock);
 
@@ -511,6 +548,10 @@ LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
 /*
  * Server Functions
  */
+#ifndef _SUN_SDK_
+/* log message formatting routine */
+typedef void sasl_logmsg_p(sasl_conn_t *conn, const char *fmt, ...);
+#endif /* _SUN_SDK_ */
 
 /*
  * input parameters to server SASL plugin
@@ -629,6 +670,28 @@ typedef struct sasl_server_params {
 	 */
     int param_version;
 } sasl_server_params_t;
+
+#ifndef _SUN_SDK_
+/* logging levels (more levels may be added later, if necessary):
+ */
+#define SASL_LOG_NONE  0	/* don't log anything */
+#define SASL_LOG_ERR   1	/* log unusual errors (default) */
+#define SASL_LOG_FAIL  2	/* log all authentication failures */
+#define SASL_LOG_WARN  3	/* log non-fatal warnings */
+#define SASL_LOG_NOTE  4	/* more verbose than LOG_WARN */
+#define SASL_LOG_DEBUG 5	/* more verbose than LOG_NOTE */
+#define SASL_LOG_TRACE 6	/* traces of internal protocols */
+#define SASL_LOG_PASS  7	/* traces of internal protocols, including
+				 * passwords */
+#endif /* _SUN_SDK_ */
+
+/*
+ * additional flags for setpass() function below:
+ *
+ *      SASL_SET_CREATE                     create user if pass non-NULL
+ *      SASL_SET_DISABLE                    disable user
+ */
+#define SASL_SET_REMOVE  SASL_SET_CREATE /* remove user if pass is NULL */
 
 /* features for server plug-in */
 #define	SASL_FEAT_SERVICE    0x0200 /* service-specific passwords supported */
@@ -838,7 +901,13 @@ typedef void sasl_server_info_callback_t (server_sasl_mechanism_t *m,
 
 /* Dump information about available server plugins (separate functions are
    used for canon and auxprop plugins) */
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_server_plugin_info (
+	struct _sasl_global_context_s *gctx,
+	const char *mech_list,
+#else
 LIBSASL_API int sasl_server_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_server_info_callback_t *info_cb,
 	void *info_cb_rock);
 
@@ -966,9 +1035,9 @@ typedef struct sasl_auxprop_plug {
 				    /* with non-zero len field.  If set, */
 				    /* override value of those properties */
 #define	SASL_AUXPROP_AUTHZID  0x02  /* if clear, we are looking up the */
-				    /* authid flags (prefixed with *), */
-				    /* otherwise we are looking up the */
-				    /* authzid flags (no prefix) */
+				    /* authid flags (prefixed with *), otherwise */
+				    /* we are looking up the authzid flags */
+				    /* (no prefix) */
 
 /* NOTE: Keep in sync with SASL_CU_<XXX> flags */
 #define SASL_AUXPROP_VERIFY_AGAINST_HASH 0x10
@@ -997,7 +1066,13 @@ typedef void auxprop_info_callback_t (sasl_auxprop_plug_t *m,
 
 /* Dump information about available auxprop plugins (separate functions are
    used for canon and server authentication plugins) */
+#ifdef _SUN_SDK_
+LIBSASL_API int auxprop_plugin_info (
+	const sasl_conn_t *conn,
+	const char *mech_list,
+#else
 LIBSASL_API int auxprop_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	auxprop_info_callback_t *info_cb,
 	void *info_cb_rock);
 

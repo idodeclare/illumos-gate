@@ -5,6 +5,7 @@
 
 /*
  * saslutil.h -- various utility functions in SASL library
+ * $Id: saslutil.h,c1aeb73 2011-11-08 17:22:40 +0000 cyrus-sasl $
  */
 
 #ifndef	_SASL_SASLUTIL_H
@@ -12,9 +13,20 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+#include <config.h>
+
 #ifndef	_SASL_SASL_H
 #include <sasl/sasl.h>
 #endif
+
+#ifdef _SUN_SDK_
+/*
+ * need to declare _sasl_global_context_s here as incomplete type because
+ * it's only defined later in saslint.h (and aliased as
+ * _sasl_global_context_t)
+ */
+struct _sasl_global_context_s;
+#endif /* _SUN_SDK_ */
 
 #ifdef	__cplusplus
 extern "C" {
@@ -50,7 +62,7 @@ LIBSASL_API int sasl_decode64(const char *in, unsigned inlen,
 LIBSASL_API int sasl_encode64(const char *in, unsigned inlen,
 			    char *out, unsigned outmax, unsigned *outlen);
 
-#if 0
+#ifndef _SUN_SDK_
 /*
  * The following is not supported:
  *
@@ -62,7 +74,7 @@ LIBSASL_API int sasl_encode64(const char *in, unsigned inlen,
  */
 LIBSASL_API int sasl_mkchal(sasl_conn_t *conn, char *buf,
 			    unsigned maxlen, unsigned hostflag);
-#endif
+#endif /* !_SUN_SDK_ */
 
 /*
  * verify a string is valid UTF-8
@@ -71,7 +83,7 @@ LIBSASL_API int sasl_mkchal(sasl_conn_t *conn, char *buf,
  */
 LIBSASL_API int sasl_utf8verify(const char *str, unsigned len);
 
-#if 0
+#ifndef _SUN_SDK_
 /* The following are not supported */
 
 /* create random pool seeded with OS-based params */
@@ -90,7 +102,7 @@ LIBSASL_API void sasl_rand(sasl_rand_t *rpool, char *buf, unsigned len);
 /* churn data into random number generator */
 LIBSASL_API void sasl_churn(sasl_rand_t *rpool, const char *data,
 			    unsigned len);
-#endif
+#endif /* !_SUN_SDK_ */
 
 /*
  * erase a security sensitive buffer or password.
@@ -101,7 +113,28 @@ LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 /* Lowercase string in place */
 LIBSASL_API char *sasl_strlower (char *val);
 
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_config_init(struct _sasl_global_context_s *gctx,
+  const char *filename);
+#else
 LIBSASL_API int sasl_config_init(const char *filename);
+#endif /* _SUN_SDK_ */
+
+#ifdef _SUN_SDK_
+LIBSASL_API void sasl_config_done(struct _sasl_global_context_s *gctx);
+#else
+LIBSASL_API void sasl_config_done(void);
+#endif /* _SUN_SDK_ */
+
+#ifndef _SUN_SDK_
+#ifdef WIN32
+/* Just in case a different DLL defines this as well */
+#if defined(NEED_GETOPT)
+LIBSASL_API int getopt(int argc, char **argv, char *optstring);
+#endif
+LIBSASL_API char * getpass(const char *prompt);
+#endif /* WIN32 */
+#endif /* !_SUN_SDK_ */
 
 #ifdef	__cplusplus
 }

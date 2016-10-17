@@ -6,7 +6,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.c,v 1.22 2011/09/01 14:12:18 mel Exp $
+ * $Id: plugin_common.c,d66db42 2015-11-20 11:28:58 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -107,7 +107,11 @@ static void sockaddr_unmapped(
 /* LINTED pointer alignment */ 
     sin4 = (struct sockaddr_in *)sa;
 /* LINTED pointer alignment */ 
-    addr = *(uint32_t *)&sin6->sin6_addr.s6_addr[12];
+#ifdef _SUN_SDK_
+    addr = *(uint32_t *)&sin6->sin6_addr._S6_un._S6_u32[3];
+#else
+    addr = *(uint32_t *)&sin6->sin6_addr.s6_addr32[3];
+#endif /* _SUN_SDK_ */
     port = sin6->sin6_port;
     memset(sin4, 0, sizeof(struct sockaddr_in));
     sin4->sin_addr.s_addr = addr;
@@ -218,7 +222,7 @@ int _plug_ipfromstring(const sasl_utils_t *utils, const char *addr,
 	return SASL_BADPARAM;
     }
 
-    len = ai->ai_addrlen;
+    len = (socklen_t) ai->ai_addrlen;
 #ifdef _SUN_SDK_
     if (len > sizeof(ss))
 	return (SASL_BUFOVER);
@@ -326,7 +330,7 @@ int _plug_strdup(const sasl_utils_t * utils, const char *in,
 		 char **out, int *outlen)
 {
 #ifdef _SUN_SDK_
-  int len;
+  size_t len;
 #else
   size_t len = strlen(in);
 #endif /* _SUN_SDK_ */
@@ -348,7 +352,7 @@ int _plug_strdup(const sasl_utils_t * utils, const char *in,
   strcpy((char *) *out, in);
 
   if (outlen)
-      *outlen = len;
+      *outlen = (int) len;
 
   return SASL_OK;
 }
@@ -361,7 +365,7 @@ void _plug_free_string(const sasl_utils_t *utils, char **str)
 
   len = strlen(*str);
 
-  utils->erasebuffer(*str, len);
+  utils->erasebuffer(*str, (unsigned int) len);
   utils->free(*str);
 
   *str=NULL;
@@ -415,7 +419,7 @@ int _plug_get_simple(const sasl_utils_t *utils, unsigned int id, int required,
 	/* We prompted, and got.*/
 	
 	if (required && !prompt->result) {
-	    SETERROR(utils, "Unexpectedly missing a prompt result");
+	    SETERROR(utils, "Unexpectedly missing a prompt result in _plug_get_simple");
 	    return SASL_BADPARAM;
 	}
 
@@ -463,7 +467,7 @@ int _plug_get_password(const sasl_utils_t *utils, sasl_secret_t **password,
 	/* We prompted, and got.*/
 	
 	if (!prompt->result) {
-	    SETERROR(utils, "Unexpectedly missing a prompt result");
+	    SETERROR(utils, "Unexpectedly missing a prompt result in _plug_get_password");
 	    return SASL_BADPARAM;
 	}
       
@@ -522,7 +526,7 @@ int _plug_challenge_prompt(const sasl_utils_t *utils, unsigned int id,
 	/* We prompted, and got.*/
 	
 	if (!prompt->result) {
-	    SETERROR(utils, "Unexpectedly missing a prompt result");
+	    SETERROR(utils, "Unexpectedly missing a prompt result in _plug_challenge_prompt");
 	    return SASL_BADPARAM;
 	}
       
@@ -568,7 +572,7 @@ int _plug_get_realm(const sasl_utils_t *utils, const char **availrealms,
 	/* We prompted, and got.*/
 	
 	if (!prompt->result) {
-	    SETERROR(utils, "Unexpectedly missing a prompt result");
+	    SETERROR(utils, "Unexpectedly missing a prompt result in _plug_get_realm");
 	    return SASL_BADPARAM;
 	}
 
@@ -1110,7 +1114,12 @@ convert_prompt(const sasl_utils_t *utils, void **h, const char *s)
 	return NULL;
     }
 
+#ifdef _SUN_SDK_
+    ret = utils->getcallback(utils->conn, SASL_CB_LANGUAGE,
+    (sasl_callback_ft * )&simple_cb,
+#else
     ret = utils->getcallback(utils->conn, SASL_CB_LANGUAGE, &simple_cb,
+#endif /* _SUN_SDK_ */
 	&simple_context);
 
     if (ret == SASL_OK && simple_cb) {

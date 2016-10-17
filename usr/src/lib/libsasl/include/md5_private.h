@@ -5,6 +5,10 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+/*
+ * $Id: md5.h,cyrus-sasl-7c78c9e3 Thu Sep 1 14:12:18 2011 +0000 $
+ */
+
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
@@ -28,6 +32,8 @@ documentation and/or software.
 
 #ifndef _MD5_PRIVATE_H
 #define _MD5_PRIVATE_H
+
+#include <config.h>
 
 #ifdef _SUN_SDK_
 #ifndef _MD5_H

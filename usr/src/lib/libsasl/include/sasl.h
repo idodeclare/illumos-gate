@@ -4,8 +4,11 @@
  */
 
 /*
+ * This is a proposed C API for support of SASL
+ * $Id: sasl.h,2f74022 2015-11-20 12:41:07 +0100 cyrus-sasl $
+ *
  * *******************************IMPORTANT******************************
- * send email to chris.newman@sun.com and cyrus-bugs@andrew.cmu.edu     *
+ * send email to chris.newman@innosoft.com and cyrus-bugs@andrew.cmu.edu*
  * if you need to add new error codes, callback types, property values, *
  * etc.   It is important to keep the multiple implementations of this  *
  * API from diverging.                                                  *
@@ -22,22 +25,17 @@
  *
  * Callbacks:
  *  sasl_getopt_t     client/server: Get an option value
- *  sasl_canon_user_t client/server: Canonicalize username
- *  sasl_log_t        client/server: Log message handler
- *  sasl_verifyfile_t client/server: Verify file for specified usage
- *  sasl_getpath_t    client/server: Get sasl search path
- *
- * Client only Callbacks:
- *  sasl_getrealm_t   client: Get available realms
+ *  sasl_logmsg_t     client/server: Log message handler
  *  sasl_getsimple_t  client: Get user/language list
  *  sasl_getsecret_t  client: Get authentication secret
  *  sasl_chalprompt_t client: Display challenge and prompt for response
  *
  * Server only Callbacks:
- *  sasl_authorize_t               user authorization policy callback
+ *  sasl_authorize_t             user authorization policy callback
  *  sasl_getconfpath_t           get path to search for config file
- *  sasl_server_userdb_checkpass_t check password and auxprops in userdb
- *  sasl_server_userdb_setpass_t   set password in userdb
+ *  sasl_server_userdb_checkpass check password and auxprops in userdb
+ *  sasl_server_userdb_setpass   set password in userdb
+ *  sasl_server_canon_user       canonicalize username routine
  *
  * Client/Server Function Summary:
  *  sasl_done         Release all SASL global state
@@ -132,18 +130,14 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
-#ifndef	_SASL_PROP_H
-#include <sasl/prop.h>
-#endif
-
-#ifdef	__cplusplus
-extern "C" {
-#endif
+#include <config.h>
+#include <prop.h>
+#include <stddef.h>  /* For size_t */
 
 /* Keep in sync with win32/common.mak */
 #define	SASL_VERSION_MAJOR 2
 #define	SASL_VERSION_MINOR 1
-#define SASL_VERSION_STEP 25
+#define SASL_VERSION_STEP 26
 
 /* A convenience macro: same as was defined in the OpenLDAP LDAPDB */
 #define SASL_VERSION_FULL ((SASL_VERSION_MAJOR << 16) |\
@@ -197,6 +191,7 @@ extern "C" {
 				       because of some constrains/policy violation */
 
 #define SASL_BADBINDING -32  /* channel binding failure */
+#define SASL_CONFIGERR  -100 /* error when parsing configuration file */
 
 /* max size of a sasl mechanism name */
 #define	SASL_MECHNAMEMAX 20
@@ -230,6 +225,10 @@ typedef struct sasl_secret {
 /* random data context structure */
 typedef struct sasl_rand_s sasl_rand_t;
 
+#ifdef	__cplusplus
+extern "C" {
+#endif
+
 
 /*
  * Configure Basic Services
@@ -240,13 +239,15 @@ typedef struct sasl_rand_s sasl_rand_t;
  * they must be called before all other SASL functions:
  */
 
+#include <sys/types.h>
+
 /* The following function is obsolete */
 /*
  * memory allocation functions which may optionally be replaced:
  */
-typedef void *sasl_malloc_t(unsigned long);
-typedef void *sasl_calloc_t(unsigned long, unsigned long);
-typedef void *sasl_realloc_t(void *, unsigned long);
+typedef void *sasl_malloc_t(size_t);
+typedef void *sasl_calloc_t(size_t, size_t);
+typedef void *sasl_realloc_t(void *, size_t);
 typedef void sasl_free_t(void *);
 
 LIBSASL_API void sasl_set_alloc(sasl_malloc_t *,
@@ -456,8 +457,10 @@ typedef int sasl_getpath_t(void *context,
 
 #define	SASL_CB_GETPATH	    3
 
+#ifdef _SUN_SDK_
 /* Callback to get the location of the sasl config  */
 #define	SASL_CB_GETCONF	    0x5001
+#endif
 
 /*
  * verify file callback -- this allows applications to check if they
@@ -969,8 +972,9 @@ LIBSASL_API int sasl_client_init(const sasl_callback_t *callbacks);
  *                   NULL prompt_supp = user/pass via SASL_INTERACT only
  *                   NULL proc = interaction supported via SASL_INTERACT
  *  flags         -- server usage flags (see above)
- * out:
- *  pconn         -- sasl connection
+ * in/out:
+ *  pconn         -- connection negotiation structure
+ *                   pointer to NULL => allocate new
  *
  * Returns:
  *  SASL_OK       -- success
@@ -987,7 +991,8 @@ LIBSASL_API int sasl_client_new(const char *service,
 
 /*
  * select a mechanism for a connection
- *  mechlist      -- list of mechanisms to use (punctuation ignored)
+ *  mechlist      -- mechanisms server has available (punctuation ignored)
+ *                   if NULL, then discard cached info and retry last mech
  * output:
  *  prompt_need   -- on SASL_INTERACT, list of prompts needed to continue
  *                   may be NULL if callbacks provided
@@ -1264,7 +1269,6 @@ LIBSASL_API int sasl_setpass(sasl_conn_t *conn,
 			    const char *oldpass, unsigned oldpasslen,
 			    unsigned flags);
 #define	SASL_SET_CREATE  0x01   /* create a new entry for user */
-#define	SASL_SET_REMOVE  SASL_SET_CREATE /* remove user if pass is NULL */
 #define	SASL_SET_DISABLE 0x02	/* disable user account */
 #define SASL_SET_NOPLAIN 0x04	/* do not store secret in plain text */
 #define SASL_SET_CURMECH_ONLY 0x08	/* set the mechanism specific password only.
