@@ -6,7 +6,7 @@
 /* GSSAPI SASL plugin
  * Leif Johansson
  * Rob Siemborski (SASL v2 Conversion)
- * $Id: gssapi.c,cyrus-sasl-f607d99bf,Sat Jan 30 10:00:02 2016 -0500 $
+ * $Id: gssapi.c,cyrus-sasl-f607d99bf Sat Jan 30 10:00:02 2016 -0500 $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -91,7 +91,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: gssapi.c,cyrus-sasl-f607d99bf,Sat Jan 30 10:00:02 2016 -0500 $";
+static const char plugin_id[] = "$Id: gssapi.c,cyrus-sasl-f607d99bf Sat Jan 30 10:00:02 2016 -0500 $";
 #endif /* !_SUN_SDK_ */
 
 static const char * GSSAPI_BLANK_STRING = "";
@@ -871,11 +871,12 @@ gssapi_server_mech_authneg(context_t *text,
     if (text->server_name == GSS_C_NO_NAME) { /* only once */
 	if (params->serverFQDN == NULL
 	    || strlen(params->serverFQDN) == 0) {
-#ifdef _INTEGRATED_SOLARIS_
-		SETERROR(text->utils, gettext("GSSAPI Failure: no serverFQDN"));
+#ifdef _SUN_SDK_
+		text->utils->log(text->utils->conn, SASL_LOG_ERR,
+				 "GSSAPI Failure: no serverFQDN");
 #else
 	    SETERROR(text->utils, "GSSAPI Failure: no serverFQDN");
-#endif
+#endif /* _SUN_SDK_ */
 	    sasl_gss_free_context_contents(text);
 	    return SASL_FAIL;
 	}
@@ -1062,7 +1063,7 @@ gssapi_server_mech_authneg(context_t *text,
 #else
 	    text->utils->seterror(text->utils->conn, SASL_LOG_WARN,
 				  "GSSAPI warning: no credentials were passed");
-#endif
+#endif /* _SUN_SDK_ */
 	    /* continue with authentication */
 	}
 
@@ -1476,14 +1477,14 @@ gssapi_server_mech_ssfreq(context_t *text,
 					oparams->mech_ssf > 1,
 #else
 					1,
-#endif
+#endif /* _SUN_SDK_ */
 					GSS_C_QOP_DEFAULT,
 					(OM_uint32) oparams->maxoutbuf,
 #ifdef _SUN_SDK_
 					&max_input_size);
 #else
 					&max_input);
-#endif
+#endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
 	    if (GSS_ERROR(maj_stat)) {
@@ -1513,7 +1514,7 @@ gssapi_server_mech_ssfreq(context_t *text,
 	    oparams->maxoutbuf = max_input;
 	}    
     }
-#endif
+#endif /* _SUN_SDK_ */
 	
     GSS_LOCK_MUTEX_CTX(params->utils, text);
     gss_release_buffer(&min_stat, output_token);
@@ -2137,7 +2138,7 @@ static int gssapi_client_mech_step(void *conn_context,
 	      gettext("GSSAPI warning: no credentials were passed"));
 #else
 	    text->utils->seterror(text->utils->conn, SASL_LOG_WARN, "GSSAPI warning: no credentials were passed");
-#endif /* _INTEGRATED_SOLARIS_ */
+#endif /* _SUN_SDK_ */
 	    /* not a fatal error */
 	}
   	    
@@ -2368,14 +2369,14 @@ static int gssapi_client_mech_step(void *conn_context,
                                             oparams->mech_ssf > 1,
 #else
                                             1,
-#endif
+#endif /* _SUN_SDK_ */
                                             GSS_C_QOP_DEFAULT,
                                             (OM_uint32) oparams->maxoutbuf,
 #ifdef _SUN_SDK_
                                             &max_input_size);
 #else
                                             &max_input);
-#endif
+#endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
 	/*
@@ -2396,7 +2397,7 @@ static int gssapi_client_mech_step(void *conn_context,
 		/* This code is actually correct */
 		oparams->maxoutbuf = max_input;
 	    }
-#endif
+#endif /* _SUN_SDK_ */
 	}
 	
 	GSS_LOCK_MUTEX_CTX(params->utils, text);

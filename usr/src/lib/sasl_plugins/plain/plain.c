@@ -156,7 +156,7 @@ static int plain_server_mech_step(void *conn_context __attribute__((unused)),
     if (lup != clientinlen) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		"Got more data than we were expecting in the PLAIN plugin");
+		"Got more data than we were expecting in the PLAIN plugin\n");
 #else
 	SETERROR(params->utils,
 		 "Got more data than we were expecting in the PLAIN plugin\n");

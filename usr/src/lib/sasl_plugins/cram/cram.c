@@ -704,7 +704,7 @@ static int crammd5_client_mech_step(void *conn_context,
     if (in16 == NULL) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "make_hashed failed");
+		"whoops, make_hashed failed us this time");
 #else
 	SETERROR(params->utils, "whoops, make_hashed failed us this time");
 #endif /* _SUN_SDK_ */

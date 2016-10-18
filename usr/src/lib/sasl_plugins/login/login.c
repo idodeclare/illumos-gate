@@ -205,10 +205,14 @@ static int login_server_mech_step(void *conn_context,
 				    text->username_len,
 				    SASL_CU_AUTHID | SASL_CU_AUTHZID | SASL_CU_EXTERNALLY_VERIFIED,
 				    oparams);
+#ifdef _SUN_SDK_
 	if (result != SASL_OK) {
 		_plug_free_secret(params->utils, &password);
 		return result;
 	}
+#else
+	if (result != SASL_OK) return result;
+#endif /* _SUN_SDK_ */
 	
 	/* verify_password - return sasl_ok on success */
 	result = params->utils->checkpass(params->utils->conn,
@@ -220,10 +224,12 @@ static int login_server_mech_step(void *conn_context,
 	    return result;
 	}
 	
+#ifdef _SUN_SDK_
 	if (params->transition) {
 	    params->transition(params->utils->conn,
 			       (char *)password->data, password->len);
 	}
+#endif
 	
 	_plug_free_secret(params->utils, &password);
 	
@@ -269,7 +275,8 @@ static sasl_server_plug_t login_server_plugins[] =
     {
 	"LOGIN",			/* mech_name */
 	0,				/* max_ssf */
-	SASL_SEC_NOANONYMOUS,		/* security_flags */
+	SASL_SEC_NOANONYMOUS
+	| SASL_SEC_PASS_CREDENTIALS,	/* security_flags */
 	0,				/* features */
 	NULL,				/* glob_context */
 	&login_server_mech_new,		/* mech_new */
@@ -353,7 +360,7 @@ static int login_client_mech_step(void *conn_context,
     switch (text->state) {
 
     case 1: {
-	const char *user;
+	const char *user = NULL;
 	int auth_result = SASL_OK;
 	int pass_result = SASL_OK;
 	int result;
@@ -362,7 +369,7 @@ static int login_client_mech_step(void *conn_context,
 	if (params->props.min_ssf > params->external_ssf) {
 #ifdef _INTEGRATED_SOLARIS_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		gettext("SSF requested of LOGIN plugin"));
+	    	"SSF requested of LOGIN plugin");
 #else
 	    SETERROR( params->utils, "SSF requested of LOGIN plugin");
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -523,7 +530,8 @@ static sasl_client_plug_t login_client_plugins[] =
     {
 	"LOGIN",			/* mech_name */
 	0,				/* max_ssf */
-	SASL_SEC_NOANONYMOUS,		/* security_flags */
+	SASL_SEC_NOANONYMOUS
+	| SASL_SEC_PASS_CREDENTIALS,	/* security_flags */
 	SASL_FEAT_SERVER_FIRST,		/* features */
 	NULL,				/* required_prompts */
 	NULL,				/* glob_context */
