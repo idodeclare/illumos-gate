@@ -4,6 +4,8 @@
  */
 
 /*
+ * $Id: sasl.h,cyrus-sasl-989fdd1 Fri Sep 2 17:15:28 2011 +0000 $
+ *
  * *******************************IMPORTANT******************************
  * send email to chris.newman@sun.com and cyrus-bugs@andrew.cmu.edu     *
  * if you need to add new error codes, callback types, property values, *
