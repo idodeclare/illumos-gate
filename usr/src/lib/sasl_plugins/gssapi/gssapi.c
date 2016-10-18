@@ -6,7 +6,7 @@
 /* GSSAPI SASL plugin
  * Leif Johansson
  * Rob Siemborski (SASL v2 Conversion)
- * $Id: gssapi.c,v 1.115 2011/11/21 15:12:35 mel Exp $
+ * $Id: gssapi.c,cyrus-sasl-f607d99bf,Sat Jan 30 10:00:02 2016 -0500 $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -91,7 +91,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: gssapi.c,v 1.115 2011/11/21 15:12:35 mel Exp $";
+static const char plugin_id[] = "$Id: gssapi.c,cyrus-sasl-f607d99bf,Sat Jan 30 10:00:02 2016 -0500 $";
 #endif /* !_SUN_SDK_ */
 
 static const char * GSSAPI_BLANK_STRING = "";
