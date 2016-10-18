@@ -5,6 +5,10 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+/*
+ * $Id: md5.h,cyrus-sasl-7c78c9e3 Thu Sep 1 14:12:18 2011 +0000 $
+ */
+
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
