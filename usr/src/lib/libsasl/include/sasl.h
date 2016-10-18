@@ -24,22 +24,17 @@
  *
  * Callbacks:
  *  sasl_getopt_t     client/server: Get an option value
- *  sasl_canon_user_t client/server: Canonicalize username
- *  sasl_log_t        client/server: Log message handler
- *  sasl_verifyfile_t client/server: Verify file for specified usage
- *  sasl_getpath_t    client/server: Get sasl search path
- *
- * Client only Callbacks:
- *  sasl_getrealm_t   client: Get available realms
+ *  sasl_logmsg_t     client/server: Log message handler
  *  sasl_getsimple_t  client: Get user/language list
  *  sasl_getsecret_t  client: Get authentication secret
  *  sasl_chalprompt_t client: Display challenge and prompt for response
  *
  * Server only Callbacks:
- *  sasl_authorize_t               user authorization policy callback
+ *  sasl_authorize_t             user authorization policy callback
  *  sasl_getconfpath_t           get path to search for config file
- *  sasl_server_userdb_checkpass_t check password and auxprops in userdb
- *  sasl_server_userdb_setpass_t   set password in userdb
+ *  sasl_server_userdb_checkpass check password and auxprops in userdb
+ *  sasl_server_userdb_setpass   set password in userdb
+ *  sasl_server_canon_user       canonicalize username routine
  *
  * Client/Server Function Summary:
  *  sasl_done         Release all SASL global state
@@ -138,10 +133,6 @@
 #include <sasl/prop.h>
 #endif
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 /* Keep in sync with win32/common.mak */
 #define	SASL_VERSION_MAJOR 2
 #define	SASL_VERSION_MINOR 1
@@ -231,6 +222,10 @@ typedef struct sasl_secret {
 
 /* random data context structure */
 typedef struct sasl_rand_s sasl_rand_t;
+
+#ifdef	__cplusplus
+extern "C" {
+#endif
 
 
 /*
@@ -458,8 +453,10 @@ typedef int sasl_getpath_t(void *context,
 
 #define	SASL_CB_GETPATH	    3
 
+#ifdef _SUN_SDK_
 /* Callback to get the location of the sasl config  */
 #define	SASL_CB_GETCONF	    0x5001
+#endif
 
 /*
  * verify file callback -- this allows applications to check if they
@@ -971,8 +968,9 @@ LIBSASL_API int sasl_client_init(const sasl_callback_t *callbacks);
  *                   NULL prompt_supp = user/pass via SASL_INTERACT only
  *                   NULL proc = interaction supported via SASL_INTERACT
  *  flags         -- server usage flags (see above)
- * out:
- *  pconn         -- sasl connection
+ * in/out:
+ *  pconn         -- connection negotiation structure
+ *                   pointer to NULL => allocate new
  *
  * Returns:
  *  SASL_OK       -- success
@@ -989,7 +987,8 @@ LIBSASL_API int sasl_client_new(const char *service,
 
 /*
  * select a mechanism for a connection
- *  mechlist      -- list of mechanisms to use (punctuation ignored)
+ *  mechlist      -- mechanisms server has available (punctuation ignored)
+ *                   if NULL, then discard cached info and retry last mech
  * output:
  *  prompt_need   -- on SASL_INTERACT, list of prompts needed to continue
  *                   may be NULL if callbacks provided
@@ -1266,7 +1265,6 @@ LIBSASL_API int sasl_setpass(sasl_conn_t *conn,
 			    const char *oldpass, unsigned oldpasslen,
 			    unsigned flags);
 #define	SASL_SET_CREATE  0x01   /* create a new entry for user */
-#define	SASL_SET_REMOVE  SASL_SET_CREATE /* remove user if pass is NULL */
 #define	SASL_SET_DISABLE 0x02	/* disable user account */
 #define SASL_SET_NOPLAIN 0x04	/* do not store secret in plain text */
 #define SASL_SET_CURMECH_ONLY 0x08	/* set the mechanism specific password only.
