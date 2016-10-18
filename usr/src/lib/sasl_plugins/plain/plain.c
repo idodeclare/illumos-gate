@@ -7,7 +7,7 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,v 1.67 2009/06/10 16:05:19 mel Exp $
+ * $Id: plain.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $
  */
 
 /* 
@@ -72,7 +72,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: plain.c,v 1.61 2003/03/26 17:18:04 rjs3 Exp $";
+static const char plugin_id[] = "$Id: plain.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
