@@ -8,7 +8,7 @@
  * Rob Siemborski (SASLv2 Conversion)
  * contributed by Rainer Schoepf <schoepf@uni-mainz.de>
  * based on PLAIN, by Tim Martin <tmartin@andrew.cmu.edu>
- * $Id: login.c,v 1.25 2003/02/13 19:56:04 rjs3 Exp $
+ * $Id: login.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -68,7 +68,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: login.c,v 1.25 2003/02/13 19:56:04 rjs3 Exp $";
+static const char plugin_id[] = "$Id: login.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
