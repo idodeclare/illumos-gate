@@ -5,6 +5,7 @@
 
 /*
  * prop.h -- property request/response management routines
+ * $Id: prop.h,cyrus-sasl-34932df Fri Dec 12 00:47:22 2003 +0000 $
  *
  * Author: Chris Newman
  * Removal of implementation-specific details by: Rob Siemborski
