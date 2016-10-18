@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,v 1.205 2011/05/13 19:18:37 murch Exp $
+ * $Id: digestmd5.c,cyrus-sasl-1b85b07 Tue Jun 14 10:19:54 2016 -0400 $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -139,7 +139,7 @@ extern int      gethostname(char *, int);
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: digestmd5.c,v 1.162 2003/11/11 16:26:07 ken3 Exp $";
+static const char plugin_id[] = "$Id: digestmd5.c,cyrus-sasl-1b85b07 Tue Jun 14 10:19:54 2016 -0400 $";
 #endif /* !_SUN_SDK_ */
 
 /* Definitions */
