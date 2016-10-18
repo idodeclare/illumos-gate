@@ -5,7 +5,7 @@
 
 /* Generic SASL plugin utility functions
  * Rob Siemborski
- * $Id: plugin_common.h,v 1.21 2006/01/17 12:18:21 mel Exp $
+ * $Id: plugin_common.h,cyrus-sasl-78b4d2ab Tue Jan 17 12:18:21 2006 +0000 $
  */
 
 /* 
