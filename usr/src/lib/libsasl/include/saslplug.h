@@ -8,6 +8,8 @@
  * $Id: saslplug.h,cyrus-sasl-7c78c9e Thu Sep 1 14:12:18 2011 +0000 $
  */
 
+#include <config.h>
+
 #ifndef	_SASL_SASLPLUG_H
 #define	_SASL_SASLPLUG_H
 

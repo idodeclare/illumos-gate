@@ -13,6 +13,8 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+#include <config.h>
+
 #ifndef	_SASL_SASL_H
 #include <sasl/sasl.h>
 #endif

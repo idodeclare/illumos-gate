@@ -33,6 +33,8 @@ documentation and/or software.
 #ifndef _MD5_PRIVATE_H
 #define _MD5_PRIVATE_H
 
+#include <config.h>
+
 #ifdef _SUN_SDK_
 #ifndef _MD5_H
 #include <md5.h>

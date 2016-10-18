@@ -129,6 +129,8 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+#include <config.h>
+
 #ifndef	_SASL_PROP_H
 #include <sasl/prop.h>
 #endif

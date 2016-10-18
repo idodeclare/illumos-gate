@@ -31,6 +31,8 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+#include <config.h>
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -54,6 +56,9 @@ extern "C" {
 #else /* WIN32 */
 # define LIBSASL_API extern
 #endif /* WIN32 */
+#ifdef _SUN_SDK_
+# define LIBSASL_API
+#endif /* _SUN_SDK_ */
 
 /* Same as above, but used during a variable declaration. Only Unix definition
  * is different, as we can't assign an initial value to an extern variable */ 

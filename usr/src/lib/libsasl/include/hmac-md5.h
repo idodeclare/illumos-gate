@@ -9,6 +9,8 @@
  * $Id: hmac-md5.h,cyrus-sasl-a7718f6 Tue May 13 21:34:28 2003 +0000 $
  */
 
+#include <config.h>
+
 #ifndef HMAC_MD5_H
 #define HMAC_MD5_H 1
 
