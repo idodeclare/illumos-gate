@@ -674,34 +674,21 @@ static char *skip_r_lws (char *s)
     }
 }
 
-#ifdef __SUN_SDK_
-static char *skip_token (char *s, int caseinsensitive  __attribute__((unused)))
-#else
 static char *skip_token (char *s, int caseinsensitive)
-#endif /* _SUN_SDK_ */
 {
     if(!s) return NULL;
     
-#ifdef __SUN_SDK_
-    while (((unsigned char *)s)[0]>SP) {
-#else
     while (s[0]>SP) {
-#endif /* _SUN_SDK_ */
 	if (s[0]==DEL || s[0]=='(' || s[0]==')' || s[0]=='<' || s[0]=='>' ||
 	    s[0]=='@' || s[0]==',' || s[0]==';' || s[0]==':' || s[0]=='\\' ||
 	    s[0]=='\'' || s[0]=='/' || s[0]=='[' || s[0]==']' || s[0]== '?' ||
 	    s[0]=='=' || s[0]== '{' || s[0]== '}') {
-#ifdef __SUN_SDK_
-	    /* the above chars are never uppercase */
-	    break;
-#else
 	    if (caseinsensitive == 1) {
 		if (!isupper((unsigned char) s[0]))
 		    break;
 	    } else {
 		break;
 	    }
-#endif /* _SUN_SDK_ */
 	}
 	s++;
     }  
