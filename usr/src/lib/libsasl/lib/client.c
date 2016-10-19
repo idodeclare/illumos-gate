@@ -59,10 +59,17 @@
 #endif
 
 /* SASL Headers */
+#ifdef _SUN_SDK_
+#include <sasl.h>
+#include <saslplug.h>
+#include <saslutil.h>
+#include <saslint.h>
+#else
 #include "sasl.h"
 #include "saslplug.h"
 #include "saslutil.h"
 #include "saslint.h"
+#endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
 DEFINE_STATIC_MUTEX(init_client_mutex);
