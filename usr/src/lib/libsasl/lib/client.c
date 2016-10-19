@@ -114,6 +114,7 @@ int sasl_client_done(void)
 {
     int result = SASL_CONTINUE;
 
+#ifndef _SUN_SDK_
     if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
 	return SASL_NOTINIT;
     }
@@ -132,6 +133,7 @@ int sasl_client_done(void)
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return result;
     }
+#endif /* _SUN_SDK_ */
     
     sasl_common_done();
 
