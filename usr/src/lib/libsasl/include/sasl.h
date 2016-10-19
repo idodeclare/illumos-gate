@@ -130,10 +130,7 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include <config.h>
-
-#ifndef	_SASL_PROP_H
-#include <sasl/prop.h>
-#endif
+#include <prop.h>
 
 /* Keep in sync with win32/common.mak */
 #define	SASL_VERSION_MAJOR 2
