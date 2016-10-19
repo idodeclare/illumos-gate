@@ -6,7 +6,7 @@
 
 /* canonusr.c - user canonicalization support
  * Rob Siemborski
- * $Id: canonusr.c,v 1.22 2011/09/01 16:33:42 mel Exp $
+ * $Id: canonusr.c,cyrus-sasl-4be981387 Thu Sep 1 16:33:42 2011 +0000 $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
