@@ -8,7 +8,7 @@
  * Rob Siemborski (SASLv2 Conversion)
  * contributed by Rainer Schoepf <schoepf@uni-mainz.de>
  * based on PLAIN, by Tim Martin <tmartin@andrew.cmu.edu>
- * $Id: login.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $
+ * $Id: login.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -58,17 +58,10 @@
 
 #include "plugin_common.h"
 
-#ifndef _SUN_SDK_
-#ifdef WIN32
-/* This must be after sasl.h */
-# include "saslLOGIN.h"
-#endif /* WIN32 */
-#endif /* !_SUN_SDK_ */
-
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: login.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $";
+static const char plugin_id[] = "$Id: login.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/
@@ -77,7 +70,7 @@ typedef struct context {
     int state;
 
     char *username;
-    size_t username_len;
+    unsigned username_len;
 } server_context_t;
 
 static int login_server_mech_new(void *glob_context __attribute__((unused)), 
@@ -120,6 +113,10 @@ static int login_server_mech_step(void *conn_context,
     *serverout = NULL;
     *serveroutlen = 0;
     
+    if (text == NULL) {
+	return SASL_BADPROT;
+    }
+
     switch (text->state) {
 
     case 1:
@@ -130,7 +127,7 @@ static int login_server_mech_step(void *conn_context,
 	if (clientinlen == 0) {
 	    /* demand username */
 	    
-	    *serveroutlen = strlen(USERNAME_CHALLENGE);
+	    *serveroutlen = (unsigned) strlen(USERNAME_CHALLENGE);
 	    *serverout = USERNAME_CHALLENGE;
 
 	    return SASL_CONTINUE;
@@ -162,7 +159,7 @@ static int login_server_mech_step(void *conn_context,
 	text->username[clientinlen] = '\0';
 	
 	/* demand password */
-	*serveroutlen = strlen(PASSWORD_CHALLENGE);
+	*serveroutlen = (unsigned) strlen(PASSWORD_CHALLENGE);
 	*serverout = PASSWORD_CHALLENGE;
 	
 	text->state = 3;
@@ -194,7 +191,7 @@ static int login_server_mech_step(void *conn_context,
 	    return SASL_NOMEM;
 	}
 	
-	strncpy((char *)password->data, clientin, clientinlen);
+	strncpy((char *) password->data, clientin, clientinlen);
 	password->data[clientinlen] = '\0';
 	password->len = clientinlen;
 
@@ -216,8 +213,8 @@ static int login_server_mech_step(void *conn_context,
 	
 	/* verify_password - return sasl_ok on success */
 	result = params->utils->checkpass(params->utils->conn,
-					oparams->authid, oparams->alen,
-					(char *)password->data, password->len);
+					  oparams->authid, oparams->alen,
+					  (char *) password->data, password->len);
 	
 	if (result != SASL_OK) {
 	    _plug_free_secret(params->utils, &password);
@@ -486,7 +483,7 @@ static int login_client_mech_step(void *conn_context,
 	}
 	
 	if (clientoutlen) *clientoutlen = text->password->len;
-	*clientout = (char *)text->password->data;
+	*clientout = (char *) text->password->data;
 	
 	/* set oparams */
 	oparams->doneflag = 1;

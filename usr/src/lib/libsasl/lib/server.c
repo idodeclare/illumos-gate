@@ -6,7 +6,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: server.c,v 1.176 2011/09/01 16:33:10 mel Exp $
+ * $Id: server.c,d66db42 2015-11-20 11:28:58 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -113,7 +113,7 @@ static int _sasl_checkpass(sasl_conn_t *conn,
 #ifndef _SUN_SDK_
 static mech_list_t *mechlist = NULL; /* global var which holds the list */
 
-sasl_global_callbacks_t global_callbacks;
+static sasl_global_callbacks_t global_callbacks;
 #endif /* !_SUN_SDK_ */
 
 /* set the password for a user
@@ -588,10 +588,12 @@ int _sasl_server_add_plugin(void *ctx,
 	UNLOCK_MUTEX(&server_plug_mutex);
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks,
 		   SASL_LOG_DEBUG,
-		   "server add_plugin entry_point error %z", result);
+		  "%s_client_plug_init() failed in sasl_server_add_plugin(): %z\n",
+		  plugname, result);
 #else
 	_sasl_log(NULL, SASL_LOG_DEBUG,
-		  "server add_plugin entry_point error %z\n", result);
+		  "%s_client_plug_init() failed in sasl_server_add_plugin(): %z\n",
+		  plugname, result);
 #endif /* _SUN_SDK_ */
 	return result;
     }
@@ -606,7 +608,8 @@ int _sasl_server_add_plugin(void *ctx,
 	_sasl_log(NULL,
 #endif /* _SUN_SDK_ */
 		  SASL_LOG_ERR,
-		  "version mismatch on plugin: %d expected, but %d reported",
+		  "version mismatch on  sasl_server_add_plugin for '%s': %d expected, but %d reported",
+		  plugname,
 		  SASL_SERVER_PLUG_VERSION,
 		  version);
 	return SASL_BADVERS;
@@ -816,6 +819,8 @@ static int server_done(void) {
   global_callbacks.appname = NULL;
 #endif /* _SUN_SDK_ */
 
+  sasl_config_done();
+
   return SASL_OK;
 }
 
@@ -1005,7 +1010,7 @@ static int load_config(const sasl_callback_t *verifyfile_cb)
             goto done;
         }
 
-        snprintf(config_filename, len, "%.*s%c%s.conf", path_len, path_to_config, 
+        snprintf(config_filename, len, "%.*s%c%s.conf", (int)path_len, path_to_config,
 	        HIER_DELIMITER, global_callbacks.appname);
 
         /* Ask the application if it's safe to use this file */
@@ -1095,7 +1100,11 @@ static int parse_mechlist_file(const char *mechlistfile)
     char *t, *ptr;
     int r = 0;
 
+#ifdef _SUN_SDK_
     f = fopen(mechlistfile, "rF");
+#else
+    f = fopen(mechlistfile, "r");
+#endif /* _SUN_SDK_ */
     if (!f) return SASL_FAIL;
 
     r = SASL_OK;
@@ -1465,10 +1474,12 @@ _sasl_transition(sasl_conn_t * conn,
 			      NULL, 0, SASL_SET_CREATE | flags);
     }
 
+#ifdef _SUN_SDK_
     /* Do authorization */
     if(result == SASL_OK) {
       result = do_authorization((sasl_server_conn_t *)conn);
     }
+#endif /* _SUN_SDK_ */
 
     RETURN(conn,result);
 }
@@ -1582,7 +1593,7 @@ int _sasl_server_new(void *ctx,
   
 #ifdef _SUN_SDK_
   utils->checkpass = &_sasl_checkpass;
-#else /* _SUN_SDK_ */  
+#else
   utils->checkpass = &sasl_checkpass;
 #endif /* _SUN_SDK_ */
 
@@ -1811,7 +1822,7 @@ static int mech_permitted(sasl_conn_t *conn,
 
     if (plug->mech_avail
 #ifdef _SUN_SDK_
-        && (plug->mech_avail(mech->glob_context,
+        && (ret = plug->mech_avail(mech->glob_context,
 #else
         && (ret = plug->mech_avail(plug->glob_context,
 #endif /* _SUN_SDK_ */
@@ -2729,11 +2740,10 @@ int sasl_checkpass(sasl_conn_t *conn,
     /* Check the password and lookup additional properties */
     result = _sasl_checkpass(conn, user, userlen, pass, passlen);
 
-#ifdef _SUN_SDK_
-    if (result == SASL_OK) {
-      result = do_authorization((sasl_server_conn_t *) conn);
+    /* Do authorization */
+    if(result == SASL_OK) {
+      result = do_authorization((sasl_server_conn_t *)conn);
     }
-#endif /* _SUN_SDK_ */
 
     RETURN(conn,result);
 }

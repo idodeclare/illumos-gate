@@ -6,7 +6,7 @@
 
 /* canonusr.c - user canonicalization support
  * Rob Siemborski
- * $Id: canonusr.c,cyrus-sasl-4be981387 Thu Sep 1 16:33:42 2011 +0000 $
+ * $Id: canonusr.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -266,7 +266,18 @@ static int _sasl_auxprop_lookup_user_props (sasl_conn_t *conn,
 		   already contains an error */
 		result = authz_result;
 	    }
-  	}
+	}
+
+	if ((flags & SASL_CU_EXTERNALLY_VERIFIED) && (result == SASL_NOUSER || result == SASL_NOMECH)) {
+	    /* The called has explicitly told us that the authentication identity
+	       was already verified or will be verified independently.
+	       So a failure to retrieve any associated properties
+	       is not an error. For example the caller is using Kerberos to verify user,
+	       but the LDAPDB/SASLDB auxprop plugin doesn't contain any auxprops for
+	       the user.
+	       Another case is PLAIN/LOGIN not using auxprop to verify user passwords. */
+	    result = SASL_OK;
+	}	
     }
 #endif
 
@@ -401,9 +412,11 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks == NULL ?
 	    	   gctx->client_global_callbacks.callbacks :
 	    	   gctx->server_global_callbacks.callbacks,
-		   SASL_LOG_ERR, "canonuserfunc error %i\n",result);
+		   SASL_LOG_ERR, "%s_canonuser_plug_init() failed in sasl_canonuser_add_plugin(): %z\n",
+		  plugname, result);
 #else
-	_sasl_log(NULL, SASL_LOG_ERR, "canonuserfunc error %i\n",result);
+	_sasl_log(NULL, SASL_LOG_ERR, "%s_canonuser_plug_init() failed in sasl_canonuser_add_plugin(): %z\n",
+		  plugname, result);
 #endif /* _SUN_SDK_ */
 	return result;
     }
@@ -414,10 +427,10 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	__sasl_log(gctx, gctx->server_global_callbacks.callbacks == NULL ?
 	    	   gctx->client_global_callbacks.callbacks :
 	    	   gctx->server_global_callbacks.callbacks, SASL_LOG_ERR,
-		   "canonuser plugin without either client or server side");
+		  "canonuser plugin '%s' without either client or server side", plugname);
 #else
 	_sasl_log(NULL, SASL_LOG_ERR,
-		  "canonuser plugin without either client or server side");
+		  "canonuser plugin '%s' without either client or server side", plugname);
 #endif /* _SUN_SDK_ */
 	return SASL_BADPROT;
     }

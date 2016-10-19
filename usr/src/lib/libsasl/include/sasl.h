@@ -4,10 +4,11 @@
  */
 
 /*
- * $Id: sasl.h,cyrus-sasl-989fdd1 Fri Sep 2 17:15:28 2011 +0000 $
+ * This is a proposed C API for support of SASL
+ * $Id: sasl.h,2f74022 2015-11-20 12:41:07 +0100 cyrus-sasl $
  *
  * *******************************IMPORTANT******************************
- * send email to chris.newman@sun.com and cyrus-bugs@andrew.cmu.edu     *
+ * send email to chris.newman@innosoft.com and cyrus-bugs@andrew.cmu.edu*
  * if you need to add new error codes, callback types, property values, *
  * etc.   It is important to keep the multiple implementations of this  *
  * API from diverging.                                                  *
@@ -131,11 +132,12 @@
 
 #include <config.h>
 #include <prop.h>
+#include <stddef.h>  /* For size_t */
 
 /* Keep in sync with win32/common.mak */
 #define	SASL_VERSION_MAJOR 2
 #define	SASL_VERSION_MINOR 1
-#define SASL_VERSION_STEP 25
+#define SASL_VERSION_STEP 26
 
 /* A convenience macro: same as was defined in the OpenLDAP LDAPDB */
 #define SASL_VERSION_FULL ((SASL_VERSION_MAJOR << 16) |\
@@ -189,6 +191,7 @@
 				       because of some constrains/policy violation */
 
 #define SASL_BADBINDING -32  /* channel binding failure */
+#define SASL_CONFIGERR  -100 /* error when parsing configuration file */
 
 /* max size of a sasl mechanism name */
 #define	SASL_MECHNAMEMAX 20
@@ -236,13 +239,15 @@ extern "C" {
  * they must be called before all other SASL functions:
  */
 
+#include <sys/types.h>
+
 /* The following function is obsolete */
 /*
  * memory allocation functions which may optionally be replaced:
  */
-typedef void *sasl_malloc_t(unsigned long);
-typedef void *sasl_calloc_t(unsigned long, unsigned long);
-typedef void *sasl_realloc_t(void *, unsigned long);
+typedef void *sasl_malloc_t(size_t);
+typedef void *sasl_calloc_t(size_t, size_t);
+typedef void *sasl_realloc_t(void *, size_t);
 typedef void sasl_free_t(void *);
 
 LIBSASL_API void sasl_set_alloc(sasl_malloc_t *,

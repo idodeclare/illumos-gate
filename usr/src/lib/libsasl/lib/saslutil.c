@@ -6,7 +6,7 @@
 /* saslutil.c
  * Rob Siemborski
  * Tim Martin
- * $Id: saslutil.c,v 1.51 2010/12/01 14:25:53 mel Exp $
+ * $Id: saslutil.c,91f766a 2015-11-24 18:59:48 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -183,7 +183,7 @@ int sasl_encode64(const char *_in,
     }
 
     *out = '\0';
- 
+    
     return SASL_OK;
 }
 
@@ -252,6 +252,19 @@ int sasl_decode64(const char *in,
                 *out++ = ((CHAR64(c[2]) << 6) & 0xc0) | CHAR64(c[3]);
                 if (++len >= outmax) return SASL_BUFOVER;
             }
+        }
+    }
+
+    *out = '\0'; /* NUL terminate the output string */
+
+    if (outlen) *outlen = len;
+
+    if (inlen != 0) {
+        if (saw_equal) {
+            /* Unless there is CRLF at the end? */
+            return SASL_BADPROT;
+        } else {
+	    return (SASL_CONTINUE);
         }
     }
 
@@ -486,7 +499,7 @@ static void randinit(sasl_rand_t *rpool)
 	srandom(*foo);
     }
 #endif /* HAVE_JRAND48 */
-#else if defined(WIN32)
+#elif defined(WIN32)
     {
 	unsigned int *foo = (unsigned int *)rpool->pool;
 	srand(*foo);
@@ -499,7 +512,7 @@ static void randinit(sasl_rand_t *rpool)
 void sasl_rand (sasl_rand_t *rpool, char *buf, unsigned len)
 {
     unsigned int lup;
-#if defined(WIN32)
+#if defined(WIN32) && !defined(__MINGW32__)
     unsigned int randomValue;
 #endif
 
@@ -510,7 +523,9 @@ void sasl_rand (sasl_rand_t *rpool, char *buf, unsigned len)
     randinit(rpool);
 
     for (lup = 0; lup < len; lup++) {
-#if defined(WIN32)
+#if defined(__MINGW32__)
+	buf[lup] = (char) (rand() >> 8);
+#elif defined(WIN32)
 	if (rand_s(&randomValue) != 0) {
 	    randomValue = rand();
 	}
@@ -605,32 +620,44 @@ int get_fqhostname(
 		  NULL,		/* don't care abour service/port */
 		  &hints,
 		  &result) != 0) {
-	/* errno on Unix, WSASetLastError on Windows are already done by the function */
-	return (-1);
+        if (abort_if_no_fqdn) {
+	    /* errno on Unix, WSASetLastError on Windows are already done by the function */
+	    return (-1);
+	} else {
+	    goto LOWERCASE;
+	}
     }
 
-    if (abort_if_no_fqdn && (result == NULL || result->ai_canonname == NULL)) {
+    if (result == NULL || result->ai_canonname == NULL) {
 	freeaddrinfo (result);
+        if (abort_if_no_fqdn) {
 #ifdef WIN32
-	WSASetLastError (WSANO_DATA);
+	    WSASetLastError (WSANO_DATA);
 #elif defined(ENODATA)
-	errno = ENODATA;
+	    errno = ENODATA;
 #elif defined(EADDRNOTAVAIL)
-	errno = EADDRNOTAVAIL;
+	    errno = EADDRNOTAVAIL;
 #endif
-	return (-1);
+	    return (-1);
+	} else {
+	    goto LOWERCASE;
+	}
     }
 
-    if (abort_if_no_fqdn && strchr (result->ai_canonname, '.') == NULL) {
+    if (strchr (result->ai_canonname, '.') == NULL) {
 	freeaddrinfo (result);
+        if (abort_if_no_fqdn) {
 #ifdef WIN32
-	WSASetLastError (WSANO_DATA);
+	    WSASetLastError (WSANO_DATA);
 #elif defined(ENODATA)
-	errno = ENODATA;
+	    errno = ENODATA;
 #elif defined(EADDRNOTAVAIL)
-	errno = EADDRNOTAVAIL;
+	    errno = EADDRNOTAVAIL;
 #endif
-	return (-1);
+	    return (-1);
+	} else {
+	    goto LOWERCASE;
+	}
     }
 
 
@@ -644,7 +671,7 @@ LOWERCASE:
 }
 
 #ifndef _SUN_SDK_
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW64_VERSION_MAJOR)
 /***************************************************************************** 
  * 
  *  MODULE NAME : GETOPT.C 

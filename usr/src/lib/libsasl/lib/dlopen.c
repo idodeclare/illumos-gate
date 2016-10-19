@@ -7,7 +7,7 @@
 /* dlopen.c--Unix dlopen() dynamic loader interface
  * Rob Siemborski
  * Rob Earhart
- * $Id: dlopen.c,v 1.52 2009/04/11 10:21:43 mel Exp $
+ * $Id: dlopen.c,a99f8b2 2009-04-11 10:21:43 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -320,7 +320,11 @@ static int _parse_la(const char *prefix, const char *in, char *out)
 	    length = strlen(line);
 	    *(line + (length - strlen(SO_SUFFIX))) = '\0';
 	    strcat(line, LA_SUFFIX);
+#ifdef _SUN_SDK_
 	    file = fopen(line, "rF");
+#else
+	    file = fopen(line, "r");
+#endif /* _SUN_SDK_ */
 	    if(file) {
 		/* We'll get it on the .la open */
 		fclose(file);
@@ -335,7 +339,11 @@ static int _parse_la(const char *prefix, const char *in, char *out)
     strcpy(line, prefix);
     strcat(line, in);
 
+#ifdef _SUN_SDK_
     file = fopen(line, "rF");
+#else
+    file = fopen(line, "r");
+#endif /* _SUN_SDK_ */
     if(!file) {
 	_sasl_log(NULL, SASL_LOG_WARN,
 		  "unable to open LA file: %s", line);
@@ -768,11 +776,10 @@ int _sasl_load_plugins(const add_plugin_list_t *entrypoints,
     return SASL_OK;
 }
 
-#ifdef _SUN_SDK_
 int
+#ifdef _SUN_SDK_
 _sasl_done_with_plugins(_sasl_global_context_t *gctx)
 #else
-int
 _sasl_done_with_plugins(void)
 #endif /* _SUN_SDK_ */
 {

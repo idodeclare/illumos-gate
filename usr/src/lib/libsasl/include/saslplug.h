@@ -5,7 +5,7 @@
 
 /*
  * saslplug.h --  API for SASL plug-ins
- * $Id: saslplug.h,cyrus-sasl-7c78c9e Thu Sep 1 14:12:18 2011 +0000 $
+ * $Id: saslplug.h,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 
 #include <config.h>
@@ -1016,9 +1016,9 @@ typedef struct sasl_auxprop_plug {
 				    /* with non-zero len field.  If set, */
 				    /* override value of those properties */
 #define	SASL_AUXPROP_AUTHZID  0x02  /* if clear, we are looking up the */
-				    /* authid flags (prefixed with *), */
-				    /* otherwise we are looking up the */
-				    /* authzid flags (no prefix) */
+				    /* authid flags (prefixed with *), otherwise */
+				    /* we are looking up the authzid flags */
+				    /* (no prefix) */
 
 /* NOTE: Keep in sync with SASL_CU_<XXX> flags */
 #define SASL_AUXPROP_VERIFY_AGAINST_HASH 0x10

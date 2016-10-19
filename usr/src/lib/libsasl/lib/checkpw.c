@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: checkpw.c,v 1.79 2009/05/08 00:43:44 murch Exp $
+ * $Id: checkpw.c,aacd3d0 2016-01-30 10:06:22 -0500 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -133,9 +133,9 @@ static int _sasl_make_plain_secret(const char *salt,
     }
 
     _sasl_MD5Init(&ctx);
-    _sasl_MD5Update(&ctx, salt, 16);
-    _sasl_MD5Update(&ctx, "sasldb", 6);
-    _sasl_MD5Update(&ctx, passwd, (unsigned int) passlen);
+    _sasl_MD5Update(&ctx, (const unsigned char *) salt, 16);
+    _sasl_MD5Update(&ctx, (const unsigned char *) "sasldb", 6);
+    _sasl_MD5Update(&ctx, (const unsigned char *) passwd, (unsigned int) passlen);
     memcpy((*secret)->data, salt, 16);
     (*secret)->data[16] = '\0';
     _sasl_MD5Final((*secret)->data + 17, &ctx);
@@ -351,7 +351,6 @@ static int auxprop_verify_password_hashed(sasl_conn_t *conn,
     }
 
  done:
-
     /* We're not going to erase the property here because other people
      * may want it */
     return ret;
@@ -406,8 +405,8 @@ int _sasl_auxprop_verify_apop(sasl_conn_t *conn,
     }
     
     _sasl_MD5Init(&ctx);
-    _sasl_MD5Update(&ctx, challenge, strlen(challenge));
-    _sasl_MD5Update(&ctx, auxprop_values[0].values[0],
+    _sasl_MD5Update(&ctx, (const unsigned char *) challenge, strlen(challenge));
+    _sasl_MD5Update(&ctx, (const unsigned char *) auxprop_values[0].values[0],
 		    strlen(auxprop_values[0].values[0]));
     _sasl_MD5Final(digest, &ctx);
 
@@ -706,7 +705,8 @@ static int saslauthd_verify_password(sasl_conn_t *conn,
 #endif
 
     /* check to see if the user configured a rundir */
-    if (_sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
+    if (_sasl_getcallback(conn, SASL_CB_GETOPT,
+                          (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
 	getopt(context, NULL, "saslauthd_path", &p, NULL);
     }
     if (p) {
@@ -1088,7 +1088,8 @@ static int authdaemon_verify_password(sasl_conn_t *conn,
     int sock = -1;
 
     /* check to see if the user configured a rundir */
-    if (_sasl_getcallback(conn, SASL_CB_GETOPT, &getopt, &context) == SASL_OK) {
+    if (_sasl_getcallback(conn, SASL_CB_GETOPT,
+                          (sasl_callback_ft *)&getopt, &context) == SASL_OK) {
 	getopt(context, NULL, "authdaemond_path", &p, NULL);
     }
     if (!p) {

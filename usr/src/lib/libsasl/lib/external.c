@@ -7,7 +7,7 @@
 /* SASL server API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: external.c,v 1.24 2009/03/10 16:27:52 mel Exp $
+ * $Id: external.c,8ab8270 2009-03-10 16:27:52 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -59,12 +59,16 @@
 #include <saslplug.h>
 #include "saslint.h"
 
+#ifdef _SUN_SDK_
 #include <plugin_common.h>
+#else
+#include "../plugins/plugin_common.h"
+#endif /* _SUN_SDK_ */
 
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: external.c,v 1.24 2009/03/10 16:27:52 mel Exp $";
+static const char plugin_id[] = "$Id: external.c,8ab8270 2009-03-10 16:27:52 +0000 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/

@@ -7,7 +7,7 @@
 /* CRAM-MD5 SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: cram.c,cyrus-sasl-7506f11a Wed Sep 7 13:19:44 2011 +0000 $
+ * $Id: cram.c,7506f11 2011-09-07 13:19:44 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: cram.c,cyrus-sasl-7506f11a Wed Sep 7 13:19:44 2011 +0000 $";
+static const char plugin_id[] = "$Id: cram.c,7506f11 2011-09-07 13:19:44 +0000 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /* convert a string of 8bit chars to it's representation in hex
@@ -704,7 +704,7 @@ static int crammd5_client_mech_step(void *conn_context,
     if (in16 == NULL) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		"whoops, make_hashed failed us this time");
+		"make_hashed failed");
 #else
 	SETERROR(params->utils, "whoops, make_hashed failed us this time");
 #endif /* _SUN_SDK_ */

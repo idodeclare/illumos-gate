@@ -7,7 +7,7 @@
 /* SASL Config file API
  * Rob Siemborski
  * Tim Martin (originally in Cyrus distribution)
- * $Id: config.c,v 1.18 2009/02/14 14:01:24 mel Exp $
+ * $Id: config.c,740d6cf 2015-09-28 17:19:53 +0200 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2009 Carnegie Mellon University.  All rights reserved.
@@ -64,8 +64,8 @@ struct configlist {
 };
 
 #ifndef _SUN_SDK_
-static struct configlist *configlist;
-static int nconfiglist;
+static struct configlist *configlist = NULL;
+static int nconfiglist = 0;
 #endif /* !_SUN_SDK_ */
 
 #define CONFIGLISTGROWSIZE 100
@@ -91,7 +91,11 @@ int sasl_config_init(const char *filename)
     nconfiglist=0;
 #endif /* _SUN_SDK_ */
 
+#ifdef _SUN_SDK_
     infile = fopen(filename, "rF");
+#else
+    infile = fopen(filename, "r");
+#endif /* _SUN_SDK_ */
     if (!infile) {
         return SASL_CONTINUE;
     }
@@ -114,11 +118,12 @@ int sasl_config_init(const char *filename)
 	    p++;
 	}
 	if (*p != ':') {
+	    fclose(infile);
 #ifdef _SUN_SDK_
 	  invalid_line = 1;
 	  goto done;
 #else
-	    return SASL_FAIL;
+	    return SASL_CONFIGERR;
 #endif /* _SUN_SDK_ */
 	}
 	*p++ = '\0';
@@ -126,11 +131,12 @@ int sasl_config_init(const char *filename)
 	while (*p && isspace((int) *p)) p++;
 	
 	if (!*p) {
+	    fclose(infile);
 #ifdef _SUN_SDK_
 	  invalid_line = 1;
 	  goto done;
 #else
-	    return SASL_FAIL;
+	    return SASL_CONFIGERR;
 #endif /* _SUN_SDK_ */
 	}
 
@@ -157,7 +163,10 @@ int sasl_config_init(const char *filename)
 #else
 	    configlist=sasl_REALLOC((char *)configlist, 
 				    alloced * sizeof(struct configlist));
-	    if (configlist==NULL) return SASL_NOMEM;
+	    if (configlist == NULL) {
+		fclose(infile);
+		return SASL_NOMEM;
+	    }
 #endif /* _SUN_SDK_ */
 	}
 
@@ -166,13 +175,17 @@ int sasl_config_init(const char *filename)
 			      &(((struct configlist *)(gctx->configlist))
 				[gctx->nconfiglist].key),
 			      NULL);
-	if (result!=SASL_OK)
+	if (result != SASL_OK) {
 	  goto done;
+	}
 #else
 	result = _sasl_strdup(key,
 			      &(configlist[nconfiglist].key),
 			      NULL);
-	if (result!=SASL_OK) return result;
+	if (result != SASL_OK) {
+	    fclose(infile);
+	    return result;
+	}
 #endif /* _SUN_SDK_ */
 #ifdef _SUN_SDK_
 	result = _sasl_strdup(p,
@@ -188,7 +201,10 @@ int sasl_config_init(const char *filename)
 	result = _sasl_strdup(p,
 			      &(configlist[nconfiglist].value),
 			      NULL);
-	if (result!=SASL_OK) return result;
+	if (result != SASL_OK) {
+	    fclose(infile);
+	    return result;
+	}
 #endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
@@ -266,3 +282,17 @@ const char *sasl_config_getstring(const char *key,const char *def)
     return def;
 }
 #endif /* _SUN_SDK_ */
+
+void sasl_config_done(void)
+{
+    int opt;
+
+    for (opt = 0; opt < nconfiglist; opt++) {
+	if (configlist[opt].key) sasl_FREE(configlist[opt].key);
+	if (configlist[opt].value) sasl_FREE(configlist[opt].value);
+    }
+
+    sasl_FREE(configlist);
+    configlist = NULL;
+    nconfiglist = 0;
+}

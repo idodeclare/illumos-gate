@@ -6,7 +6,7 @@
 /* GSSAPI SASL plugin
  * Leif Johansson
  * Rob Siemborski (SASL v2 Conversion)
- * $Id: gssapi.c,cyrus-sasl-f607d99bf Sat Jan 30 10:00:02 2016 -0500 $
+ * $Id: gssapi.c,f607d99 2016-01-30 10:00:02 -0500 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -91,7 +91,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: gssapi.c,cyrus-sasl-f607d99bf Sat Jan 30 10:00:02 2016 -0500 $";
+static const char plugin_id[] = "$Id: gssapi.c,f607d99 2016-01-30 10:00:02 -0500 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 static const char * GSSAPI_BLANK_STRING = "";
@@ -525,7 +525,7 @@ gssapi_decode_packet(void *context,
     }
     
     input_token = &real_input_token; 
-    real_input_token.value = (char *) text->buffer;
+    real_input_token.value = (char *) input;
     real_input_token.length = inputlen;
     
     output_token = &real_output_token;
@@ -1031,7 +1031,11 @@ gssapi_server_mech_authneg(context_t *text,
         return SASL_CONTINUE;
     }
 
+#ifdef _SUN_SDK_
     VERIFY(maj_stat == GSS_S_COMPLETE);
+#else
+    assert(maj_stat == GSS_S_COMPLETE);
+#endif /* _SUN_SDK_ */
 
     /* When GSS_Accept_sec_context returns GSS_S_COMPLETE, the server
        examines the context to ensure that it provides a level of protection
@@ -1188,7 +1192,7 @@ gssapi_server_mech_authneg(context_t *text,
 	    ret = _plug_strdup(params->utils, name_token.value,
 		&text->authid, NULL);
 	}
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
 	
     /* Release server creds which are no longer needed */
      if ( text->server_creds != GSS_C_NO_CREDENTIAL) {
@@ -1290,6 +1294,7 @@ gssapi_server_mech_ssfcap(context_t *text,
 #else
 	params->utils->seterror(params->utils->conn, 0,
 				"GSSAPI needs a security layer but one is forbidden");
+#endif /* _SUN_SDK_ */
 	return SASL_TOOWEAK;
     }
 
@@ -1480,11 +1485,7 @@ gssapi_server_mech_ssfreq(context_t *text,
 #endif /* _SUN_SDK_ */
 					GSS_C_QOP_DEFAULT,
 					(OM_uint32) oparams->maxoutbuf,
-#ifdef _SUN_SDK_
-					&max_input_size);
-#else
 					&max_input);
-#endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
 	    if (GSS_ERROR(maj_stat)) {
@@ -1500,8 +1501,8 @@ gssapi_server_mech_ssfreq(context_t *text,
 	     * gss_wrap_size_limit will return very big sizes for
 	     * small input values
 	     */
-	    if (max_input_size < oparams->maxoutbuf)
- 		oparams->maxoutbuf = max_input_size;
+	    if (max_input < oparams->maxoutbuf)
+ 		oparams->maxoutbuf = max_input;
 	    else {
 		oparams->maxoutbuf = 0;
 	    }
@@ -1680,7 +1681,7 @@ static sasl_server_plug_t gssapi_server_plugins[] =
 	&_gssapi_server_mech_step,	/* mech_step */
 #else
 	&gssapi_server_mech_step,	/* mech_step */
-#endif
+#endif /* _SUN_SDK_ && GSSAPI_PROTECT */
 	&gssapi_common_mech_dispose,	/* mech_dispose */
 	&gssapi_common_mech_free,	/* mech_free */
 	NULL,				/* setpass */
@@ -1831,11 +1832,7 @@ static int gssapi_client_mech_step(void *conn_context,
     gss_buffer_t input_token, output_token;
     gss_buffer_desc real_input_token, real_output_token;
     OM_uint32 maj_stat = 0, min_stat = 0;
-#ifdef _SUN_SDK_
-    OM_uint32 max_input_size;
-#else
     OM_uint32 max_input;
-#endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
     int ret;
     OM_uint32 req_flags = 0, out_req_flags = 0;
@@ -2339,11 +2336,10 @@ static int gssapi_client_mech_step(void *conn_context,
 	    oparams->decode = &gssapi_decode;
 	    oparams->mech_ssf = 1;
 	    mychoice = LAYER_INTEGRITY;
-#ifdef _SUN_SDK_
 	} else if ((text->qop & LAYER_NONE) &&
+#ifdef _SUN_SDK_
 		   need == 0 && (serverhas & LAYER_NONE)) {
 #else
-	} else if ((text->qop & LAYER_NONE) &&
 		   need <= 0 && (serverhas & LAYER_NONE)) {
 #endif /* _SUN_SDK_ */
 	    /* no layer */
@@ -2372,11 +2368,7 @@ static int gssapi_client_mech_step(void *conn_context,
 #endif /* _SUN_SDK_ */
                                             GSS_C_QOP_DEFAULT,
                                             (OM_uint32) oparams->maxoutbuf,
-#ifdef _SUN_SDK_
-                                            &max_input_size);
-#else
                                             &max_input);
-#endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
 	/*
@@ -2384,8 +2376,8 @@ static int gssapi_client_mech_step(void *conn_context,
 	 * gss_wrap_size_limit may return very big sizes for
 	 * small input values
 	 */
-	    if (max_input_size < oparams->maxoutbuf)
- 		oparams->maxoutbuf = max_input_size;
+	    if (max_input < oparams->maxoutbuf)
+ 		oparams->maxoutbuf = max_input;
 	    else {
 		oparams->maxoutbuf = 0;
 	    }

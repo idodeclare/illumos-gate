@@ -10,7 +10,7 @@
  * Rob Siemborski
  * Tim Martin
  * split from common.c by Rolf Braun
- * $Id: seterror.c,v 1.10 2011/09/01 14:12:53 mel Exp $
+ * $Id: seterror.c,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 
 /* 
@@ -257,13 +257,11 @@ void sasl_seterror(sasl_conn_t *conn,
 	    break;
 
 	  case 'z': /* insert the sasl error string */
-#ifdef _INTEGRATED_SOLARIS_
 	    result = _sasl_add_string(error_buf, error_buf_len,	&outlen,
 			 (char *)sasl_errstring(_sasl_seterror_usererr(
+#ifdef _INTEGRATED_SOLARIS_
 					        va_arg(ap, int)), lang, NULL));
 #else
-	    result = _sasl_add_string(error_buf, error_buf_len,	&outlen,
-			 (char *)sasl_errstring(_sasl_seterror_usererr(
 					        va_arg(ap, int)),NULL,NULL));
 #endif /* _INTEGRATED_SOLARIS_ */
 	    if (result != SASL_OK)

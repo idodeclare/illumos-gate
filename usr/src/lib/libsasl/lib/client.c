@@ -6,7 +6,7 @@
 /* SASL client API implementation
  * Rob Siemborski
  * Tim Martin
- * $Id: client.c,v 1.86 2011/09/01 14:12:53 mel Exp $
+ * $Id: client.c,26dcfb2 2013-07-05 16:37:59 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -76,7 +76,7 @@ DEFINE_STATIC_MUTEX(client_active_mutex);
 DEFINE_STATIC_MUTEX(client_plug_mutex);
 #else
 static cmech_list_t *cmechlist; /* global var which holds the list */
-sasl_global_callbacks_t global_callbacks_client; 
+static sasl_global_callbacks_t global_callbacks_client;
 static int _sasl_client_active = 0;
 #endif /* _SUN_SDK_ */
 
@@ -101,7 +101,7 @@ static int init_mechlist()
   cmechlist->mech_list=NULL;
   cmechlist->mech_length=0;
 
-  _sasl_client_active = 0;
+  return SASL_OK;
 }
 
 int sasl_client_done(void)
@@ -133,11 +133,11 @@ int sasl_client_done(void)
 }
 
 #ifdef _SUN_SDK_
-static void client_done(_sasl_global_context_t *gctx) {
+static int client_done(_sasl_global_context_t *gctx) {
   cmech_list_t *cmechlist = gctx->cmechlist;
   _sasl_path_info_t *path_info, *p;
 #else
-static void client_done(void) {
+static int client_done(void) {
 #endif /* _SUN_SDK_ */
     cmechanism_t *cm;
     cmechanism_t *cprevm;
@@ -287,12 +287,12 @@ int _sasl_client_add_plugin(void *ctx,
 #ifdef _SUN_SDK_
     UNLOCK_MUTEX(&client_plug_mutex);
     __sasl_log(gctx, gctx->client_global_callbacks.callbacks, SASL_LOG_WARN,
-	      "entry_point failed in sasl_client_add_plugin for %s",
-	      plugname);
+		  "sasl_client_add_plugin(): entry_point(): failed for plugname %s: %z",
+		  plugname, result);
 #else
 	_sasl_log(NULL, SASL_LOG_WARN,
-	      "entry_point failed in sasl_client_add_plugin for %s",
-	      plugname);
+		  "sasl_client_add_plugin(): entry_point(): failed for plugname %s: %z",
+		  plugname, result);
 #endif /* _SUN_SDK_ */
 	return result;
     }
@@ -429,9 +429,9 @@ static int _load_client_plugins(_sasl_global_context_t *gctx)
  *  ...
  */
 
+#ifdef _SUN_SDK_
 int sasl_client_init(const sasl_callback_t *callbacks)
 {
-#ifdef _SUN_SDK_
 	return _sasl_client_init(NULL, callbacks);
 }
 
@@ -499,8 +499,15 @@ int sasl_client_init(const sasl_callback_t *callbacks)
       { NULL, NULL }
   };
 
-  _sasl_client_cleanup_hook = &client_done;
-  _sasl_client_idle_hook = &client_idle;
+  /* lock allocation type */
+  _sasl_allocation_locked++;
+  
+  if(_sasl_client_active) {
+      /* We're already active, just increase our refcount */
+      /* xxx do something with the callback structure? */
+      _sasl_client_active++;
+      return SASL_OK;
+  }
 
   global_callbacks_client.callbacks = callbacks;
   global_callbacks_client.appname = NULL;
@@ -508,10 +515,15 @@ int sasl_client_init(const sasl_callback_t *callbacks)
   cmechlist=sasl_ALLOC(sizeof(cmech_list_t));
   if (cmechlist==NULL) return SASL_NOMEM;
 
+  /* We need to call client_done if we fail now */
+  _sasl_client_active = 1;
+
   /* load plugins */
   ret=init_mechlist();  
-  if (ret!=SASL_OK)
-    return ret;
+  if (ret!=SASL_OK) {
+      client_done();
+      return ret;
+  }
 
   sasl_client_add_plugin("EXTERNAL", &external_client_plug_init);
 
@@ -528,8 +540,8 @@ int sasl_client_init(const sasl_callback_t *callbacks)
 #endif /* _SUN_SDK_ */
   
   if (ret == SASL_OK) {
-      _sasl_client_active = 1;
 #ifdef _SUN_SDK_
+      _sasl_client_active = 1;
 	/* If sasl_client_init returns error, sasl_done() need not be called */
       ret = _sasl_build_mechlist(gctx);
   }
@@ -538,7 +550,12 @@ int sasl_client_init(const sasl_callback_t *callbacks)
   }
   UNLOCK_MUTEX(&init_client_mutex);
 #else
+      _sasl_client_cleanup_hook = &client_done;
+      _sasl_client_idle_hook = &client_idle;
+
       ret = _sasl_build_mechlist();
+  } else {
+      client_done();
   }
 #endif /* _SUN_SDK_ */
       
@@ -704,6 +721,7 @@ int _sasl_client_new(void *ctx,
 #endif /* _SUN_SDK_ */
   if (utils == NULL) {
       MEMERROR(*pconn);
+  }
   
   utils->conn= *pconn;
   conn->cparams->utils = utils;
@@ -941,6 +959,20 @@ _sasl_cbinding_disp(sasl_client_params_t *cparams,
     return SASL_OK;
 }
 
+static int
+_sasl_are_current_security_flags_worse_then_best(unsigned best_security_flags,
+						 unsigned current_security_flags)
+{
+    /* We don't qualify SASL_SEC_PASS_CREDENTIALS as "secure" flag */
+    best_security_flags &= ~SASL_SEC_PASS_CREDENTIALS;
+
+    if ((current_security_flags ^ best_security_flags) & best_security_flags) {
+	return 1;
+    } else {
+	return 0;
+    }
+}
+
 /* select a mechanism for a connection
  *  mechlist      -- mechanisms server has available (punctuation ignored)
  *  secret        -- optional secret from previous session
@@ -990,10 +1022,10 @@ int sasl_client_start(sasl_conn_t *conn,
   if (gctx->sasl_client_active == 0) return SASL_NOTINIT;
     cmechlist = gctx->cmechlist;
 #else
-  if (_sasl_client_active == 0) return SASL_NOTINIT;
+    if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif /* _SUN_SDK_ */
 
-  if (!conn) return SASL_BADPARAM;
+    if (!conn) return SASL_BADPARAM;
 
     /* verify parameters */
     if (mechlist == NULL) {
@@ -1056,7 +1088,8 @@ int sasl_client_start(sasl_conn_t *conn,
 
 	/* for each mechanism in client's list */
 	for (m = c_conn->mech_list; m != NULL; m = m->next) {
-	    int myflags, plus;
+	    unsigned myflags;
+	    int plus;
 
 	    if (!_sasl_is_equal_mech(name, m->m.plug->mech_name, name_len, &plus)) {
 		continue;
@@ -1076,15 +1109,17 @@ int sasl_client_start(sasl_conn_t *conn,
 		break;
 #endif /* _INTEGRATED_SOLARIS_ */
 
-	    /* Does it meet our security properties? */
 	    myflags = conn->props.security_flags;
-	    
-	    /* if there's an external layer this is no longer plaintext */
+
+	    /* if there's an external layer with a better SSF then this is no
+	     * longer considered a plaintext mechanism
+	     */
 	    if ((conn->props.min_ssf <= conn->external.ssf) && 
 		(conn->external.ssf > 1)) {
 		myflags &= ~SASL_SEC_NOPLAINTEXT;
 	    }
 
+	    /* Does it meet our security properties? */
 	    if (((myflags ^ m->m.plug->security_flags) & myflags) != 0) {
 		break;
 	    }
@@ -1130,8 +1165,9 @@ int sasl_client_start(sasl_conn_t *conn,
 	     */
 
 	    if (bestm &&
-		((m->m.plug->security_flags ^ bestm->m.plug->security_flags) &
-		 bestm->m.plug->security_flags)) {
+		_sasl_are_current_security_flags_worse_then_best(
+		    bestm->m.plug->security_flags,
+		    m->m.plug->security_flags)) {
 		break;
 	    }
 
@@ -1270,9 +1306,9 @@ int sasl_client_step(sasl_conn_t *conn,
 
   if(gctx->sasl_client_active==0) return SASL_NOTINIT;
 #else
-  if(_sasl_client_active==0) return SASL_NOTINIT;
+  if (_sasl_client_active == 0) return SASL_NOTINIT;
 #endif	/* _SUN_SDK_ */
-  if(!conn) return SASL_BADPARAM;
+  if (!conn) return SASL_BADPARAM;
 
   /* check parameters */
   if ((serverin==NULL) && (serverinlen>0))

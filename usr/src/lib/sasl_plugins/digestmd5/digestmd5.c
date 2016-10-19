@@ -8,7 +8,7 @@
  * Rob Siemborski
  * Tim Martin
  * Alexey Melnikov 
- * $Id: digestmd5.c,cyrus-sasl-1b85b07 Tue Jun 14 10:19:54 2016 -0400 $
+ * $Id: digestmd5.c,1b85b07 2016-06-14 10:19:54 -0400 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -139,7 +139,7 @@ extern int      gethostname(char *, int);
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: digestmd5.c,cyrus-sasl-1b85b07 Tue Jun 14 10:19:54 2016 -0400 $";
+static const char plugin_id[] = "$Id: digestmd5.c,1b85b07 2016-06-14 10:19:54 -0400 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /* Definitions */
@@ -2048,15 +2048,12 @@ static int digestmd5_decode_packet(void *context,
     if (seqnum != text->rec_seqnum) {
 #ifdef _INTEGRATED_SOLARIS_
 	utils->log(utils->conn, SASL_LOG_ERR,
-	    "Incorrect Sequence Number: received %u, expected %u",
-	    seqnum,
-	    text->rec_seqnum);
 #else
 	text->utils->seterror(text->utils->conn, 0,
+#endif /* _INTEGRATED_SOLARIS_ */
 	    "Incorrect Sequence Number: received %u, expected %u",
 	    seqnum,
 	    text->rec_seqnum);
-#endif /* _INTEGRATED_SOLARIS_ */
 	return SASL_FAIL;
     }
 
@@ -2100,12 +2097,14 @@ static int digestmd5_decode_packet(void *context,
     for (lup = 0; lup < 10; lup++)
 	if (checkdigest[lup] != digest[lup]) {
 #ifdef _SUN_SDK_
-		    text->utils->log(text->utils->conn, SASL_LOG_ERR,
-				  "CMAC doesn't match at byte %d!", lup);
-		    return SASL_BADMAC;
+	    text->utils->log(text->utils->conn, SASL_LOG_ERR,
 #else
 	    text->utils->seterror(text->utils->conn, 0,
+#endif /* _SUN_SDK_ */
 				  "CMAC doesn't match at byte %d!", lup);
+#ifdef _SUN_SDK_
+	    return SASL_BADMAC;
+#else
 	    return SASL_FAIL;
 #endif /* _SUN_SDK_ */
 	}
@@ -2377,11 +2376,10 @@ static int get_server_realm(sasl_server_params_t * params, char **realm)
 	    /* Catch improperly converted apps */
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			       "user_realm is an empty string!");
 #else
 	    params->utils->seterror(params->utils->conn, 0,
-				    "user_realm is an empty string!");
 #endif /* _SUN_SDK_ */
+				    "user_realm is an empty string!");
 	    return SASL_BADPARAM;
 	}
     } else if (params->serverFQDN != NULL) {
@@ -2389,11 +2387,10 @@ static int get_server_realm(sasl_server_params_t * params, char **realm)
     } else {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				"no way to obtain DIGEST-MD5 realm");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"no way to obtain DIGEST-MD5 realm");
 #endif /* _SUN_SDK_ */
+				"no way to obtain DIGEST-MD5 realm");
 	return SASL_FAIL;
     }
     
@@ -2565,7 +2562,9 @@ digestmd5_server_mech_step1(server_context_t *stext,
     }
     
     resplen = 0;
+#ifdef _SUN_SDK_
     if (text->out_buf) params->utils->free(text->out_buf);
+#endif /* _SUN_SDK_ */
     text->out_buf = NULL;
     text->out_buf_len = 0;
     if (add_to_challenge(sparams->utils,
@@ -2630,13 +2629,12 @@ digestmd5_server_mech_step1(server_context_t *stext,
 				 "cipher", (unsigned char *) cipheropts, 
 				 TRUE) != SASL_OK) {
 #ifdef _SUN_SDK_
-		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			"internal error: add_to_challenge 4 failed");
 		sparams->utils->free(nonce);
+		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
 #else
 		SETERROR(sparams->utils,
-			 "internal error: add_to_challenge 4 failed");
 #endif /* _SUN_SDK_ */
+			 "internal error: add_to_challenge 4 failed");
 		return SASL_FAIL;
 	    }
 	}
@@ -2672,11 +2670,10 @@ digestmd5_server_mech_step1(server_context_t *stext,
 			     (unsigned char *) maxbufstr, FALSE) != SASL_OK) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-				"internal error: add_to_challenge 5 failed");
 #else
 	    SETERROR(sparams->utils,
-		     "internal error: add_to_challenge 5 failed");
 #endif /* _SUN_SDK_ */
+		     "internal error: add_to_challenge 5 failed");
 	    return SASL_FAIL;
 	}
     }
@@ -2728,11 +2725,10 @@ digestmd5_server_mech_step1(server_context_t *stext,
 #ifdef _SUN_SDK_
 	sparams->utils->free(nonce);
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			    "internal error: challenge larger than 2048 bytes");
 #else
 	SETERROR(sparams->utils,
-		 "internal error: challenge larger than 2048 bytes");
 #endif /* _SUN_SDK_ */
+		 "internal error: challenge larger than 2048 bytes");
 	return SASL_FAIL;
     }
 
@@ -2740,11 +2736,10 @@ digestmd5_server_mech_step1(server_context_t *stext,
     if (_plug_strdup(sparams->utils, realm, &text->realm, NULL) != SASL_OK) {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		 "internal error: out of memory when saving realm");
 #else
 	SETERROR(sparams->utils,
-		 "internal error: out of memory when saving realm");
 #endif /* _SUN_SDK_ */
+		 "internal error: out of memory when saving realm");
 	return SASL_FAIL;
     }
 
@@ -2851,11 +2846,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (!request) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "missing HTTP request in DIGEST-MD5, step 2");
 #else
 	    SETERROR(sparams->utils,
-		     "missing HTTP request in DIGEST-MD5, step 2");
 #endif /* _SUN_SDK_ */
+		     "missing HTTP request in DIGEST-MD5, step 2");
 	    result = SASL_BADPARAM;
 	    goto FreeAllMem;
 	}
@@ -2889,11 +2883,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (name == NULL) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "Parse error");
 #else
 	    SETERROR(sparams->utils,
-		     "Parse error");
 #endif /* _SUN_SDK_ */
+		     "Parse error");
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
@@ -2920,11 +2913,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    if (htoi((unsigned char *) value, &noncecount) != SASL_OK) {
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			 "error converting hex to int");
 #else
 		SETERROR(sparams->utils,
-			 "error converting hex to int");
 #endif /* _SUN_SDK_ */
+			 "error converting hex to int");
 		result = SASL_BADAUTH;
 		goto FreeAllMem;
 	    }
@@ -2932,11 +2924,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    if (realm) {
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-				    "duplicate realm: authentication aborted");
 #else
 		SETERROR(sparams->utils,
-			 "duplicate realm: authentication aborted");
 #endif /* _SUN_SDK_ */
+			 "duplicate realm: authentication aborted");
 		result = SASL_FAIL;
 		goto FreeAllMem;
 	    }
@@ -2947,11 +2938,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    if (qop) {
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			 "duplicate qop: authentication aborted");
 #else
 		SETERROR(sparams->utils,
-			 "duplicate qop: authentication aborted");
 #endif /* _SUN_SDK_ */
+			 "duplicate qop: authentication aborted");
 		result = SASL_FAIL;
 		goto FreeAllMem;
 	    }
@@ -2964,11 +2954,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    if (digesturi) {
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			 "duplicate digest-uri: authentication aborted");
 #else
 		SETERROR(sparams->utils,
-			 "duplicate digest-uri: authentication aborted");
 #endif /* _SUN_SDK_ */
+			 "duplicate digest-uri: authentication aborted");
 		result = SASL_FAIL;
 		goto FreeAllMem;
 	    }
@@ -2981,11 +2970,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		    result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			     "bad digest-uri: doesn't match HTTP request");
 #else
 		    SETERROR(sparams->utils, 
-			     "bad digest-uri: doesn't match HTTP request");
 #endif /* _SUN_SDK_ */
+			     "bad digest-uri: doesn't match HTTP request");
 		    goto FreeAllMem;
 		}
 	    }
@@ -3002,11 +2990,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		    result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			     "bad digest-uri: doesn't match service");
 #else
 		    SETERROR(sparams->utils, 
-			     "bad digest-uri: doesn't match service");
 #endif /* _SUN_SDK_ */
+			     "bad digest-uri: doesn't match service");
 		    goto FreeAllMem;
 		}
 
@@ -3025,11 +3012,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			 "duplicate maxbuf: authentication aborted");
 #else
 		SETERROR(sparams->utils,
-			 "duplicate maxbuf: authentication aborted");
 #endif /* _SUN_SDK_ */
+			 "duplicate maxbuf: authentication aborted");
 		goto FreeAllMem;
 	    } else if (str2ul32 (value, &client_maxbuf) == FALSE) {
 		result = SASL_BADAUTH;
@@ -3045,11 +3031,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		    result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			     "maxbuf parameter too small");
 #else
 		    SETERROR(sparams->utils,
-			     "maxbuf parameter too small");
 #endif /* _SUN_SDK_ */
+			     "maxbuf parameter too small");
 		    goto FreeAllMem;
 		}
 
@@ -3184,11 +3169,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
         if (text->realm[0] != '\0') {
 #ifdef _SUN_SDK_
             sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		 "realm changed: authentication aborted");
 #else
             SETERROR(sparams->utils,
-		 "realm changed: authentication aborted");
 #endif /* _SUN_SDK_ */
+		 "realm changed: authentication aborted");
             result = SASL_BADAUTH;
             goto FreeAllMem;
         }
@@ -3254,11 +3238,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (strcmp((char *) nonce, (char *) text->nonce) != 0) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "nonce changed: authentication aborted");
 #else
 	    SETERROR(sparams->utils,
-		     "nonce changed: authentication aborted");
 #endif /* _SUN_SDK_ */
+		     "nonce changed: authentication aborted");
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
@@ -3268,11 +3251,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (noncecount != text->nonce_count) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "incorrect nonce-count: authentication aborted");
 #else
 	    SETERROR(sparams->utils,
-		     "incorrect nonce-count: authentication aborted");
 #endif /* _SUN_SDK_ */
+		     "incorrect nonce-count: authentication aborted");
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
@@ -3282,11 +3264,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	if (text->cnonce && strcmp((char *) cnonce, (char *) text->cnonce) != 0) {
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "cnonce changed: authentication aborted");
 #else
 	    SETERROR(sparams->utils,
-		     "cnonce changed: authentication aborted");
 #endif /* _SUN_SDK_ */
+		     "cnonce changed: authentication aborted");
 	    result = SASL_BADAUTH;
 	    goto FreeAllMem;
 	}
@@ -3539,11 +3520,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
     } else {
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			    "protocol violation: client requested invalid qop");
 #else
 	SETERROR(sparams->utils,
-		 "protocol violation: client requested invalid qop");
 #endif /* _SUN_SDK_ */
+		 "protocol violation: client requested invalid qop");
 	result = SASL_FAIL;
 	goto FreeAllMem;
     }
@@ -3600,11 +3580,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	    if (strcmp(serverresponse, response) != 0) {
 #ifdef _INTEGRATED_SOLARIS_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			 "client response doesn't match what we generated (tried bogus)");
 #else
 		SETERROR(sparams->utils,
-			 "client response doesn't match what we generated (tried bogus)");
 #endif /* _INTEGRATED_SOLARIS_ */
+			 "client response doesn't match what we generated (tried bogus)");
 		result = SASL_BADAUTH;
 		
 		goto FreeAllMem;
@@ -3613,11 +3592,10 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 	} else {	    
 #ifdef _INTEGRATED_SOLARIS_
 		sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-		     "client response doesn't match what we generated");
 #else
 	    SETERROR(sparams->utils,
-		     "client response doesn't match what we generated");
 #endif /* _INTEGRATED_SOLARIS_ */
+		     "client response doesn't match what we generated");
 	    result = SASL_BADAUTH;
 	    
 	    goto FreeAllMem;
@@ -3919,11 +3897,10 @@ static int digestmd5_server_mech_step(void *conn_context,
 
 #ifdef _SUN_SDK_
 	    sparams->utils->log(sparams->utils->conn, SASL_LOG_WARN,
-				"DIGEST-MD5 reauth failed");
 #else
 	    sparams->utils->log(NULL, SASL_LOG_WARN,
-				"DIGEST-MD5 reauth failed\n");
 #endif /* _SUN_SDK_ */
+				"DIGEST-MD5 reauth failed\n");
 
 	    /* re-initialize everything for a fresh start */
 	    memset(oparams, 0, sizeof(sasl_out_params_t));
@@ -3947,11 +3924,10 @@ static int digestmd5_server_mech_step(void *conn_context,
     default:
 #ifdef _SUN_SDK_
 	sparams->utils->log(sparams->utils->conn, SASL_LOG_ERR,
-			    "Invalid DIGEST-MD5 server step %d", text->state);
 #else
 	sparams->utils->log(NULL, SASL_LOG_ERR,
-			    "Invalid DIGEST-MD5 server step %d\n", text->state);
 #endif /* _SUN_SDK_ */
+			    "Invalid DIGEST-MD5 server step %d\n", text->state);
 	return SASL_FAIL;
     }
     
@@ -4467,11 +4443,10 @@ static int make_client_response(context_t *text,
 			     FALSE) != SASL_OK) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		     "internal error: add_to_challenge maxbuf failed");
 #else
 	    SETERROR(params->utils,
-		     "internal error: add_to_challenge maxbuf failed");
 #endif /* _SUN_SDK_ */
+		     "internal error: add_to_challenge maxbuf failed");
 	    goto FreeAllocatedMem;
 	}
     }
@@ -4621,11 +4596,10 @@ static int parse_server_challenge(client_context_t *ctext,
     if (!serverin || !serverinlen) {
 #ifndef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				"no server challenge");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"no server challenge");
 #endif /* _SUN_SDK_ */
+				"no server challenge");
 	return SASL_FAIL;
     }
 
@@ -4642,11 +4616,10 @@ static int parse_server_challenge(client_context_t *ctext,
     if (text->cnonce == NULL) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "failed to create cnonce");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"failed to create cnonce");
 #endif /* _SUN_SDK_ */
+				"failed to create cnonce");
 	result = SASL_FAIL;
 	goto FreeAllocatedMem;
     }
@@ -4818,11 +4791,10 @@ SKIP_SPACES_IN_CIPHER:
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"At least two maxbuf directives found. Authentication aborted");
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"At least two maxbuf directives found. Authentication aborted");
 #endif /* _SUN_SDK_ */
+					"At least two maxbuf directives found. Authentication aborted");
 		goto FreeAllocatedMem;
 	    } 
 
@@ -4830,11 +4802,10 @@ SKIP_SPACES_IN_CIPHER:
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"Invalid maxbuf parameter received from server (%s)", value);
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Invalid maxbuf parameter received from server (%s)", value);
 #endif /* _SUN_SDK_ */
+					"Invalid maxbuf parameter received from server (%s)", value);
 		goto FreeAllocatedMem;
 	    }
 	    
@@ -4842,11 +4813,10 @@ SKIP_SPACES_IN_CIPHER:
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"Invalid maxbuf parameter received from server (too small: %s)", value);
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Invalid maxbuf parameter received from server (too small: %s)", value);
 #endif /* _SUN_SDK_ */
+					"Invalid maxbuf parameter received from server (too small: %s)", value);
 		goto FreeAllocatedMem;
 	    }
 
@@ -4854,11 +4824,10 @@ SKIP_SPACES_IN_CIPHER:
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"Invalid maxbuf parameter received from server (too big: %s)", value);
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Invalid maxbuf parameter received from server (too big: %s)", value);
 #endif /* _SUN_SDK_ */
+					"Invalid maxbuf parameter received from server (too big: %s)", value);
 		goto FreeAllocatedMem;
 	    }
 	} else if (strcasecmp(name, "charset") == 0) {
@@ -4866,11 +4835,10 @@ SKIP_SPACES_IN_CIPHER:
 		result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"Charset must be UTF-8");
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"Charset must be UTF-8");
 #endif /* _SUN_SDK_ */
+					"Charset must be UTF-8");
 		goto FreeAllocatedMem;
 	    }
 	} else if (strcasecmp(name,"algorithm")==0) {
@@ -4881,11 +4849,10 @@ SKIP_SPACES_IN_CIPHER:
 		{
 #ifdef _SUN_SDK_
 		    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					    "'algorithm' isn't 'md5-sess'");
 #else
 		    params->utils->seterror(params->utils->conn, 0,
-					    "'algorithm' isn't 'md5-sess'");
 #endif /* _SUN_SDK_ */
+					    "'algorithm' isn't 'md5-sess'");
 		    result = SASL_FAIL;
 		    goto FreeAllocatedMem;
 		}
@@ -4900,11 +4867,10 @@ SKIP_SPACES_IN_CIPHER:
 		{
 #ifdef _SUN_SDK_
 		    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					    "Must see 'algorithm' only once");
 #else
 		    params->utils->seterror(params->utils->conn, 0,
-					    "Must see 'algorithm' only once");
 #endif /* _SUN_SDK_ */
+					    "Must see 'algorithm' only once");
 		    result = SASL_FAIL;
 		    goto FreeAllocatedMem;
 		}
@@ -4919,11 +4885,10 @@ SKIP_SPACES_IN_CIPHER:
 		    {
 #ifdef _SUN_SDK_
 			params->utils->log(params->utils->conn, SASL_LOG_ERR,
-						"Must see 'opaque' only once");
 #else
 			params->utils->seterror(params->utils->conn, 0,
-						"Must see 'opaque' only once");
 #endif /* _SUN_SDK_ */
+						"Must see 'opaque' only once");
 			result = SASL_FAIL;
 			goto FreeAllocatedMem;
 		    }
@@ -4944,11 +4909,10 @@ SKIP_SPACES_IN_CIPHER:
 	    result = SASL_BADAUTH;
 #ifdef _SUN_SDK_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				    "Server doesn't support any known qop level");
 #else
 	    params->utils->seterror(params->utils->conn, 0,
-				    "Server doesn't support any known qop level");
 #endif /* _SUN_SDK_ */
+				    "Server doesn't support any known qop level");
 	    goto FreeAllocatedMem;
 	}
     }
@@ -4956,11 +4920,10 @@ SKIP_SPACES_IN_CIPHER:
     if (algorithm_count != 1) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				"Must see 'algorithm' once. Didn't see at all");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"Must see 'algorithm' once. Didn't see at all");
 #endif /* _SUN_SDK_ */
+				"Must see 'algorithm' once. Didn't see at all");
 	result = SASL_FAIL;
 	goto FreeAllocatedMem;
     }
@@ -4969,11 +4932,10 @@ SKIP_SPACES_IN_CIPHER:
     if (text->nonce == NULL) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				"Don't have nonce.");
 #else
 	params->utils->seterror(params->utils->conn, 0,
-				"Don't have nonce.");
 #endif /* _SUN_SDK_ */
+				"Don't have nonce.");
 	result = SASL_FAIL;
 	goto FreeAllocatedMem;
     }
@@ -5029,11 +4991,10 @@ SKIP_SPACES_IN_CIPHER:
 	    /* we didn't find any ciphers we like */
 #ifdef _INTEGRATED_SOLARIS_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				    "No good privacy layers");
 #else
 	    params->utils->seterror(params->utils->conn, 0,
-				    "No good privacy layers");
 #endif /* _INTEGRATED_SOLARIS_ */
+				    "No good privacy layers");
 	}
     }
     
@@ -5057,22 +5018,20 @@ SKIP_SPACES_IN_CIPHER:
 	    if ((protection & DIGEST_NOLAYER) != DIGEST_NOLAYER) {
 #ifdef _INTEGRATED_SOLARIS_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"Server doesn't support \"no layer\"");
 #else
 		params->utils->seterror(params->utils->conn, 0, 
-					"Server doesn't support \"no layer\"");
 #endif /* _INTEGRATED_SOLARIS_ */
+					"Server doesn't support \"no layer\"");
 		result = SASL_FAIL;
 		goto FreeAllocatedMem;
 	    }
 	} else {
 #ifdef _INTEGRATED_SOLARIS_
 		params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				    "Can't find an acceptable layer");
 #else
 	    params->utils->seterror(params->utils->conn, 0,
-				    "Can't find an acceptable layer");
 #endif /* _INTEGRATED_SOLARIS_ */
+				    "Can't find an acceptable layer");
 	    result = SASL_TOOWEAK;
 	    goto FreeAllocatedMem;
 	}
@@ -5287,11 +5246,10 @@ static int digestmd5_client_mech_new(void *glob_context,
     if ((params->flags & SASL_NEED_HTTP) && !params->http_request) {
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-		 "DIGEST-MD5 unavailable due to lack of HTTP request");
 #else
 	SETERROR(params->utils,
-		 "DIGEST-MD5 unavailable due to lack of HTTP request");
 #endif /* _SUN_SDK_ */
+		 "DIGEST-MD5 unavailable due to lack of HTTP request");
 	return SASL_BADPARAM;
     }
 
@@ -5495,11 +5453,10 @@ digestmd5_client_mech_step3(client_context_t *ctext,
 	if (name == NULL) {
 #ifdef _SUN_SDK_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-				    "DIGEST-MD5 Received Garbage");
 #else
 	    params->utils->seterror(params->utils->conn, 0,
-				    "DIGEST-MD5 Received Garbage");
 #endif /* _SUN_SDK_ */
+				    "DIGEST-MD5 Received Garbage");
 	    result = SASL_BADAUTH;
 	    break;
 	}
@@ -5513,11 +5470,10 @@ digestmd5_client_mech_step3(client_context_t *ctext,
 	    if (strcmp(text->response_value, value) != 0) {
 #ifdef _INTEGRATED_SOLARIS_
 	    params->utils->log(params->utils->conn, SASL_LOG_ERR,
-					"DIGEST-MD5: This server wants us to believe that he knows shared secret");
 #else
 		params->utils->seterror(params->utils->conn, 0,
-					"DIGEST-MD5: This server wants us to believe that he knows shared secret");
 #endif /* _INTEGRATED_SOLARIS_ */
+					"DIGEST-MD5: This server wants us to believe that he knows shared secret");
 		result = SASL_BADSERV;
 	    } else {
 		oparams->doneflag = 1;
@@ -5669,11 +5625,10 @@ static int digestmd5_client_mech_step(void *conn_context,
     default:
 #ifdef _SUN_SDK_
 	params->utils->log(params->utils->conn, SASL_LOG_ERR,
-			   "Invalid DIGEST-MD5 client step %d\n", text->state);
 #else
 	params->utils->log(NULL, SASL_LOG_ERR,
-			   "Invalid DIGEST-MD5 client step %d\n", text->state);
 #endif /* _SUN_SDK_ */
+			   "Invalid DIGEST-MD5 client step %d\n", text->state);
 	return SASL_FAIL;
     }
     

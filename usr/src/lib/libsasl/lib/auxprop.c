@@ -6,7 +6,7 @@
 
 /* auxprop.c - auxilliary property support
  * Rob Siemborski
- * $Id: auxprop.c,v 1.21 2011/09/01 14:12:53 mel Exp $
+ * $Id: auxprop.c,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.

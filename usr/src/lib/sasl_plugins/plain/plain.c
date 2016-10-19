@@ -7,7 +7,7 @@
 /* Plain SASL plugin
  * Rob Siemborski
  * Tim Martin 
- * $Id: plain.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $
+ * $Id: plain.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $
  */
 
 /* 
@@ -58,13 +58,6 @@
 
 #include "plugin_common.h"
 
-#ifndef _SUN_SDK_
-#ifdef WIN32
-/* This must be after sasl.h */
-# include "saslPLAIN.h"
-#endif /* WIN32 */
-#endif /* !_SUN_SDK_ */
-
 #ifdef macintosh 
 #include <sasl_plain_plugin_decl.h> 
 #endif 
@@ -72,7 +65,7 @@
 /*****************************  Common Section  *****************************/
 
 #ifndef _SUN_SDK_
-static const char plugin_id[] = "$Id: plain.c,cyrus-sasl-d1b5785 Thu Apr 19 14:41:12 2012 +0100 $";
+static const char plugin_id[] = "$Id: plain.c,d1b5785 2012-04-19 14:41:12 +0100 cyrus-sasl $";
 #endif /* !_SUN_SDK_ */
 
 /*****************************  Server Section  *****************************/

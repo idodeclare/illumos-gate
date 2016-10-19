@@ -6,7 +6,7 @@
 /* common.c - Functions that are common to server and clinet
  * Rob Siemborski
  * Tim Martin
- * $Id: common.c,v 1.133 2011/09/01 14:12:53 mel Exp $
+ * $Id: common.c,f607d99 2016-01-30 10:00:02 -0500 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -115,7 +115,7 @@ static pthread_key_t errstring_key = PTHREAD_ONCE_KEY_NP;
 static const char build_ident[] = "$Build: libsasl " PACKAGE "-" VERSION " $";
 
 /* It turns out to be convenient to have a shared sasl_utils_t */
-LIBSASL_VAR const sasl_utils_t *sasl_global_utils = NULL;
+const sasl_utils_t *sasl_global_utils = NULL;
 
 /* Should be a null-terminated array that lists the available mechanisms */
 static char **global_mech_list = NULL;
@@ -134,6 +134,7 @@ sasl_allocation_utils_t _sasl_allocation_utils={
   (sasl_free_t *) &free
 };
 #endif /* _SUN_SDK_ */
+int _sasl_allocation_locked = 0;
 
 #define SASL_ENCODEV_EXTRA  4096
 
@@ -144,7 +145,6 @@ static sasl_callback_t default_getpath_cb = {
 static sasl_callback_t default_getconfpath_cb = {
     SASL_CB_GETCONFPATH, (sasl_callback_ft)&_sasl_getconfpath, NULL
 };
-int _sasl_allocation_locked = 0;
 
 static char * default_plugin_path = NULL;
 static char * default_conf_path = NULL;
@@ -410,10 +410,18 @@ _sasl_encodev (sasl_conn_t *conn,
 	       const char **output,     /* previous output, if *p_num_packets > 0 */
                unsigned *outputlen)
 {
+#ifdef _SUN_SDK_
     int result = SASL_OK;
+#else
+    int result;
+#endif /* _SUN_SDK_ */
     char * new_buf;
 
+#ifdef _SUN_SDK_
     VERIFY(conn->oparams.encode != NULL);
+#else
+    assert (conn->oparams.encode != NULL);
+#endif /* _SUN_SDK_ */
 
     if (*p_num_packets == 1) {
         /* This is the second call to this function,
@@ -498,7 +506,7 @@ int sasl_encodev(sasl_conn_t *conn,
 #ifdef _SUN_SDK_
     int result = SASL_FAIL;
 #else
-    int result;
+    int result = SASL_OK;
 #endif /* _SUN_SDK_ */
     unsigned i;
     unsigned j;
@@ -1044,14 +1052,11 @@ void sasl_dispose(sasl_conn_t **pconn)
   if (result!=SASL_OK) return;
   
   /* *pconn might have become NULL by now */
-#ifdef _SUN_SDK_
-  if (! (*pconn)) {
+  if (! (*pconn))
+  {
 	sasl_MUTEX_UNLOCK(free_mutex);
 	return;
   }
-#else
-  if (! (*pconn)) return;
-#endif /* _SUN_SDK_ */
 
   (*pconn)->destroy_conn(*pconn);
   sasl_FREE(*pconn);
@@ -1258,10 +1263,10 @@ int sasl_getprop(sasl_conn_t *conn, int propnum, const void **pvalue)
       break;
   case SASL_GSS_CREDS:
       if(conn->type == SASL_CONN_CLIENT)
-	  *(void **)pvalue = 
+	  *(const void **)pvalue = 
               ((sasl_client_conn_t *)conn)->cparams->gss_creds;
       else
-	  *(void **)pvalue = 
+	  *(const void **)pvalue = 
               ((sasl_server_conn_t *)conn)->sparams->gss_creds;
       break;
   case SASL_HTTP_REQUEST: {
@@ -1667,6 +1672,16 @@ const char *sasl_errstring(int saslerr,
     case SASL_NOUSERPASS: s = gettext("user supplied passwords are not permitted");
 
 	break;
+    case SASL_NEED_OLD_PASSWD: s = gettext("sasl_setpass needs old password in order "
+				"to perform password change");
+	break;
+    case SASL_CONSTRAINT_VIOLAT: s = gettext("sasl_setpass can't store a property because "
+			        "of a constraint violation");
+	break;
+    case SASL_BADBINDING: s = gettext("channel binding failure");
+	break;
+    case SASL_CONFIGERR:  s = gettext("error when parsing configuration file";
+	break;
     default:   s = gettext("undefined error!");
 	break;
   }
@@ -1735,6 +1750,7 @@ const char *sasl_errstring(int saslerr,
     case SASL_CONSTRAINT_VIOLAT: return "sasl_setpass can't store a property because "
 			        "of a constraint violation";
     case SASL_BADBINDING: return "channel binding failure";
+    case SASL_CONFIGERR:  return "error when parsing configuration file";
 
     default:   return "undefined error!";
     }
@@ -2401,7 +2417,7 @@ ___sasl_log(const _sasl_global_context_t *gctx,
 
 #ifndef _SUN_SDK_
   /* See if we have a logging callback... */
-  result = _sasl_getcallback(conn, SASL_CB_LOG, &log_cb, &log_ctx);
+  result = _sasl_getcallback(conn, SASL_CB_LOG, (sasl_callback_ft *)&log_cb, &log_ctx);
   if (result == SASL_OK && ! log_cb)
     result = SASL_FAIL;
   if (result != SASL_OK) goto done;
@@ -2551,32 +2567,13 @@ ___sasl_log(const _sasl_global_context_t *gctx,
 }
 
 
-int _sasl_is_equal_mech(const char *req_mech,
-                        const char *plug_mech,
-			size_t req_mech_len,
-                        int *plus)
-{
-    size_t n;
-
-    if (req_mech_len > 5 &&
-        strcasecmp(&req_mech[req_mech_len - 5], "-PLUS") == 0) {
-        n = req_mech_len - 5;
-        *plus = 1;
-    } else {
-        n = req_mech_len;
-        *plus = 0;
-    }
-
-    return (strncasecmp(req_mech, plug_mech, n) == 0);
-}
 
 /* Allocate and Init a sasl_utils_t structure */
-#ifdef _SUN_SDK_
 sasl_utils_t *
+#ifdef _SUN_SDK_
 _sasl_alloc_utils(_sasl_global_context_t *gctx, sasl_conn_t *conn,
 		  sasl_global_callbacks_t *global_callbacks)
 #else
-sasl_utils_t *
 _sasl_alloc_utils(sasl_conn_t *conn,
 		  sasl_global_callbacks_t *global_callbacks)
 #endif /* _SUN_SDK_ */
@@ -3194,6 +3191,30 @@ int sasl_listmech(sasl_conn_t *conn,
     PARAMERROR(conn);
 }
 
+int _sasl_is_equal_mech(const char *req_mech,
+                        const char *plug_mech,
+			size_t req_mech_len,
+                        int *plus)
+{
+    size_t n;
+
+    if (req_mech_len > 5 &&
+        strcasecmp(&req_mech[req_mech_len - 5], "-PLUS") == 0) {
+        n = req_mech_len - 5;
+        *plus = 1;
+    } else {
+        n = req_mech_len;
+        *plus = 0;
+    }
+
+    if (n < strlen(plug_mech)) {
+	/* Don't allow arbitrary prefix match */
+	return 0;
+    }
+
+    return (strncasecmp(req_mech, plug_mech, n) == 0);
+}
+
 #ifdef _SUN_SDK_
 /*
  * Creates a context so that libraries may use libsasl independently
@@ -3384,8 +3405,10 @@ _sasl_get_default_unix_path(void *context __attribute__((unused)),
 
 #else
 /* Return NULL on failure */
-static int
-_sasl_getpath(void *context __attribute__((unused)), const char **path)
+static char *
+_sasl_get_default_win_path(void *context __attribute__((unused)),
+                           char * reg_attr_name,
+                           char * default_value)
 {
     /* Open registry entry, and find all registered SASL libraries.
      *
@@ -3549,5 +3572,4 @@ CLEANUP:
 
     return (return_value);
 }
-
 #endif

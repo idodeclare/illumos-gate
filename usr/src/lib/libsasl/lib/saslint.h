@@ -6,7 +6,7 @@
 /* saslint.h - internal SASL library definitions
  * Rob Siemborski
  * Tim Martin
- * $Id: saslint.h,v 1.73 2011/09/01 14:12:53 mel Exp $
+ * $Id: saslint.h,32c3b03 2012-04-20 20:50:10 +0100 cyrus-sasl $
  */
 /* 
  * Copyright (c) 1998-2003 Carnegie Mellon University.  All rights reserved.
@@ -137,8 +137,6 @@ typedef struct {
   struct _sasl_global_context_s *gctx;
 #endif /* _SUN_SDK_ */
 } sasl_global_callbacks_t;
-
-extern sasl_global_callbacks_t global_callbacks;
 
 typedef struct _sasl_external_properties 
 {
@@ -422,13 +420,6 @@ struct sasl_verify_password_s {
     sasl_plaintext_verifier *verify;
 };
 
-void sasl_common_done(void);
-
-extern int _sasl_is_equal_mech(const char *req_mech,
-                               const char *plug_mech,
-                               size_t req_mech_len,
-                               int *plus);
-
 /*
  * globals & constants
  */
@@ -452,6 +443,13 @@ extern sasl_mutex_utils_t _sasl_mutex_utils;
 #endif /* !_SUN_SDK_ */
 
 extern int _sasl_allocation_locked;
+
+void sasl_common_done(void);
+
+extern int _sasl_is_equal_mech(const char *req_mech,
+                               const char *plug_mech,
+                               size_t req_mech_len,
+                               int *plus);
 
 /*
  * checkpw.c
@@ -575,12 +573,11 @@ extern int _sasl_conn_init(sasl_conn_t *conn,
 			   const sasl_global_callbacks_t *global_callbacks);
 extern void _sasl_conn_dispose(sasl_conn_t *conn);
 
-#ifdef _SUN_SDK_
 extern sasl_utils_t *
+#ifdef _SUN_SDK_
 _sasl_alloc_utils(_sasl_global_context_t *gctx, sasl_conn_t *conn,
 		  sasl_global_callbacks_t *global_callbacks);
 #else
-extern sasl_utils_t *
 _sasl_alloc_utils(sasl_conn_t *conn,
 		  sasl_global_callbacks_t *global_callbacks);
 #endif /* _SUN_SDK_ */

@@ -6,7 +6,7 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /* hmac-md5.h -- HMAC_MD5 functions
- * $Id: hmac-md5.h,cyrus-sasl-a7718f6 Tue May 13 21:34:28 2003 +0000 $
+ * $Id: hmac-md5.h,a7718f6 2003-05-13 21:34:28 +0000 cyrus-sasl $
  */
 
 #include <config.h>

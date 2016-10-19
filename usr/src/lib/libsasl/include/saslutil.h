@@ -5,7 +5,7 @@
 
 /*
  * saslutil.h -- various utility functions in SASL library
- * $Id: saslutil.h,cyrus-sasl-a76729b6 Sat Feb 21 20:07:45 2009 +0000 $
+ * $Id: saslutil.h,c1aeb73 2011-11-08 17:22:40 +0000 cyrus-sasl $
  */
 
 #ifndef	_SASL_SASLUTIL_H
@@ -105,6 +105,8 @@ LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 LIBSASL_API char *sasl_strlower (char *val);
 
 LIBSASL_API int sasl_config_init(const char *filename);
+
+LIBSASL_API void sasl_config_done(void);
 
 #ifndef _SUN_SDK_
 #ifdef WIN32

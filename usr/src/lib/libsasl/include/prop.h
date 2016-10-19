@@ -5,7 +5,7 @@
 
 /*
  * prop.h -- property request/response management routines
- * $Id: prop.h,cyrus-sasl-34932df Fri Dec 12 00:47:22 2003 +0000 $
+ * $Id: prop.h,69dc9c4 2012-05-08 15:44:35 +0100 cyrus-sasl $
  *
  * Author: Chris Newman
  * Removal of implementation-specific details by: Rob Siemborski
@@ -33,10 +33,6 @@
 
 #include <config.h>
 
-#ifdef	__cplusplus
-extern "C" {
-#endif
-
 /* The following ifdef block is the standard way of creating macros
  * which make exporting from a DLL simpler. All files within this DLL
  * are compiled with the LIBSASL_EXPORTS symbol defined on the command
@@ -49,9 +45,9 @@ extern "C" {
  * as extern.  (Technically, we don't even have to do that.) */
 #ifdef WIN32
 # ifdef LIBSASL_EXPORTS
-#  define LIBSASL_API  __declspec(dllexport)
+#  define LIBSASL_API  extern __declspec(dllexport)
 # else /* LIBSASL_EXPORTS */
-#  define LIBSASL_API  __declspec(dllimport)
+#  define LIBSASL_API  extern __declspec(dllimport)
 # endif /* LIBSASL_EXPORTS */
 #else
 # ifdef _SUN_SDK_
@@ -65,12 +61,12 @@ extern "C" {
  * is different, as we can't assign an initial value to an extern variable */ 
 #ifdef WIN32
 # ifdef LIBSASL_EXPORTS
-#  define LIBSASL_VAR  __declspec(dllexport)
+#  define LIBSASL_VAR  extern __declspec(dllexport)
 # else /* LIBSASL_EXPORTS */
-#  define LIBSASL_VAR  __declspec(dllimport)
+#  define LIBSASL_VAR  extern __declspec(dllimport)
 # endif /* LIBSASL_EXPORTS */
 #else /* WIN32 */
-# define LIBSASL_VAR
+# define LIBSASL_VAR extern
 #endif /* WIN32 */
 
 /*
@@ -173,9 +169,6 @@ LIBSASL_API void prop_erase(struct propctx *ctx, const char *name);
  */
 LIBSASL_API void prop_dispose(struct propctx **ctx);
 
-#ifdef __cplusplus
-}
-#endif
 
 /* fetcher interfaces */
 
