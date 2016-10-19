@@ -385,15 +385,6 @@ int sasl_canonuser_add_plugin(const char *plugname,
 	if (strcmp(plugname, l->name) == 0) {
 	    return SASL_OK;
 	}
-
-	if (result == SASL_NOUSER && (flags & SASL_CU_EXTERNALLY_VERIFIED)) {
-	    /* The called has explicitly told us that the authentication identity
-	       was already verified. So a failure to retrieve any associated properties
-	       is not an error. For example the caller is using Kerberos to verify user,
-	       but the LDAPDB/SASLDB auxprop plugin doesn't contain any auxprops for
-	       the user. */
-	    result = SASL_OK;
-	}	
     }
     sasl_global_utils = gctx->sasl_canonusr_global_utils;
 #endif /* _SUN_SDK_ */
