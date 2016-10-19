@@ -53,12 +53,13 @@ extern "C" {
 # else /* LIBSASL_EXPORTS */
 #  define LIBSASL_API  __declspec(dllimport)
 # endif /* LIBSASL_EXPORTS */
-#else /* WIN32 */
+#else
+# ifdef _SUN_SDK_
+#  define LIBSASL_API
+# else
 # define LIBSASL_API extern
+# endif /* _SUN_SDK_ */
 #endif /* WIN32 */
-#ifdef _SUN_SDK_
-# define LIBSASL_API
-#endif /* _SUN_SDK_ */
 
 /* Same as above, but used during a variable declaration. Only Unix definition
  * is different, as we can't assign an initial value to an extern variable */ 
