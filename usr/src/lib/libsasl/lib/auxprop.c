@@ -919,10 +919,11 @@ int sasl_auxprop_add_plugin(const char *plugname,
 #endif /* _SUN_SDK_ */
     /* These will load from least-important to most important */
     new_item->plug = plug;
-    new_item->next = auxprop_head;
 #ifdef _SUN_SDK_
+    gctx->new_item->next = auxprop_head;
     gctx->auxprop_head = new_item;
 #else
+    new_item->next = auxprop_head;
     auxprop_head = new_item;
 #endif /* _SUN_SDK_ */
 
@@ -1038,7 +1039,11 @@ int _sasl_auxprop_lookup(sasl_server_params_t *sparams,
 
 	/* TODO: Ideally, each auxprop plugin should be marked if its failure
 	   should be ignored or treated as a fatal error of the whole lookup. */
+#ifdef _SUN_SDK_
+	for(ptr = gctx->auxprop_head; ptr; ptr = ptr->next) {
+#else
 	for(ptr = auxprop_head; ptr; ptr = ptr->next) {
+#endif /* _SUN_SDK_ */
 	    found=1;
 	    ret = ptr->plug->auxprop_lookup(ptr->plug->glob_context,
 				      sparams, flags, user, ulen);
@@ -1062,7 +1067,11 @@ int _sasl_auxprop_lookup(sasl_server_params_t *sparams,
 	    if(*p == '\0') last = 1;
 	    else *p='\0';
 	    
+#ifdef _SUN_SDK_
+	    for(ptr = gctx->auxprop_head; ptr; ptr = ptr->next) {
+#else
 	    for(ptr = auxprop_head; ptr; ptr = ptr->next) {
+#endif /* _SUN_SDK_ */
 		/* Skip non-matching plugins */
 		if(!ptr->plug->name
 		   || strcasecmp(ptr->plug->name, thisplugin))
@@ -1122,7 +1131,11 @@ int sasl_auxprop_store(sasl_conn_t *conn,
     ret = SASL_OK;
     if(!plist) {
 	/* Do store in all plugins */
+#ifdef _SUN_SDK_
+	for(ptr = gctx->auxprop_head; ptr && ret == SASL_OK; ptr = ptr->next) {
+#else
 	for(ptr = auxprop_head; ptr && ret == SASL_OK; ptr = ptr->next) {
+#endif /* _SUN_SDK_ */
 	    total_plugins++;
 	    if (ptr->plug->auxprop_store) {
 		ret = ptr->plug->auxprop_store(ptr->plug->glob_context,
@@ -1151,7 +1164,11 @@ int sasl_auxprop_store(sasl_conn_t *conn,
 	    if(*p == '\0') last = 1;
 	    else *p='\0';
 	    
+#ifdef _SUN_SDK_
+	    for(ptr = gctx->auxprop_head; ptr && ret == SASL_OK; ptr = ptr->next) {
+#else
 	    for(ptr = auxprop_head; ptr && ret == SASL_OK; ptr = ptr->next) {
+#endif /* _SUN_SDK_ */
 		/* Skip non-matching plugins */
 		if((!ptr->plug->name
 		    || strcasecmp(ptr->plug->name, thisplugin)))
@@ -1258,11 +1275,19 @@ int auxprop_plugin_info (
 	info_cb = _sasl_print_mechanism;
     }
 
+#ifdef _SUN_SDK_
+    if (gctx->auxprop_head != NULL) {
+#else
     if (auxprop_head != NULL) {
+#endif /* _SUN_SDK_ */
 	info_cb (NULL, SASL_INFO_LIST_START, info_cb_rock);
 
 	if (c_mech_list == NULL) {
+#ifdef _SUN_SDK_
+	    m = gctx->auxprop_head; /* m point to beginning of the list */
+#else
 	    m = auxprop_head; /* m point to beginning of the list */
+#endif /* _SUN_SDK_ */
 
 	    while (m != NULL) {
                 /* TODO: Need to be careful when dealing with auxprop_export, etc. */
@@ -1284,7 +1309,11 @@ int auxprop_plugin_info (
 		    p++;
 		}
 
+#ifdef _SUN_SDK_
+	    m = gctx->auxprop_head; /* m point to beginning of the list */
+#else
 		m = auxprop_head; /* m point to beginning of the list */
+#endif /* _SUN_SDK_ */
 
 		while (m != NULL) {
 		    if (strcasecmp (cur_mech, m->plug->name) == 0) {
