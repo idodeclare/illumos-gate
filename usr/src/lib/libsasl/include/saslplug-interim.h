@@ -169,9 +169,10 @@ typedef struct sasl_utils {
 	/*
 	 * format a message and then pass it to the SASL_CB_LOG callback
 	 *
-     * use syslog()-style formatting (printf with %m as a human readable text
-     * (strerror()) for the error specified as the parameter).
-     * The implementation may use a fixed size buffer not smaller
+	 * use syslog()-style formatting (printf with %m as a human
+	 * readable text (strerror()) for the error specified as
+	 * the parameter).
+	 * The implementation may use a fixed size buffer not smaller
 	 * than 512 octets if it securely truncates the message.
 	 *
 	 * level is a SASL_LOG_* level (see sasl.h)
@@ -201,7 +202,7 @@ typedef struct sasl_utils {
 			const char **values);
     void (*prop_erase)(struct propctx *ctx, const char *name);
     int (*auxprop_store)(sasl_conn_t *conn,
-			 struct propctx *ctx, const char *user);
+			struct propctx *ctx, const char *user);
 
 	/* for additions which don't require a version upgrade; set to 0 */
     int (*spare_fptr1)(void);
@@ -225,9 +226,12 @@ typedef struct sasl_out_params {
     unsigned alen;		/* length of canonicalized authid */
 
 	/* security layer information */
-    unsigned maxoutbuf;         /* Maximum buffer size, which will
-                                   produce buffer no bigger than the
-                                   negotiated SASL maximum buffer size */
+	/*
+	 * Maximum buffer size, which will
+	 * produce buffer no bigger than the
+	 * negotiated SASL maximum buffer size
+	 */
+    unsigned maxoutbuf;
     sasl_ssf_t mech_ssf;    /* Should be set non-zero if negotiation of a */
 			    /* security layer was *attempted*, even if */
 			    /* the negotiation failed */
@@ -238,8 +242,10 @@ typedef struct sasl_out_params {
     int (*decode)(void *context, const char *input, unsigned inputlen,
 		const char **output, unsigned *outputlen);
 
-    /* Pointer to delegated (client's) credentials, if supported by
-       the SASL mechanism */
+	/*
+	 * Pointer to delegated (client's) credentials, if supported by
+	 * the SASL mechanism
+	 */
     void *client_creds;
 
 	/* for additions which don't require a version upgrade; set to 0 */
@@ -270,21 +276,22 @@ typedef enum  {
     SASL_INFO_LIST_END
 } sasl_info_callback_stage_t;
 
-/******************************
- * Channel binding macros     **
- ******************************/
+/*
+ * Channel binding macros
+ */
 
 typedef enum {
-    SASL_CB_DISP_NONE = 0,          /* client did not support CB */
-    SASL_CB_DISP_WANT,              /* client supports CB, thinks server does not */
-    SASL_CB_DISP_USED               /* client supports and used CB */
+    SASL_CB_DISP_NONE = 0,		/* client did not support CB */
+    SASL_CB_DISP_WANT,			/* client supports CB, thinks ... */
+			/* ... server does not */
+    SASL_CB_DISP_USED			/* client supports and used CB */
 } sasl_cbinding_disp_t;
 
 /* TRUE if channel binding is non-NULL */
-#define SASL_CB_PRESENT(params)     ((params)->cbinding != NULL)
+#define	SASL_CB_PRESENT(params)		((params)->cbinding != NULL)
 /* TRUE if channel binding is marked critical */
-#define SASL_CB_CRITICAL(params)    (SASL_CB_PRESENT(params) && \
-				     (params)->cbinding->critical)
+#define	SASL_CB_CRITICAL(params)	(SASL_CB_PRESENT(params) && \
+	(params)->cbinding->critical)
 
 
 /*
@@ -320,9 +327,10 @@ typedef struct sasl_client_params {
     sasl_ssf_t external_ssf;	/* external SSF active */
 
 	/* for additions which don't require a version upgrade; set to 0 */
-    const void *gss_creds;                  /* GSS credential handle */
+    const void *gss_creds;		/* GSS credential handle */
     const sasl_channel_binding_t *cbinding; /* client channel binding */
-    const sasl_http_request_t *http_request;/* HTTP Digest request method */
+    const sasl_http_request_t *http_request;	/* HTTP Digest ... */
+			/* ... request method */
     void *spare_ptr4;
 
 	/*
@@ -405,16 +413,16 @@ typedef struct sasl_client_params {
 #define	SASL_FEAT_ALLOWS_PROXY 0x0020
 
 /* server plugin don't use cleartext userPassword attribute */
-#define SASL_FEAT_DONTUSE_USERPASSWD 0x0080
+#define	SASL_FEAT_DONTUSE_USERPASSWD 0x0080
 
 /* Underlying mechanism uses GSS framing */
-#define SASL_FEAT_GSS_FRAMING       0x0100
+#define	SASL_FEAT_GSS_FRAMING		0x0100
 
 /* Underlying mechanism supports channel binding */
-#define SASL_FEAT_CHANNEL_BINDING  0x0800
+#define	SASL_FEAT_CHANNEL_BINDING  0x0800
 
 /* This plugin can be used for HTTP authentication */
-#define SASL_FEAT_SUPPORTS_HTTP	    	0x1000
+#define	SASL_FEAT_SUPPORTS_HTTP		0x1000
 
 /* client plug-in features */
 #define	SASL_FEAT_NEEDSERVERFQDN 0x0001
@@ -531,14 +539,14 @@ typedef struct client_sasl_mechanism
 } client_sasl_mechanism_t;
 
 typedef void sasl_client_info_callback_t (client_sasl_mechanism_t *m,
-					  sasl_info_callback_stage_t stage,
-					  void *rock);
+    sasl_info_callback_stage_t stage,
+    void *rock);
 
 /* Dump information about available client plugins */
 #ifdef _SUN_SDK_
-LIBSASL_API int sasl_client_plugin_info (
-  struct _sasl_global_context_s *gctx,
-  const char *mech_list,
+LIBSASL_API int sasl_client_plugin_info(
+	struct _sasl_global_context_s *gctx,
+	const char *mech_list,
 #else
 LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
 #endif /* _SUN_SDK_ */
@@ -600,10 +608,10 @@ typedef struct sasl_server_params {
     sasl_ssf_t external_ssf;	/* external SSF active */
 
 	/*
-     * Pointer to the function which takes the plaintext passphrase and
-     *  transitions a user to non-plaintext mechanisms via setpass calls.
-     *  (NULL = auto transition not enabled/supported)
-     *
+	 * Pointer to the function which takes the plaintext passphrase and
+	 *  transitions a user to non-plaintext mechanisms via setpass calls.
+	 *  (NULL = auto transition not enabled/supported)
+	 *
 	 *  If passlen is 0, it defaults to strlen(pass).
 	 *  returns 0 if no entry added, 1 if entry added
 	 */
@@ -612,7 +620,7 @@ typedef struct sasl_server_params {
 	/*
 	 * Canonicalize a user name from on-wire to internal format
 	 *  added cjn 1999-09-21
-     *  Must be called once user name acquired if canon_user is non-NULL.
+	 *  Must be called once user name acquired if canon_user is non-NULL.
 	 *  conn    connection context
 	 *  user    user name from wire protocol (need not be NUL terminated)
 	 *  ulen    length of user name from wire protocol (0 = strlen(user))
@@ -651,9 +659,10 @@ typedef struct sasl_server_params {
     struct propctx *propctx;
 
 	/* for additions which don't require a version upgrade; set to 0 */
-    const void *gss_creds;                  /* GSS credential handle */
-    const sasl_channel_binding_t *cbinding; /* server channel binding */
-    const sasl_http_request_t *http_request;/* HTTP Digest request method */
+    const void *gss_creds;		/* GSS credential handle */
+    const sasl_channel_binding_t *cbinding;	/* server channel binding */
+    const sasl_http_request_t *http_request;	/* HTTP Digest ... */
+			/* ... request method */
     void *spare_ptr4;
     int (*spare_fptr1)(void);
     int (*spare_fptr2)(void);
@@ -673,17 +682,18 @@ typedef struct sasl_server_params {
 } sasl_server_params_t;
 
 #ifndef _SUN_SDK_
-/* logging levels (more levels may be added later, if necessary):
+/*
+ * logging levels--(more levels may be added later, if necessary):
  */
-#define SASL_LOG_NONE  0	/* don't log anything */
-#define SASL_LOG_ERR   1	/* log unusual errors (default) */
-#define SASL_LOG_FAIL  2	/* log all authentication failures */
-#define SASL_LOG_WARN  3	/* log non-fatal warnings */
-#define SASL_LOG_NOTE  4	/* more verbose than LOG_WARN */
-#define SASL_LOG_DEBUG 5	/* more verbose than LOG_NOTE */
-#define SASL_LOG_TRACE 6	/* traces of internal protocols */
-#define SASL_LOG_PASS  7	/* traces of internal protocols, including
-				 * passwords */
+#define	SASL_LOG_NONE  0	/* don't log anything */
+#define	SASL_LOG_ERR   1	/* log unusual errors (default) */
+#define	SASL_LOG_FAIL  2	/* log all authentication failures */
+#define	SASL_LOG_WARN  3	/* log non-fatal warnings */
+#define	SASL_LOG_NOTE  4	/* more verbose than LOG_WARN */
+#define	SASL_LOG_DEBUG 5	/* more verbose than LOG_NOTE */
+#define	SASL_LOG_TRACE 6	/* traces of internal protocols */
+#define	SASL_LOG_PASS  7	/* traces of internal protocols, ... */
+		/* ... including passwords */
 #endif /* _SUN_SDK_ */
 
 /*
@@ -692,7 +702,7 @@ typedef struct sasl_server_params {
  *      SASL_SET_CREATE                     create user if pass non-NULL
  *      SASL_SET_DISABLE                    disable user
  */
-#define SASL_SET_REMOVE  SASL_SET_CREATE /* remove user if pass is NULL */
+#define	SASL_SET_REMOVE  SASL_SET_CREATE /* remove user if pass is NULL */
 
 /* features for server plug-in */
 #define	SASL_FEAT_SERVICE    0x0200 /* service-specific passwords supported */
@@ -837,14 +847,15 @@ typedef struct sasl_server_plug {
 	 *  given connection context, thus for a given protocol it may
 	 *  never be called.  Note that if mech_avail returns SASL_NOMECH,
 	 *  then that mechanism is considered disabled for the remainder
-     *  of the session.  If mech_avail returns SASL_NOTDONE, then a
-     *  future call to mech_avail may still return either SASL_OK
-     *  or SASL_NOMECH.
+	 *  of the session.  If mech_avail returns SASL_NOTDONE, then a
+	 *  future call to mech_avail may still return either SASL_OK
+	 *  or SASL_NOMECH.
 	 *
 	 *  returns SASL_OK on success,
-     *          SASL_NOTDONE if mech is not available now, but may be later
-     *                       (e.g. EXTERNAL w/o auth_id)
-	 *	    SASL_NOMECH if mech disabled
+	 *		SASL_NOTDONE if mech is not available now,
+	 *			 but may be later
+	 *			(e.g. EXTERNAL w/o auth_id)
+	 *		SASL_NOMECH if mech disabled
 	 */
     int (*mech_avail)(void *glob_context,
 		    sasl_server_params_t *sparams,
@@ -887,23 +898,25 @@ LIBSASL_API int sasl_server_add_plugin(const char *plugname,
 
 typedef struct server_sasl_mechanism
 {
-    int version;
-    int condition; /* set to SASL_NOUSER if no available users;
-		      set to SASL_CONTINUE if delayed plugin loading */
-    char *plugname; /* for AUTHSOURCE tracking */
-    const sasl_server_plug_t *plug;
-    char *f;       /* where should i load the mechanism from? */
+	int version;
+	int condition; /* set to SASL_NOUSER if no available users; */
+			/* set to SASL_CONTINUE if delayed plugin loading */
+	char *plugname; /* for AUTHSOURCE tracking */
+	const sasl_server_plug_t *plug;
+	char *f;	/* where should i load the mechanism from? */
 } server_sasl_mechanism_t;
 
 typedef void sasl_server_info_callback_t (server_sasl_mechanism_t *m,
-					  sasl_info_callback_stage_t stage,
-					  void *rock);
+    sasl_info_callback_stage_t stage,
+    void *rock);
 
 
-/* Dump information about available server plugins (separate functions are
-   used for canon and auxprop plugins) */
+/*
+ * Dump information about available server plugins--(separate functions are
+ * used for canon and auxprop plugins)
+ */
 #ifdef _SUN_SDK_
-LIBSASL_API int sasl_server_plugin_info (
+LIBSASL_API int sasl_server_plugin_info(
 	struct _sasl_global_context_s *gctx,
 	const char *mech_list,
 #else
@@ -1017,18 +1030,19 @@ typedef struct sasl_auxprop_plug {
 	/* name of the auxprop plugin */
     char *name;
 
-    /* store the fields/values of an auxiliary property context (OPTIONAL)
-     *
-     * if ctx is NULL, just check if storing properties is enabled
-     *
-     * returns
-     *  SASL_OK         on success
-     *  SASL_FAIL       on failure
-     */
+	/*
+	 * store the fields/values of an auxiliary property context (OPTIONAL)
+	 *
+	 * if ctx is NULL, just check if storing properties is enabled
+	 *
+	 * returns
+	 *  SASL_OK		on success
+	 *  SASL_FAIL	on failure
+	 */
     int (*auxprop_store)(void *glob_context,
-			 sasl_server_params_t *sparams,
-			 struct propctx *ctx,
-			 const char *user, unsigned ulen);
+    sasl_server_params_t *sparams,
+    struct propctx *ctx,
+    const char *user, unsigned ulen);
 } sasl_auxprop_plug_t;
 
 /* auxprop lookup flags */
@@ -1036,15 +1050,15 @@ typedef struct sasl_auxprop_plug {
 				    /* with non-zero len field.  If set, */
 				    /* override value of those properties */
 #define	SASL_AUXPROP_AUTHZID  0x02  /* if clear, we are looking up the */
-				    /* authid flags (prefixed with *), otherwise */
-				    /* we are looking up the authzid flags */
-				    /* (no prefix) */
+				/* authid flags (prefixed with *), otherwise */
+				/* we are looking up the authzid flags */
+				/* (no prefix) */
 
 /* NOTE: Keep in sync with SASL_CU_<XXX> flags */
-#define SASL_AUXPROP_VERIFY_AGAINST_HASH 0x10
+#define	SASL_AUXPROP_VERIFY_AGAINST_HASH 0x10
 
 
-#define SASL_AUXPROP_PLUG_VERSION 8
+#define	SASL_AUXPROP_PLUG_VERSION 8
 
 /*
  * default name for auxprop plug-in entry point is "sasl_auxprop_init"
@@ -1062,13 +1076,15 @@ LIBSASL_API int sasl_auxprop_add_plugin(const char *plugname,
 					sasl_auxprop_init_t *auxpropfunc);
 
 typedef void auxprop_info_callback_t (sasl_auxprop_plug_t *m,
-			              sasl_info_callback_stage_t stage,
-				      void *rock);
+	sasl_info_callback_stage_t stage,
+	void *rock);
 
-/* Dump information about available auxprop plugins (separate functions are
-   used for canon and server authentication plugins) */
+/*
+ * Dump information about available auxprop plugins--(separate functions are
+ * used for canon and server authentication plugins)
+ */
 #ifdef _SUN_SDK_
-LIBSASL_API int auxprop_plugin_info (
+LIBSASL_API int auxprop_plugin_info(
 	const sasl_conn_t *conn,
 	const char *mech_list,
 #else

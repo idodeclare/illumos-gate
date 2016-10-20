@@ -58,6 +58,20 @@ LIBSASL_API int sasl_decode64(const char *in, unsigned inlen,
 LIBSASL_API int sasl_encode64(const char *in, unsigned inlen,
 			    char *out, unsigned outmax, unsigned *outlen);
 
+#if 0
+/*
+ * The following is not supported:
+ *
+ * make a challenge string (NUL terminated)
+ *  buf      -- buffer for result
+ *  maxlen   -- max length of result
+ *  hostflag -- 0 = don't include hostname, 1 = include hostname
+ * returns final length or 0 if not enough space
+ */
+LIBSASL_API int sasl_mkchal(sasl_conn_t *conn, char *buf,
+			    unsigned maxlen, unsigned hostflag);
+#endif /* 0 */
+
 /*
  * verify a string is valid UTF-8
  * if len == 0, strlen(str) will be used.
