@@ -50,11 +50,7 @@
 #  define LIBSASL_API  extern __declspec(dllimport)
 # endif /* LIBSASL_EXPORTS */
 #else
-# ifdef _SUN_SDK_
-#  define LIBSASL_API
-# else
 # define LIBSASL_API extern
-# endif /* _SUN_SDK_ */
 #endif /* WIN32 */
 
 /* Same as above, but used during a variable declaration. Only Unix definition

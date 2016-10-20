@@ -275,11 +275,7 @@ int sasl_setpass(sasl_conn_t *conn,
 
 	tried_setpass++;
 
-#ifdef _SUN_SDK_
-	tmpresult = m->plug->setpass(m->glob_context,
-#else
 	tmpresult = m->plug->setpass(m->plug->glob_context,
-#endif /* _SUN_SDK_ */
 				     ((sasl_server_conn_t *)conn)->sparams,
 				     user,
 				     pass,
@@ -347,7 +343,7 @@ server_dispose_mech_contexts(sasl_conn_t *pconn)
   for(cur = s_conn->mech_contexts; cur; cur=cur_next) {
       cur_next = cur->next;
       if(cur->context)
-	  cur->mech->plug->mech_dispose(cur->context, s_conn->sparams->utils);
+	  cur->mech->m.plug->mech_dispose(cur->context, s_conn->sparams->utils);
       sasl_FREE(cur);
   }  
   s_conn->mech_contexts = NULL;
@@ -365,7 +361,11 @@ static void server_dispose(sasl_conn_t *pconn)
 #endif /* _SUN_SDK_ */
 
     /* Just sanity check that sasl_server_done wasn't called yet */
+#ifdef _SUN_SDK_
+    if (gctx->sasl_server_active != 0) {
+#else
     if (_sasl_server_active != 0) {
+#endif /* _SUN_SDK_ */
 	if (s_conn->mech) {
 	    void (*mech_dispose)(void *conn_context, const sasl_utils_t *utils);
 
@@ -409,7 +409,11 @@ static void server_dispose(sasl_conn_t *pconn)
 	sasl_FREE(s_conn->sparams);
     }
 
+#ifdef _SUN_SDK_
+    if (s_conn->mech_list != gctx->mechlist->mech_list) {
+#else
     if (s_conn->mech_list != mechlist->mech_list) {
+#endif /* _SUN_SDK_ */
 	/* free connection-specific mech_list */
 	mechanism_t *m, *prevm;
 
@@ -464,7 +468,8 @@ static int load_mech(_sasl_global_context_t *gctx, const char *mechname)
 
     /* No sasl_conn_t was given to getcallback, so we provide the
      * global callbacks structure */
-    if (_sasl_getcallback(NULL, SASL_CB_GETOPT, &getopt, &context) == SASL_OK)
+    if (_sasl_getcallback(NULL, SASL_CB_GETOPT, (sasl_callback_ft * )&getopt,
+        &context) == SASL_OK)
 	(void)getopt(&gctx->server_global_callbacks, NULL,
 		"server_load_mech_list", &mlist, NULL);
 
@@ -561,7 +566,7 @@ int _sasl_server_add_plugin(void *ctx,
     /* Check to see if this plugin has already been registered */
     m = mechlist->mech_list;
     for (i = 0; i < mechlist->mech_length; i++) {
-	if (strcmp(plugname, m->plugname) == 0)
+	if (strcmp(plugname, m->m.plugname) == 0)
 		return SASL_OK;
 	m = m->next;
     }
@@ -671,7 +676,7 @@ int _sasl_server_add_plugin(void *ctx,
 #endif /* _INTEGRATED_SOLARIS_ */
 
 	/* whether this mech actually has any users in it's db */
-	mech->condition = SASL_OK;
+	mech->m.condition = SASL_OK;
 #else
 	/* whether this mech actually has any users in it's db */
 	mech->m.condition = result; /* SASL_OK, SASL_CONTINUE or SASL_NOUSER */
@@ -705,6 +710,7 @@ int _sasl_server_add_plugin(void *ctx,
 
 int sasl_server_done(void)
 {
+#ifndef _SUN_SDK_
     int result = SASL_CONTINUE;
 
     if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
@@ -725,6 +731,7 @@ int sasl_server_done(void)
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return result;
     }
+#endif /* !_SUN_SDK_ */
     
     sasl_common_done();
 
@@ -777,11 +784,7 @@ static int server_done(void) {
 	  m=m->next;
     
 	  if (prevm->m.plug->mech_free) {
-#ifdef _SUN_SDK_
-	      prevm->plug->mech_free(prevm->glob_context,
-#else
 	      prevm->m.plug->mech_free(prevm->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 				     mechlist->utils);
 	  }
 
@@ -847,11 +850,7 @@ static int server_idle(sasl_conn_t *conn)
 	 m != NULL;
 	 m = m->next) {
 	if (m->m.plug->idle
-#ifdef _SUN_SDK_
-	    &&  m->plug->idle(m->glob_context,
-#else
 	    &&  m->m.plug->idle(m->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 				conn,
 				conn ? ((sasl_server_conn_t *)conn)->sparams : NULL)) {
 	    return 1;
