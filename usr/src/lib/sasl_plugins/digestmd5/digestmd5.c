@@ -1834,8 +1834,13 @@ struct digest_cipher *available_ciphers1 = uef_ciphers;
 static int create_layer_keys(context_t *text,
 			     const sasl_utils_t *utils,
 			     HASH key, int keylen,
+#ifdef _SUN_SDK_
+			     char enckey[16],
+			     char deckey[16])
+#else
 			     unsigned char enckey[16],
 			     unsigned char deckey[16])
+#endif /* _SUN_SDK_ */
 {
     MD5_CTX Md5Ctx;
     
@@ -1851,7 +1856,11 @@ static int create_layer_keys(context_t *text,
 	utils->MD5Update(&Md5Ctx, (const unsigned char *) SEALING_CLIENT_SERVER,
 			 (unsigned) strlen(SEALING_CLIENT_SERVER));
     }
+#ifdef _SUN_SDK_
+    utils->MD5Final((unsigned char *)enckey, &Md5Ctx);
+#else
     utils->MD5Final(enckey, &Md5Ctx);
+#endif /* _SUN_SDK_ */
     
     utils->MD5Init(&Md5Ctx);
     utils->MD5Update(&Md5Ctx, key, keylen);
@@ -1862,7 +1871,11 @@ static int create_layer_keys(context_t *text,
 	utils->MD5Update(&Md5Ctx, (const unsigned char *) SEALING_CLIENT_SERVER,
 			 (unsigned) strlen(SEALING_CLIENT_SERVER));
     }
+#ifdef _SUN_SDK_
+    utils->MD5Final((unsigned char *)deckey, &Md5Ctx);
+#else
     utils->MD5Final(deckey, &Md5Ctx);
+#endif /* _SUN_SDK_ */
     
     /* create integrity keys */
     /* sending */
@@ -2020,7 +2033,7 @@ static int digestmd5_decode_packet(void *context,
 	
     if (inputlen < 16) {
 #ifdef _SUN_SDK_
-	utils->log(utils->conn, SASL_LOG_ERR,
+	text->utils->log(text->utils->conn, SASL_LOG_ERR,
 		"DIGEST-MD5 SASL packets must be at least 16 bytes long");
 #else
 	text->utils->seterror(text->utils->conn, 0, "DIGEST-MD5 SASL packets must be at least 16 bytes long");
@@ -2033,7 +2046,7 @@ static int digestmd5_decode_packet(void *context,
     ver = ntohs(ver);
     if (ver != version) {
 #ifdef _INTEGRATED_SOLARIS_
-	utils->log(utils->conn, SASL_LOG_ERR,
+	text->utils->log(text->utils->conn, SASL_LOG_ERR,
 		"Wrong Version");
 #else
 	text->utils->seterror(text->utils->conn, 0, "Wrong Version");
@@ -2047,7 +2060,7 @@ static int digestmd5_decode_packet(void *context,
 	
     if (seqnum != text->rec_seqnum) {
 #ifdef _INTEGRATED_SOLARIS_
-	utils->log(utils->conn, SASL_LOG_ERR,
+	text->utils->log(text->utils->conn, SASL_LOG_ERR,
 #else
 	text->utils->seterror(text->utils->conn, 0,
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -2563,7 +2576,7 @@ digestmd5_server_mech_step1(server_context_t *stext,
     
     resplen = 0;
 #ifdef _SUN_SDK_
-    if (text->out_buf) params->utils->free(text->out_buf);
+    if (text->out_buf) sparams->utils->free(text->out_buf);
 #endif /* _SUN_SDK_ */
     text->out_buf = NULL;
     text->out_buf_len = 0;
@@ -3674,8 +3687,13 @@ static int digestmd5_server_mech_step2(server_context_t *stext,
 		      DEFAULT_BUFSIZE);
 
     if (oparams->mech_ssf > 0) {
+#ifdef _SUN_SDK_
+	char enckey[16];
+	char deckey[16];
+#else
 	unsigned char enckey[16];
 	unsigned char deckey[16];
+#endif /* _SUN_SDK_ */
 	
 	create_layer_keys(text, sparams->utils,text->HA1,n,enckey,deckey);
 	
@@ -4537,8 +4555,13 @@ static int make_client_response(context_t *text,
 		      DEFAULT_BUFSIZE);
     
     if (oparams->mech_ssf > 0) {
+#ifdef _SUN_SDK_
+	char enckey[16];
+	char deckey[16];
+#else
 	unsigned char enckey[16];
 	unsigned char deckey[16];
+#endif /* _SUN_SDK_ */
 	
 	create_layer_keys(text, params->utils, text->HA1, nbits,
 			  enckey, deckey);
