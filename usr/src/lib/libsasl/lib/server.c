@@ -355,7 +355,8 @@ static void server_dispose(sasl_conn_t *pconn)
 {
     sasl_server_conn_t *s_conn=  (sasl_server_conn_t *) pconn;
 #ifdef _SUN_SDK_
-  _sasl_global_context_t *gctx = pconn->gctx;
+    _sasl_global_context_t *gctx = pconn->gctx;
+    mech_list_t *mechlist = gctx->mechlist;
 #else
     context_list_t *cur, *cur_next;
 #endif /* _SUN_SDK_ */
@@ -409,11 +410,7 @@ static void server_dispose(sasl_conn_t *pconn)
 	sasl_FREE(s_conn->sparams);
     }
 
-#ifdef _SUN_SDK_
-    if (s_conn->mech_list != gctx->mechlist->mech_list) {
-#else
     if (s_conn->mech_list != mechlist->mech_list) {
-#endif /* _SUN_SDK_ */
 	/* free connection-specific mech_list */
 	mechanism_t *m, *prevm;
 
@@ -841,7 +838,7 @@ static int server_idle(sasl_conn_t *conn)
         gctx = _sasl_gbl_ctx();
     else
         gctx = conn->gctx;
-  mechlist = gctx->mechlist;
+    mechlist = gctx->mechlist;
 #endif /* _SUN_SDK_ */
 
     if (! mechlist) {
@@ -3095,11 +3092,17 @@ _sasl_print_mechanism (
 /* Dump information about available server plugins (separate functions should be
    used for canon and auxprop plugins */
 int sasl_server_plugin_info (
+#ifdef _SUN_SDK_
+  _sasl_global_context_t *gctx,
+#endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   sasl_server_info_callback_t *info_cb,
   void *info_cb_rock
 )
 {
+#ifdef _SUN_SDK_
+    mech_list_t *mechlist = gctx->mechlist;
+#endif /* _SUN_SDK_ */
     mechanism_t *m;
     server_sasl_mechanism_t plug_data;
     char * cur_mech;

@@ -1704,7 +1704,7 @@ _sasl_print_mechanism (
 /* Dump information about available client plugins */
 int sasl_client_plugin_info (
 #ifdef _SUN_SDK_
-  const sasl_conn_t *conn,
+  _sasl_global_context_t *gctx,
 #endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   sasl_client_info_callback_t *info_cb,
@@ -1717,7 +1717,7 @@ int sasl_client_plugin_info (
     char * mech_list = NULL;
     char * p;
 #ifdef _SUN_SDK_
-  cmech_list_t *cmechlist = conn->gctx->cmechlist;
+  cmech_list_t *cmechlist = gctx->cmechlist;
 #endif /* _SUN_SDK_ */
 
     if (info_cb == NULL) {

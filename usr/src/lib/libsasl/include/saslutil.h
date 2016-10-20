@@ -21,12 +21,11 @@
 
 #ifdef _SUN_SDK_
 /*
- * need to declare _sasl_global_context_s* here as incomplete type because
+ * need to declare _sasl_global_context_s here as incomplete type because
  * it's only defined later in saslint.h (and aliased as
  * _sasl_global_context_t)
  */
-struct _sasl_global_context_s *gctx;
-
+struct _sasl_global_context_s;
 #endif /* _SUN_SDK_ */
 
 #ifdef	__cplusplus

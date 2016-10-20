@@ -43,6 +43,13 @@ extern "C" {
 #endif
 
 #ifdef _SUN_SDK_
+/*
+ * need to declare _sasl_global_context_s here as incomplete type because
+ * it's only defined later in saslint.h (and aliased as
+ * _sasl_global_context_t)
+ */
+struct _sasl_global_context_s;
+
 /* intermediate MD5 context */
 typedef struct HMAC_MD5_CTX_s {
     MD5_CTX ictx, octx;
@@ -529,7 +536,7 @@ typedef void sasl_client_info_callback_t (client_sasl_mechanism_t *m,
 /* Dump information about available client plugins */
 #ifdef _SUN_SDK_
 LIBSASL_API int sasl_client_plugin_info (
-  const sasl_conn_t *conn,
+  struct _sasl_global_context_s *gctx,
   const char *mech_list,
 #else
 LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
@@ -894,7 +901,13 @@ typedef void sasl_server_info_callback_t (server_sasl_mechanism_t *m,
 
 /* Dump information about available server plugins (separate functions are
    used for canon and auxprop plugins) */
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_server_plugin_info (
+	struct _sasl_global_context_s *gctx,
+	const char *mech_list,
+#else
 LIBSASL_API int sasl_server_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_server_info_callback_t *info_cb,
 	void *info_cb_rock);
 
