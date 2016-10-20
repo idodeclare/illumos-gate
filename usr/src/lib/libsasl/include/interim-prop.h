@@ -32,37 +32,42 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #include <config.h>
-
-/* The following ifdef block is the standard way of creating macros
+/*
+ * The following ifdef block is the standard way of creating macros
  * which make exporting from a DLL simpler. All files within this DLL
  * are compiled with the LIBSASL_EXPORTS symbol defined on the command
  * line. this symbol should not be defined on any project that uses
  * this DLL. This way any other project whose source files include
  * this file see LIBSASL_API functions as being imported from a DLL,
  * wheras this DLL sees symbols defined with this macro as being
- * exported.  */
-/* Under Unix, life is simpler: we just need to mark library functions
- * as extern.  (Technically, we don't even have to do that.) */
+ * exported.
+ */
+/*
+ * Under Unix, life is simpler: we just need to mark library functions
+ * as extern.  (Technically, we don't even have to do that.)
+ */
 #ifdef WIN32
-# ifdef LIBSASL_EXPORTS
-#  define LIBSASL_API  extern __declspec(dllexport)
-# else /* LIBSASL_EXPORTS */
-#  define LIBSASL_API  extern __declspec(dllimport)
-# endif /* LIBSASL_EXPORTS */
+#ifdef LIBSASL_EXPORTS
+#define	LIBSASL_API  extern __declspec(dllexport)
+#else /* LIBSASL_EXPORTS */
+#define	LIBSASL_API  extern __declspec(dllimport)
+#endif /* LIBSASL_EXPORTS */
 #else
-# define LIBSASL_API extern
+#define	LIBSASL_API extern
 #endif /* WIN32 */
 
-/* Same as above, but used during a variable declaration. Only Unix definition
- * is different, as we can't assign an initial value to an extern variable */ 
+/*
+ * Same as above, but used during a variable declaration. Only Unix definition
+ * is different, as we can't assign an initial value to an extern variable
+ */
 #ifdef WIN32
-# ifdef LIBSASL_EXPORTS
-#  define LIBSASL_VAR  extern __declspec(dllexport)
-# else /* LIBSASL_EXPORTS */
-#  define LIBSASL_VAR  extern __declspec(dllimport)
-# endif /* LIBSASL_EXPORTS */
+#ifdef LIBSASL_EXPORTS
+#define	LIBSASL_VAR  extern __declspec(dllexport)
+#else /* LIBSASL_EXPORTS */
+#define	LIBSASL_VAR  extern __declspec(dllimport)
+#endif /* LIBSASL_EXPORTS */
 #else /* WIN32 */
-# define LIBSASL_VAR extern
+#define	LIBSASL_VAR extern
 #endif /* WIN32 */
 
 /*
