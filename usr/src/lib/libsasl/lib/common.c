@@ -832,7 +832,8 @@ sasl_set_alloc(sasl_malloc_t *m,
 void sasl_common_done(void)
 {
 #ifdef _SUN_SDK_
-   _sasl_dispose_context(_sasl_gbl_ctx());
+    _sasl_global_context_t *gctx = _sasl_gbl_ctx();
+    _sasl_dispose_context(gctx);
 #else
     /* NOTE - the caller will need to reinitialize the values,
        if it is going to call sasl_client_init/sasl_server_init again. */
@@ -847,10 +848,11 @@ void sasl_common_done(void)
 
     _sasl_canonuser_free();
     _sasl_done_with_plugins();
+#endif
     
 #ifdef _SUN_SDK_
-    sasl_config_free();
-#endif /* _SUN_SDK_ */
+    sasl_config_free(gctx);
+#else
 
     sasl_MUTEX_FREE(free_mutex);
     free_mutex = NULL;
@@ -861,11 +863,13 @@ void sasl_common_done(void)
 	sasl_FREE(global_mech_list);
 	global_mech_list = NULL;
     }
+#endif /* _SUN_SDK_ */
 }
 
 /* This function is for backward compatibility */
 void sasl_done(void)
 {
+#ifndef _SUN_SDK_
     if (_sasl_server_cleanup_hook && _sasl_server_cleanup_hook() == SASL_OK) {
 	_sasl_server_idle_hook = NULL;
 	_sasl_server_cleanup_hook = NULL;
@@ -879,9 +883,9 @@ void sasl_done(void)
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return;
     }
+#endif /* !_SUN_SDK_ */
 
     sasl_common_done();
-#endif /* _SUN_SDK_ */
 }
 
 /* fills in the base sasl_conn_t info */

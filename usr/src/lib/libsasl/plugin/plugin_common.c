@@ -107,7 +107,11 @@ static void sockaddr_unmapped(
 /* LINTED pointer alignment */ 
     sin4 = (struct sockaddr_in *)sa;
 /* LINTED pointer alignment */ 
+#ifdef _SUN_SDK_
+    addr = *(uint32_t *)&sin6->sin6_addr._S6_un._S6_u32[3];
+#else
     addr = *(uint32_t *)&sin6->sin6_addr.s6_addr32[3];
+#endif /* _SUN_SDK_ */
     port = sin6->sin6_port;
     memset(sin4, 0, sizeof(struct sockaddr_in));
     sin4->sin_addr.s_addr = addr;
@@ -1110,7 +1114,12 @@ convert_prompt(const sasl_utils_t *utils, void **h, const char *s)
 	return NULL;
     }
 
+#ifdef _SUN_SDK_
+    ret = utils->getcallback(utils->conn, SASL_CB_LANGUAGE,
+    (sasl_callback_ft * )&simple_cb,
+#else
     ret = utils->getcallback(utils->conn, SASL_CB_LANGUAGE, &simple_cb,
+#endif /* _SUN_SDK_ */
 	&simple_context);
 
     if (ret == SASL_OK && simple_cb) {
