@@ -543,8 +543,6 @@ int sasl_client_init(const sasl_callback_t *callbacks)
   
   if (ret == SASL_OK) {
 #ifdef _SUN_SDK_
-      _sasl_client_active = 1;
-	/* If sasl_client_init returns error, sasl_done() need not be called */
       ret = _sasl_build_mechlist(gctx);
   }
   if (ret != SASL_OK) {
