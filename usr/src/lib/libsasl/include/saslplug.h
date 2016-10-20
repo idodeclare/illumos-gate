@@ -527,7 +527,13 @@ typedef void sasl_client_info_callback_t (client_sasl_mechanism_t *m,
 					  void *rock);
 
 /* Dump information about available client plugins */
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_client_plugin_info (
+  const sasl_conn_t *conn,
+  const char *mech_list,
+#else
 LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_client_info_callback_t *info_cb,
 	void *info_cb_rock);
 
@@ -1048,7 +1054,8 @@ typedef void auxprop_info_callback_t (sasl_auxprop_plug_t *m,
 /* Dump information about available auxprop plugins (separate functions are
    used for canon and server authentication plugins) */
 #ifdef _SUN_SDK_
-LIBSASL_API int auxprop_plugin_info (const sasl_utils_t *utils,
+LIBSASL_API int auxprop_plugin_info (
+	const sasl_conn_t *conn,
 	const char *mech_list,
 #else
 LIBSASL_API int auxprop_plugin_info (const char *mech_list,

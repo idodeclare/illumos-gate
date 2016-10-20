@@ -567,6 +567,7 @@ static void client_dispose(sasl_conn_t *pconn)
   sasl_client_conn_t *c_conn=(sasl_client_conn_t *) pconn;
 #ifdef _SUN_SDK_
   sasl_free_t *free_func = c_conn->cparams->utils->free;
+  _sasl_global_context_t *gctx = pconn->gctx;
 #endif /* _SUN_SDK_ */
 
   if (c_conn->mech && c_conn->mech->m.plug->mech_dispose) {
@@ -592,7 +593,11 @@ static void client_dispose(sasl_conn_t *pconn)
 #endif /* _SUN_SDK_ */
   }
 
+#ifdef _SUN_SDK_
+  if (c_conn->mech_list != gctx->cmechlist->mech_list) {
+#else
   if (c_conn->mech_list != cmechlist->mech_list) {
+#endif /* _SUN_SDK_ */
       /* free connection-specific mech_list */
       cmechanism_t *m, *prevm;
 
@@ -742,7 +747,11 @@ int _sasl_client_new(void *ctx,
 	  for (cp = mlist; *cp && !isspace((int) *cp); cp++);
 
 	  /* search for mech name in loaded plugins */
+#ifdef _SUN_SDK_
+	  for (mptr = gctx->cmechlist->mech_list; mptr; mptr = mptr->next) {
+#else
 	  for (mptr = cmechlist->mech_list; mptr; mptr = mptr->next) {
+#endif /* _SUN_SDK_ */
 	      const sasl_client_plug_t *plug = mptr->m.plug;
 
 	      if (_sasl_is_equal_mech(mlist, plug->mech_name, (size_t) (cp - mlist), &plus)) {
@@ -774,8 +783,13 @@ int _sasl_client_new(void *ctx,
 	  while (*mlist && isspace((int) *mlist)) mlist++;
       }
   } else {
+#ifdef _SUN_SDK_
+      conn->mech_list = gctx->cmechlist->mech_list;
+      conn->mech_length = gctx->cmechlist->mech_length;
+#else
       conn->mech_list = cmechlist->mech_list;
       conn->mech_length = cmechlist->mech_length;
+#endif /* _SUN_SDK_ */
   }
 
   if (conn->mech_list == NULL) {
@@ -1043,8 +1057,8 @@ int sasl_client_start(sasl_conn_t *conn,
 
 #ifdef _SUN_SDK_
     if (c_conn->mech != NULL) {
-	if (c_conn->mech->plug->mech_dispose != NULL) {
-	    c_conn->mech->plug->mech_dispose(conn->context,
+	if (c_conn->mech->m.plug->mech_dispose != NULL) {
+	    c_conn->mech->m.plug->mech_dispose(conn->context,
 		c_conn->cparams->utils);
 	    c_conn->mech = NULL;
 	}
@@ -1201,7 +1215,7 @@ int sasl_client_start(sasl_conn_t *conn,
 
 	    best_cbindingdisp = cur_cbindingdisp;
 #ifdef _INTEGRATED_SOLARIS_
-	    bestssf = m->sun_reg ? m->plug->max_ssf : 0;
+	    bestssf = m->sun_reg ? m->m.plug->max_ssf : 0;
 #else
 	    bestssf = m->m.plug->max_ssf;
 #endif /* _INTEGRATED_SOLARIS_ */
@@ -1246,11 +1260,7 @@ int sasl_client_start(sasl_conn_t *conn,
     c_conn->mech = bestm;
 
     /* init that plugin */
-#ifdef _SUN_SDK_
-    result = c_conn->mech->plug->mech_new(c_conn->mech->glob_context,
-#else
     result = c_conn->mech->m.plug->mech_new(c_conn->mech->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 					  c_conn->cparams,
 					  &(conn->context));
     if (result != SASL_OK) goto done;
@@ -1368,7 +1378,7 @@ int sasl_client_step(sasl_conn_t *conn,
 #ifdef _SUN_SDK_
 static unsigned mech_names_len(_sasl_global_context_t *gctx)
 {
-  cmech_list_t *cmechlist = gctx->cmechlist;
+  cmechanism_t *mech_list = gctx->cmechlist->mech_list;
 #else
 static unsigned mech_names_len(cmechanism_t *mech_list)
 {
@@ -1693,6 +1703,9 @@ _sasl_print_mechanism (
 
 /* Dump information about available client plugins */
 int sasl_client_plugin_info (
+#ifdef _SUN_SDK_
+  const sasl_conn_t *conn,
+#endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   sasl_client_info_callback_t *info_cb,
   void *info_cb_rock
@@ -1703,6 +1716,9 @@ int sasl_client_plugin_info (
     char * cur_mech;
     char * mech_list = NULL;
     char * p;
+#ifdef _SUN_SDK_
+  cmech_list_t *cmechlist = conn->gctx->cmechlist;
+#endif /* _SUN_SDK_ */
 
     if (info_cb == NULL) {
 	info_cb = _sasl_print_mechanism;

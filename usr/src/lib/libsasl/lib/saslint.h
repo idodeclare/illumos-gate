@@ -62,7 +62,11 @@
 /* Visual Studio: "inline" keyword is not available in C, only in C++ */
 #define INLINE __inline
 #else
+#ifdef _SUN_SDK_
+#define INLINE
+#else
 #define INLINE  inline
+#endif /* _SUN_SDK_ */
 #endif
 #endif
 

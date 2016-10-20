@@ -112,6 +112,10 @@
 
 #define SASL_CONFDIR "/etc/sasl"
 
+#define SASL_CONF_PATH_ENV_VAR "SASL_CONF_PATH"
+
+#define CONFIGDIR SASL_CONFDIR
+
 /* should we use the internal rc4 library? */
 /* This may be defined in digestmd5 makefile */
 /* #undef WITH_RC4 */

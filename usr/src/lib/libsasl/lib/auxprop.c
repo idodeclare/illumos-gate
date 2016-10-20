@@ -1264,7 +1264,7 @@ _sasl_print_mechanism (sasl_auxprop_plug_t *m,
    used for canon and server authentication plugins) */
 int auxprop_plugin_info (
 #ifdef _SUN_SDK_
-  const sasl_utils_t *utils,
+  const sasl_conn_t *conn,
 #endif /* _SUN_SDK_ */
   const char *c_mech_list,		/* space separated mechanism list or NULL for ALL */
   auxprop_info_callback_t *info_cb,
@@ -1277,7 +1277,7 @@ int auxprop_plugin_info (
     char *mech_list = NULL;
     char * p;
 #ifdef _SUN_SDK_
-    _sasl_global_context_t *gctx = utils->conn->gctx;
+    _sasl_global_context_t *gctx = conn->gctx;
 #endif /* _SUN_SDK_ */
 
     if (info_cb == NULL) {

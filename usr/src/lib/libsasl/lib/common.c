@@ -66,6 +66,7 @@
 #include "saslint.h"
 
 #ifdef _SUN_SDK_
+#include <sys/debug.h>
 #include "md5_private.h"
 #include "hmac-md5.h"
 #include "plugin_common.h"
@@ -234,11 +235,13 @@ void sasl_set_mutex(sasl_mutex_alloc_t *n,
 		    sasl_mutex_unlock_t *u,
 		    sasl_mutex_free_t *d)
 {
+#ifndef _SUN_SDK_
     /* Disallow mutex function changes once sasl_client_init
        and/or sasl_server_init is called */
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return;
     }
+#endif /* !_SUN_SDK_ */
 
 #ifdef _SUN_SDK_
     _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
@@ -305,6 +308,9 @@ int _sasl_add_string(char **out, size_t *alloclen,
 int sasl_set_path (int path_type, char * path)
 {
     int result;
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
+#endif /* _SUN_SDK_ */
 
     if (path == NULL) {
         return (SASL_FAIL);
@@ -412,6 +418,7 @@ _sasl_encodev (sasl_conn_t *conn,
 {
 #ifdef _SUN_SDK_
     int result = SASL_OK;
+    const _sasl_global_context_t *gctx = conn->gctx;
 #else
     int result;
 #endif /* _SUN_SDK_ */
@@ -505,6 +512,7 @@ int sasl_encodev(sasl_conn_t *conn,
 {
 #ifdef _SUN_SDK_
     int result = SASL_FAIL;
+    const _sasl_global_context_t *gctx = NULL;
 #else
     int result = SASL_OK;
 #endif /* _SUN_SDK_ */
@@ -526,6 +534,10 @@ int sasl_encodev(sasl_conn_t *conn,
 	PARAMERROR(conn);
     }
 
+#ifdef _SUN_SDK_
+    gctx = conn->gctx;
+#endif /* _SUN_SDK_ */
+
     if (!conn->props.maxbufsize) {
 #ifdef _SUN_SDK_
 	_sasl_log(conn, SASL_LOG_ERR,
@@ -540,7 +552,11 @@ int sasl_encodev(sasl_conn_t *conn,
     /* If oparams.encode is NULL, this means there is no SASL security
        layer in effect, so no SASL framing is needed. */
     if (conn->oparams.encode == NULL)  {
+#ifdef _SUN_SDK_
+	result = _iovec_to_buf(gctx, invec, numiov, &conn->encode_buf);
+#else
 	result = _iovec_to_buf(invec, numiov, &conn->encode_buf);
+#endif /* _SUN_SDK_ */
 	if (result != SASL_OK) INTERROR(conn, result);
        
 	*output = conn->encode_buf->data;
@@ -714,7 +730,7 @@ int sasl_decode(sasl_conn_t *conn,
 {
     int result;
 #ifdef _SUN_SDK_
-    const _sasl_global_context_t *gctx;
+    const _sasl_global_context_t *gctx = NULL;
 #endif /* _SUN_SDK_ */
 
     if(!conn) return SASL_BADPARAM;
@@ -1680,7 +1696,7 @@ const char *sasl_errstring(int saslerr,
 	break;
     case SASL_BADBINDING: s = gettext("channel binding failure");
 	break;
-    case SASL_CONFIGERR:  s = gettext("error when parsing configuration file";
+    case SASL_CONFIGERR:  s = gettext("error when parsing configuration file");
 	break;
     default:   s = gettext("undefined error!");
 	break;
@@ -2057,6 +2073,9 @@ static int
 _sasl_getpath(void *context __attribute__((unused)),
               const char ** path_dest)
 {
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
+#endif /* _SUN_SDK_ */
 #if !defined(WIN32)
     char *path;
 #endif
@@ -2112,6 +2131,9 @@ static int
 _sasl_getconfpath(void *context __attribute__((unused)),
                   char ** path_dest)
 {
+#ifdef _SUN_SDK_
+    _sasl_global_context_t *gctx =  _sasl_gbl_ctx();
+#endif /* _SUN_SDK_ */
 #if !defined(WIN32)
     char *path;
 #endif
