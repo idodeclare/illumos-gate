@@ -87,6 +87,9 @@
 
 #include <errno.h>
 #include <assert.h>
+#ifdef _SUN_SDK_
+#include <sys/debug.h>
+#endif /* _SUN_SDK_ */
 
 /*****************************  Common Section  *****************************/
 
@@ -230,7 +233,7 @@ enum {
 #define sasl_gss_log(x,y,z) sasl_gss_seterror_(text,y,z,1)
 #define sasl_gss_seterror(x,y,z) sasl_gss_seterror_(text,y,z,0)
 
-static void
+static int
 sasl_gss_seterror_(const context_t *text, OM_uint32 maj, OM_uint32 min, 
 	int logonly)
 #else
@@ -856,7 +859,11 @@ gssapi_server_mech_authneg(context_t *text,
     gss_OID_set desired_mechs = GSS_C_NULL_OID_SET;
 #endif /* _SUN_SDK_ */
     gss_buffer_desc name_token;
+#ifdef _SUN_SDK_
+    int ret;
+#else
     int ret, equal = 0;
+#endif /* _SUN_SDK_ */
     unsigned out_flags = 0;
     gss_cred_id_t server_creds = (gss_cred_id_t) params->gss_creds;
     gss_buffer_desc name_without_realm;
