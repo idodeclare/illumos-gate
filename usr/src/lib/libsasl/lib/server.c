@@ -1475,13 +1475,6 @@ _sasl_transition(sasl_conn_t * conn,
 			      NULL, 0, SASL_SET_CREATE | flags);
     }
 
-#ifdef _SUN_SDK_
-    /* Do authorization */
-    if(result == SASL_OK) {
-      result = do_authorization((sasl_server_conn_t *)conn);
-    }
-#endif /* _SUN_SDK_ */
-
     RETURN(conn,result);
 }
 
@@ -1608,12 +1601,14 @@ int _sasl_server_new(void *ctx,
   serverconn->sparams->service = (*pconn)->service;
   serverconn->sparams->servicelen = (unsigned) strlen((*pconn)->service);
 
-  if (global_callbacks.appname && global_callbacks.appname[0] != '\0') {
 #ifdef _SUN_SDK_
+  if (gctx->server_global_callbacks.appname
+    && gctx->server_global_callbacks.appname[0] != '\0') {
     result = _sasl_strdup (gctx->server_global_callbacks.appname,
 			   &serverconn->appname,
 			   NULL);
 #else
+  if (global_callbacks.appname && global_callbacks.appname[0] != '\0') {
     result = _sasl_strdup (global_callbacks.appname,
 			   &serverconn->appname,
 			   NULL);
@@ -1683,7 +1678,11 @@ int _sasl_server_new(void *ctx,
 	  for (cp = mlist; *cp && !isspace((int) *cp); cp++);
 
 	  /* search for mech name in loaded plugins */
+#ifdef _SUN_SDK_
+	  for (mptr = gctx->mechlist->mech_list; mptr; mptr = mptr->next) {
+#else
 	  for (mptr = mechlist->mech_list; mptr; mptr = mptr->next) {
+#endif /* _SUN_SDK_ */
 	      const sasl_server_plug_t *plug = mptr->m.plug;
 
 	      if (_sasl_is_equal_mech(mlist, plug->mech_name, (size_t) (cp - mlist), &plus)) {
@@ -1715,8 +1714,13 @@ int _sasl_server_new(void *ctx,
       }
   }
   else {
+#ifdef _SUN_SDK_
+      serverconn->mech_list = gctx->mechlist->mech_list;
+      serverconn->mech_length = gctx->mechlist->mech_length;
+#else
       serverconn->mech_list = mechlist->mech_list;
       serverconn->mech_length = mechlist->mech_length;
+#endif /* _SUN_SDK_ */
   }
 
   serverconn->sparams->canon_user = &_sasl_canon_user_lookup;
@@ -2072,7 +2076,7 @@ int sasl_server_start(sasl_conn_t *conn,
 
 #ifdef _SUN_SDK_
     if(conn->context) {
-	s_conn->mech->plug->mech_dispose(conn->context, s_conn->sparams->utils);
+	s_conn->mech->m.plug->mech_dispose(conn->context, s_conn->sparams->utils);
 	conn->context = NULL;
     }
     memset(&conn->oparams, 0, sizeof(sasl_out_params_t));
@@ -2167,11 +2171,7 @@ int sasl_server_start(sasl_conn_t *conn,
     
     if (!conn->context) {
 	/* Note that we don't hand over a new challenge */
-#ifdef _SUN_SDK_
-	result = s_conn->mech->plug->mech_new(s_conn->mech->glob_context,
-#else
 	result = s_conn->mech->m.plug->mech_new(s_conn->mech->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 						s_conn->sparams,
 						NULL,
 						0,
@@ -2381,14 +2381,8 @@ int sasl_server_step(sasl_conn_t *conn,
  * added up 
  */
 
-#ifdef _SUN_SDK_
-static unsigned mech_names_len(_sasl_global_context_t *gctx)
-{
-  mech_list_t *mechlist = gctx->mechlist;
-#else
 static unsigned mech_names_len(mechanism_t *mech_list)
 {
-#endif /* _SUN_SDK_ */
   mechanism_t *listptr;
   unsigned result = 0;
 
@@ -2458,11 +2452,7 @@ int _sasl_server_listmech(sasl_conn_t *conn,
 
   resultlen = (prefix ? strlen(prefix) : 0)
             + (strlen(mysep) * (s_conn->mech_length - 1) * 2)
-#ifdef _SUN_SDK_
-	    + (mech_names_len(gctx) * 2) /* including -PLUS variant */
-#else
 	    + (mech_names_len(s_conn->mech_list) * 2) /* including -PLUS variant */
-#endif /* _SUN_SDK_ */
 	    + (s_conn->mech_length * (sizeof("-PLUS") - 1))
             + (suffix ? strlen(suffix) : 0)
 	    + 1;
