@@ -31,6 +31,7 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
+#include <config.h>
 /*
  * The following ifdef block is the standard way of creating macros
  * which make exporting from a DLL simpler. All files within this DLL

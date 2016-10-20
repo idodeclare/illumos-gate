@@ -130,9 +130,8 @@
 
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
-#ifndef	_SASL_PROP_H
-#include <sasl/prop.h>
-#endif
+#include <config.h>
+#include <prop.h>
 #include <stddef.h>  /* For size_t */
 
 /* Keep in sync with win32/common.mak */
@@ -460,8 +459,10 @@ typedef int sasl_getpath_t(void *context,
 
 #define	SASL_CB_GETPATH	    3
 
+#ifdef _SUN_SDK_
 /* Callback to get the location of the sasl config  */
 #define	SASL_CB_GETCONF	    0x5001
+#endif
 
 /*
  * verify file callback -- this allows applications to check if they

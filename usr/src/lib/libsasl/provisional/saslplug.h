@@ -8,9 +8,13 @@
  * $Id: saslplug.h,7c78c9e 2011-09-01 14:12:18 +0000 cyrus-sasl $
  */
 
+
 #ifndef	_SASL_SASLPLUG_H
 #define	_SASL_SASLPLUG_H
 
+#include <config.h>
+
+#ifdef _SUN_SDK_
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #ifndef	_SASL_SASL_H
@@ -20,11 +24,26 @@
 #ifndef _MD5_H
 #include <md5.h>
 #endif /* _MD5_H */
+#else
+#ifndef MD5GLOBAL_H
+#include "md5global.h"
+#endif
+#ifndef MD5_H
+#include "md5.h"
+#endif
+#ifndef HMAC_MD5_H
+#include "hmac-md5.h"
+#endif
+#ifndef PROP_H
+#include "prop.h"
+#endif
+#endif /* _SUN_SDK_ */
 
 #ifdef	__cplusplus
 extern "C" {
 #endif
 
+#ifdef _SUN_SDK_
 /*
  * need to declare _sasl_global_context_s here as incomplete type because
  * it's only defined later in saslint.h (and aliased as
@@ -45,6 +64,7 @@ typedef struct HMAC_MD5_STATE_s {
     uint32_t istate[4];
     uint32_t ostate[4];
 } HMAC_MD5_STATE;
+#endif /* _SUN_SDK_ */
 
 /*
  * callback to lookup a sasl_callback_t for a connection
@@ -523,9 +543,13 @@ typedef void sasl_client_info_callback_t (client_sasl_mechanism_t *m,
     void *rock);
 
 /* Dump information about available client plugins */
+#ifdef _SUN_SDK_
 LIBSASL_API int sasl_client_plugin_info(
 	struct _sasl_global_context_s *gctx,
 	const char *mech_list,
+#else
+LIBSASL_API int sasl_client_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_client_info_callback_t *info_cb,
 	void *info_cb_rock);
 
@@ -533,10 +557,10 @@ LIBSASL_API int sasl_client_plugin_info(
 /*
  * Server Functions
  */
-#if 0
+#ifndef _SUN_SDK_
 /* log message formatting routine */
 typedef void sasl_logmsg_p(sasl_conn_t *conn, const char *fmt, ...);
-#endif /* 0 */
+#endif /* _SUN_SDK_ */
 
 /*
  * input parameters to server SASL plugin
@@ -657,7 +681,7 @@ typedef struct sasl_server_params {
     int param_version;
 } sasl_server_params_t;
 
-#if 0
+#ifndef _SUN_SDK_
 /*
  * logging levels--(more levels may be added later, if necessary):
  */
@@ -670,7 +694,7 @@ typedef struct sasl_server_params {
 #define	SASL_LOG_TRACE 6	/* traces of internal protocols */
 #define	SASL_LOG_PASS  7	/* traces of internal protocols, ... */
 		/* ... including passwords */
-#endif /* 0 */
+#endif /* _SUN_SDK_ */
 
 /*
  * additional flags for setpass() function below:
@@ -891,9 +915,13 @@ typedef void sasl_server_info_callback_t (server_sasl_mechanism_t *m,
  * Dump information about available server plugins--(separate functions are
  * used for canon and auxprop plugins)
  */
+#ifdef _SUN_SDK_
 LIBSASL_API int sasl_server_plugin_info(
 	struct _sasl_global_context_s *gctx,
 	const char *mech_list,
+#else
+LIBSASL_API int sasl_server_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	sasl_server_info_callback_t *info_cb,
 	void *info_cb_rock);
 
@@ -1055,9 +1083,13 @@ typedef void auxprop_info_callback_t (sasl_auxprop_plug_t *m,
  * Dump information about available auxprop plugins--(separate functions are
  * used for canon and server authentication plugins)
  */
+#ifdef _SUN_SDK_
 LIBSASL_API int auxprop_plugin_info(
 	const sasl_conn_t *conn,
 	const char *mech_list,
+#else
+LIBSASL_API int auxprop_plugin_info (const char *mech_list,
+#endif /* _SUN_SDK_ */
 	auxprop_info_callback_t *info_cb,
 	void *info_cb_rock);
 
