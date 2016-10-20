@@ -71,7 +71,7 @@ static int nconfiglist = 0;
 #define CONFIGLISTGROWSIZE 100
 
 #ifdef _SUN_SDK_
-int sasl_config_init(sasl_conn_t *conn, const char *filename)
+int sasl_config_init(_sasl_global_context_t *gctx, const char *filename)
 #else
 int sasl_config_init(const char *filename)
 #endif /* _SUN_SDK_ */
@@ -86,10 +86,6 @@ int sasl_config_init(const char *filename)
 #ifdef _SUN_SDK_
     int invalid_line = 0;
 
-    if (conn == NULL) {
-        return SASL_BADPARAM;
-    }
-    _sasl_global_context_t *gctx = conn->gctx;
     gctx->nconfiglist=0;
 #else
     nconfiglist=0;
@@ -288,13 +284,9 @@ const char *sasl_config_getstring(const char *key,const char *def)
 #endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
-void sasl_config_done(sasl_conn_t *conn)
+void sasl_config_done(_sasl_global_context_t *gctx)
 {
 	struct configlist *gconfiglist;
-    if (conn == NULL) {
-        return;
-    }
-    _sasl_global_context_t *gctx = conn->gctx;
 #else
 void sasl_config_done(void)
 {

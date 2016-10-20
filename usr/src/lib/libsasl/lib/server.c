@@ -815,14 +815,16 @@ static int server_done(void) {
   }
   gctx->splug_path_info = NULL;
   UNLOCK_MUTEX(&server_active_mutex);
+
+  sasl_config_done(gctx);
 #else
   _sasl_auxprop_free();
 
   global_callbacks.callbacks = NULL;
   global_callbacks.appname = NULL;
-#endif /* _SUN_SDK_ */
 
   sasl_config_done();
+#endif /* _SUN_SDK_ */
 
   return SASL_OK;
 }

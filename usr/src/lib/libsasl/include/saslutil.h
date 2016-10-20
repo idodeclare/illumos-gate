@@ -19,6 +19,16 @@
 #include <sasl/sasl.h>
 #endif
 
+#ifdef _SUN_SDK_
+/*
+ * need to declare _sasl_global_context_s* here as incomplete type because
+ * it's only defined later in saslint.h (and aliased as
+ * _sasl_global_context_t)
+ */
+struct _sasl_global_context_s *gctx;
+
+#endif /* _SUN_SDK_ */
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -105,14 +115,14 @@ LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 LIBSASL_API char *sasl_strlower (char *val);
 
 #ifdef _SUN_SDK_
-LIBSASL_API int sasl_config_init(sasl_conn_t *conn,
+LIBSASL_API int sasl_config_init(struct _sasl_global_context_s *gctx,
   const char *filename);
 #else
 LIBSASL_API int sasl_config_init(const char *filename);
 #endif /* _SUN_SDK_ */
 
 #ifdef _SUN_SDK_
-LIBSASL_API void sasl_config_done(sasl_conn_t *conn);
+LIBSASL_API void sasl_config_done(struct _sasl_global_context_s *gctx);
 #else
 LIBSASL_API void sasl_config_done(void);
 #endif /* _SUN_SDK_ */
