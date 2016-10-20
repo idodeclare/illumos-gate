@@ -56,7 +56,9 @@
 #include <gssapi/gssapi.h>
 #endif
 
+#ifndef _SUN_SDK_
 #include <gssapi/gssapi_krb5.h>
+#endif /* !_SUN_SDK_ */
 
 #ifdef WIN32
 #  include <winsock2.h>
@@ -99,7 +101,9 @@ static const char plugin_id[] = "$Id: gssapi.c,f607d99 2016-01-30 10:00:02 -0500
 
 static const char * GSSAPI_BLANK_STRING = "";
 
+#ifndef _SUN_SDK_
 static gss_OID_desc gss_spnego_oid = { 6, (void *) "\x2b\x06\x01\x05\x05\x02" };
+#endif /* !_SUN_SDK_ */
 
 #if !defined(HAVE_GSS_C_NT_HOSTBASED_SERVICE) && !defined(GSS_C_NT_HOSTBASED_SERVICE)
 extern gss_OID gss_nt_service_name;
@@ -1521,8 +1525,8 @@ gssapi_server_mech_ssfreq(context_t *text,
 	    /* This code is actually correct */
 	    oparams->maxoutbuf = max_input;
 	}    
-    }
 #endif /* _SUN_SDK_ */
+    }
 	
     GSS_LOCK_MUTEX_CTX(params->utils, text);
     gss_release_buffer(&min_stat, output_token);
