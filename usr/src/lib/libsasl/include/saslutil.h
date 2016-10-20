@@ -93,10 +93,10 @@ LIBSASL_API void sasl_churn(sasl_rand_t *rpool, const char *data,
 LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 
 /* Lowercase string in place */
-LIBSASL_API char *sasl_strlower (char *val);
+LIBSASL_API char *sasl_strlower(char *val);
 
 LIBSASL_API int sasl_config_init(struct _sasl_global_context_s *gctx,
-  const char *filename);
+	const char *filename);
 
 LIBSASL_API void sasl_config_done(struct _sasl_global_context_s *gctx);
 

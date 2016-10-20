@@ -138,11 +138,11 @@
 /* Keep in sync with win32/common.mak */
 #define	SASL_VERSION_MAJOR 2
 #define	SASL_VERSION_MINOR 1
-#define SASL_VERSION_STEP 26
+#define	SASL_VERSION_STEP 26
 
 /* A convenience macro: same as was defined in the OpenLDAP LDAPDB */
-#define SASL_VERSION_FULL ((SASL_VERSION_MAJOR << 16) |\
-      (SASL_VERSION_MINOR << 8) | SASL_VERSION_STEP)
+#define	SASL_VERSION_FULL ((SASL_VERSION_MAJOR << 16) |\
+	(SASL_VERSION_MINOR << 8) | SASL_VERSION_STEP)
 
 /*
  * Basic API
@@ -186,13 +186,13 @@
 #define	SASL_NOCHANGE	-22  /* requested change was not needed */
 #define	SASL_WEAKPASS	-27  /* passphrase is too weak for security policy */
 #define	SASL_NOUSERPASS	-28  /* user supplied passwords not permitted */
-#define SASL_NEED_OLD_PASSWD -29 /* sasl_setpass needs old password in order
-				    to perform password change */
-#define SASL_CONSTRAINT_VIOLAT	-30 /* a property can't be stored,
-				       because of some constrains/policy violation */
+#define	SASL_NEED_OLD_PASSWD -29 /* sasl_setpass needs old password in order */
+			/* to perform password change */
+#define	SASL_CONSTRAINT_VIOLAT	-30 /* a property can't be stored, */
+			/* because of some constrains/policy violation */
 
-#define SASL_BADBINDING -32  /* channel binding failure */
-#define SASL_CONFIGERR  -100 /* error when parsing configuration file */
+#define	SASL_BADBINDING -32  /* channel binding failure */
+#define	SASL_CONFIGERR  -100 /* error when parsing configuration file */
 
 /* max size of a sasl mechanism name */
 #define	SASL_MECHNAMEMAX 20
@@ -296,7 +296,8 @@ typedef unsigned sasl_ssf_t;
 /* usage flags provided to sasl_server_new and sasl_client_new: */
 #define	SASL_SUCCESS_DATA	0x0004 /* server supports data on success */
 #define	SASL_NEED_PROXY		0x0008 /* require a mech that allows proxying */
-#define SASL_NEED_HTTP       0x0010 /* require a mech that can do HTTP auth */
+#define	SASL_NEED_HTTP		0x0010 /* require a mech that can do ... */
+		/* ... HTTP auth */
 
 /*
  * Security Property Types
@@ -382,7 +383,8 @@ typedef struct sasl_callback {
 	 * Mechanisms must ignore callbacks with id's they don't recognize.
 	 */
     unsigned long id;
-    int (*proc)(void);   /* Callback function.  Types of arguments vary by 'id' */
+    int (*proc)(void);   /* Callback function. */
+			/* Types of arguments vary by 'id' */
     void *context;
 } sasl_callback_t;
 
@@ -489,7 +491,8 @@ typedef int sasl_verifyfile_t(void *context,
 			    const char *file, sasl_verify_type_t type);
 #define	SASL_CB_VERIFYFILE  4
 
-/* getconfpath callback -- this allows applications to specify the
+/*
+ * getconfpath callback -- this allows applications to specify the
  * colon-separated path to search for config files (by default,
  * taken from the SASL_CONF_PATH environment variable).
  * inputs:
@@ -504,9 +507,9 @@ typedef int sasl_verifyfile_t(void *context,
  *  SASL_FAIL   -- error
  */
 typedef int sasl_getconfpath_t(void *context,
-                               char **path);
+		char **path);
 
-#define SASL_CB_GETCONFPATH  5
+#define	SASL_CB_GETCONFPATH  5
 
 /* client/user interaction callbacks: */
 /*
@@ -680,16 +683,19 @@ typedef int sasl_server_userdb_setpass_t(sasl_conn_t *conn,
 /* One of the following two is required */
 #define	SASL_CU_AUTHID  0x01
 #define	SASL_CU_AUTHZID 0x02
-/* Combine the following with SASL_CU_AUTHID, if you don't want
-   to fail if auxprop returned SASL_NOUSER */
-#define SASL_CU_EXTERNALLY_VERIFIED 0x04
+/*
+ * Combine the following with SASL_CU_AUTHID, if you don't want
+ * to fail if auxprop returned SASL_NOUSER
+ */
+#define	SASL_CU_EXTERNALLY_VERIFIED 0x04
 
-#define SASL_CU_OVERRIDE	    0x08    /* mapped to SASL_AUXPROP_OVERRIDE */
+#define	SASL_CU_OVERRIDE	    0x08    /* mapped to ... */
+		/* ...SASL_AUXPROP_OVERRIDE */
 
 /* The following CU flags are passed "as is" down to auxprop lookup */
-#define SASL_CU_ASIS_MASK	    0xFFF0
+#define	SASL_CU_ASIS_MASK	    0xFFF0
 /* NOTE: Keep in sync with SASL_AUXPROP_<XXX> flags */
-#define SASL_CU_VERIFY_AGAINST_HASH 0x10
+#define	SASL_CU_VERIFY_AGAINST_HASH 0x10
 
 
 typedef int sasl_canon_user_t(sasl_conn_t *conn,
@@ -707,26 +713,29 @@ typedef int sasl_canon_user_t(sasl_conn_t *conn,
  */
 
 /* Types of paths to set (see sasl_set_path below). */
-#define SASL_PATH_TYPE_PLUGIN	0
-#define SASL_PATH_TYPE_CONFIG	1
+#define	SASL_PATH_TYPE_PLUGIN	0
+#define	SASL_PATH_TYPE_CONFIG	1
 
-/* a simpler way to set plugin path or configuration file path
+/*
+ * a simpler way to set plugin path or configuration file path
  * without the need to set sasl_getpath_t callback.
  *
  * This function can be called before sasl_server_init/sasl_client_init.
- */  
-LIBSASL_API int sasl_set_path (int path_type, char * path);
+ */
+LIBSASL_API int sasl_set_path(int path_type, char * path);
 
 /*
  * get sasl library version information
  * implementation is a vendor-defined string
  * version is a vender-defined representation of the version #.
  *
- * This function is being deprecated in favor of sasl_version_info. */
+ * This function is being deprecated in favor of sasl_version_info.
+ */
 LIBSASL_API void sasl_version(const char **implementation,
 			    int *version);
 
-/* Extended version of sasl_version().
+/*
+ * Extended version of sasl_version().
  *
  * This function is to be used
  *  for library version display and logging
@@ -736,7 +745,7 @@ LIBSASL_API void sasl_version(const char **implementation,
  *
  * All parameters are optional. If NULL is specified, the value is not returned.
  */
-LIBSASL_API void sasl_version_info (const char **implementation,
+LIBSASL_API void sasl_version_info(const char **implementation,
 				const char **version_string,
 				int *version_major,
 				int *version_minor,
@@ -752,17 +761,19 @@ LIBSASL_API void sasl_version_info (const char **implementation,
  */
 LIBSASL_API void sasl_done(void);
 
-/* dispose of all SASL plugins.  Connection
+/*
+ * dispose of all SASL plugins.  Connection
  * states have to be disposed of before calling this.
  * This function should be called instead of sasl_done(),
-   whenever possible.
+ * whenever possible.
  */
 LIBSASL_API int sasl_server_done(void);
 
-/* dispose of all SASL plugins.  Connection
+/*
+ * dispose of all SASL plugins.  Connection
  * states have to be disposed of before calling this.
  * This function should be called instead of sasl_done(),
-   whenever possible.
+ * whenever possible.
  */
 LIBSASL_API int sasl_client_done(void);
 
@@ -842,18 +853,21 @@ LIBSASL_API int sasl_getprop(sasl_conn_t *conn, int propnum,
 #define	SASL_IPLOCALPORT 8	/* iplocalport string passed to server_new */
 #define	SASL_IPREMOTEPORT 9	/* ipremoteport string passed to server_new */
 
-/* This returns a string which is either empty or has an error message
- * from sasl_seterror (e.g., from a plug-in or callback).  It differs
+/*
+ * This returns a string which is either empty or has an error message
+ * from sasl_seterror--(e.g., from a plug-in or callback).  It differs
  * from the result of sasl_errdetail() which also takes into account the
  * last return status code.
  */
-#define SASL_PLUGERR     10
+#define	SASL_PLUGERR	10
 
-/* a handle to any delegated credentials or NULL if none is present 
+/*
+ * a handle to any delegated credentials or NULL if none is present
  * is returned by the mechanism. The user will probably need to know
  * which mechanism was used to actually known how to make use of them
- * currently only implemented for the gssapi mechanism */
-#define SASL_DELEGATEDCREDS 11
+ * currently only implemented for the gssapi mechanism
+ */
+#define	SASL_DELEGATEDCREDS 11
 
 #define	SASL_SERVICE	12	/* service passed to sasl_*_new */
 #define	SASL_SERVERFQDN	13	/* serverFQDN passed to sasl_*_new */
@@ -861,23 +875,28 @@ LIBSASL_API int sasl_getprop(sasl_conn_t *conn, int propnum,
 				/* for failed authentication tracking */
 #define	SASL_MECHNAME	15	/* active mechanism name, if any */
 #define	SASL_AUTHUSER	16	/* authentication/admin user */
-#define SASL_APPNAME	  17	/* application name (used for logging/
-				   configuration), same as appname parameter
-				   to sasl_server_init */
+#define	SASL_APPNAME	  17	/* application name (used for */
+			/* logging/configuration), same as appname parameter */
+			/* to sasl_server_init */
 
-/* GSS-API credential handle for sasl_client_step() or sasl_server_step().
- * The application is responsible for releasing this credential handle. */
+/*
+ * GSS-API credential handle for sasl_client_step() or sasl_server_step().
+ * The application is responsible for releasing this credential handle.
+ */
 #define	SASL_GSS_CREDS	  18
 
-/* GSS name (gss_name_t) of the peer, as output by gss_inquire_context()
+/*
+ * GSS name (gss_name_t) of the peer, as output by gss_inquire_context()
  * or gss_accept_sec_context().
  * On server end this is similar to SASL_USERNAME, but the gss_name_t
  * structure can contain additional attributes associated with the peer.
  */
 #define	SASL_GSS_PEER_NAME	19
 
-/* Local GSS name (gss_name_t) as output by gss_inquire_context(). This
- * is particularly useful for servers that respond to multiple names. */
+/*
+ * Local GSS name (gss_name_t) as output by gss_inquire_context(). This
+ * is particularly useful for servers that respond to multiple names.
+ */
 #define	SASL_GSS_LOCAL_NAME	20
 
 /* Channel binding information. Memory is managed by the caller. */
@@ -888,7 +907,7 @@ typedef struct sasl_channel_binding {
     const unsigned char *data;
 } sasl_channel_binding_t;
 
-#define SASL_CHANNEL_BINDING    21
+#define	SASL_CHANNEL_BINDING    21
 
 /* HTTP Request (RFC 2616) - ONLY used for HTTP Digest Auth (RFC 2617) */
 typedef struct sasl_http_request {
@@ -899,7 +918,7 @@ typedef struct sasl_http_request {
     unsigned non_persist;		/* Is it a non-persistent connection? */
 } sasl_http_request_t;
 
-#define SASL_HTTP_REQUEST	22
+#define	SASL_HTTP_REQUEST	22
 
 /*
  * set property in SASL connection state
@@ -1269,9 +1288,10 @@ LIBSASL_API int sasl_setpass(sasl_conn_t *conn,
 			    unsigned flags);
 #define	SASL_SET_CREATE  0x01   /* create a new entry for user */
 #define	SASL_SET_DISABLE 0x02	/* disable user account */
-#define SASL_SET_NOPLAIN 0x04	/* do not store secret in plain text */
-#define SASL_SET_CURMECH_ONLY 0x08	/* set the mechanism specific password only.
-					   fail if no current mechanism */
+#define	SASL_SET_NOPLAIN 0x04	/* do not store secret in plain text */
+#define	SASL_SET_CURMECH_ONLY 0x08	/* set the mechanism ... */
+				/* specific password only. */
+				/* fail if no current mechanism */
 
 /*
  * Auxiliary Property Support -- added by cjn 1999-09-29
@@ -1279,11 +1299,12 @@ LIBSASL_API int sasl_setpass(sasl_conn_t *conn,
 
 #define	SASL_AUX_END	NULL	/* last auxiliary property */
 
-#define SASL_AUX_ALL "*" /* A special flag to signal user deletion */
+#define	SASL_AUX_ALL "*" /* A special flag to signal user deletion */
 
 /* traditional Posix items (should be implemented on Posix systems) */
-#define SASL_AUX_PASSWORD_PROP "userPassword" /* User Password */
-#define SASL_AUX_PASSWORD "*" SASL_AUX_PASSWORD_PROP /* User Password (of authid) */
+#define	SASL_AUX_PASSWORD_PROP "userPassword" /* User Password */
+#define	SASL_AUX_PASSWORD "*" SASL_AUX_PASSWORD_PROP /* User ... */
+				/* ... Password (of authid) */
 #define	SASL_AUX_UIDNUM   "uidNumber"	/* UID number for the user */
 #define	SASL_AUX_GIDNUM   "gidNumber"	/* GID for the user */
 #define	SASL_AUX_FULLNAME "gecos"	/* full name of the user, unix-style */
@@ -1330,24 +1351,25 @@ LIBSASL_API int sasl_auxprop_request(sasl_conn_t *conn,
  */
 LIBSASL_API struct propctx *sasl_auxprop_getctx(sasl_conn_t *conn);
 
-/* Store the set of auxiliary properties for the given user.
+/*
+ * Store the set of auxiliary properties for the given user.
  * Use functions in prop.h to set the content.
  *
- *  conn         connection context
- *  ctx          property context from prop_new()/prop_request()/prop_set()
- *  user         NUL terminated user
+ *  conn	connection context
+ *  ctx		property context from prop_new()/prop_request()/prop_set()
+ *  user	NUL terminated user
  *
  * Call with NULL 'ctx' to see if the backend allows storing properties.
  *
  * errors
- *  SASL_OK       -- success
- *  SASL_NOMECH   -- can not store some/all properties
- *  SASL_BADPARAM -- bad conn/ctx/user parameter
- *  SASL_NOMEM    -- out of memory
- *  SASL_FAIL     -- failed to store
+ *  SASL_OK			-- success
+ *  SASL_NOMECH		-- can not store some/all properties
+ *  SASL_BADPARAM	-- bad conn/ctx/user parameter
+ *  SASL_NOMEM		-- out of memory
+ *  SASL_FAIL		-- failed to store
  */
 LIBSASL_API int sasl_auxprop_store(sasl_conn_t *conn,
-				   struct propctx *ctx, const char *user);
+    struct propctx *ctx, const char *user);
 
 /*
  * security layer API
