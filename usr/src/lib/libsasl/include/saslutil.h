@@ -104,9 +104,18 @@ LIBSASL_API void sasl_erasebuffer(char *pass, unsigned len);
 /* Lowercase string in place */
 LIBSASL_API char *sasl_strlower (char *val);
 
+#ifdef _SUN_SDK_
+LIBSASL_API int sasl_config_init(sasl_conn_t *conn,
+  const char *filename);
+#else
 LIBSASL_API int sasl_config_init(const char *filename);
+#endif /* _SUN_SDK_ */
 
+#ifdef _SUN_SDK_
+LIBSASL_API void sasl_config_done(sasl_conn_t *conn);
+#else
 LIBSASL_API void sasl_config_done(void);
+#endif /* _SUN_SDK_ */
 
 #ifndef _SUN_SDK_
 #ifdef WIN32

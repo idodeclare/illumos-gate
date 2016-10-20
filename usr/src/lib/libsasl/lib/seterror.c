@@ -174,8 +174,8 @@ void sasl_seterror(sasl_conn_t *conn,
     utils = NULL;
 
   if (utils != NULL) {
-    ret = utils->getcallback(conn, SASL_CB_LANGUAGE, &simple_cb,
-	&simple_context);
+    ret = utils->getcallback(conn, SASL_CB_LANGUAGE,
+      (sasl_callback_ft *)&simple_cb, &simple_context);
 
     if (ret == SASL_OK && simple_cb)
 	(void) simple_cb(simple_context, SASL_CB_LANGUAGE, &lang, NULL);

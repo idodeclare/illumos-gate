@@ -215,7 +215,7 @@ int sasl_decode64(const char *in,
 
     /* check parameters */
 #ifdef _SUN_SDK_
-    if (ou == NULL || in == NULL) return SASL_FAIL;
+    if (out == NULL || in == NULL) return SASL_FAIL;
 #else
     if (out == NULL) return SASL_FAIL;
 #endif /* _SUN_SDK_ */

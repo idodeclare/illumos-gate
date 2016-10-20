@@ -2384,7 +2384,7 @@ __sasl_log(const _sasl_global_context_t *gctx,
   if (callbacks)
     while (callbacks->id != SASL_CB_LIST_END) {
       if (callbacks->id == SASL_CB_LOG) {
-	log_cb = callbacks->proc;
+	log_cb = (sasl_log_t *)callbacks->proc;
 	log_ctx = callbacks->context;
 	break;
       }
@@ -2392,7 +2392,8 @@ __sasl_log(const _sasl_global_context_t *gctx,
     }
 
   if (log_cb == NULL) {
-    result = _sasl_getcallback(NULL, SASL_CB_LOG, &log_cb, &log_ctx);
+    result = _sasl_getcallback(NULL, SASL_CB_LOG,
+      (sasl_callback_ft *)&log_cb, &log_ctx);
     if (result != SASL_OK || ! log_cb)
 	return;
   }
@@ -2801,7 +2802,7 @@ _sasl_find_getconf_callback(const sasl_callback_t *callbacks)
 {
   static const sasl_callback_t default_getconf_cb = {
     SASL_CB_GETCONF,
-    &_sasl_getconf,
+    (int (*)(void))&_sasl_getconf,
     NULL
   };
 

@@ -71,7 +71,7 @@ static int nconfiglist = 0;
 #define CONFIGLISTGROWSIZE 100
 
 #ifdef _SUN_SDK_
-int sasl_config_init(_sasl_global_context_t *gctx, const char *filename)
+int sasl_config_init(sasl_conn_t *conn, const char *filename)
 #else
 int sasl_config_init(const char *filename)
 #endif /* _SUN_SDK_ */
@@ -86,6 +86,10 @@ int sasl_config_init(const char *filename)
 #ifdef _SUN_SDK_
     int invalid_line = 0;
 
+    if (conn == NULL) {
+        return SASL_BADPARAM;
+    }
+    _sasl_global_context_t *gctx = conn->gctx;
     gctx->nconfiglist=0;
 #else
     nconfiglist=0;
@@ -283,10 +287,31 @@ const char *sasl_config_getstring(const char *key,const char *def)
 }
 #endif /* _SUN_SDK_ */
 
+#ifdef _SUN_SDK_
+void sasl_config_done(sasl_conn_t *conn)
+{
+	struct configlist *gconfiglist;
+    if (conn == NULL) {
+        return;
+    }
+    _sasl_global_context_t *gctx = conn->gctx;
+#else
 void sasl_config_done(void)
 {
+#endif /* _SUN_SDK_ */
     int opt;
 
+#ifdef _SUN_SDK_
+	gconfiglist = (struct configlist *)gctx->configlist;
+    for (opt = 0; opt < gctx->nconfiglist; opt++) {
+	if (gconfiglist[opt].key) sasl_FREE(gconfiglist[opt].key);
+	if (gconfiglist[opt].value) sasl_FREE(gconfiglist[opt].value);
+    }
+
+    sasl_FREE(gctx->configlist);
+    gctx->configlist = NULL;
+    gctx->nconfiglist = 0;
+#else
     for (opt = 0; opt < nconfiglist; opt++) {
 	if (configlist[opt].key) sasl_FREE(configlist[opt].key);
 	if (configlist[opt].value) sasl_FREE(configlist[opt].value);
@@ -295,4 +320,5 @@ void sasl_config_done(void)
     sasl_FREE(configlist);
     configlist = NULL;
     nconfiglist = 0;
+#endif /* _SUN_SDK_ */
 }
