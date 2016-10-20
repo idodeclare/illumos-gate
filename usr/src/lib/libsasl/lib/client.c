@@ -112,9 +112,9 @@ static int init_mechlist()
 
 int sasl_client_done(void)
 {
+#ifndef _SUN_SDK_
     int result = SASL_CONTINUE;
 
-#ifndef _SUN_SDK_
     if (_sasl_server_cleanup_hook == NULL && _sasl_client_cleanup_hook == NULL) {
 	return SASL_NOTINIT;
     }
@@ -133,7 +133,7 @@ int sasl_client_done(void)
     if (_sasl_server_cleanup_hook || _sasl_client_cleanup_hook) {
 	return result;
     }
-#endif /* _SUN_SDK_ */
+#endif /* !_SUN_SDK_ */
     
     sasl_common_done();
 
@@ -150,6 +150,7 @@ static int client_done(void) {
     cmechanism_t *cm;
     cmechanism_t *cprevm;
 
+#ifndef _SUN_SDK_
     if (!_sasl_client_active) {
 	return SASL_NOTINIT;
     } else {
@@ -160,6 +161,7 @@ static int client_done(void) {
 	/* Don't de-init yet! Our refcount is nonzero. */
 	return SASL_CONTINUE;
     }
+#endif /* !_SUN_SDK_ */
 
     cm = cmechlist->mech_list; /* m point to beginning of the list */
     while (cm != NULL) {
@@ -167,12 +169,8 @@ static int client_done(void) {
 	cm = cm->next;
 
 	if (cprevm->m.plug->mech_free) {
-#ifdef _SUN_SDK_
-	    cprevm->plug->mech_free(cprevm->glob_context, cmechlist->utils);
-#else
 	    cprevm->m.plug->mech_free(cprevm->m.plug->glob_context,
 				      cmechlist->utils);
-#endif /* _SUN_SDK_ */
 	}
 
 	sasl_FREE(cprevm->m.plugname);
@@ -269,7 +267,7 @@ int _sasl_client_add_plugin(void *ctx,
   /* Check to see if this plugin has already been registered */
   m = cmechlist->mech_list;
   for (i = 0; i < cmechlist->mech_length; i++) {
-    if (strcmp(plugname, m->plugname) == 0) {
+    if (strcmp(plugname, m->m.plugname) == 0) {
 	return SASL_OK;
     }
     m = m->next;
@@ -397,11 +395,7 @@ client_idle(sasl_conn_t *conn)
        m;
        m = m->next)
     if (m->m.plug->idle
-#ifdef _SUN_SDK_
-	&&  m->plug->idle(m->glob_context,
-#else
 	&&  m->m.plug->idle(m->m.plug->glob_context,
-#endif /* _SUN_SDK_ */
 			  conn,
 			  conn ? ((sasl_client_conn_t *)conn)->cparams : NULL))
       return 1;
