@@ -115,8 +115,8 @@ GIDSET_T	InitialGidSet[NGROUPS_MAX];
 #if SASL
 static sasl_callback_t srvcallbacks[] =
 {
-	{	SASL_CB_VERIFYFILE,	&safesaslfile,	NULL	},
-	{	SASL_CB_PROXY_POLICY,	&proxy_policy,	NULL	},
+	{	SASL_CB_VERIFYFILE,	(int (*)(void))&safesaslfile,	NULL	},
+	{	SASL_CB_PROXY_POLICY,	(int (*)(void))&proxy_policy,	NULL	},
 	{	SASL_CB_LIST_END,	NULL,		NULL	}
 };
 #endif /* SASL */

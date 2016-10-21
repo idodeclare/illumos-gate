@@ -24,9 +24,9 @@ SM_RCSID("@(#)$Id: sasl.c,v 8.22 2006/08/15 23:24:57 ca Exp $")
 **  using unsigned long: for portability, it should be size_t.
 */
 
-void *sm_sasl_malloc __P((unsigned long));
-static void *sm_sasl_calloc __P((unsigned long, unsigned long));
-static void *sm_sasl_realloc __P((void *, unsigned long));
+void *sm_sasl_malloc __P((size_t));
+static void *sm_sasl_calloc __P((size_t, size_t));
+static void *sm_sasl_realloc __P((void *, size_t));
 void sm_sasl_free __P((void *));
 
 /*
@@ -50,9 +50,9 @@ void sm_sasl_free __P((void *));
 
 void *
 sm_sasl_malloc(size)
-	unsigned long size;
+	size_t size;
 {
-	return sm_malloc((size_t) size);
+	return sm_malloc(size);
 }
 
 /*
@@ -71,13 +71,13 @@ sm_sasl_malloc(size)
 
 static void *
 sm_sasl_calloc(nelem, elemsize)
-	unsigned long nelem;
-	unsigned long elemsize;
+	size_t nelem;
+	size_t elemsize;
 {
 	size_t size;
 	void *p;
 
-	size = (size_t) nelem * (size_t) elemsize;
+	size = nelem * elemsize;
 	p = sm_malloc(size);
 	if (p == NULL)
 		return NULL;
@@ -99,9 +99,9 @@ sm_sasl_calloc(nelem, elemsize)
 static void *
 sm_sasl_realloc(o, size)
 	void *o;
-	unsigned long size;
+	size_t size;
 {
-	return sm_realloc(o, (size_t) size);
+	return sm_realloc(o, size);
 }
 
 /*

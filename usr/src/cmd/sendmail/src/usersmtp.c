@@ -516,17 +516,17 @@ static int attemptauth	__P((MAILER *, MCI *, ENVELOPE *, SASL_AI_T *));
 
 static sasl_callback_t callbacks[] =
 {
-	{	SASL_CB_GETREALM,	&saslgetrealm,	NULL	},
+	{	SASL_CB_GETREALM,	(int (*)(void))&saslgetrealm,	NULL },
 #define CB_GETREALM_IDX	0
-	{	SASL_CB_PASS,		&getsecret,	NULL	},
+	{	SASL_CB_PASS,		(int (*)(void))&getsecret,	NULL },
 #define CB_PASS_IDX	1
-	{	SASL_CB_USER,		&getsimple,	NULL	},
+	{	SASL_CB_USER,		(int (*)(void))&getsimple,	NULL },
 #define CB_USER_IDX	2
-	{	SASL_CB_AUTHNAME,	&getsimple,	NULL	},
+	{	SASL_CB_AUTHNAME,	(int (*)(void))&getsimple,	NULL },
 #define CB_AUTHNAME_IDX	3
-	{	SASL_CB_VERIFYFILE,	&safesaslfile,	NULL	},
+	{	SASL_CB_VERIFYFILE,	(int (*)(void))&safesaslfile,	NULL },
 #define CB_SAFESASL_IDX	4
-	{	SASL_CB_LIST_END,	NULL,		NULL	}
+	{	SASL_CB_LIST_END,	NULL,		NULL }
 };
 
 /*
