@@ -20,6 +20,7 @@
  */
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
  */
 
 #include <sys/types.h>
@@ -462,6 +463,9 @@ dhcp_extending(dhcp_smach_t *dsmp)
 		/* Add required Option Request option */
 		(void) add_pkt_prl(dpkt, dsmp);
 
+		/* Add FQDN if configured */
+		(void) dhcp_add_fqdn_opt(dpkt, dsmp);
+
 		return (send_pkt_v6(dsmp, dpkt, dsmp->dsm_server,
 		    stop_extending, irt, mrt));
 	} else {
@@ -490,7 +494,8 @@ dhcp_extending(dhcp_smach_t *dsmp)
 		 * dhcp_selecting() if the REQUEST_HOSTNAME option was set and
 		 * a host name was found.
 		 */
-		if (dsmp->dsm_reqhost != NULL) {
+		if (dhcp_add_fqdn_opt(dpkt, dsmp) != 0 &&
+		    dsmp->dsm_reqhost != NULL) {
 			(void) add_pkt_opt(dpkt, CD_HOSTNAME, dsmp->dsm_reqhost,
 			    strlen(dsmp->dsm_reqhost));
 		}
