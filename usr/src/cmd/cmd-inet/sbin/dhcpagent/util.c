@@ -20,11 +20,13 @@
  */
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
  */
 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 #include <stdlib.h>
 #include <netinet/in.h>		/* struct in_addr */
 #include <netinet/dhcp.h>
@@ -35,16 +37,23 @@
 #include <string.h>
 #include <dhcpmsg.h>
 #include <ctype.h>
+#include <arpa/inet.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <dhcp_hostconf.h>
+#include <limits.h>
+#include <strings.h>
+#include <libipadm.h>
 
 #include "states.h"
 #include "agent.h"
 #include "interface.h"
 #include "util.h"
 #include "packet.h"
+#include "defaults.h"
 
 /*
  * this file contains utility functions that have no real better home
@@ -66,6 +75,12 @@
  *
  *  o  true miscellany -- anything else
  */
+
+#define	ETCNODENAME		"/etc/nodename"
+#define	ETCDEFAULTDOMAIN	"/etc/defaultdomain"
+
+static	boolean_t	is_fqdn(const char *);
+static int			dhcp_assemble_fqdn(dhcp_smach_t *dsmp);
 
 /*
  * pkt_type_to_string(): stringifies a packet type
@@ -466,35 +481,6 @@ bind_sock_v6(int fd, in_port_t port_hbo, const in6_addr_t *addr_nbo)
 }
 
 /*
- * valid_hostname(): check whether a string is a valid hostname
- *
- *   input: const char *: the string to verify as a hostname
- *  output: boolean_t: B_TRUE if the string is a valid hostname
- *
- * Note that we accept both host names beginning with a digit and
- * those containing hyphens.  Neither is strictly legal according
- * to the RFCs, but both are in common practice, so we endeavour
- * to not break what customers are using.
- */
-
-static boolean_t
-valid_hostname(const char *hostname)
-{
-	unsigned int i;
-
-	for (i = 0; hostname[i] != '\0'; i++) {
-
-		if (isalpha(hostname[i]) || isdigit(hostname[i]) ||
-		    (((hostname[i] == '-') || (hostname[i] == '.')) && (i > 0)))
-			continue;
-
-		return (B_FALSE);
-	}
-
-	return (i > 0);
-}
-
-/*
  * iffile_to_hostname(): return the hostname contained on a line of the form
  *
  * [ ^I]*inet[ ^I]+hostname[\n]*\0
@@ -556,7 +542,7 @@ iffile_to_hostname(const char *path)
 					    " host name too long");
 					return (NULL);
 				}
-				if (valid_hostname(p)) {
+				if (ipadm_is_valid_hostname(p)) {
 					return (p);
 				} else {
 					dhcpmsg(MSG_WARNING,
@@ -704,4 +690,416 @@ write_lease_to_hostconf(dhcp_smach_t *dsmp)
 		dhcpmsg(MSG_ERR, "cannot write %s (reboot will "
 		    "not use cached configuration)", hcfile);
 	}
+}
+
+/*
+ * Try to get a string from the first line of a file, up to but not
+ * including any space (0x20) or newline.
+ */
+
+static int
+dhcp_get_oneline(const char *filename, char *buf, size_t buflen)
+{
+	char	value[SYS_NMLN], *c;
+	int		fd, i;
+
+	if ((fd = open(filename, O_RDONLY)) <= 0) {
+		dhcpmsg(MSG_DEBUG, "dhcp_get_oneline: could not open %s",
+		    filename);
+		*buf = '\0';
+	} else {
+		if ((i = read(fd, value, SYS_NMLN - 1)) <= 0) {
+			dhcpmsg(MSG_WARNING, "dhcp_get_oneline: no line in %s",
+			    filename);
+			*buf = '\0';
+		} else {
+			value[i] = '\0';
+			if ((c = strchr(value, '\n')) != NULL)
+				*c = '\0';
+			if ((c = strchr(value, ' ')) != NULL)
+				*c = '\0';
+
+			if (strlcpy(buf, value, buflen) >= buflen) {
+				dhcpmsg(MSG_WARNING, "dhcp_get_oneline: too long value, %s",
+				    value);
+				*buf = '\0';
+			}
+		}
+		(void) close(fd);
+	}
+
+	return (*buf != '\0' ? 0 : -1);
+}
+
+/*
+ * Try to get the hostname from the /etc/nodename file. uname(2) cannot
+ * be used, because that is initialized after DHCP has solicited, in order
+ * to allow for the possibility that utsname.nodename can be set from
+ * DHCP Hostname. Here, though, we want to send a value specified
+ * advance of DHCP, so read /etc/nodename directly.
+ */
+
+static int
+dhcp_get_nodename(char *buf, size_t buflen)
+{
+	return dhcp_get_oneline(ETCNODENAME, buf, buflen);
+}
+
+/*
+ * Try to get the value from the /etc/defaultdomain file. libnsl's
+ * domainname() cannot be used, because that is initialized after DHCP has
+ * solicited. Here, though, we want to send a value specified in advance
+ * of DHCP, so read /etc/defaultdomain directly.
+ */
+
+static int
+dhcp_get_defaultdomain(char *buf, size_t buflen)
+{
+	return dhcp_get_oneline(ETCDEFAULTDOMAIN, buf, buflen);
+}
+
+/*
+ * dhcp_add_hostname_opt(): Set CD_HOSTNAME option if REQUEST_HOSTNAME is
+ *			 affirmative and if 1) dsm_msg_reqhost is available; or
+ *			 2) hostname is read from an extant /etc/hostname.<ifname>
+ *			 file; or 3) interface is primary and nodename(4) is defined.
+ *
+ *   input: dhcp_pkt_t *: pointer to DHCP message being constructed;
+ *	    dhcp_smach_t *: pointer to interface DHCP state machine;
+ */
+
+int
+dhcp_add_hostname_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
+{
+	const char	*reqhost;
+	char	nodename[MAXNAMELEN];
+
+	if (!df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6, DF_REQUEST_HOSTNAME))
+		return (0);
+
+	dhcpmsg(MSG_DEBUG, "dhcp_add_hostname_opt: DF_REQUEST_HOSTNAME");
+
+	if (dsmp->dsm_msg_reqhost != NULL
+	    && ipadm_is_valid_hostname(dsmp->dsm_msg_reqhost)) {
+		reqhost = dsmp->dsm_msg_reqhost;
+	} else {
+		char		hostfile[PATH_MAX + 1];
+
+		(void) snprintf(hostfile, sizeof (hostfile),
+		    "/etc/hostname.%s", dsmp->dsm_name);
+		reqhost = iffile_to_hostname(hostfile);
+	}
+
+	if (reqhost == NULL && (dsmp->dsm_dflags & DHCP_IF_PRIMARY) &&
+	    dhcp_get_nodename(nodename, sizeof (nodename)) == 0) {
+		reqhost = nodename;
+	}
+
+	if (reqhost != NULL) {
+		free(dsmp->dsm_reqhost);
+		if ((dsmp->dsm_reqhost = strdup(reqhost)) == NULL)
+			dhcpmsg(MSG_WARNING, "dhcp_add_hostname_opt: cannot allocate "
+			    "memory for host name option");
+	}
+
+	if (dsmp->dsm_reqhost != NULL) {
+		dhcpmsg(MSG_DEBUG, "dhcp_add_hostname_opt: host %s for %s",
+		    dsmp->dsm_reqhost, dsmp->dsm_name);
+		(void) add_pkt_opt(dpkt, CD_HOSTNAME, dsmp->dsm_reqhost,
+		    strlen(dsmp->dsm_reqhost));
+		return 1;
+	}
+	else {
+		dhcpmsg(MSG_DEBUG, "dhcp_add_hostname_opt: no hostname for %s",
+		    dsmp->dsm_name);
+	}
+
+	return (0);
+}
+
+/*
+ * dhcp_add_fqdn_opt(): Set CD_CLIENTFQDN option if dsm_reqfqdn is not NULL
+ *			 or if dhcp_assemble_fqdn() initializes it. If dsm_reqfqdn
+ *			 cannot be set, no option will be added.
+ *
+ *   input: dhcp_pkt_t *: pointer to DHCP message being constructed;
+ *	    dhcp_smach_t *: pointer to interface DHCP state machine;
+ *  output: 0 if a CLIENT_FQDN was added; non-zero if otherwise;
+ */
+
+int
+dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
+{
+	/*
+	 * RFC 4702 section 2:
+	 *
+	 * The format of the Client FQDN option is:
+	 *
+	 *  Code   Len    Flags  RCODE1 RCODE2   Domain Name
+	 * +------+------+------+------+------+------+--
+	 * |  81  |   n  |      |      |      |       ...
+	 * +------+------+------+------+------+------+--
+	 *
+	 * Code and Len are distinct, and the remainder is in a single buffer,
+	 * opt81, for Flags + (unused) RCODE1 and RCODE2 (all octets) and a
+	 * potentially maximum-length domain name.
+	 *
+	 * The format of the Flags field is:
+	 *
+	 *  0 1 2 3 4 5 6 7
+	 * +-+-+-+-+-+-+-+-+
+	 * |  MBZ  |N|E|O|S|
+	 * +-+-+-+-+-+-+-+-+
+	 *
+	 * where MBZ is ignored and NEOS are:
+	 *
+	 * S = 1 to request that "the server SHOULD perform the A RR (FQDN-to-
+	 * address) DNS updates;
+	 *
+	 * O = 0, for a server-only response bit;
+	 *
+	 * E = 1 to indicate the domain name is in "canonical wire format,
+	 * without compression (i.e., ns_name_pton2) ....  This encoding SHOULD
+	 * be used by clients ....";
+	 *
+	 * N = 0 to request that "the server SHALL perform DNS updates [of the
+	 * PTR RR]." (1 would request SHALL NOT update).
+	 *
+	 * The format of the DHCPv6 Client FQDN option is shown below:
+	 *
+	 *     0                   1                   2                   3
+	 *     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+	 *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	 *    |          OPTION_FQDN          |         option-len            |
+	 *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	 *    |   flags       |                                               |
+	 *    +-+-+-+-+-+-+-+-+                                               |
+	 *    .                                                               .
+	 *    .                          domain-name                          .
+	 *    .                                                               .
+	 *    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+	 *
+	 *      option-code      OPTION_CLIENT_FQDN (39)
+	 *
+	 *      option-len       1 + length of domain name
+	 *
+	 *      flags            flag bits used between client and server to
+	 *                       negotiate who performs which updates
+	 *
+	 *      domain-name      the partial or fully qualified domain name
+	 *                       (with length option-len - 1)
+	 *
+	 *    The DHCPv6 format of the Flags field is:
+	 *
+	 *         0 1 2 3 4 5 6 7
+	 *        +-+-+-+-+-+-+-+-+
+	 *        |  MBZ    |N|O|S|
+	 *        +-+-+-+-+-+-+-+-+
+	 */
+
+	const uint8_t	S_BITPOS = 7 - 7;
+	const uint8_t	E_BITPOS = 7 - 5;
+	const size_t	OPT_FQDN_METALEN = 3, OPT_V6_FQDN_METALEN = 1;
+	uint_t		fqdncode;
+	u_char		enc_fqdnbuf[MAXNAMELEN];
+	uint8_t		fqdnopt[MAXNAMELEN + OPT_FQDN_METALEN];
+	size_t		len, metalen;
+
+	if (dsmp->dsm_reqfqdn == NULL && dhcp_assemble_fqdn(dsmp) != 0)
+		return (-1);
+
+	/* encode the FQDN in canonical wire format */
+
+	if (ns_name_pton2(dsmp->dsm_reqfqdn, enc_fqdnbuf, sizeof (enc_fqdnbuf),
+	    &len) < 0) {
+		dhcpmsg(MSG_WARNING, "dhcp_add_fqdn_opt: error encoding domain"
+		    " name %s", dsmp->dsm_reqfqdn);
+		return (-1);
+	}
+
+	dhcpmsg(MSG_DEBUG, "dhcp_add_fqdn_opt: interface FQDN is %s"
+	    " for %s", dsmp->dsm_reqfqdn, dsmp->dsm_name);
+
+	bzero(fqdnopt, sizeof (fqdnopt));
+	if (dsmp->dsm_isv6) {
+		fqdncode = DHCPV6_OPT_CLIENT_FQDN;
+		metalen = OPT_V6_FQDN_METALEN;
+		*fqdnopt = (uint8_t)(1 << S_BITPOS);
+	} else {
+		fqdncode = CD_CLIENTFQDN;
+		metalen = OPT_FQDN_METALEN;
+		*fqdnopt = (uint8_t)((1 << S_BITPOS) | (1 << E_BITPOS));
+	}
+	(void) memcpy(fqdnopt + metalen, enc_fqdnbuf, len);
+	(void) add_pkt_opt(dpkt, fqdncode, fqdnopt, metalen + len);
+
+	return (0);
+}
+
+/*
+ * dhcp_assemble_fqdn(): Set dsm_reqfqdn if REQUEST_FQDN is set and
+ *			 either a host name was sent in the IPC message (e.g., from
+ *			 ipadm(1M) -h,--reqhost) or the interface is primary and a
+ *			 nodename(4) is defined. If the host name is not already fully
+ *			 qualified per is_fqdn(), then a value from
+ *			 dhcp_get_defaultdomain() or from resolv.conf(4)--if defined--
+ *			 is used to construct an FQDN.
+ *
+ *			 If no FQDN can be determined, dsm_reqfqdn will be NULL.
+ *
+ *   input: dhcp_smach_t *: pointer to interface DHCP state machine;
+ *  output: 0 if dsm_reqfqdn was assigned; non-zero if otherwise;
+ */
+
+static int
+dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
+{
+	char		fqdnbuf[MAXNAMELEN], nodename[MAXNAMELEN], *reqhost;
+	size_t		pos, len;
+
+	if (dsmp->dsm_reqfqdn != NULL) {
+		free(dsmp->dsm_reqfqdn);
+		dsmp->dsm_reqfqdn = NULL;
+	}
+
+	if (!df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6, DF_REQUEST_FQDN))
+		return (-1);
+
+	dhcpmsg(MSG_DEBUG, "dhcp_assemble_fqdn: DF_REQUEST_FQDN");
+
+	bzero(fqdnbuf, sizeof (fqdnbuf));
+
+	reqhost = dsmp->dsm_msg_reqhost;
+	if (ipadm_is_nil_hostname(reqhost) &&
+	    (dsmp->dsm_dflags & DHCP_IF_PRIMARY) &&
+	    dhcp_get_nodename(nodename, sizeof (nodename)) == 0) {
+		reqhost = nodename;
+	}
+
+	if (ipadm_is_nil_hostname(reqhost)) {
+		dhcpmsg(MSG_DEBUG,
+		    "dhcp_assemble_fqdn: no interface reqhost for %s",
+		    dsmp->dsm_name);
+		return (-1);
+	}
+
+	if ((pos = strlcpy(fqdnbuf, reqhost, sizeof (fqdnbuf))) >=
+	    sizeof (fqdnbuf)) {
+		dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: too long reqhost %s"
+		    " for %s", reqhost, dsmp->dsm_name);
+		return (-1);
+	}
+
+	if (!is_fqdn(reqhost)) {
+		char		dnamebuf[MAXHOSTNAMELEN];
+		size_t		needdots;
+		int			lasterrno;
+		char		*domainname = NULL;
+
+		/*
+		 * determine FQDN domain name, if possible
+		 */
+
+		if (dhcp_get_defaultdomain(dnamebuf, sizeof (dnamebuf)) == 0 &&
+		    !ipadm_is_nil_hostname(dnamebuf)) {
+			domainname = dnamebuf;
+		} else {
+			/*
+			 * fall back to resolv's "default domain (deprecated)"
+			 */
+
+			struct __res_state	res_state;
+			bzero(&res_state, sizeof (struct __res_state));
+
+			/* initialize resolver or warn */
+			if ((lasterrno = res_ninit(&res_state)) != 0) {
+				dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: error %d"
+				    " initializing resolver", lasterrno);
+			}
+			else {
+				if (*res_state.defdname != '\0') {
+					(void) strlcpy(dnamebuf, res_state.defdname,
+					    sizeof (dnamebuf));
+					domainname = dnamebuf;
+				}
+				res_ndestroy(&res_state);
+			}
+		}
+
+		if (ipadm_is_nil_hostname(domainname)) {
+			dhcpmsg(MSG_DEBUG, "dhcp_assemble_fqdn: no domain name for %s",
+			    dsmp->dsm_name);
+			return (-1);
+		}
+
+		/*
+		 * Finish constructing FQDN. Account for space needed to hold a
+		 * separator '.' and a terminating '.'.
+		 */
+		len = strlen(domainname);
+		needdots = 1 + (domainname[len - 1] != '.');
+
+		if (pos + len + needdots >= sizeof (fqdnbuf)) {
+			dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: too long FQDN %s.%s"
+			    " for %s", fqdnbuf, domainname, dsmp->dsm_name);
+			return (-1);
+		}
+
+		/* add separator and then domain name */
+		fqdnbuf[pos++] = '.';
+		(void) strlcpy(fqdnbuf + pos, domainname, sizeof (fqdnbuf) - pos);
+		pos += len;
+
+		/* ensure the final character is '.' */
+		if (needdots > 1)
+			fqdnbuf[pos++] = '.'; /* following is already zeroed */
+	}
+
+	if (!ipadm_is_valid_hostname(fqdnbuf)) {
+		dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: invalid FQDN %s for %s",
+		    fqdnbuf, dsmp->dsm_name);
+		return (-1);
+	}
+
+	free(dsmp->dsm_reqfqdn);
+	if ((dsmp->dsm_reqfqdn = strdup(fqdnbuf)) == NULL) {
+		dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: cannot allocate memory");
+		return (-1);
+	}
+	return (0);
+}
+
+/*
+ * is_fqdn() : Determine if the `hostname' can be considered as a Fully
+ *			Qualified Domain Name by being "rooted" (i.e., ending in '.')
+ *			or by containing at least three DNS labels (e.g.,
+ *			srv.example.com).
+ *
+ *   input: const char *: the hostname to inspect;
+ *  output: boolean_t: B_TRUE if `hostname' is not NULL satisfies the
+ *			criteria above; otherwise, B_FALSE;
+ */
+
+boolean_t
+is_fqdn(const char *hostname)
+{
+	const char *c;
+	size_t i;
+
+	if (hostname == NULL)
+		return (B_FALSE);
+
+	i = strlen(hostname);
+	if (i > 0 && hostname[i - 1] == '.')
+		return (B_TRUE);
+
+	c = hostname;
+	i = 0;
+	while ((c = strchr(c, '.')) != NULL) {
+		++i;
+		++c;
+	}
+
+	/* at least two separators is inferred to be fully-qualified */
+	return (i >= 2);
 }

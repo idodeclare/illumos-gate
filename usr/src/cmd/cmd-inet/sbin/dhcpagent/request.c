@@ -21,6 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
  *
  * REQUESTING state of the client state machine.
  */
@@ -78,6 +79,9 @@ send_v6_request(dhcp_smach_t *dsmp)
 
 	/* Add required Option Request option */
 	(void) add_pkt_prl(dpkt, dsmp);
+
+	/* Add FQDN if configured */
+	(void) dhcp_add_fqdn_opt(dpkt, dsmp);
 
 	(void) send_pkt_v6(dsmp, dpkt, dsmp->dsm_server, stop_requesting,
 	    DHCPV6_REQ_TIMEOUT, DHCPV6_REQ_MAX_RT);
@@ -313,7 +317,8 @@ dhcp_requesting(iu_tq_t *tqp, void *arg)
 		 * dhcp_selecting() if the DF_REQUEST_HOSTNAME option set and a
 		 * host name was found
 		 */
-		if (dsmp->dsm_reqhost != NULL) {
+		if (dhcp_add_fqdn_opt(dpkt, dsmp) != 0 &&
+		    dsmp->dsm_reqhost != NULL) {
 			(void) add_pkt_opt(dpkt, CD_HOSTNAME, dsmp->dsm_reqhost,
 			    strlen(dsmp->dsm_reqhost));
 		}
