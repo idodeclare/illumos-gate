@@ -19,8 +19,9 @@
 .\" "
 .\" "Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
 .\" "Copyright 2010, Richard Lowe
+.\" "Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 .\" "
-.TH ONU 1ONBLD "Aug 28, 2010"
+.TH ONU 1ONBLD "Nov 7, 2016"
 .SH NAME
 .I onu
 \- OS/Net Update
@@ -97,6 +98,12 @@ Incorrect usage.
 .B 2
 One of the commands used by the script failed.
 .SH NOTES
+.LP
+Distributions which segment certain system directories onto separate, child
+datasets (e.g., /var for openindiana Text Install) must run
+.B beadm unmount <new beName>
+after running onu or else the child dataset will not mount at the correct
+location after reboot.
 .LP
 Former users of bfu should note the following ways in which onu behaves
 differently from bfu.  First, as noted above, onu creates a new BE, rather
