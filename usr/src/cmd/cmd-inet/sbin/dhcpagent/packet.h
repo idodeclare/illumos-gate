@@ -21,6 +21,7 @@
 /*
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
  */
 
 #ifndef	_PACKET_H
@@ -122,6 +123,8 @@ dhcp_pkt_t	*init_pkt(dhcp_smach_t *, uchar_t);
 boolean_t	remove_pkt_opt(dhcp_pkt_t *, uint_t);
 boolean_t	update_v6opt_len(dhcpv6_option_t *, int);
 void		*add_pkt_opt(dhcp_pkt_t *, uint_t, const void *, uint_t);
+size_t		encode_dhcp_opt(void *, boolean_t, uint_t, const void *,
+			uint_t);
 void		*add_pkt_subopt(dhcp_pkt_t *, dhcpv6_option_t *, uint_t,
 		    const void *, uint_t);
 void		*add_pkt_opt16(dhcp_pkt_t *, uint_t, uint16_t);

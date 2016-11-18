@@ -22,6 +22,7 @@
 /*
  * Copyright 1996-2003 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
+ * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
  */
 
 /*
@@ -157,8 +158,15 @@ extern "C" {
 
 #define	CD_SLPDA		78
 #define	CD_SLPSS		79
+#define	CD_CLIENTFQDN		81
 #define	CD_AGENTOPT		82
+
+/*
+ * Per RFC 3679, option 89 was "Never published as standard and [is] not in
+ * general use". See active CD_CLIENTFQDN and RFC 4702.
+ */
 #define	CD_FQDN			89
+
 #define	CD_PXEARCHi		93
 #define	CD_PXENIIi		94
 #define	CD_PXECID		95
