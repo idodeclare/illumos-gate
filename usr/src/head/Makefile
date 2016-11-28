@@ -247,7 +247,7 @@ ISOHDRS = \
 
 # Historically, ldap.h and lber.h have been in HDRS, so keep them there;
 # otherwise collect ldap headers together.
-LDAP_HDRS = 			\
+LDAPHDRS = 			\
 	disptmpl.h		\
 	ldap-deprecated.h	\
 	ldap-extension.h	\
