@@ -78,6 +78,8 @@ extern "C" {
 #endif /* _WINDOWS */
 #endif /* LDAP_CALL */
 
+#ifndef _SOLARIS_SDK
+
 struct ldap_searchattr {
 	char				*sa_attrlabel;
 	char				*sa_attr;
@@ -147,6 +149,8 @@ LDAP_API(struct ldap_searchobj *)
 LDAP_CALL
 ldap_next_searchobj(struct ldap_searchobj *sollist,
 struct ldap_searchobj *so);
+
+#endif /* !_SOLARIS_SDK */
 
 #ifdef __cplusplus
 }

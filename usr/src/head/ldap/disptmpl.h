@@ -78,6 +78,8 @@ extern "C" {
 #endif /* _WINDOWS */
 #endif /* LDAP_CALL */
 
+#ifndef _SOLARIS_SDK
+
 #define	LDAP_TEMPLATE_VERSION   1
 
 /*
@@ -367,6 +369,8 @@ ldap_entry2html_search(LDAP *ld, char *dn, char *base, LDAPMessage *entry,
 	struct ldap_disptmpl *tmpllist, char **defattrs, char ***defvals,
 	writeptype writeproc, void *writeparm, char *eol, int rdncount,
 	unsigned long opts, char *urlprefix);
+
+#endif /* !_SOLARIS_SDK */
 
 LDAP_API(char *)
 LDAP_CALL
