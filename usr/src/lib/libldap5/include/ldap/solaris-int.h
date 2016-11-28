@@ -6,7 +6,7 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #ifndef _SOLARISINT_H
-#define _SOLARISINT_H
+#define	_SOLARISINT_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +20,7 @@ extern "C" {
 #include "ldap.h"
 
 /* Used in various functions */
-#define LBER_FUNC_VALUE		-1
+#define	LBER_FUNC_VALUE		-1
 
 #ifdef __cplusplus
 }

@@ -2,33 +2,47 @@
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- */
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 
 #ifndef LDAP_PR_H
-#define LDAP_PR_H
+#define	LDAP_PR_H
 
 #include "nspr.h"
 
@@ -51,6 +65,10 @@ extern "C" {
  * this LDAP * handle from more than one thread.
  *
  * Returns an LDAP session handle (or NULL if an error occurs).
+ *
+ * NOTE: If you want to use IPv6, you must use prldap creating a LDAP handle
+ * with this function prldap_init.  Prldap_init installs the appropriate
+ * set of NSPR functions and prevents calling deprecated functions accidentally.
  */
 LDAP * LDAP_CALL prldap_init( const char *defhost, int defport, int shared );
 
@@ -104,12 +122,11 @@ int LDAP_CALL prldap_get_session_option( LDAP *ld, void *sessionarg,
 	int option, ... );
 
 
-
 /*
  * Available options.
  */
 /*
- * PRLDAP_OPT_IO_MAX_TIMEOUT: set the maximum time in milliseconds to
+ * PRLDAP_OPT_IO_MAX_TIMEOUT: the maximum time in milliseconds to
  * block waiting for a network I/O operation to complete.
  *
  * Data type: int.
@@ -119,7 +136,7 @@ int LDAP_CALL prldap_get_session_option( LDAP *ld, void *sessionarg,
  *    LDAP_X_IO_TIMEOUT_NO_TIMEOUT
  *    LDAP_X_IO_TIMEOUT_NO_WAIT
  */
-#define PRLDAP_OPT_IO_MAX_TIMEOUT		1
+#define	PRLDAP_OPT_IO_MAX_TIMEOUT		1
 
 
 /**
@@ -150,7 +167,7 @@ typedef struct prldap_session_info {
 	int				seinfo_size;
 	struct prldap_session_private	*seinfo_appdata;
 } PRLDAPSessionInfo;
-#define PRLDAP_SESSIONINFO_SIZE	sizeof( PRLDAPSessionInfo )
+#define	PRLDAP_SESSIONINFO_SIZE	sizeof( PRLDAPSessionInfo )
 
 
 /*
@@ -192,7 +209,7 @@ typedef struct prldap_socket_info {
 	PRFileDesc			*soinfo_prfd;
 	struct prldap_socket_private	*soinfo_appdata;
 } PRLDAPSocketInfo;
-#define PRLDAP_SOCKETINFO_SIZE	sizeof( PRLDAPSocketInfo )
+#define	PRLDAP_SOCKETINFO_SIZE	sizeof( PRLDAPSocketInfo )
 
 
 /*
@@ -203,7 +220,7 @@ typedef struct prldap_socket_info {
  *
  * Returns an LDAP API error code (LDAP_SUCCESS if all goes well).
  *
- * Note: it is only safe to change soinfo_prfd from within the SOCKET
+ * Note: it is only safe to change soinfo_prfd from within the CONNECT
  * extended I/O callback function.
  */
 int LDAP_CALL prldap_set_socket_info( int fd, void *socketarg,
@@ -242,6 +259,19 @@ int LDAP_CALL prldap_get_default_socket_info( LDAP *ld, PRLDAPSocketInfo *soip )
  * which case the fields in the structure that soip points to are filled in).
  */
 int LDAP_CALL prldap_set_default_socket_info( LDAP *ld, PRLDAPSocketInfo *soip );
+
+/* Function: prldap_is_installed()
+ * Check if NSPR routine is installed
+ */
+PRBool prldap_is_installed( LDAP *ld );
+
+/* Function: prldap_import_connection().
+ * Given a ldap handle with connection already done with ldap_init()
+ * installs NSPR routines and imports the original connection info.
+ *
+ * Returns an LDAP API error code (LDAP_SUCCESS if all goes well).
+ */
+int LDAP_CALL prldap_import_connection (LDAP *ld);
 
 #ifdef __cplusplus
 }

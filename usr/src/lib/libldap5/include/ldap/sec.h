@@ -1,7 +1,7 @@
 #pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 #ifndef _SEC_H_
-#define _SEC_H_
+#define	_SEC_H_
 
 #include <sys/types.h>
 #include <md5.h>
