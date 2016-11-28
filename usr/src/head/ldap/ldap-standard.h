@@ -48,9 +48,9 @@
 extern "C" {
 #endif
 
-#include "ldap-platform.h"
+#include <ldap/ldap-platform.h>
 
-#include "lber.h"
+#include <lber.h>
 
 #define	LDAP_PORT		389
 #define	LDAPS_PORT		636

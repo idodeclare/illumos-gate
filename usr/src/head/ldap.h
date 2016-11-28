@@ -65,10 +65,10 @@ extern "C" {
 #endif
 
 /* Standard LDAP API functions and declarations */
-#include "ldap-standard.h"
+#include <ldap/ldap-standard.h>
 
 /* Extensions to the LDAP standard */
-#include "ldap-extension.h"
+#include <ldap/ldap-extension.h>
 
 /* A deprecated API is an API that we recommend you no longer use,
  * due to improvements in the LDAP C SDK. While deprecated APIs are
@@ -77,10 +77,10 @@ extern "C" {
  */
 
 /* Soon-to-be deprecated functions and declarations */
-#include "ldap-to-be-deprecated.h"
+#include <ldap/ldap-to-be-deprecated.h>
 
 /* Deprecated functions and declarations */
-#include "ldap-deprecated.h"
+#include <ldap/ldap-deprecated.h>
 
 #ifdef	_SOLARIS_SDK
 #define	LDAP_SASL_CRAM_MD5	"CRAM-MD5"
@@ -93,7 +93,7 @@ extern "C" {
 #define	LDAP_CONTROL_SIMPLE_PAGE	"1.2.840.113556.1.4.319"
 
 
-#include "disptmpl.h"
+#include <ldap/disptmpl.h>
 
 
 /* Simple Page Control functions for Solaris SDK */
@@ -151,15 +151,15 @@ int ldap_8859_to_t61(char **bufp, unsigned long *buflenp,
 #endif	/* STR_TRANSLATION */
 
 
-#include "srchpref.h"
+#include <ldap/srchpref.h>
 
-#include "ldaprot.h"
+#include <ldap/ldaprot.h>
 
 
 char *ldap_dns_to_dn(char *dns_name, int *nameparts);
 
 
-#include "ldap_ssl.h"
+#include <ldap/ldap_ssl.h>
 
 #endif	/* _SOLARIS_SDK */
 
