@@ -245,6 +245,19 @@ ISOHDRS = \
 	wchar_iso.h	\
 	wctype_iso.h
 
+# Historically, ldap.h and lber.h have been in HDRS, so keep them there;
+# otherwise collect ldap headers together.
+LDAP_HDRS = 			\
+	disptmpl.h		\
+	ldap-deprecated.h	\
+	ldap-extension.h	\
+	ldap-platform.h		\
+	ldap-standard.h		\
+	ldap-to-be-deprecated.h	\
+	ldap_ssl.h 		\
+	ldaprot.h 		\
+	srchpref.h
+
 ARPAHDRS = 		\
 	ftp.h		\
 	inet.h		\
@@ -332,6 +345,7 @@ PROTOHDRS=   dumprestore.h routed.h ripngd.h rwhod.h timed.h
 ROOTHDRS= $(HDRS:%=$(ROOT)/usr/include/%)  \
 	$(KRB5HDRS:%=$(ROOT)/usr/include/kerberosv5/%)  \
 	$(ISOHDRS:%=$(ROOT)/usr/include/iso/%)  \
+	$(LDAPHDRS:%=$(ROOT)/usr/include/ldap/%)  \
 	$(ARPAHDRS:%=$(ROOT)/usr/include/arpa/%)  \
 	$(AUDIOHDRS:%=$(ROOT)/usr/include/audio/%)  \
 	$(UUIDHDRS:%=$(ROOT)/usr/include/uuid/%)  \
@@ -340,7 +354,7 @@ ROOTHDRS= $(HDRS:%=$(ROOT)/usr/include/%)  \
 	$(LVMRPCHDRS:%=$(ROOT)/usr/include/%) \
 	$(PROTOHDRS:%=$(ROOT)/usr/include/protocols/%)
 
-DIRS= iso arpa audio rpcsvc protocols security uuid kerberosv5
+DIRS= iso ldap arpa audio rpcsvc protocols security uuid kerberosv5
 ROOTDIRS= $(DIRS:%=$(ROOT)/usr/include/%)
 
 # check files really don't exist
@@ -348,6 +362,9 @@ ROOTDIRS= $(DIRS:%=$(ROOT)/usr/include/%)
 # should do something with the rpcsvc headers
 
 iso/%.check:		iso/%.h
+	$(DOT_H_CHECK)
+
+ldap/%.check:		ldap/%.h
 	$(DOT_H_CHECK)
 
 arpa/%.check:		arpa/%.h
@@ -382,6 +399,7 @@ uuid/%.check:		uuid/%.h
 CHECKHDRS= $(HDRS:%.h=%.check)  \
 	$(KRB5HDRS:%.h=kerberosv5/%.check)  \
 	$(ISOHDRS:%.h=iso/%.check)  \
+	$(LDAPHDRS:%.h=ldap/%.check)  \
 	$(ARPAHDRS:%.h=arpa/%.check)  \
 	$(AUDIOHDRS:%.h=audio/%.check)  \
 	$(UUIDHDRS:%.h=uuid/%.check)  \
@@ -417,6 +435,9 @@ $(ROOT)/usr/include/audio/%: audio/%
 	$(INS.file)
 
 $(ROOT)/usr/include/iso/%: iso/%
+	$(INS.file)
+
+$(ROOT)/usr/include/ldap/%: ldap/%
 	$(INS.file)
 
 $(ROOT)/usr/include/uuid/%: uuid/%
