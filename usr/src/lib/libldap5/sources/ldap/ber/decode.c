@@ -482,6 +482,9 @@ ber_scanf( BerElement *ber, const char *fmt, ... )
 	char			*s, **ss, ***sss;
 	struct berval 	***bv, **bvp, *bval;
 	int				*i, j;
+#ifdef _SOLARIS_SDK
+	ber_int_t				*boolv;
+#endif /* _SOLARIS_SDK */
 	ber_int_t		*l, rc, tag;
 	ber_tag_t		*t;
 	ber_len_t		len;
@@ -505,8 +508,13 @@ ber_scanf( BerElement *ber, const char *fmt, ... )
 			break;
 
 		case 'b':	/* boolean */
+#ifdef _SOLARIS_SDK
+			boolv = va_arg( ap, ber_int_t * );
+			rc = ber_get_boolean( ber, boolv );
+#else
 			i = va_arg( ap, int * );
 			rc = ber_get_boolean( ber, i );
+#endif /* _SOLARIS_SDK */
 			break;
 
 		case 'e':	/* enumerated */

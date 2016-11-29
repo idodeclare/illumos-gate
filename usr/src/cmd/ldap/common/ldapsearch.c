@@ -968,7 +968,12 @@ print_entry( ld, entry, attrsonly )
 
     if ( use_psearch ) {
 	LDAPControl	**ectrls;
+#ifdef _SOLARIS_SDK
+	ber_int_t	chgtype;
+	int			chgnumpresent;
+#else
 	int		chgtype, chgnumpresent;
+#endif /* _SOLARIS_SDK */
 #ifdef SOLARIS_LDAP_CMD
 	ber_int_t	chgnum;
 #else
