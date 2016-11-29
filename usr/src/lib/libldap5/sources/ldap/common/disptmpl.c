@@ -56,7 +56,11 @@
  */
 
 #include "ldap-int.h"
+#ifdef _SOLARIS_SDK
+#include <ldap/disptmpl.h>
+#else
 #include "disptmpl.h"
+#endif /* _SOLARIS_SDK */
 
 static void free_disptmpl( struct ldap_disptmpl *tmpl );
 static int read_next_tmpl( char **bufp, long *blenp,

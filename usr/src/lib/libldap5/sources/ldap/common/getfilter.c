@@ -55,7 +55,11 @@ static char copyright[] = "@(#) Copyright (c) 1993 Regents of the University of 
 #endif
 
 #include "ldap-int.h"
+#ifdef _SOLARIS_SDK
+#include <re_comp.h>
+#else
 #include "regex.h"
+#endif /* _SOLARIS_SDK */
 
 static int break_into_words( char *str, char *delims, char ***wordsp );
 

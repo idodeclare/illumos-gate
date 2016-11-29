@@ -94,7 +94,7 @@
 
 #ifdef _SOLARIS_SDK
 #include <ldap.h>
-#include <ldaprot.h>
+#include <ldap/ldaprot.h>
 #include <ldaplog.h>
 #include <portable.h>
 #else
