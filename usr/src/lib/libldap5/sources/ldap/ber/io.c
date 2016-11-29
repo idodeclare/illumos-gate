@@ -893,7 +893,11 @@ ber_get_next( Sockbuf *sb, ber_len_t *len, BerElement *ber )
 	    }
 
 	    /* check to see if we already have enough memory allocated */
+#ifdef _SOLARIS_SDK
+	    if ( (ber_len_t)(ber->ber_end - ber->ber_buf) < newlen) {
+#else
 	    if ( ((ber_len_t) ber->ber_end - (ber_len_t) ber->ber_buf) < newlen) {
+#endif /* _SOLARIS_SDK */
 			if ( ber->ber_buf && !(ber->ber_flags & LBER_FLAG_NO_FREE_BUFFER)) {
 				NSLBERI_FREE(ber->ber_buf);
 			}
@@ -914,10 +918,18 @@ ber_get_next( Sockbuf *sb, ber_len_t *len, BerElement *ber )
 	}
 
 	/* OK, we've malloc-ed the buffer; now read the rest of the expected length */
+#ifdef _SOLARIS_SDK
+	toread = (ber_len_t)(ber->ber_end - ber->ber_rwptr);
+#else
 	toread = (ber_len_t)ber->ber_end - (ber_len_t)ber->ber_rwptr;
+#endif /* _SOLARIS_SDK */
 	do {
 	    if ( (rc = BerRead( sb, ber->ber_rwptr, (ber_int_t)toread )) <= 0 ) {
+#ifdef _SOLARIS_SDK
+		*len = (ber_len_t)(ber->ber_rwptr - orig_rwptr);
+#else
 		*len = (ber_len_t) ber->ber_rwptr - (ber_len_t) orig_rwptr;
+#endif /* _SOLARIS_SDK */
 		return( LBER_DEFAULT );
 	    }
 
@@ -936,7 +948,11 @@ ber_get_next( Sockbuf *sb, ber_len_t *len, BerElement *ber )
 	}
 #endif
 
+#ifdef _SOLARIS_SDK
+	*len = (ber_len_t)(ber->ber_rwptr - orig_rwptr);
+#else
 	*len = (ber_len_t) ber->ber_rwptr - (ber_len_t) orig_rwptr;
+#endif /* _SOLARIS_SDK */
 	ber->ber_rwptr = NULL;
 	ber->ber_struct[BER_STRUCT_VAL].ldapiov_len = ber->ber_len;
 	return( ber->ber_tag );
@@ -1589,7 +1605,11 @@ ber_get_next_buffer_ext( void *buffer, size_t buffer_size, ber_len_t *len,
 		ber->ber_rwptr = ber->ber_buf;
 	}
 
+#ifdef _SOLARIS_SDK
+	toread = (ber_len_t)(ber->ber_end - ber->ber_rwptr);
+#else
 	toread = (ber_len_t)ber->ber_end - (ber_len_t)ber->ber_rwptr;
+#endif /* _SOLARIS_SDK */
 	do {
 		if ( (rc = read_bytes( &sb, (unsigned char *)ber->ber_rwptr,
 		    (ber_int_t)toread )) <= 0 ) {

@@ -56,13 +56,6 @@ extern "C" {
 
 #include <stdlib.h>	/* to pick up size_t typedef */
 
-#ifdef	_SOLARIS_SDK
-#ifdef	sunos4
-#define	SAFEMEMCPY(d, s, n)   bcopy(s, d, n)
-#else /* sunos4 */
-#define	SAFEMEMCPY(d, s, n)   memmove(d, s, n)
-#endif /* sunos4 */
-#endif /* _SOLARIS_SDK */
 /*
  * Note that LBER_ERROR and LBER_DEFAULT are values that can never appear
  * as valid BER tags, and so it is safe to use them to report errors.  In

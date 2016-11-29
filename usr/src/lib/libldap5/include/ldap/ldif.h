@@ -97,6 +97,10 @@ extern "C" {
 #define	LDIF_OPT_VALUE_IS_URL		0x02UL
 #define	LDIF_OPT_MINIMAL_ENCODING	0x04UL
 
+#ifdef _SOLARIS_SDK
+int str_parse_line( char *line, char **type, char **value, int *vlen);
+char * str_getline( char **next );
+#endif /* _SOLARIS_SDK */
 int ldif_parse_line( char *line, char **type, char **value, int *vlen);
 char * ldif_getline( char **next );
 void ldif_put_type_and_value( char **out, char *t, char *val, int vlen );

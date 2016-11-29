@@ -850,7 +850,7 @@ dosearch( ld, base, scope, attrs, attrsonly, filtpatt, value )
     } 
     /* Parse the returned sort control */
     if (server_sort) {
-	unsigned long result = 0;
+    ber_int_t	result = 0;
 	char *attribute;
 	
 	if ( LDAP_SUCCESS != ldap_parse_sort_control(ld,ctrl_response_array,&result,&attribute) ) {
@@ -878,7 +878,7 @@ dosearch( ld, base, scope, attrs, attrsonly, filtpatt, value )
 
     if (use_vlv)
     {
-	unsigned long vpos, vcount;
+    ber_int_t	vpos, vcount;
 	int vresult;
 	if ( LDAP_SUCCESS != ldap_parse_virtuallist_control(ld,ctrl_response_array,&vpos, &vcount,&vresult) ) {
 	    ldaptool_print_lderror( ld, "ldap_parse_virtuallist_control",
