@@ -2,28 +2,43 @@
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  *  Copyright (c) 1995 Regents of the University of Michigan.
@@ -34,7 +49,7 @@
  */
 
 #if 0
-#ifndef lint 
+#ifndef lint
 static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of Michigan.\nAll rights reserved.\n";
 #endif
 #endif
@@ -43,22 +58,22 @@ static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of 
 #ifdef LDAP_SASLIO_HOOKS
 /* Valid for any ANSI C compiler */
 #include <limits.h>
+extern sasl_callback_t client_callbacks[];
 #endif
 
-#define VI_PRODUCTVERSION 3
+#define	VI_PRODUCTVERSION 3
 
 #ifndef INADDR_LOOPBACK
-#define INADDR_LOOPBACK	((unsigned long) 0x7f000001)
-#endif
-
-#ifndef MAXHOSTNAMELEN
-#define MAXHOSTNAMELEN  64
+#define	INADDR_LOOPBACK	((unsigned long) 0x7f000001)
 #endif
 
 #ifdef LDAP_DEBUG
-int	ldap_debug;
+int	ldap_debug = 0;
 #endif
 
+#ifdef _WINDOWS
+#define	USE_WINDOWS_TLS /* thread local storage */
+#endif
 
 /*
  * global defaults for callbacks are stored here.  callers of the API set
@@ -70,23 +85,44 @@ struct ldap                     nsldapi_ld_defaults;
 struct ldap_memalloc_fns        nsldapi_memalloc_fns = { 0, 0, 0, 0 };
 int				nsldapi_initialized = 0;
 
-#ifndef _WINDOWS
+#ifdef USE_PTHREADS
 #include <pthread.h>
+#ifdef VMS
+/*
+** pthread_self() is not a routine on OpenVMS; it's inline assembler code.
+** Since we need a real address which we can stuff away into a table, we need
+** to make sure that pthread_self maps to the real pthread_self routine (yes,
+** we do have one fortunately).
+*/
+#undef pthread_self
+#define	pthread_self PTHREAD_SELF
+extern pthread_t pthread_self (void);
+#endif
 static pthread_key_t		nsldapi_key;
+static pthread_mutex_t		nsldapi_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct nsldapi_ldap_error {
         int     le_errno;
         char    *le_matched;
         char    *le_errmsg;
 };
-#else
+#elif defined (USE_WINDOWS_TLS)
+static DWORD dwTlsIndex;
+struct nsldapi_ldap_error {
+	int	le_errno;
+	char	*le_matched;
+	char	*le_errmsg;
+};
+#elif defined (_WINDOWS) /* use static tls */
 __declspec ( thread ) int	nsldapi_gldaperrno;
 __declspec ( thread ) char	*nsldapi_gmatched = NULL;
-__declspec ( thread ) char	*nsldapi_gldaperror = NULL; 
-#endif /* _WINDOWS */
+__declspec ( thread ) char	*nsldapi_gldaperror = NULL;
+#endif /* USE_WINDOWS_TLS */
+
 
 #ifdef _WINDOWS
 #define	LDAP_MUTEX_T	HANDLE
+static LDAP_MUTEX_T		nsldapi_init_mutex;
 
 int
 pthread_mutex_init( LDAP_MUTEX_T *mp, void *attr)
@@ -154,6 +190,55 @@ set_errno( int Errno )
 	errno = Errno;
 }
 
+#ifdef USE_WINDOWS_TLS
+static void
+set_ld_error( int err, char *matched, char *errmsg, void *dummy )
+{
+	struct nsldapi_ldap_error *le;
+	void *tsd;
+
+	le = TlsGetValue( dwTlsIndex );
+
+	if (le == NULL) {
+		tsd = (void *)calloc(1, sizeof(struct nsldapi_ldap_error));
+		TlsSetValue( dwTlsIndex, tsd );
+	}
+
+	le = TlsGetValue ( dwTlsIndex );
+
+	if (le == NULL)
+		return;
+
+	le->le_errno = err;
+
+	if ( le->le_matched != NULL ) {
+		ldap_memfree( le->le_matched );
+	}
+	le->le_matched = matched;
+
+	if ( le->le_errmsg != NULL ) {
+		ldap_memfree( le->le_errmsg );
+	}
+	le->le_errmsg = errmsg;
+}
+
+static int
+get_ld_error ( char **matched, char **errmsg, void *dummy )
+{
+	struct nsldapi_ldap_error *le;
+
+	le = TlsGetValue( dwTlsIndex );
+	if ( matched != NULL ) {
+		*matched = le->le_matched;
+	}
+
+	if ( errmsg != NULL ) {
+		*errmsg = le->le_errmsg;
+	}
+
+	return( le->le_errno );
+}
+#else
 static int
 get_ld_error( char **LDMatched, char **LDError, void * Args )
 {
@@ -186,7 +271,10 @@ set_ld_error( int LDErrno, char *  LDMatched, char *  LDError,
 	nsldapi_gmatched    = LDMatched;
 	nsldapi_gldaperror  = LDError;
 }
-#else
+#endif /* USE_WINDOWS_TLS */
+#endif /* ! _WINDOWS */
+
+#ifdef USE_PTHREADS
 static void *
 pthread_mutex_alloc( void )
 {
@@ -220,10 +308,15 @@ set_ld_error( int err, char *matched, char *errmsg, void *dummy )
 
         le = pthread_getspecific( nsldapi_key );
 
+#ifdef _SOLARIS_SDK
         if (le == NULL) {
 		free(tsd);
                 return;
 	}
+#else
+        if (le == NULL)
+                return;
+#endif
 
         le->le_errno = err;
 
@@ -244,21 +337,17 @@ get_ld_error( char **matched, char **errmsg, void *dummy )
         struct nsldapi_ldap_error *le;
 
         le = pthread_getspecific( nsldapi_key );
-	if (le != NULL) {
-        	if ( matched != NULL ) {
-                	*matched = le->le_matched;
-        	}
-        	if ( errmsg != NULL ) {
-                	*errmsg = le->le_errmsg;
-        	}
-        	return( le->le_errno );
-	} else {
-        	if ( matched != NULL )
-                	*matched = NULL;
-        	if ( errmsg != NULL )
-                	*errmsg = NULL;
-	}
-	return (LDAP_SUCCESS);
+
+        if (le == NULL)
+                return( LDAP_SUCCESS );
+
+        if ( matched != NULL ) {
+                *matched = le->le_matched;
+        }
+        if ( errmsg != NULL ) {
+                *errmsg = le->le_errmsg;
+        }
+        return( le->le_errno );
 }
 
 static void
@@ -272,8 +361,9 @@ get_errno( void )
 {
         return( errno );
 }
-#endif /* _WINDOWS */
+#endif /* use_pthreads */
 
+#if defined(USE_PTHREADS) || defined(_WINDOWS)
 static struct ldap_thread_fns
 	nsldapi_default_thread_fns = {
 		(void *(*)(void))pthread_mutex_alloc,
@@ -295,14 +385,28 @@ static struct ldap_extra_thread_fns
 		(void *(*)(void))pthread_self
 #endif /* _WINDOWS */
 		};
+#endif /* use_pthreads || _windows */
 
 void
 nsldapi_initialize_defaults( void )
 {
+#ifdef _WINDOWS
+	pthread_mutex_init( &nsldapi_init_mutex, NULL );
+#endif /* _WINDOWS */
+
+#if defined(USE_PTHREADS) || defined(_WINDOWS)
+	pthread_mutex_lock( &nsldapi_init_mutex );
 
 	if ( nsldapi_initialized ) {
+		pthread_mutex_unlock( &nsldapi_init_mutex );
 		return;
 	}
+#else
+         if ( nsldapi_initialized ) {
+                 return;
+         }
+#endif /* use_pthreads || _windows */
+
 #ifdef	_SOLARIS_SDK
 	/*
 	 * This has to be called before nsldapi_initialized is set to 1
@@ -311,17 +415,18 @@ nsldapi_initialize_defaults( void )
 	prldap_nspr_init();
 #endif
 
-#ifndef _WINDOWS
+#ifdef USE_PTHREADS
         if ( pthread_key_create(&nsldapi_key, free ) != 0) {
                 perror("pthread_key_create");
         }
-#endif /* _WINDOWS */
+#elif defined(USE_WINDOWS_TLS)
+	dwTlsIndex = TlsAlloc();
+#endif /* USE_WINDOWS_TLS */
 
-	nsldapi_initialized = 1;
 	memset( &nsldapi_memalloc_fns, 0, sizeof( nsldapi_memalloc_fns ));
 	memset( &nsldapi_ld_defaults, 0, sizeof( nsldapi_ld_defaults ));
 	nsldapi_ld_defaults.ld_options = LDAP_BITOPT_REFERRALS;
-	nsldapi_ld_defaults.ld_version = LDAP_VERSION2;
+	nsldapi_ld_defaults.ld_version = LDAP_VERSION3;
 	nsldapi_ld_defaults.ld_lberoptions = LBER_OPT_USE_DER;
 	nsldapi_ld_defaults.ld_refhoplimit = LDAP_DEFAULT_REFHOPLIMIT;
 
@@ -336,6 +441,27 @@ nsldapi_initialize_defaults( void )
 	nsldapi_ld_defaults.ld_sasl_secprops.maxbufsize = SASL_MAX_BUFF_SIZE;
 	nsldapi_ld_defaults.ld_sasl_secprops.security_flags =
 		SASL_SEC_NOPLAINTEXT | SASL_SEC_NOANONYMOUS;
+
+	/* SASL mutex function callbacks */
+	sasl_set_mutex(
+		(sasl_mutex_alloc_t *)nsldapi_default_thread_fns.ltf_mutex_alloc,
+		(sasl_mutex_lock_t *)nsldapi_default_thread_fns.ltf_mutex_lock,
+		(sasl_mutex_unlock_t *)nsldapi_default_thread_fns.ltf_mutex_unlock,
+		(sasl_mutex_free_t *)nsldapi_default_thread_fns.ltf_mutex_free );
+
+	/* SASL memory allocation function callbacks */
+	sasl_set_alloc(
+		(sasl_malloc_t *)ldap_x_malloc,
+		(sasl_calloc_t *)ldap_x_calloc,
+		(sasl_realloc_t *)ldap_x_realloc,
+		(sasl_free_t *)ldap_x_free );
+
+	/* SASL library initialization */
+	if ( sasl_client_init( client_callbacks ) != SASL_OK ) {
+		nsldapi_initialized = 0;
+		pthread_mutex_unlock( &nsldapi_init_mutex );
+		return;
+	}
 #endif
 
 #if defined( STR_TRANSLATION ) && defined( LDAP_DEFAULT_CHARSET )
@@ -350,19 +476,29 @@ nsldapi_initialize_defaults( void )
         /* this was picked as it is the standard tcp timeout as well */
         nsldapi_ld_defaults.ld_connect_timeout = LDAP_X_IO_TIMEOUT_NO_TIMEOUT;
 
+#if defined(USE_PTHREADS) || defined(_WINDOWS)
         /* load up default platform specific locking routines */
-        if (ldap_set_option( NULL, LDAP_OPT_THREAD_FN_PTRS,
+        if (ldap_set_option( &nsldapi_ld_defaults, LDAP_OPT_THREAD_FN_PTRS,
                 (void *)&nsldapi_default_thread_fns) != LDAP_SUCCESS) {
+		nsldapi_initialized = 0;
+		pthread_mutex_unlock( &nsldapi_init_mutex );
                 return;
         }
 
 #ifndef _WINDOWS
         /* load up default threadid function */
-        if (ldap_set_option( NULL, LDAP_OPT_EXTRA_THREAD_FN_PTRS,
+        if (ldap_set_option( &nsldapi_ld_defaults, LDAP_OPT_EXTRA_THREAD_FN_PTRS,
                 (void *)&nsldapi_default_extra_thread_fns) != LDAP_SUCCESS) {
+		nsldapi_initialized = 0;
+		pthread_mutex_unlock( &nsldapi_init_mutex );
                 return;
         }
 #endif /* _WINDOWS */
+	nsldapi_initialized = 1;
+	pthread_mutex_unlock( &nsldapi_init_mutex );
+#else
+        nsldapi_initialized = 1;
+#endif /* use_pthreads || _windows */
 }
 
 
@@ -393,13 +529,17 @@ ldap_version( LDAPVersion *ver )
 		ver->sdk_version = (int)(VI_PRODUCTVERSION * 100);
 		ver->protocol_version = LDAP_VERSION_MAX * 100;
 		ver->SSL_version = SSL_VERSION * 100;
-		/* 
-		 * set security to none by default 
+		/*
+		 * set security to none by default
 		 */
 
 		ver->security_level = LDAP_SECURITY_NONE;
 #if defined(LINK_SSL)
+#if defined(NS_DOMESTIC)
 		ver->security_level = 128;
+#elif defined(NSS_EXPORT)
+		ver->security_level = 40;
+#endif
 #endif
 
 	}
@@ -448,6 +588,10 @@ ldap_open( const char *host, int port )
  * future communication is returned on success, NULL on failure.
  * "defhost" may be a space-separated list of hosts or IP addresses
  *
+ * NOTE: If you want to use IPv6, you must use prldap creating a LDAP handle
+ * with prldap_init instead of ldap_init. Or install the NSPR functions
+ * by calling prldap_install_routines. (See the nspr samples in examples)
+ *
  * Example:
  *	LDAP	*ld;
  *	ld = ldap_init( default_hostname, default_port );
@@ -466,7 +610,7 @@ ldap_init( const char *defhost, int defport )
 	    LDAPDebug( LDAP_DEBUG_ANY,
 		    "ldap_init: port %d is invalid (port numbers must range from 1 to %d)\n",
 		    defport, LDAP_PORT_MAX, 0 );
-#if !defined( macintosh ) && !defined( DOS )
+#if !defined( macintosh ) && !defined( DOS ) && !defined( BEOS )
 	    errno = EINVAL;
 #endif
 	    return( NULL );
@@ -544,11 +688,10 @@ ldap_init( const char *defhost, int defport )
 		ld = NULL;
 		return( NULL );
         }
-#else
+#endif /* _SOLARIS_SDK */
 
 	/* allocate mutexes */
 	nsldapi_mutex_alloc_all( ld );
-#endif
 
 	/* set default port */
 	ld->ld_defport = ( defport == 0 ) ? LDAP_PORT : defport;
@@ -556,32 +699,34 @@ ldap_init( const char *defhost, int defport )
 	return( ld );
 }
 
+
 void
 nsldapi_mutex_alloc_all( LDAP *ld )
 {
-        int     i;
+	int	i;
 
-        if ( ld != &nsldapi_ld_defaults && ld->ld_mutex != NULL ) {
-                for ( i = 0; i<LDAP_MAX_LOCK; i++ ) {
-                        ld->ld_mutex[i] = LDAP_MUTEX_ALLOC( ld );
-                        ld->ld_mutex_threadid[i] = (void *) -1;
-                        ld->ld_mutex_refcnt[i] = 0;
-                }
-        }
+	if ( ld != &nsldapi_ld_defaults && ld->ld_mutex != NULL ) {
+		for ( i = 0; i<LDAP_MAX_LOCK; i++ ) {
+			ld->ld_mutex[i] = LDAP_MUTEX_ALLOC( ld );
+			ld->ld_mutex_threadid[i] = (void *) -1;
+			ld->ld_mutex_refcnt[i] = 0;
+		}
+	}
 }
 
 
 void
 nsldapi_mutex_free_all( LDAP *ld )
 {
-        int     i;
+	int	i;
 
-        if ( ld != &nsldapi_ld_defaults && ld->ld_mutex != NULL ) {
-                for ( i = 0; i<LDAP_MAX_LOCK; i++ ) {
-                        LDAP_MUTEX_FREE( ld, ld->ld_mutex[i] );
-                }
-        }
+	if ( ld != &nsldapi_ld_defaults && ld->ld_mutex != NULL ) {
+		for ( i = 0; i<LDAP_MAX_LOCK; i++ ) {
+			LDAP_MUTEX_FREE( ld, ld->ld_mutex[i] );
+		}
+	}
 }
+
 
 /* returns 0 if connection opened and -1 if an error occurs */
 int
@@ -597,11 +742,9 @@ nsldapi_open_ldap_defconn( LDAP *ld )
 	}
 	srv->lsrv_port = ld->ld_defport;
 
-#ifdef LDAP_SSLIO_HOOKS
 	if (( ld->ld_options & LDAP_BITOPT_SSL ) != 0 ) {
 		srv->lsrv_options |= LDAP_SRV_OPT_SECURE;
 	}
-#endif
 
 	if (( ld->ld_defconn = nsldapi_new_connection( ld, &srv, 1, 1, 0 ))
 	    == NULL ) {
@@ -710,7 +853,7 @@ ldap_x_hostlist_next( char **hostp, int *portp,
 		status->lhs_nexthost = NULL;
 	}
 
-	/* 
+	/*
 	 * Look for closing ']' and skip past it before looking for port.
 	 */
 	if ( squarebrackets && NULL != ( q = strchr( *hostp, ']' ))) {

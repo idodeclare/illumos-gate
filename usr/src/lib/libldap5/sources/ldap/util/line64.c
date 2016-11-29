@@ -2,30 +2,43 @@
  * Copyright 2001-2002 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 /* line64.c - routines for dealing with the slapd line format */
@@ -46,18 +59,22 @@
 #include "ldif.h"
 
 #ifndef isascii
-#define isascii( c )	(!((c) & ~0177))
+#define	isascii( c )	(!((c) & ~0177))
 #endif
 
-#define RIGHT2			0x03
-#define RIGHT4			0x0f
-#define CONTINUED_LINE_MARKER	'\001'
+#define	RIGHT2			0x03
+#define	RIGHT4			0x0f
+#define	CONTINUED_LINE_MARKER	'\001'
 
+#ifdef _SOLARIS_SDK
 #define ISBLANK(c) ((c) == ' ' || (c) == '\t' || (c) == '\n') /* not "\r\v\f" */
+#else
+#define	ISBLANK(c) (c == ' ' || c == '\t' || c == '\n') /* not "\r\v\f" */
+#endif /* _SOLARIS_SDK */
 
-#define LDIF_OPT_ISSET( value, opt )	(((value) & (opt)) != 0 )
+#define	LDIF_OPT_ISSET( value, opt )	(((value) & (opt)) != 0 )
 
-static char nib2b64[0x40] =
+static char nib2b64[0x40f] =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static unsigned char b642nib[0x80] = {
@@ -82,15 +99,28 @@ static unsigned char b642nib[0x80] = {
 static int ldif_base64_encode_internal( unsigned char *src, char *dst, int srclen,
 	int lenused, int wraplen );
 
+#ifdef _SOLARIS_SDK
+int
+str_parse_line(
+    char	*line,
+    char	**type,
+    char	**value,
+    int		*vlen
+)
+{
+	return ldif_parse_line(line, type, value, vlen);
+}
+#endif /* _SOLARIS_SDK */
+
 /*
- * str_parse_line - takes a line of the form "type:[:] value" and splits it
+ * ldif_parse_line - takes a line of the form "type:[:] value" and splits it
  * into components "type" and "value".  if a double colon separates type from
  * value, then value is encoded in base 64, and parse_line un-decodes it
  * (in place) before returning.
  */
 
 int
-str_parse_line(
+ldif_parse_line(
     char	*line,
     char	**type,
     char	**value,
@@ -115,8 +145,8 @@ str_parse_line(
 #if defined( _WIN32 )
 		/*
 #endif
-		 LDAPDebug( LDAP_DEBUG_PARSE, "str_parse_line: missing ':' "
-			"on line \"%s\"\n", line, 0, 0 ); 
+		 LDAPDebug( LDAP_DEBUG_PARSE, "ldif_parse_line: missing ':' "
+			"on line \"%s\"\n", line, 0, 0 );
 #if defined( _WIN32 )
 		*/
 #endif
@@ -144,7 +174,7 @@ str_parse_line(
 		s++;
 	}
 
-	/* 
+	/*
 	 * If no value is present, return a zero-length string for
 	 * *value, with *vlen set to zero.
 	 */
@@ -171,8 +201,8 @@ str_parse_line(
 		/*
 #endif
 			 LDAPDebug( LDAP_DEBUG_ANY,
-			    "str_parse_line: invalid base 64 char on line \"%s\"\n",
-			    line, 0, 0 ); 
+			    "ldif_parse_line: invalid base 64 char on line \"%s\"\n",
+			    line, 0, 0 );
 #if defined( _WIN32 )
 		*/
 #endif
@@ -249,15 +279,23 @@ ldif_base64_decode( char *src, unsigned char *dst )
 	return( len );
 }
 
+#ifdef _SOLARIS_SDK
+char *
+str_getline( char **next )
+{
+	return ldif_getline(next);
+}
+#endif /* _SOLARIS_SDK */
+
 /*
- * str_getline - return the next "line" (minus newline) of input from a
+ * ldif_getline - return the next "line" (minus newline) of input from a
  * string buffer of lines separated by newlines, terminated by \n\n
  * or \0.  this routine handles continued lines, bundling them into
  * a single big line before returning.  if a line begins with a white
  * space character, it is a continuation of the previous line. the white
  * space character (nb: only one char), and preceeding newline are changed
  * into CONTINUED_LINE_MARKER chars, to be deleted later by the
- * str_parse_line() routine above.
+ * ldif_parse_line() routine above.
  *
  * it takes a pointer to a pointer to the buffer on the first call,
  * which it updates and must be supplied on subsequent calls.
@@ -267,7 +305,7 @@ ldif_base64_decode( char *src, unsigned char *dst )
  */
 
 char *
-str_getline( char **next )
+ldif_getline( char **next )
 {
 	char	*l;
 	char	c;
@@ -310,14 +348,14 @@ str_getline( char **next )
 }
 
 
-#define LDIF_SAFE_CHAR( c )		( (c) != '\r' && (c) != '\n' )
-#define LDIF_CONSERVATIVE_CHAR( c )	( LDIF_SAFE_CHAR(c) && isascii((c)) \
+#define	LDIF_SAFE_CHAR( c )		( (c) != '\r' && (c) != '\n' )
+#define	LDIF_CONSERVATIVE_CHAR( c )	( LDIF_SAFE_CHAR(c) && isascii((c)) \
 					 && ( isprint((c)) || (c) == '\t' ))
-#define LDIF_SAFE_INITCHAR( c )		( LDIF_SAFE_CHAR(c) && (c) != ':' \
+#define	LDIF_SAFE_INITCHAR( c )		( LDIF_SAFE_CHAR(c) && (c) != ':' \
 					 && (c) != ' ' && (c) != '<' )
-#define LDIF_CONSERVATIVE_INITCHAR( c ) ( LDIF_SAFE_INITCHAR( c ) && \
+#define	LDIF_CONSERVATIVE_INITCHAR( c ) ( LDIF_SAFE_INITCHAR( c ) && \
 					 ! ( isascii((c)) && isspace((c))))
-#define LDIF_CONSERVATIVE_FINALCHAR( c ) ( (c) != ' ' )
+#define	LDIF_CONSERVATIVE_FINALCHAR( c ) ( (c) != ' ' )
 
 
 void
@@ -378,7 +416,7 @@ ldif_put_type_and_value_with_options( char **out, char *t, char *val,
 				b64 = 1;
 				break;
 			}
-			
+
 			if ( wraplen != -1 && len > wraplen ) {
 				*(*out)++ = '\n';
 				*(*out)++ = ' ';
@@ -400,13 +438,13 @@ ldif_put_type_and_value_with_options( char **out, char *t, char *val,
 	*(*out)++ = '\n';
 }
 
-void 
+void
 ldif_put_type_and_value( char **out, char *t, char *val, int vlen )
 {
     ldif_put_type_and_value_with_options( out, t, val, vlen, 0 );
 }
 
-void 
+void
 ldif_put_type_and_value_nowrap( char **out, char *t, char *val, int vlen )
 {
     ldif_put_type_and_value_with_options( out, t, val, vlen, LDIF_OPT_NOWRAP );

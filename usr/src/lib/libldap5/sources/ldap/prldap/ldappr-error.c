@@ -1,25 +1,40 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 /*
@@ -31,11 +46,10 @@
 
 #include "ldappr-int.h"
 
-
 void
 prldap_set_system_errno( int oserrno )
 {
-    PR_SetError( PR_UNKNOWN_ERROR, oserrno );
+    PR_SetError( PR_GetError(), oserrno );
 }
 
 
@@ -57,69 +71,171 @@ struct prldap_errormap_entry {
 /* XXX: not sure if this extra mapping for Windows is good or correct */
 #ifdef _WINDOWS
 #ifndef ENOTSUP
-#define ENOTSUP		-1
+#define	ENOTSUP		-1
 #endif
 #ifndef ETIMEDOUT
-#define ETIMEDOUT	WSAETIMEDOUT
+#define	ETIMEDOUT	WSAETIMEDOUT
 #endif
 #ifndef EADDRNOTAVAIL
-#define EADDRNOTAVAIL	WSAEADDRNOTAVAIL
+#define	EADDRNOTAVAIL	WSAEADDRNOTAVAIL
 #endif
 #ifndef EAFNOSUPPORT
-#define EAFNOSUPPORT	WSAEAFNOSUPPORT
+#define	EAFNOSUPPORT	WSAEAFNOSUPPORT
 #endif
 #ifndef EISCONN
-#define EISCONN		WSAEISCONN
+#define	EISCONN		WSAEISCONN
 #endif
 #ifndef EADDRINUSE
-#define EADDRINUSE	WSAEADDRINUSE
+#define	EADDRINUSE	WSAEADDRINUSE
 #endif
 #ifndef ECONNREFUSED
-#define ECONNREFUSED	WSAECONNREFUSED
+#define	ECONNREFUSED	WSAECONNREFUSED
 #endif
 #ifndef EHOSTUNREACH
-#define EHOSTUNREACH	WSAEHOSTUNREACH
+#define	EHOSTUNREACH	WSAEHOSTUNREACH
 #endif
 #ifndef ENOTCONN
-#define ENOTCONN	WSAENOTCONN
+#define	ENOTCONN	WSAENOTCONN
 #endif
 #ifndef ENOTSOCK
-#define ENOTSOCK	WSAENOTSOCK
+#define	ENOTSOCK	WSAENOTSOCK
 #endif
 #ifndef EPROTOTYPE
-#define EPROTOTYPE	WSAEPROTOTYPE
+#define	EPROTOTYPE	WSAEPROTOTYPE
 #endif
 #ifndef EOPNOTSUPP
-#define EOPNOTSUPP	WSAEOPNOTSUPP
+#define	EOPNOTSUPP	WSAEOPNOTSUPP
 #endif
 #ifndef EPROTONOSUPPORT
-#define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
+#define	EPROTONOSUPPORT	WSAEPROTONOSUPPORT
 #endif
 #ifndef EOVERFLOW
-#define EOVERFLOW	-1
+#define	EOVERFLOW	-1
 #endif
 #ifndef ECONNRESET
-#define ECONNRESET	WSAECONNRESET
+#define	ECONNRESET	WSAECONNRESET
 #endif
 #ifndef ELOOP
-#define ELOOP		WSAELOOP
+#define	ELOOP		WSAELOOP
 #endif
 #ifndef ENOTBLK
-#define ENOTBLK		-1
+#define	ENOTBLK		-1
 #endif
 #ifndef ETXTBSY
-#define ETXTBSY		-1
+#define	ETXTBSY		-1
 #endif
 #ifndef ENETDOWN
-#define ENETDOWN	WSAENETDOWN
+#define	ENETDOWN	WSAENETDOWN
 #endif
 #ifndef ESHUTDOWN
-#define ESHUTDOWN	WSAESHUTDOWN
+#define	ESHUTDOWN	WSAESHUTDOWN
 #endif
 #ifndef ECONNABORTED
-#define ECONNABORTED	WSAECONNABORTED
+#define	ECONNABORTED	WSAECONNABORTED
 #endif
 #endif /* _WINDOWS */
+
+#if defined(macintosh)
+/*
+ * Some Unix error defs. Under CW 7, we can't define OTUNIXERRORS because
+ * it generates many conflicts with errno.h. Define what we need here.
+ * These need to be in sync with OpenTransport.h
+ */
+#define	EWOULDBLOCK     35
+#define	ENOTSOCK        38
+#define	EPROTOTYPE      41
+#define	EPROTONOSUPPORT 43
+#define	EOPNOTSUPP      45
+#define	EADDRINUSE      48
+#define	EADDRNOTAVAIL   49
+#define	ENETDOWN        50
+#define	ECONNABORTED    53
+#define	ECONNRESET      54
+#define	EISCONN         56
+#define	ENOTCONN        57
+#define	ESHUTDOWN       58
+#define	ETIMEDOUT       60
+#define	ECONNREFUSED    61
+#define	EHOSTUNREACH    65
+#define	EAFNOSUPPORT    -1
+#define	ELOOP           -1
+#define	ENOTBLK         -1
+#define	ENOTSUP         -1
+#define	EOVERFLOW       -1
+#define	ETXTBSY         -1
+#endif /* macintosh */
+
+#ifdef XP_OS2
+#define	SOCBASEERR      0
+#endif
+#ifndef ENOTSUP
+#define	ENOTSUP         -1
+#endif
+#ifndef EOVERFLOW
+#define	EOVERFLOW       -1
+#endif
+#ifndef EDEADLOCK
+#define	EDEADLOCK       -1
+#endif
+#ifndef EFAULT
+#define	EFAULT          SOCEFAULT
+#endif
+#ifndef EPIPE
+#define	EPIPE           SOCEPIPE
+#endif
+#ifndef EIO
+#define	EIO             (SOCBASEERR+5)
+#endif
+#ifndef EDEADLK
+#define	EDEADLK         (SOCBASEERR+11)
+#endif
+#ifndef ENOTBLK
+#define	ENOTBLK         (SOCBASEERR+15)
+#endif
+#ifndef EBUSY
+#define	EBUSY           (SOCBASEERR+16)
+#endif
+#ifndef ENOTDIR
+#define	ENOTDIR         (SOCBASEERR+20)
+#endif
+#ifndef EISDIR
+#define	EISDIR          (SOCBASEERR+21)
+#endif
+#ifndef ENFILE
+#define	ENFILE          (SOCBASEERR+23)
+#endif
+#ifndef ETXTBSY
+#define	ETXTBSY         (SOCBASEERR+26)
+#endif
+#ifndef EFBIG
+#define	EFBIG           (SOCBASEERR+27)
+#endif
+#ifndef ESPIPE
+#define	ESPIPE          (SOCBASEERR+29)
+#endif
+#ifndef EROFS
+#define	EROFS           (SOCBASEERR+30)
+#endif
+
+#ifdef BEOS
+#define	ENOTSUP         -1
+#define	ENOTBLK         -1
+#define	ETXTBSY         -1
+#endif
+
+#if defined(BSDI) || defined(OPENBSD) || defined (NETBSD)
+#define	ENOTSUP		-1
+#endif
+
+#if defined(OSF1) || defined(BSDI) || defined(VMS) || defined(OPENBSD)
+#define	EOVERFLOW       -1
+#endif
+
+#if defined(__hpux) || defined(_AIX) || defined(OSF1) || defined(DARWIN) || \
+  defined(BEOS) || defined(FREEBSD) || defined(BSDI) || defined(VMS) || \
+  defined(OPENBSD) || defined(NETBSD)
+#define	EDEADLOCK       -1
+#endif
 
 /* XXX: need to verify that the -1 entries are correct (no mapping) */
 static struct prldap_errormap_entry prldap_errormap[] = {
@@ -150,7 +266,7 @@ static struct prldap_errormap_entry prldap_errormap[] = {
     {  PR_UNLOAD_LIBRARY_ERROR, -1 },
     {  PR_FIND_SYMBOL_ERROR, -1 },
     {  PR_INSUFFICIENT_RESOURCES_ERROR, -1 },
-    {  PR_DIRECTORY_LOOKUP_ERROR, -1 },
+    {  PR_DIRECTORY_LOOKUP_ERROR, EHOSTUNREACH },/* an approximation */
     {  PR_TPD_RANGE_ERROR, -1 },
     {  PR_PROC_DESC_TABLE_FULL_ERROR, -1 },
     {  PR_SYS_DESC_TABLE_FULL_ERROR, -1 },
@@ -161,19 +277,11 @@ static struct prldap_errormap_entry prldap_errormap[] = {
     {  PR_OPERATION_NOT_SUPPORTED_ERROR, EOPNOTSUPP },
     {  PR_PROTOCOL_NOT_SUPPORTED_ERROR, EPROTONOSUPPORT },
     {  PR_REMOTE_FILE_ERROR, -1 },
-#if defined(OSF1)
-    {  PR_BUFFER_OVERFLOW_ERROR, -1 },
-#else
     {  PR_BUFFER_OVERFLOW_ERROR, EOVERFLOW },
-#endif /* OSF1 */
     {  PR_CONNECT_RESET_ERROR, ECONNRESET },
     {  PR_RANGE_ERROR, ERANGE },
     {  PR_DEADLOCK_ERROR, EDEADLK },
-#if defined(HPUX11) || defined(AIX4_3) || defined(OSF1)
-    {  PR_FILE_IS_LOCKED_ERROR, -1 },	/* XXX: correct mapping ? */
-#else
     {  PR_FILE_IS_LOCKED_ERROR, EDEADLOCK },	/* XXX: correct mapping ? */
-#endif /* HPUX11 */
     {  PR_FILE_TOO_BIG_ERROR, EFBIG },
     {  PR_NO_DEVICE_SPACE_ERROR, ENOSPC },
     {  PR_PIPE_ERROR, EPIPE },

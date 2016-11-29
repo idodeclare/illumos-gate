@@ -1,25 +1,40 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  * Copyright (c) 1994 Regents of the University of Michigan.
@@ -48,7 +63,7 @@
 #if defined(MOZILLA_CLIENT) && defined(SOLARIS)
 #include "xp_qsort.h"
 #else
-#define XP_QSORT qsort
+#define	XP_QSORT qsort
 #endif
 
 typedef struct keycmp {
@@ -94,6 +109,14 @@ ldap_keysort_entries(
 
 	count = ldap_count_entries( ld, *chain );
 
+	if (count < 0) { /* error */
+		return( LDAP_PARAM_ERROR );
+	}
+
+	if (count < 2) { /* nothing to sort */
+		return( 0 );
+	}
+
 	kt = (keything_t**)NSLDAPI_MALLOC( count * (sizeof(keything_t*) + sizeof(keything_t)) );
 	if ( kt == NULL ) {
 		LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL, NULL );
@@ -119,7 +142,7 @@ ldap_keysort_entries(
 	last = e;
 
 	XP_QSORT( (void*)kt, count, (size_t)sizeof(keything_t*), ldapi_keycmp );
-    
+
 	ep = chain;
 	for ( i = 0; i < count; i++ ) {
 		*ep = kt[i]->kt_msg;
@@ -138,7 +161,7 @@ struct entrything {
 };
 
 typedef int (LDAP_C LDAP_CALLBACK LDAP_CHARCMP_CALLBACK)(char*, char*);
-typedef int (LDAP_C LDAP_CALLBACK LDAP_VOIDCMP_CALLBACK)(const void*, 
+typedef int (LDAP_C LDAP_CALLBACK LDAP_VOIDCMP_CALLBACK)(const void*,
 	const void*);
 
 static LDAP_CHARCMP_CALLBACK *et_cmp_fn;
@@ -153,9 +176,9 @@ ldap_sort_strcasecmp(
 )
 {
     /* XXXceb
-     * I am not 100% sure this is the way this should be handled.  
+     * I am not 100% sure this is the way this should be handled.
      * For now we will return a 0 on invalid.
-     */    
+     */
     if (NULL == a || NULL == b)
         return (0);
 	return( strcasecmp( (char *)*a, (char *)*b ) );
@@ -215,6 +238,14 @@ ldap_multisort_entries(
 
 	count = ldap_count_entries( ld, *chain );
 
+	if (count < 0) { /* error, usually with bad ld or malloc */
+		return( LDAP_PARAM_ERROR );
+	}
+
+	if (count < 2) { /* nothing to sort */
+		return( 0 );
+	}
+
 	if ( (et = (struct entrything *)NSLDAPI_MALLOC( count *
 	    sizeof(struct entrything) )) == NULL ) {
 		LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL, NULL );
@@ -245,7 +276,7 @@ ldap_multisort_entries(
 				for ( j = 0; j <= i; j++ )
 				    ldap_value_free( et[j].et_vals );
 				NSLDAPI_FREE( (char *) et );
-				LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL, 
+				LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL,
 				    NULL );
 				return( -1 );
 			    }
@@ -306,7 +337,7 @@ ldap_sort_values(
 		return( LDAP_PARAM_ERROR );
 	}
 
-    if ( NULL == vals) 
+    if ( NULL == vals)
     {
 		LDAP_SET_LDERRNO( ld, LDAP_PARAM_ERROR, NULL, NULL );
 		return( LDAP_PARAM_ERROR );

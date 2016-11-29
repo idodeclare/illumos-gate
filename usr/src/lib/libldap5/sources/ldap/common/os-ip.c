@@ -2,27 +2,43 @@
  * Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  *  Copyright (c) 1995 Regents of the University of Michigan.
@@ -33,13 +49,29 @@
  */
 
 #if 0
-#ifndef lint 
+#ifndef lint
 static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of Michigan.\nAll rights reserved.\n";
 #endif
 #endif
 
+/*
+ * On platforms where poll() does not exist, we use select().
+ * Therefore, we should increase the number of file descriptors
+ * we can use by #defining FD_SETSIZE to a large number before
+ * we include <sys/select.h> or its equivalent.  We do not need
+ * to do this for Windows, because on that platform there is no
+ * relationship between FD_SETSIZE and the highest numbered file
+ * descriptor we can use.  See the document fdsetsize.txt in
+ * this directory for a description of the setting of FD_SETSIZE
+ * for the OS'es we care about.
+ */
+#ifndef NSLDAPI_HAVE_POLL
+/* XXX value for BSDI? */
+/* XXX value for macintosh (if applicable)? */
+#endif
+
 #include "ldap-int.h"
-#ifdef LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED
+#ifdef NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED
 #include <signal.h>
 #endif
 
@@ -49,13 +81,13 @@ static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of 
 
 
 #ifdef _WINDOWS
-#define NSLDAPI_INVALID_OS_SOCKET( s )	((s) == INVALID_SOCKET)
+#define	NSLDAPI_INVALID_OS_SOCKET( s )	((s) == INVALID_SOCKET)
 #else
-#define NSLDAPI_INVALID_OS_SOCKET( s )	((s) < 0 )	
+#define	NSLDAPI_INVALID_OS_SOCKET( s )	((s) < 0 )
 #endif
 
 
-#define NSLDAPI_POLL_ARRAY_GROWTH  5  /* grow arrays 5 elements at a time */
+#define	NSLDAPI_POLL_ARRAY_GROWTH  5  /* grow arrays 5 elements at a time */
 
 
 /*
@@ -85,9 +117,9 @@ struct nsldapi_cb_statusinfo {		/* used with ext. I/O poll() callback */
  * matches the LDAP_X_PollFD pollfd.
  */
 #ifdef _WINDOWS
-#define NSLDAPI_CB_POLL_SD_CAST		(unsigned int)
+#define	NSLDAPI_CB_POLL_SD_CAST		(unsigned int)
 #else
-#define NSLDAPI_CB_POLL_SD_CAST
+#define	NSLDAPI_CB_POLL_SD_CAST
 #endif
 #if defined(LDAP_SASLIO_HOOKS)
 #define NSLDAPI_CB_POLL_MATCH( sbp, pollfd ) \
@@ -103,8 +135,8 @@ struct nsldapi_cb_statusinfo {		/* used with ext. I/O poll() callback */
 
 struct nsldapi_iostatus_info {
 	int				ios_type;
-#define NSLDAPI_IOSTATUS_TYPE_OSNATIVE		1   /* poll() or select() */
-#define NSLDAPI_IOSTATUS_TYPE_CALLBACK		2   /* poll()-like */
+#define	NSLDAPI_IOSTATUS_TYPE_OSNATIVE		1   /* poll() or select() */
+#define	NSLDAPI_IOSTATUS_TYPE_CALLBACK		2   /* poll()-like */
 	int				ios_read_count;
 	int				ios_write_count;
 	union {
@@ -113,7 +145,7 @@ struct nsldapi_iostatus_info {
 	} ios_status;
 };
 
-
+#ifndef NSLDAPI_AVOID_OS_SOCKETS
 #ifdef NSLDAPI_HAVE_POLL
 static int nsldapi_add_to_os_pollfds( int fd,
     struct nsldapi_os_statusinfo *pip, short events );
@@ -122,6 +154,7 @@ static int nsldapi_clear_from_os_pollfds( int fd,
 static int nsldapi_find_in_os_pollfds( int fd,
     struct nsldapi_os_statusinfo *pip, short revents );
 #endif /* NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 static int nsldapi_iostatus_init_nolock( LDAP *ld );
 static int nsldapi_add_to_cb_pollfds( Sockbuf *sb,
@@ -139,18 +172,18 @@ static int nsldapi_find_in_cb_pollfds( Sockbuf *sb,
  * has not been initialized.  We work around the problem by bypassing
  * the NSPR wrapper functions and going directly to the OS' functions.
  */
-#define NSLDAPI_POLL		_poll
-#define NSLDAPI_SELECT		_select
+#define	NSLDAPI_POLL		_poll
+#define	NSLDAPI_SELECT		_select
 extern int _poll(struct pollfd *fds, unsigned long nfds, int timeout);
 extern int _select(int nfds, fd_set *readfds, fd_set *writefds,
         fd_set *exceptfds, struct timeval *timeout);
 #else /* _PR_THREADS */
-#define NSLDAPI_POLL		poll
-#define NSLDAPI_SELECT		select
+#define	NSLDAPI_POLL		poll
+#define	NSLDAPI_SELECT		select
 #endif /* else _PR_THREADS */
 #else /* irix */
-#define NSLDAPI_POLL		poll
-#define NSLDAPI_SELECT		select
+#define	NSLDAPI_POLL		poll
+#define	NSLDAPI_SELECT		select
 #endif /* else irix */
 
 
@@ -158,7 +191,10 @@ static LBER_SOCKET nsldapi_os_socket( LDAP *ld, int secure, int domain,
 	int type, int protocol );
 static int nsldapi_os_ioctl( LBER_SOCKET s, int option, int *statusp );
 static int nsldapi_os_connect_with_to( LBER_SOCKET s, struct sockaddr *name,
-	int namelen, LDAP *ld);
+	int namelen, int msec_timeout );
+#if defined(KERBEROS)
+char * nsldapi_host_connected_to( LDAP *ld, Sockbuf *sb );
+#endif
 
 /*
  * Function typedefs used by nsldapi_try_each_host()
@@ -167,7 +203,7 @@ typedef LBER_SOCKET (NSLDAPI_SOCKET_FN)( LDAP *ld, int secure, int domain,
 	    int type, int protocol );
 typedef int (NSLDAPI_IOCTL_FN)( LBER_SOCKET s, int option, int *statusp );
 typedef int (NSLDAPI_CONNECT_WITH_TO_FN )( LBER_SOCKET s, struct sockaddr *name,
-	int namelen, LDAP *ld);
+	int namelen, int msec_timeout );
 typedef int (NSLDAPI_CONNECT_FN )( LBER_SOCKET s, struct sockaddr *name,
 	int namelen );
 typedef int (NSLDAPI_CLOSE_FN )( LBER_SOCKET s );
@@ -183,11 +219,15 @@ nsldapi_os_closesocket( LBER_SOCKET s )
 {
 	int	rc;
 
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+	rc = -1;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef _WINDOWS
 	rc = closesocket( s );
-#else
+#else /* _WINDOWS */
 	rc = close( s );
-#endif
+#endif /* _WINDOWS */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 	return( rc );
 }
 
@@ -195,13 +235,15 @@ nsldapi_os_closesocket( LBER_SOCKET s )
 static LBER_SOCKET
 nsldapi_os_socket( LDAP *ld, int secure, int domain, int type, int protocol )
 {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+	return -1;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 	int		s, invalid_socket;
 	char		*errmsg = NULL;
 
 	if ( secure ) {
 		LDAP_SET_LDERRNO( ld, LDAP_LOCAL_ERROR, NULL,
-			    nsldapi_strdup( dgettext(TEXT_DOMAIN,
-				"secure mode not supported") ));
+			    nsldapi_strdup( "secure mode not supported" ));
 		return( -1 );
 	}
 
@@ -212,7 +254,11 @@ nsldapi_os_socket( LDAP *ld, int secure, int domain, int type, int protocol )
 	 * than we can deal with, return a "local error."
 	 */
 	if ( NSLDAPI_INVALID_OS_SOCKET( s )) {
+#ifdef _SOLARIS_SDK
 		errmsg = dgettext(TEXT_DOMAIN, "unable to create a socket");
+#else
+		errmsg = "unable to create a socket";
+#endif _SOLARIS_SDK
 		invalid_socket = 1;
 	} else {	/* valid socket -- check for overflow */
 		invalid_socket = 0;
@@ -234,6 +280,7 @@ nsldapi_os_socket( LDAP *ld, int secure, int domain, int type, int protocol )
 	}
 
 	return( s );
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 }
 
 
@@ -243,27 +290,28 @@ nsldapi_os_socket( LDAP *ld, int secure, int domain, int type, int protocol )
  */
 static int
 nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
-	int salen, LDAP *ld)
+	int salen, int msec)
 {
-#ifndef _WINDOWS
-	int		flags;
-#endif /* _WINDOWS */
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+	return -1;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 	int		n, error;
 	int		len;
-	fd_set		rset, wset;
-	struct timeval	tval;
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(XP_OS2)
 	int		nonblock = 1;
 	int		block = 0;
-	fd_set		eset;
-#endif /* _WINDOWS */
-	int		msec = ld->ld_connect_timeout; /* milliseconds */
-	int		continue_on_intr = 0;
-#ifdef _SOLARIS_SDK
-	hrtime_t	start_time = 0, tmp_time, tv_time; /* nanoseconds */
 #else
-	long		start_time = 0, tmp_time; /* seconds */
+	int		flags;
+#endif /* _WINDOWS */
+#ifdef NSLDAPI_HAVE_POLL
+	struct pollfd   pfd;
+#else
+	struct timeval	tval;
+	fd_set		rset, wset;
+#ifdef _WINDOWS
+	fd_set		eset;
 #endif
+#endif /* NSLDAPI_HAVE_POLL */
 
 
 	LDAPDebug( LDAP_DEBUG_TRACE, "nsldapi_connect_nonblock timeout: %d (msec)\n",
@@ -271,6 +319,8 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 
 #ifdef _WINDOWS
 	ioctlsocket(sockfd, FIONBIO, &nonblock);
+#elif defined(XP_OS2)
+  ioctl( sockfd, FIONBIO, &nonblock, sizeof(nonblock) );
 #else
 	flags = fcntl(sockfd, F_GETFL, 0);
 	fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
@@ -295,6 +345,10 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 	if (n == 0)
 		goto done;
 
+#ifdef NSLDAPI_HAVE_POLL
+	pfd.fd = sockfd;
+	pfd.events = POLLOUT;
+#else
 	FD_ZERO(&rset);
 	FD_SET(sockfd, &rset);
 	wset = rset;
@@ -302,17 +356,18 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 #ifdef _WINDOWS
 	eset = rset;
 #endif /* _WINDOWS */
+#endif /* NSLDAPI_HAVE_POLL */
 
 	if (msec < 0 && msec != LDAP_X_IO_TIMEOUT_NO_TIMEOUT) {
 		LDAPDebug( LDAP_DEBUG_TRACE, "Invalid timeout value detected.."
 			"resetting connect timeout to default value "
 			"(LDAP_X_IO_TIMEOUT_NO_TIMEOUT\n", 0, 0, 0);
 		msec = LDAP_X_IO_TIMEOUT_NO_TIMEOUT;
+#ifndef NSLDAPI_HAVE_POLL
 	} else {
 		if (msec != 0) {
-			tval.tv_sec = msec / MILLISEC;
-			tval.tv_usec = (MICROSEC / MILLISEC) *
-					    (msec % MILLISEC);
+			tval.tv_sec = msec / 1000;
+			tval.tv_usec = 1000 * ( msec % 1000 );
 #ifdef _SOLARIS_SDK
 			start_time = gethrtime();
 			tv_time = MSEC2NSEC(msec);
@@ -321,10 +376,29 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 #endif
 		} else {
 			tval.tv_sec = 0;
-		        tval.tv_usec = 0;
-                }
+			tval.tv_usec = 0;
+		}
+#endif /* NSLDAPI_HAVE_POLL */
 	}
 
+#ifdef NSLDAPI_HAVE_POLL
+	if ((n = poll(&pfd, 1,
+		(msec != LDAP_X_IO_TIMEOUT_NO_TIMEOUT) ? msec : -1)) == 0) {
+		errno = ETIMEDOUT;
+		return (-1);
+	}
+	if (pfd.revents & (POLLOUT|POLLERR|POLLHUP|POLLNVAL)) {
+		len = sizeof(error);
+		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char *)&error, &len)
+			< 0)
+			return (-1);
+#ifdef LDAP_DEBUG
+	} else if ( ldap_debug & LDAP_DEBUG_TRACE ) {
+		perror("poll error: sockfd not set");
+#endif
+	}
+
+#else /* NSLDAPI_HAVE_POLL */
 	/* if timeval structure == NULL, select will block indefinitely */
 	/* 			!= NULL, and value == 0, select will */
 	/* 			         not block */
@@ -356,61 +430,14 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 	/* failure on select call */
 	if (n == SOCKET_ERROR) {
 		perror("select error: SOCKET_ERROR returned");
-		return (-1);		
+		return (-1);
 	}
 #else
-	/*
-	 * if LDAP_BITOPT_RESTART and select() is interrupted
-	 * try again.
-	 */
-	do {
-		continue_on_intr = 0;
-		if ((n = select(sockfd +1, &rset, &wset, NULL,
-			(msec != LDAP_X_IO_TIMEOUT_NO_TIMEOUT) ? \
-			    &tval : NULL)) == 0) {
-			errno = ETIMEDOUT;
-			return (-1);
-		}
-		if (n < 0) {
-			if ((ld->ld_options & LDAP_BITOPT_RESTART) &&
-			    (errno == EINTR)) {
-				continue_on_intr = 1;
-				errno = 0;
-				FD_ZERO(&rset);
-				FD_SET(sockfd, &rset);
-				wset = rset;
-				/* honour the timeout */
-				if ((msec != LDAP_X_IO_TIMEOUT_NO_TIMEOUT) &&
-				    (msec !=  0)) {
-#ifdef _SOLARIS_SDK
-					tmp_time = gethrtime();
-					if ((tv_time -=
-					    (tmp_time - start_time)) <= 0) {
-#else
-					tmp_time = (long)time(NULL);
-					if ((tval.tv_sec -=
-					    (tmp_time - start_time)) <= 0) {
-#endif
-						/* timeout */
-						errno = ETIMEDOUT;
-						return (-1);
-					}
-#ifdef _SOLARIS_SDK
-					tval.tv_sec = tv_time / NANOSEC;
-					tval.tv_usec = (tv_time % NANOSEC) /
-							(NANOSEC / MICROSEC);
-#endif
-					start_time = tmp_time;
-				}
-			} else {
-#ifdef LDAP_DEBUG
-				perror("select error: ");
-#endif
-				return (-1);
-			}
-		}
-	} while (continue_on_intr == 1);
-
+	if ((n = select(sockfd +1, &rset, &wset, NULL,
+		(msec != LDAP_X_IO_TIMEOUT_NO_TIMEOUT) ? &tval : NULL)) == 0) {
+		errno = ETIMEDOUT;
+		return (-1);
+	}
 	if (FD_ISSET(sockfd, &rset) || FD_ISSET(sockfd, &wset)) {
 		len = sizeof(error);
 		if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (char *)&error, &len)
@@ -422,10 +449,13 @@ nsldapi_os_connect_with_to(LBER_SOCKET sockfd, struct sockaddr *saptr,
 #endif
 	}
 #endif /* _WINDOWS */
+#endif /* NSLDAPI_HAVE_POLL */
 
 done:
 #ifdef _WINDOWS
 	ioctlsocket(sockfd, FIONBIO, &block);
+#elif defined(XP_OS2)
+  ioctl( sockfd, FIONBIO, &nonblock, sizeof(block) );
 #else
 	fcntl(sockfd, F_SETFL, flags);
 #endif /* _WINDOWS */
@@ -436,14 +466,18 @@ done:
 	}
 
 	return (0);
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 }
 
 
 static int
 nsldapi_os_ioctl( LBER_SOCKET s, int option, int *statusp )
 {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+	return -1;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 	int		err;
-#ifdef _WINDOWS
+#if defined(_WINDOWS) || defined(XP_OS2)
 	u_long		iostatus;
 #endif
 
@@ -455,10 +489,15 @@ nsldapi_os_ioctl( LBER_SOCKET s, int option, int *statusp )
 	iostatus = *(u_long *)statusp;
 	err = ioctlsocket( s, FIONBIO, &iostatus );
 #else
+#ifdef XP_OS2
+	err = ioctl( s, FIONBIO, (caddr_t)&iostatus, sizeof(iostatus) );
+#else
 	err = ioctl( s, FIONBIO, (caddr_t)statusp );
+#endif
 #endif
 
 	return( err );
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 }
 
 
@@ -491,18 +530,17 @@ nsldapi_connect_to_host( LDAP *ld, Sockbuf *sb, const char *hostlist,
 		s = ld->ld_extconnect_fn( hostlist, defport,
 		    ld->ld_connect_timeout, connect_opts,
 		    ld->ld_ext_session_arg,
-		    &sb->sb_ext_io_fns.lbextiofn_socket_arg
-#ifdef _SOLARIS_SDK
-		    , NULL );
-#else
-		    );
-#endif	/* _SOLARIS_SDK */
+		    &sb->sb_ext_io_fns.lbextiofn_socket_arg );
 
 	} else {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		return( -1 );
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 		s = nsldapi_try_each_host( ld, hostlist,
 			defport, secure, nsldapi_os_socket,
 			nsldapi_os_ioctl, nsldapi_os_connect_with_to,
 			NULL, nsldapi_os_closesocket );
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 	}
 
 	if ( s < 0 ) {
@@ -539,11 +577,16 @@ nsldapi_try_each_host( LDAP *ld, const char *hostlist,
 	NSLDAPI_IOCTL_FN *ioctlfn, NSLDAPI_CONNECT_WITH_TO_FN *connectwithtofn,
 	NSLDAPI_CONNECT_FN *connectfn, NSLDAPI_CLOSE_FN *closefn )
 {
-	int			rc, i, s, err, connected, use_hp;
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+	return -1;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
+	int			rc = -1;
+	int			s = 0;
+	int			i, err, connected, use_hp;
 	int			parse_err, port;
 	struct sockaddr_in	sin;
 	nsldapi_in_addr_t	address;
-	char			**addrlist, *ldhpbuf, *ldhpbuf_allocd;
+	char			**addrlist, *ldhpbuf, *ldhpbuf_allocd = NULL;
 	char			*host;
 	LDAPHostEnt		ldhent, *ldhp;
 	struct hostent		*hp;
@@ -567,8 +610,14 @@ nsldapi_try_each_host( LDAP *ld, const char *hostlist,
 
 		if (( address = inet_addr( host )) == -1 ) {
 			if ( ld->ld_dns_gethostbyname_fn == NULL ) {
-				if (( hp = GETHOSTBYNAME( host, &hent, hbuf,
-				    sizeof(hbuf), &err )) != NULL ) {
+#ifdef GETHOSTBYNAME_R_RETURNS_INT
+				(void)GETHOSTBYNAME( host, &hent, hbuf,
+				    sizeof(hbuf), &hp, &err );
+#else
+				hp = GETHOSTBYNAME( host, &hent, hbuf,
+				    sizeof(hbuf), &err );
+#endif
+				if ( hp != NULL ) {
 					addrlist = hp->h_addr_list;
 				}
 			} else {
@@ -648,12 +697,12 @@ nsldapi_try_each_host( LDAP *ld, const char *hostlist,
 			    (char *) &address ), sizeof( sin.sin_addr.s_addr) );
 
 			{
-#ifdef LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED
+#ifdef NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED
 /*
- * Block all of the signals that might interrupt connect() since there
- * is an OS bug that causes connect() to fail if it is restarted.  Look in
- * ns/netsite/ldap/include/portable.h for the definition of
- * LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED
+ * Block all of the signals that might interrupt connect() since
+ * there is an OS bug that causes connect() to fail if it is restarted.
+ * Look in ../../include/portable.h for the definition of
+ * NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED.
  */
 				sigset_t	ints_off, oldset;
 
@@ -662,25 +711,25 @@ nsldapi_try_each_host( LDAP *ld, const char *hostlist,
 				sigaddset( &ints_off, SIGIO );
 				sigaddset( &ints_off, SIGCLD );
 
-				sigprocmask( SIG_BLOCK, &ints_off, &oldset );
-#endif /* LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED */
+				NSLDAPI_MT_SAFE_SIGPROCMASK( SIG_BLOCK, &ints_off, &oldset );
+#endif /* NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED */
 
-				if ( NULL != connectwithtofn  ) {	
+				if ( NULL != connectwithtofn  ) {
 					err = (*connectwithtofn)(s,
 						(struct sockaddr *)&sin,
 						sizeof(struct sockaddr_in),
-						ld);
+						ld->ld_connect_timeout);
 				} else {
 					err = (*connectfn)(s,
 						(struct sockaddr *)&sin,
 						sizeof(struct sockaddr_in));
 				}
-#ifdef LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED
+#ifdef NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED
 /*
  * restore original signal mask
  */
-				sigprocmask( SIG_SETMASK, &oldset, 0 );
-#endif /* LDAP_CONNECT_MUST_NOT_BE_INTERRUPTED */
+				NSLDAPI_MT_SAFE_SIGPROCMASK( SIG_SETMASK, &oldset, 0 );
+#endif /* NSLDAPI_CONNECT_MUST_NOT_BE_INTERRUPTED */
 
 			}
 			if ( err >= 0 ) {
@@ -730,14 +779,16 @@ nsldapi_try_each_host( LDAP *ld, const char *hostlist,
 	}
 
 	return( rc == 0 ? s : -1 );
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 }
-
 
 void
 nsldapi_close_connection( LDAP *ld, Sockbuf *sb )
 {
 	if ( ld->ld_extclose_fn == NULL ) {
+#ifndef NSLDAPI_AVOID_OS_SOCKETS
 		nsldapi_os_closesocket( sb->sb_sd );
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 	} else {
 		ld->ld_extclose_fn( sb->sb_sd,
 			    sb->sb_ext_io_fns.lbextiofn_socket_arg );
@@ -745,9 +796,9 @@ nsldapi_close_connection( LDAP *ld, Sockbuf *sb )
 }
 
 
-#ifdef  KERBEROS
+#ifdef KERBEROS
 char *
-nsldapi_host_connected_to( Sockbuf *sb )
+nsldapi_host_connected_to( LDAP *ld, Sockbuf *sb )
 {
 	struct hostent		*hp;
 	char			*p;
@@ -757,20 +808,20 @@ nsldapi_host_connected_to( Sockbuf *sb )
 	(void)memset( (char *)&sin, 0, sizeof( struct sockaddr_in ));
 	len = sizeof( sin );
 	if ( getpeername( sb->sb_sd, (struct sockaddr *)&sin, &len ) == -1 ) {
-	    return( NULL );
+		return( NULL );
 	}
 
-        /*
+	/*
 	 * do a reverse lookup on the addr to get the official hostname.
 	 * this is necessary for kerberos to work right, since the official
 	 * hostname is used as the kerberos instance.
 	 */
 #error XXXmcs: need to use DNS callbacks here
-	if (( hp = gethostbyaddr((char *) &sin.sin_addr, 
-	    sizeof( sin.sin_addr ), AF_INET)) != NULL ) {
-	    if ( hp->h_name != NULL ) {
-		return( nsldapi_strdup( hp->h_name ));
-	    }
+	if (( hp = (struct hostent *)gethostbyaddr( (char *) &sin.sin_addr,
+	    sizeof( sin.sin_addr ), AF_INET )) != NULL ) {
+		if ( hp->h_name != NULL ) {
+			return( nsldapi_strdup( hp->h_name ));
+		}
 	}
 
 	return( NULL );
@@ -785,19 +836,24 @@ nsldapi_host_connected_to( Sockbuf *sb )
 int
 nsldapi_iostatus_interest_write( LDAP *ld, Sockbuf *sb )
 {
+	int		rc = 0;
 	NSLDAPIIOStatus	*iosp;
 
 	LDAP_MUTEX_LOCK( ld, LDAP_IOSTATUS_LOCK );
 
 	if ( ld->ld_iostatus == NULL
 	    && nsldapi_iostatus_init_nolock( ld ) < 0 ) {
-		LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-		return( -1 );
+		rc = -1;
+		goto unlock_and_return;
 	}
 
 	iosp = ld->ld_iostatus;
 
 	if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		rc = -1;
+		goto unlock_and_return;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef NSLDAPI_HAVE_POLL
 		if ( nsldapi_add_to_os_pollfds( sb->sb_sd,
 		    &iosp->ios_status.ios_osinfo, POLLOUT )) {
@@ -811,6 +867,7 @@ nsldapi_iostatus_interest_write( LDAP *ld, Sockbuf *sb )
 			++iosp->ios_write_count;
 		}
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		if ( nsldapi_add_to_cb_pollfds( sb,
@@ -824,9 +881,9 @@ nsldapi_iostatus_interest_write( LDAP *ld, Sockbuf *sb )
 		     iosp->ios_type, 0, 0 );
 	}
 
+unlock_and_return:
 	LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-
-	return( 0 );
+	return( rc );
 }
 
 
@@ -837,19 +894,24 @@ nsldapi_iostatus_interest_write( LDAP *ld, Sockbuf *sb )
 int
 nsldapi_iostatus_interest_read( LDAP *ld, Sockbuf *sb )
 {
+	int		rc = 0;
 	NSLDAPIIOStatus	*iosp;
 
 	LDAP_MUTEX_LOCK( ld, LDAP_IOSTATUS_LOCK );
 
 	if ( ld->ld_iostatus == NULL
 	    && nsldapi_iostatus_init_nolock( ld ) < 0 ) {
-		LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-		return( -1 );
+		rc = -1;
+		goto unlock_and_return;
 	}
 
 	iosp = ld->ld_iostatus;
 
 	if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		rc = -1;
+		goto unlock_and_return;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef NSLDAPI_HAVE_POLL
 		if ( nsldapi_add_to_os_pollfds( sb->sb_sd,
 		    &iosp->ios_status.ios_osinfo, POLLIN )) {
@@ -863,6 +925,7 @@ nsldapi_iostatus_interest_read( LDAP *ld, Sockbuf *sb )
 			++iosp->ios_read_count;
 		}
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		if ( nsldapi_add_to_cb_pollfds( sb,
@@ -875,9 +938,9 @@ nsldapi_iostatus_interest_read( LDAP *ld, Sockbuf *sb )
 		     iosp->ios_type, 0, 0 );
 	}
 
+unlock_and_return:
 	LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-
-	return( 0 );
+	return( rc );
 }
 
 
@@ -888,19 +951,24 @@ nsldapi_iostatus_interest_read( LDAP *ld, Sockbuf *sb )
 int
 nsldapi_iostatus_interest_clear( LDAP *ld, Sockbuf *sb )
 {
+	int		rc = 0;
 	NSLDAPIIOStatus	*iosp;
 
 	LDAP_MUTEX_LOCK( ld, LDAP_IOSTATUS_LOCK );
 
 	if ( ld->ld_iostatus == NULL
 	    && nsldapi_iostatus_init_nolock( ld ) < 0 ) {
-		LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-		return( -1 );
+		rc = -1;
+		goto unlock_and_return;
 	}
 
 	iosp = ld->ld_iostatus;
 
 	if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		rc = -1;
+		goto unlock_and_return;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef NSLDAPI_HAVE_POLL
 		if ( nsldapi_clear_from_os_pollfds( sb->sb_sd,
 		    &iosp->ios_status.ios_osinfo, POLLOUT )) {
@@ -924,6 +992,7 @@ nsldapi_iostatus_interest_clear( LDAP *ld, Sockbuf *sb )
 			--iosp->ios_read_count;
 		}
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		if ( nsldapi_clear_from_cb_pollfds( sb,
@@ -940,9 +1009,9 @@ nsldapi_iostatus_interest_clear( LDAP *ld, Sockbuf *sb )
 		     iosp->ios_type, 0, 0 );
 	}
 
+unlock_and_return:
 	LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
-
-	return( 0 );
+	return( rc );
 }
 
 
@@ -952,13 +1021,19 @@ nsldapi_iostatus_interest_clear( LDAP *ld, Sockbuf *sb )
 int
 nsldapi_iostatus_is_write_ready( LDAP *ld, Sockbuf *sb )
 {
-	int		rc;
+	int		rc = 0;
 	NSLDAPIIOStatus	*iosp;
 
 	LDAP_MUTEX_LOCK( ld, LDAP_IOSTATUS_LOCK );
 	iosp = ld->ld_iostatus;
+	if ( iosp == NULL ) {
+		goto unlock_and_return;
+	}
 
 	if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		goto unlock_and_return;
+#else  /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef NSLDAPI_HAVE_POLL
 		/*
 		 * if we are using poll() we do something a little tricky: if
@@ -975,6 +1050,7 @@ nsldapi_iostatus_is_write_ready( LDAP *ld, Sockbuf *sb )
 		rc = FD_ISSET( sb->sb_sd,
 			&iosp->ios_status.ios_osinfo.ossi_use_writefds );
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		rc = nsldapi_find_in_cb_pollfds( sb,
@@ -987,6 +1063,7 @@ nsldapi_iostatus_is_write_ready( LDAP *ld, Sockbuf *sb )
 		rc = 0;
 	}
 
+unlock_and_return:
 	LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
 	return( rc );
 }
@@ -998,13 +1075,19 @@ nsldapi_iostatus_is_write_ready( LDAP *ld, Sockbuf *sb )
 int
 nsldapi_iostatus_is_read_ready( LDAP *ld, Sockbuf *sb )
 {
-	int		rc;
+	int		rc = 0;
 	NSLDAPIIOStatus	*iosp;
 
 	LDAP_MUTEX_LOCK( ld, LDAP_IOSTATUS_LOCK );
 	iosp = ld->ld_iostatus;
+	if ( iosp == NULL ) {
+		goto unlock_and_return;
+	}
 
 	if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		goto unlock_and_return;
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifdef NSLDAPI_HAVE_POLL
 		/*
 		 * if we are using poll() we do something a little tricky: if
@@ -1021,6 +1104,7 @@ nsldapi_iostatus_is_read_ready( LDAP *ld, Sockbuf *sb )
 		rc = FD_ISSET( sb->sb_sd,
 		    &iosp->ios_status.ios_osinfo.ossi_use_readfds );
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		rc = nsldapi_find_in_cb_pollfds( sb,
@@ -1033,13 +1117,14 @@ nsldapi_iostatus_is_read_ready( LDAP *ld, Sockbuf *sb )
 		rc = 0;
 	}
 
+unlock_and_return:
 	LDAP_MUTEX_UNLOCK( ld, LDAP_IOSTATUS_LOCK );
 	return( rc );
 }
 
 
 /*
- * Allocated and initialize ld->ld_iostatus if not already done.
+ * Allocate and initialize ld->ld_iostatus if not already done.
  * Should be called with LDAP_IOSTATUS_LOCK locked.
  * Returns 0 if all goes well and -1 if not (sets error in ld)
  */
@@ -1060,10 +1145,14 @@ nsldapi_iostatus_init_nolock( LDAP *ld )
 
 	if ( ld->ld_extpoll_fn == NULL ) {
 		iosp->ios_type = NSLDAPI_IOSTATUS_TYPE_OSNATIVE;
+#ifdef NSLDAPI_AVOID_OS_SOCKETS
+		return( -1 );
+#else /* NSLDAPI_AVOID_OS_SOCKETS */
 #ifndef NSLDAPI_HAVE_POLL
 		FD_ZERO( &iosp->ios_status.ios_osinfo.ossi_readfds );
 		FD_ZERO( &iosp->ios_status.ios_osinfo.ossi_writefds );
 #endif /* !NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else {
 		iosp->ios_type = NSLDAPI_IOSTATUS_TYPE_CALLBACK;
@@ -1081,7 +1170,7 @@ nsldapi_iostatus_free( LDAP *ld )
 		return;
 	}
 
-		
+
 	/* clean up classic I/O compatibility glue */
 	if ( ld->ld_io_fns_ptr != NULL ) {
 		if ( ld->ld_ext_session_arg != NULL ) {
@@ -1120,6 +1209,8 @@ nsldapi_iostatus_free( LDAP *ld )
 }
 
 
+
+#if !defined(NSLDAPI_HAVE_POLL) && !defined(NSLDAPI_AVOID_OS_SOCKETS)
 static int
 nsldapi_get_select_table_size( void )
 {
@@ -1146,6 +1237,8 @@ nsldapi_get_select_table_size( void )
 
 	return( tblsize );
 }
+#endif /* !defined(NSLDAPI_HAVE_POLL) && !defined(NSLDAPI_AVOID_OS_SOCKETS) */
+
 
 static int
 nsldapi_tv2ms( struct timeval *tv )
@@ -1170,10 +1263,11 @@ nsldapi_iostatus_poll( LDAP *ld, struct timeval *timeout )
 	iosp = ld->ld_iostatus;
 
 	if ( iosp == NULL ||
-	    ( iosp->ios_read_count <= 0 && iosp->ios_read_count <= 0 )) {
+            ( iosp->ios_read_count <= 0 && iosp->ios_write_count <= 0 )) {
 		rc = 0;		/* simulate a timeout */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_OSNATIVE ) {
+#ifndef NSLDAPI_AVOID_OS_SOCKETS
 #ifdef NSLDAPI_HAVE_POLL
 
 		rc = NSLDAPI_POLL( iosp->ios_status.ios_osinfo.ossi_pollfds,
@@ -1200,13 +1294,14 @@ nsldapi_iostatus_poll( LDAP *ld, struct timeval *timeout )
 		    NULL, timeout );
 #endif /* else HPUX9 */
 #endif /* else NSLDAPI_HAVE_POLL */
+#endif /* NSLDAPI_AVOID_OS_SOCKETS */
 
 	} else if ( iosp->ios_type == NSLDAPI_IOSTATUS_TYPE_CALLBACK ) {
 		/*
 		 * We always pass the session extended I/O argument to
 		 * the extended poll() callback.
 		 */
-		rc = ld->ld_extpoll_fn( 
+		rc = ld->ld_extpoll_fn(
 		    iosp->ios_status.ios_cbinfo.cbsi_pollfds,
 		    iosp->ios_status.ios_cbinfo.cbsi_pollfds_size,
 		    nsldapi_tv2ms( timeout ), ld->ld_ext_session_arg );
@@ -1222,8 +1317,7 @@ nsldapi_iostatus_poll( LDAP *ld, struct timeval *timeout )
 	return( rc );
 }
 
-
-#ifdef NSLDAPI_HAVE_POLL
+#if defined(NSLDAPI_HAVE_POLL) && !defined(NSLDAPI_AVOID_OS_SOCKETS)
 /*
  * returns 1 if "fd" was added to pollfds.
  * returns 1 if some of the bits in "events" were added to pollfds.
@@ -1339,8 +1433,7 @@ nsldapi_find_in_os_pollfds( int fd, struct nsldapi_os_statusinfo *pip,
 
 	return( 0 );	/* "fd" was not found */
 }
-#endif /* NSLDAPI_HAVE_POLL */
-
+#endif /* !defined(NSLDAPI_HAVE_POLL) && !defined(NSLDAPI_AVOID_OS_SOCKETS) */
 
 /*
  * returns 1 if "sb" was added to pollfds.
@@ -1473,7 +1566,6 @@ nsldapi_install_lber_extiofns( LDAP *ld, Sockbuf *sb )
 {
 	struct lber_x_ext_io_fns	lberiofns;
 
-        memset( &lberiofns, 0, sizeof(struct lber_x_ext_io_fns) );
 	if ( NULL != sb ) {
 		lberiofns.lbextiofn_size = LBER_X_EXTIO_FNS_SIZE;
 		lberiofns.lbextiofn_read = ld->ld_extread_fn;
@@ -1508,7 +1600,7 @@ typedef struct nsldapi_compat_socket_info {
     LBER_SOCKET		csi_socket;
     LDAP		*csi_ld;
 } NSLDAPICompatSocketInfo;
-    
+
 static int LDAP_CALLBACK
 nsldapi_ext_compat_read( int s, void *buf, int len,
 	struct lextiof_socket_private *arg )
@@ -1555,7 +1647,7 @@ nsldapi_ext_compat_poll( LDAP_X_PollFD fds[], int nfds, int timeout,
 			LDAP_SET_ERRNO( csip->csi_ld, EINVAL );
 			return( -1 );
 		}
-		
+
 		if ( 0 != ( fds[i].lpoll_events & LDAP_X_POLLIN )) {
 			FD_SET( fds[i].lpoll_fd, &readfds );
 		}
@@ -1626,8 +1718,12 @@ nsldapi_compat_socket( LDAP *ld, int secure, int domain, int type,
 #ifdef NSLDAPI_HAVE_POLL
 		if ( ld->ld_io_fns_ptr->liof_select != NULL
 			    && s >= FD_SETSIZE ) {
+#ifdef _SOLARIS_SDK
 			errmsg = dgettext(TEXT_DOMAIN,
 				"can't use socket >= FD_SETSIZE");
+#else
+			errmsg = "can't use socket >= FD_SETSIZE";
+#endif /* _SOLARIS_SDK */
 		}
 #elif !defined(_WINDOWS) /* not on Windows and do not have poll() */
 		if ( s >= FD_SETSIZE ) {
@@ -1637,8 +1733,12 @@ nsldapi_compat_socket( LDAP *ld, int secure, int domain, int type,
 
 		if ( NULL == errmsg && secure &&
 			    ld->ld_io_fns_ptr->liof_ssl_enable( s ) < 0 ) {
+#ifdef _SOLARIS_SDK
 			errmsg = dgettext(TEXT_DOMAIN,
 				"failed to enable secure mode");
+#else
+			errmsg = "failed to enable secure mode";
+#endif /* _SOLARIS_SDK */
 		    }
 
 		if ( NULL != errmsg ) {
@@ -1705,7 +1805,7 @@ nsldapi_ext_compat_connect( const char *hostlist, int defport, int timeout,
 		connectfn = iofns->liof_connect;
 	}
 	closefn = ( iofns->liof_close == NULL ) ?
-		    nsldapi_os_closesocket : iofns->liof_close;	
+		    nsldapi_os_closesocket : iofns->liof_close;
 
 	s = nsldapi_try_each_host( defcsip->csi_ld, hostlist, defport,
 			secure, socketfn, ioctlfn, connectwithtofn,
@@ -1816,5 +1916,3 @@ _ns_gethostbyaddr(LDAP *ld, const char *addr, int length, int type,
 }
 
 #endif	/* _SOLARIS_SDK */
-
-

@@ -1,25 +1,40 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  *  Copyright (c) 1993 Regents of the University of Michigan.
@@ -30,7 +45,7 @@
  */
 
 #if 0
-#ifndef lint 
+#ifndef lint
 static char copyright[] = "@(#) Copyright (c) 1993 Regents of the University of Michigan.\nAll rights reserved.\n";
 #endif
 #endif
@@ -39,7 +54,6 @@ static char copyright[] = "@(#) Copyright (c) 1993 Regents of the University of 
 
 static int simple_bind_nolock( LDAP *ld, const char *dn, const char *passwd,
 	int unlock_permitted );
-static int simple_bindifnot_s( LDAP *ld, const char *dn, const char *passwd );
 
 /*
  * ldap_simple_bind - bind to the ldap server.  The dn and
@@ -60,7 +74,11 @@ ldap_simple_bind( LDAP *ld, const char *dn, const char *passwd )
 	LDAPDebug( LDAP_DEBUG_TRACE, "ldap_simple_bind\n", 0, 0, 0 );
 
 	if ( !NSLDAPI_VALID_LDAP_POINTER( ld )) {
-		return( -1 );
+		return( LDAP_PARAM_ERROR );
+	}
+
+	if ( ( ld->ld_options & LDAP_BITOPT_RECONNECT ) != 0 ) {
+		nsldapi_handle_reconnect( ld );
 	}
 
 	rc = simple_bind_nolock( ld, dn, passwd, 1 );
@@ -157,9 +175,8 @@ ldap_simple_bind_s( LDAP *ld, const char *dn, const char *passwd )
 
 	LDAPDebug( LDAP_DEBUG_TRACE, "ldap_simple_bind_s\n", 0, 0, 0 );
 
-	if ( NSLDAPI_VALID_LDAP_POINTER( ld ) &&
-	    ( ld->ld_options & LDAP_BITOPT_RECONNECT ) != 0 ) {
-		return( simple_bindifnot_s( ld, dn, passwd ));
+	if ( !NSLDAPI_VALID_LDAP_POINTER( ld )) {
+		return( LDAP_PARAM_ERROR );
 	}
 
 	if ( (msgid = ldap_simple_bind( ld, dn, passwd )) == -1 )
@@ -171,39 +188,10 @@ ldap_simple_bind_s( LDAP *ld, const char *dn, const char *passwd )
 	return( ldap_result2error( ld, result, 1 ) );
 }
 
-
-/*
- * simple_bindifnot_s() is like ldap_simple_bind_s() except that it only does
- * a bind if the default connection is not currently bound.
- * If a successful bind using the same DN has already taken place we just
- * return LDAP_SUCCESS without conversing with the server at all.
- */
-static int
-simple_bindifnot_s( LDAP *ld, const char *dn, const char *passwd )
+void nsldapi_handle_reconnect( LDAP *ld )
 {
-	int		msgid, rc;
-	LDAPMessage	*result;
-	char		*binddn;
 
-	LDAPDebug( LDAP_DEBUG_TRACE, "simple_bindifnot_s\n", 0, 0, 0 );
-
-	if ( !NSLDAPI_VALID_LDAP_POINTER( ld )) {
-		return( LDAP_PARAM_ERROR );
-	}
-
-	if ( dn == NULL ) {
-		dn = "";	/* to make comparisons simpler */
-	}
-
-	/*
-	 * if we are already bound using the same DN, just return LDAP_SUCCESS.
-	 */
-	if ( NULL != ( binddn = nsldapi_get_binddn( ld ))
-	    && 0 == strcmp( dn, binddn )) {
-		rc = LDAP_SUCCESS;
-		LDAP_SET_LDERRNO( ld, rc, NULL, NULL );
-		return rc;
-	}
+	LDAPDebug( LDAP_DEBUG_TRACE, "nsldapi_handle_reconnect\n", 0, 0, 0 );
 
 	/*
 	 * if the default connection has been lost and is now marked dead,
@@ -216,49 +204,13 @@ simple_bindifnot_s( LDAP *ld, const char *dn, const char *passwd )
 	LDAP_MUTEX_LOCK( ld, LDAP_CONN_LOCK );
 	if ( NULL != ld->ld_defconn ) {
 	    if ( LDAP_CONNST_DEAD == ld->ld_defconn->lconn_status ) {
-		nsldapi_free_connection( ld, ld->ld_defconn, NULL, NULL, 1, 0 );
-		ld->ld_defconn = NULL;
+			nsldapi_free_connection( ld, ld->ld_defconn, NULL, NULL, 1, 0 );
+			ld->ld_defconn = NULL;
 	    } else if ( ld->ld_defconn->lconn_binddn != NULL ) {
-		NSLDAPI_FREE( ld->ld_defconn->lconn_binddn );
-		ld->ld_defconn->lconn_binddn = NULL;
-		ld->ld_defconn->lconn_bound = 0;
+			NSLDAPI_FREE( ld->ld_defconn->lconn_binddn );
+			ld->ld_defconn->lconn_binddn = NULL;
+			ld->ld_defconn->lconn_bound = 0;
 	    }
 	}
 	LDAP_MUTEX_UNLOCK( ld, LDAP_CONN_LOCK );
-
-	/*
-	 * finally, bind (this will open a new connection if necessary)
-	 *
-	 * do everything under the protection of the result lock to
-	 * ensure that only one thread will be in this code at a time.
-	 * XXXmcs: we should use a condition variable instead?
-	 */
-	LDAP_MUTEX_LOCK( ld, LDAP_RESULT_LOCK );
-	if ( (msgid = simple_bind_nolock( ld, dn, passwd, 0 )) == -1 ) {
-		rc = LDAP_GET_LDERRNO( ld, NULL, NULL );
-		goto unlock_and_return;
-	}
-
-	/*
-	 * Note that at this point the bind request is on its way to the
-	 * server and at any time now we will either be bound as the new
-	 * DN (if the bind succeeded) or we will be bound as anonymous (if
-	 * the bind failed).
-	 */
-
-	/*
-	 * Wait for the bind result.  Code inside result.c:read1msg()
-	 * takes care of setting the connection's bind DN and status.
-	 */
-	if ( nsldapi_result_nolock( ld, msgid, 1, 0, (struct timeval *) 0,
-	    &result ) == -1 ) {
-		rc = LDAP_GET_LDERRNO( ld, NULL, NULL );
-		goto unlock_and_return;
-	}
-
-	rc = ldap_result2error( ld, result, 1 );
-
-unlock_and_return:
-	LDAP_MUTEX_UNLOCK( ld, LDAP_RESULT_LOCK );
-	return( rc );
 }

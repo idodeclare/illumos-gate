@@ -2,25 +2,43 @@
  * Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * The contents of this file are subject to the Netscape Public License
- * Version 1.0 (the "NPL"); you may not use this file except in
- * compliance with the NPL.  You may obtain a copy of the NPL at
- * http://www.mozilla.org/NPL/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
  *
- * Software distributed under the NPL is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the NPL
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
- * NPL.
+ * License.
  *
- * The Initial Developer of this code under the NPL is Netscape
- * Communications Corporation.  Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation.  All Rights
- * Reserved.
+ * The Original Code is Mozilla Communicator client code, released
+ * March 31, 1998.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 #include "ldap-int.h"
 
@@ -140,8 +158,8 @@ static struct ldaperror ldap_errlist[] = {
 	{ LDAP_UNWILLING_TO_PERFORM, 		"DSA is unwilling to perform" },
 	{ LDAP_LOOP_DETECT, 			"Loop detected" },
     { LDAP_SORT_CONTROL_MISSING,    "Sort Control is missing"  },
-    { LDAP_INDEX_RANGE_ERROR,              "Search results exceed the range specified by the offsets" }, 
-    
+    { LDAP_INDEX_RANGE_ERROR,              "Search results exceed the range specified by the offsets" },
+
     { LDAP_NAMING_VIOLATION, 		"Naming violation" },
 	{ LDAP_OBJECT_CLASS_VIOLATION, 		"Object class violation" },
 	{ LDAP_NOT_ALLOWED_ON_NONLEAF, 		"Operation not allowed on nonleaf" },
@@ -171,7 +189,7 @@ static struct ldaperror ldap_errlist[] = {
 	{ LDAP_REFERRAL_LIMIT_EXCEEDED,		"Referral hop limit exceeded" },
 	{ -1, 0 }
 };
-#endif
+#endif /* _SOLARIS_SDK */
 
 #ifdef _SOLARIS_SDK
 static mutex_t		err_mutex = DEFAULTMUTEX;
@@ -298,7 +316,7 @@ static void fill_ldap_errlist()
 				"Referral hop limit exceeded");
 	mutex_unlock(&err_mutex);
 }
-#endif
+#endif /* _SOLARIS_SDK */
 
 char *
 LDAP_CALL
@@ -312,14 +330,18 @@ ldap_err2string( int err )
 	/* Make sure errlist is initialized before referencing err string */
 	if (ldap_errlist[last_index].e_reason == NULL)
 		fill_ldap_errlist();
-#endif
+#endif /* _SOLARIS_SDK */
 
 	for ( i = 0; ldap_errlist[i].e_code != -1; i++ ) {
 		if ( err == ldap_errlist[i].e_code )
 			return( ldap_errlist[i].e_reason );
 	}
 
+#ifdef _SOLARIS_SDK
 	return( dgettext(TEXT_DOMAIN, "Unknown error") );
+#else
+	return( "Unknown error" );
+#endif /* _SOLARIS_SDK */
 }
 
 
@@ -329,7 +351,11 @@ nsldapi_safe_strerror( int e )
 	char *s;
 
 	if (( s = strerror( e )) == NULL ) {
+#ifdef _SOLARIS_SDK
 		s = dgettext(TEXT_DOMAIN, "unknown error");
+#else
+		s = "unknown error";
+#endif /* _SOLARIS_SDK */
 	}
 
 	return( s );
@@ -340,8 +366,10 @@ void
 LDAP_CALL
 ldap_perror( LDAP *ld, const char *s )
 {
-	int	i, err;
-	char	*matched, *errmsg, *separator;
+	int		i, err;
+	char	*matched = NULL;
+	char	*errmsg = NULL;
+	char	*separator;
 	char    msg[1024];
 
 	LDAPDebug( LDAP_DEBUG_TRACE, "ldap_perror\n", 0, 0, 0 );
@@ -350,7 +378,7 @@ ldap_perror( LDAP *ld, const char *s )
 	/* Make sure errlist is initialized before referencing err string */
 	if (ldap_errlist[last_index].e_reason == NULL)
 		fill_ldap_errlist();
-#endif
+#endif /* _SOLARIS_SDK */
 
 	if ( s == NULL ) {
 		s = separator = "";
@@ -359,8 +387,8 @@ ldap_perror( LDAP *ld, const char *s )
 	}
 
 	if ( ld == NULL ) {
-		sprintf( msg, "%s%s%s", s, separator,
-		    nsldapi_safe_strerror( errno ) );
+		snprintf( msg, sizeof( msg ),
+			"%s%s%s", s, separator, nsldapi_safe_strerror( errno ) );
 		ber_err_print( msg );
 		return;
 	}
@@ -369,8 +397,8 @@ ldap_perror( LDAP *ld, const char *s )
 	err = LDAP_GET_LDERRNO( ld, &matched, &errmsg );
 	for ( i = 0; ldap_errlist[i].e_code != -1; i++ ) {
 		if ( err == ldap_errlist[i].e_code ) {
-			sprintf( msg, "%s%s%s", s, separator,
-				    ldap_errlist[i].e_reason );
+			snprintf( msg, sizeof( msg ),
+				"%s%s%s", s, separator, ldap_errlist[i].e_reason );
 			ber_err_print( msg );
 			if ( err == LDAP_CONNECT_ERROR ) {
 				ber_err_print( " - " );
@@ -379,23 +407,21 @@ ldap_perror( LDAP *ld, const char *s )
 			}
 			ber_err_print( "\n" );
 			if ( matched != NULL && *matched != '\0' ) {
-				sprintf( msg, dgettext(TEXT_DOMAIN,
-					"%s%smatched: %s\n"),
-				    s, separator, matched );
+				snprintf( msg, sizeof( msg ),
+					"%s%smatched: %s\n", s, separator, matched );
 				ber_err_print( msg );
 			}
 			if ( errmsg != NULL && *errmsg != '\0' ) {
-				sprintf( msg, dgettext(TEXT_DOMAIN,
-					"%s%sadditional info: %s\n"),
-				    s, separator, errmsg );
+				snprintf( msg, sizeof( msg ),
+					"%s%sadditional info: %s\n", s, separator, errmsg );
 				ber_err_print( msg );
 			}
 			LDAP_MUTEX_UNLOCK( ld, LDAP_ERR_LOCK );
 			return;
 		}
 	}
-	sprintf( msg, dgettext(TEXT_DOMAIN, "%s%sNot an LDAP errno %d\n"),
-		s, separator, err );
+	snprintf( msg, sizeof( msg ),
+		"%s%sNot an LDAP errno %d\n", s, separator, err );
 	ber_err_print( msg );
 	LDAP_MUTEX_UNLOCK( ld, LDAP_ERR_LOCK );
 }
@@ -444,7 +470,7 @@ ldap_get_lderrno( LDAP *ld, char **m, char **s )
  * between threads they *must* perform their own locking around the
  * session handle or they must install a "set lderrno" thread callback
  * function.
- * 
+ *
  */
 int
 LDAP_CALL
@@ -489,6 +515,7 @@ ldap_parse_result( LDAP *ld, LDAPMessage *res, int *errcodep, char **matchednp,
 	LDAPMessage		*lm;
 	int			err, errcode;
 	char			*m, *e;
+	m = e = NULL;
 
 	LDAPDebug( LDAP_DEBUG_TRACE, "ldap_parse_result\n", 0, 0, 0 );
 
@@ -498,7 +525,7 @@ ldap_parse_result( LDAP *ld, LDAPMessage *res, int *errcodep, char **matchednp,
 	}
 
 	/* skip over entries and references to find next result in this chain */
-	for ( lm = res; lm != NULL; lm = lm->lm_chain ) {	
+	for ( lm = res; lm != NULL; lm = lm->lm_chain ) {
 		if ( lm->lm_msgtype != LDAP_RES_SEARCH_ENTRY &&
 		    lm->lm_msgtype != LDAP_RES_SEARCH_REFERENCE ) {
 			break;
@@ -529,7 +556,7 @@ ldap_parse_result( LDAP *ld, LDAPMessage *res, int *errcodep, char **matchednp,
 		 * if there are more result messages in the chain, arrange to
 		 * return the special LDAP_MORE_RESULTS_TO_RETURN "error" code.
 		 */
-		for ( lm = lm->lm_chain; lm != NULL; lm = lm->lm_chain ) {	
+		for ( lm = lm->lm_chain; lm != NULL; lm = lm->lm_chain ) {
 			if ( lm->lm_msgtype != LDAP_RES_SEARCH_ENTRY &&
 			    lm->lm_msgtype != LDAP_RES_SEARCH_REFERENCE ) {
 				err = LDAP_MORE_RESULTS_TO_RETURN;
@@ -537,7 +564,8 @@ ldap_parse_result( LDAP *ld, LDAPMessage *res, int *errcodep, char **matchednp,
 			}
 		}
 	} else {
-		m = e = NULL;
+	    /* In this case, m and e were already freed by ber_scanf */
+	    m = e = NULL;
 	}
 
 	if ( freeit ) {
@@ -546,9 +574,19 @@ ldap_parse_result( LDAP *ld, LDAPMessage *res, int *errcodep, char **matchednp,
 
 	LDAP_SET_LDERRNO( ld, ( err == LDAP_SUCCESS ) ? errcode : err, m, e );
 
+	/* nsldapi_parse_result set m and e, so we have to delete them if they exist.
+	   Only delete them if they haven't been reused for matchednp or errmsgp.
+	   if ( err == LDAP_SUCCESS ) {
+	if ( (m != NULL) && (matchednp == NULL) ) {
+	NSLDAPI_FREE( m );
+	}
+	if ( (e != NULL) && (errmsgp == NULL) ) {
+	NSLDAPI_FREE( e );
+	}
+	} */
+
 	return( err );
 }
-
 
 /*
  * returns an LDAP error code indicating success or failure of parsing
@@ -561,8 +599,8 @@ nsldapi_parse_result( LDAP *ld, int msgtype, BerElement *rber, int *errcodep,
 {
 	BerElement	ber;
 	ber_len_t	len;
-	int		berrc, err, errcode;
-	ber_int_t	along;
+	ber_int_t   errcode;
+	int			berrc, err;
 	char		*m, *e;
 
 	/*
@@ -607,12 +645,10 @@ nsldapi_parse_result( LDAP *ld, int msgtype, BerElement *rber, int *errcodep,
 	ber = *rber;		/* struct copy */
 
 	if ( NSLDAPI_LDAP_VERSION( ld ) < LDAP_VERSION2 ) {
-		berrc = ber_scanf( &ber, "{ia}", &along, &e );
-		errcode = (int)along;	/* XXX lossy cast */
+		berrc = ber_scanf( &ber, "{ia}", &errcode, &e );
 	} else {
-		if (( berrc = ber_scanf( &ber, "{iaa", &along, &m, &e ))
+		if (( berrc = ber_scanf( &ber, "{iaa", &errcode, &m, &e ))
 		    != LBER_ERROR ) {
-			errcode = (int)along;	/* XXX lossy cast */
 			/* check for optional referrals */
 			if ( ber_peek_tag( &ber, &len ) == LDAP_TAG_REFERRAL ) {
 				if ( referralsp == NULL ) {
@@ -635,7 +671,7 @@ nsldapi_parse_result( LDAP *ld, int msgtype, BerElement *rber, int *errcodep,
 			 *   extendedop results -  OID plus value
 			 */
 			if ( msgtype == LDAP_RES_BIND ) {
-				if ( ber_peek_tag( &ber, &len ) == 
+				if ( ber_peek_tag( &ber, &len ) ==
 				    LDAP_TAG_SASL_RES_CREDS ) {
 					berrc = ber_scanf( &ber, "x" );
 				}

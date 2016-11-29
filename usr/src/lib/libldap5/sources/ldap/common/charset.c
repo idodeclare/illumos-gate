@@ -2,29 +2,43 @@
  * Copyright (c) 2001 by Sun Microsystems, Inc.
  * All rights reserved.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  *  Copyright (c) 1995 Regents of the University of Michigan.
@@ -70,7 +84,7 @@ ldap_enable_translation( LDAP *ld, LDAPMessage *entry, int enable )
 
 	optionsp = ( entry == NULLMSG ) ? &ld->ld_lberoptions :
 	    &entry->lm_ber->ber_options;
-		
+
 	if ( enable ) {
 		*optionsp |= LBER_OPT_TRANSLATE_STRINGS;
 	} else {
@@ -83,13 +97,11 @@ int
 ldap_translate_from_t61( LDAP *ld, char **bufp, unsigned long *lenp,
     int free_input )
 {
-	ber_len_t length = (ber_len_t)*lenp;
-
 	if ( ld->ld_lber_decode_translate_proc == NULL ) {
 		return( LDAP_SUCCESS );
 	}
-	    
-	return( (*ld->ld_lber_decode_translate_proc)( bufp, &length, free_input ));
+
+	return( (*ld->ld_lber_decode_translate_proc)( bufp, lenp, free_input ));
 }
 
 
@@ -97,13 +109,11 @@ int
 ldap_translate_to_t61( LDAP *ld, char **bufp, unsigned long *lenp,
     int free_input )
 {
-	ber_len_t length = (ber_len_t)*lenp;
-
 	if ( ld->ld_lber_encode_translate_proc == NULL ) {
 		return( LDAP_SUCCESS );
 	}
-	    
-	return( (*ld->ld_lber_encode_translate_proc)( bufp, &length, free_input ));
+
+	return( (*ld->ld_lber_encode_translate_proc)( bufp, lenp, free_input ));
 }
 
 
@@ -125,27 +135,27 @@ ldap_translate_to_t61( LDAP *ld, char **bufp, unsigned long *lenp,
 #ifdef LDAP_CHARSET_8859
 
 #if LDAP_CHARSET_8859 == 88591
-#define ISO_8859 1
+#define	ISO_8859 1
 #elif LDAP_CHARSET_8859 == 88592
-#define ISO_8859 2
+#define	ISO_8859 2
 #elif LDAP_CHARSET_8859 == 88593
-#define ISO_8859 3
+#define	ISO_8859 3
 #elif LDAP_CHARSET_8859 == 88594
-#define ISO_8859 4
+#define	ISO_8859 4
 #elif LDAP_CHARSET_8859 == 88595
-#define ISO_8859 5
+#define	ISO_8859 5
 #elif LDAP_CHARSET_8859 == 88596
-#define ISO_8859 6
+#define	ISO_8859 6
 #elif LDAP_CHARSET_8859 == 88597
-#define ISO_8859 7
+#define	ISO_8859 7
 #elif LDAP_CHARSET_8859 == 88598
-#define ISO_8859 8
+#define	ISO_8859 8
 #elif LDAP_CHARSET_8859 == 88599
-#define ISO_8859 9
+#define	ISO_8859 9
 #elif LDAP_CHARSET_8859 == 885910
-#define ISO_8859 10
+#define	ISO_8859 10
 #else
-#define ISO_8859 0
+#define	ISO_8859 0
 #endif
 
 /*
@@ -207,7 +217,7 @@ static Byte *cc_to_t61();
    Character choosed as base in diacritics alone: NO-BREAK SPACE.
    (The standard say it must be a blank space, 0x20.)
 */
-#define  ALONE  0xA0
+#define	ALONE  0xA0
 
 static Couple diacritic[16] = {
 #if (ISO_8859 == 1) || (ISO_8859 == 9)
@@ -1599,7 +1609,7 @@ ldap_8859_to_t61( char **bufp, unsigned long *buflenp, int free_input )
 {
   Byte		*s, *oo, *o, *aux;
   int		c;
-  unsigned long len; 
+  unsigned long len;
   Couple	*cc;
 
   LDAPDebug( LDAP_DEBUG_TRACE, "ldap_8859_to_t61 input length: %ld\n",

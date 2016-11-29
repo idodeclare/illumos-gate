@@ -2,23 +2,43 @@
  * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * The contents of this file are subject to the Netscape Public License
- * Version 1.0 (the "NPL"); you may not use this file except in
- * compliance with the NPL.  You may obtain a copy of the NPL at
- * http://www.mozilla.org/NPL/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
  *
- * Software distributed under the NPL is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the NPL
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
- * NPL.
+ * License.
  *
- * The Initial Developer of this code under the NPL is Netscape
- * Communications Corporation.  Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation.  All Rights
- * Reserved.
+ * The Original Code is Mozilla Communicator client code, released
+ * March 31, 1998.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 /*
@@ -37,23 +57,15 @@
 
 #include "lber-int.h"
 
-/* the following constants are used in ber_calc_lenlen */
-
-#define LENMASK1	0xFF
-#define	LENMASK2 	0xFFFF
-#define LENMASK3	0xFFFFFF
-#define LENMASK4	0xFFFFFFFF
-#define _MASK		0x80
-
 static int
 ber_calc_taglen( ber_tag_t tag )
 {
-	int		i;
+	int			i;
 	ber_int_t	mask;
 
 	/* find the first non-all-zero byte in the tag */
 	for ( i = sizeof(ber_int_t) - 1; i > 0; i-- ) {
-		mask = (LENMASK3 << (i * 8));
+		mask = (0xff << (i * 8));
 		/* not all zero */
 		if ( tag & mask )
 			break;
@@ -65,7 +77,7 @@ ber_calc_taglen( ber_tag_t tag )
 static int
 ber_put_tag( BerElement	*ber, ber_tag_t tag, int nosos )
 {
-	int		taglen;
+	int			taglen;
 	ber_tag_t	ntag;
 
 	taglen = ber_calc_taglen( tag );
@@ -92,11 +104,11 @@ ber_calc_lenlen( ber_len_t len )
 	 * length of the length, followed by the length itself.
 	 */
 
-	if ( len <= LENMASK1 )
+	if ( len <= 0xFF )
 		return( 2 );
-	if ( len <= LENMASK2 )
+	if ( len <= 0xFFFF )
 		return( 3 );
-	if ( len <= LENMASK3 )
+	if ( len <= 0xFFFFFF )
 		return( 4 );
 
 	return( 5 );
@@ -105,7 +117,7 @@ ber_calc_lenlen( ber_len_t len )
 static int
 ber_put_len( BerElement *ber, ber_len_t len, int nosos )
 {
-	int		i;
+	int			i;
 	char		lenlen;
 	ber_int_t	mask;
 	ber_len_t	netlen;
@@ -128,7 +140,7 @@ ber_put_len( BerElement *ber, ber_len_t len, int nosos )
 
 	/* find the first non-all-zero byte */
 	for ( i = sizeof(ber_int_t) - 1; i > 0; i-- ) {
-		mask = (LENMASK1 << (i * 8));
+		mask = (0xff << (i * 8));
 		/* not all zero */
 		if ( len & mask )
 			break;
@@ -154,8 +166,8 @@ ber_put_len( BerElement *ber, ber_len_t len, int nosos )
 static int
 ber_put_int_or_enum( BerElement *ber, ber_int_t num, ber_tag_t tag )
 {
-	int		i, sign, taglen;
-	int		len, lenlen;
+	int			i, sign, taglen;
+	int			len, lenlen;
 	ber_int_t	netnum, mask;
 
 	sign = (num < 0);
@@ -165,7 +177,7 @@ ber_put_int_or_enum( BerElement *ber, ber_int_t num, ber_tag_t tag )
 	 * high bit is clear - look for first non-all-zero byte
 	 */
 	for ( i = sizeof(ber_int_t) - 1; i > 0; i-- ) {
-		mask = (LENMASK1 << (i * 8));
+		mask = (0xff << (i * 8));
 
 		if ( sign ) {
 			/* not all ones */
@@ -182,7 +194,7 @@ ber_put_int_or_enum( BerElement *ber, ber_int_t num, ber_tag_t tag )
 	 * we now have the "leading byte".  if the high bit on this
 	 * byte matches the sign bit, we need to "back up" a byte.
 	 */
-	mask = (num & (_MASK << (i * 8)));
+	mask = (num & (0x80 << (i * 8)));
 	if ( (mask && !sign) || (sign && !mask) )
 		i++;
 
@@ -195,8 +207,8 @@ ber_put_int_or_enum( BerElement *ber, ber_int_t num, ber_tag_t tag )
 		return( -1 );
 	i++;
 	netnum = LBER_HTONL( num );
-	if ( ber_write( ber, (char *) &netnum + (sizeof(ber_int_t) - i), i, 0 ) 
-		== i) 
+	if ( ber_write( ber, (char *) &netnum + (sizeof(ber_int_t) - i), i, 0 )
+		== i)
 		/* length of tag + length + contents */
 		return( taglen + lenlen + i );
 
@@ -252,8 +264,8 @@ ber_put_ostring( BerElement *ber, char *str, ber_len_t len,
 	}
 #endif /* STR_TRANSLATION */
 
-    /*  
-     *  Note:  below is a spot where we limit ber_write 
+    /*
+     *  Note:  below is a spot where we limit ber_write
      *         to signed long (instead of unsigned long)
      */
 
@@ -330,7 +342,7 @@ ber_put_null( BerElement *ber, ber_tag_t tag )
 
 int
 LDAP_CALL
-ber_put_boolean( BerElement *ber, int boolval, ber_tag_t tag )
+ber_put_boolean( BerElement *ber, ber_int_t boolval, ber_tag_t tag )
 {
 	int		taglen;
 	unsigned char	trueval = 0xff;
@@ -352,7 +364,7 @@ ber_put_boolean( BerElement *ber, int boolval, ber_tag_t tag )
 	return( taglen + 2 );
 }
 
-#define FOUR_BYTE_LEN	5
+#define	FOUR_BYTE_LEN	5
 
 
 /* the idea here is roughly this: we maintain a stack of these Seqorset
@@ -423,13 +435,18 @@ ber_start_set( BerElement *ber, ber_tag_t tag )
 static int
 ber_put_seqorset( BerElement *ber )
 {
-	ber_len_t	len, netlen;
-	int		taglen, lenlen;
+	ber_len_t		len, netlen;
+	int				taglen, lenlen;
 	unsigned char	ltag = 0x80 + FOUR_BYTE_LEN - 1;
-	Seqorset	*next;
-	Seqorset	**sos = &ber->ber_sos;
+	Seqorset		*next;
+	Seqorset		**sos = &ber->ber_sos;
 
-	/*
+	if ( *sos == NULL ) {
+        /* No sequence or set to put... fatal error. */
+        return( -1 );
+	}
+
+    /*
 	 * If this is the toplevel sequence or set, we need to actually
 	 * write the stuff out.  Otherwise, it's already been put in
 	 * the appropriate buffer and will be written when the toplevel
@@ -439,7 +456,7 @@ ber_put_seqorset( BerElement *ber )
 
 	len = (*sos)->sos_clen;
 	netlen = LBER_HTONL( len );
-	if ( sizeof(ber_int_t) > 4 && len > LENMASK4 )
+	if ( sizeof(ber_int_t) > 4 && len > 0xFFFFFFFF )
 		return( -1 );
 
 	if ( ber->ber_options & LBER_OPT_USE_DER ) {
@@ -492,7 +509,7 @@ ber_put_seqorset( BerElement *ber )
 		    sizeof(ber_int_t) - taglen, taglen );
 
 		if ( ber->ber_options & LBER_OPT_USE_DER ) {
-			ltag = (lenlen == 1) ? (unsigned char)len :  
+			ltag = (lenlen == 1) ? (unsigned char)len :
                 (unsigned char) (0x80 + (lenlen - 1));
 		}
 
@@ -561,11 +578,11 @@ int
 LDAP_C
 ber_printf( BerElement *ber, const char *fmt, ... )
 {
-	va_list		ap;
-	char		*s, **ss;
+	va_list			ap;
+	char			*s, **ss;
 	struct berval	*bval, **bv;
-	int		rc, i;
-	ber_len_t	len;
+	int				rc, i;
+	ber_len_t		len;
 
 	va_start( ap, fmt );
 
@@ -611,9 +628,9 @@ ber_printf( BerElement *ber, const char *fmt, ... )
 				rc = ber_put_ostring( ber, "", 0, ber->ber_tag );
 			} else {
 				rc = ber_put_ostring( ber, bval->bv_val, bval->bv_len,
-				    ber->ber_tag );
+					ber->ber_tag );
 			}
-			break;
+ 			break;
 
 		case 's':	/* string */
 			s = va_arg( ap, char * );

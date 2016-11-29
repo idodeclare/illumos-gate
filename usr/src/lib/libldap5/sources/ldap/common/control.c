@@ -1,21 +1,40 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * The contents of this file are subject to the Netscape Public License
- * Version 1.0 (the "NPL"); you may not use this file except in
- * compliance with the NPL.  You may obtain a copy of the NPL at
- * http://www.mozilla.org/NPL/
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
  *
- * Software distributed under the NPL is distributed on an "AS IS" basis,
- * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the NPL
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
  * for the specific language governing rights and limitations under the
- * NPL.
+ * License.
  *
- * The Initial Developer of this code under the NPL is Netscape
- * Communications Corporation.  Portions created by Netscape are
- * Copyright (C) 1998 Netscape Communications Corporation.  All Rights
- * Reserved.
+ * The Original Code is Mozilla Communicator client code, released
+ * March 31, 1998.
+ *
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /* control.c - routines to handle ldapv3 controls */
 
@@ -91,7 +110,7 @@ nsldapi_put_controls( LDAP *ld, LDAPControl **ctrls, int closeseq,
 
 		if ( c->ldctl_value.bv_val != NULL ) {
 			if ( ber_printf( ber, "o", c->ldctl_value.bv_val,
-			    (int)c->ldctl_value.bv_len /* XXX lossy cast */ )
+			    c->ldctl_value.bv_len )
 			    == -1 ) {
 				goto error_exit;
 			}
@@ -130,7 +149,7 @@ nsldapi_get_controls( BerElement *ber, LDAPControl ***controlsp )
 	LDAPControl		*newctrl;
 	ber_tag_t		tag;
 	ber_len_t		len;
-	int			rc, maxcontrols, curcontrols;
+	int				rc, maxcontrols, curcontrols;
 	char			*last;
 
 	/*
@@ -185,7 +204,7 @@ nsldapi_get_controls( BerElement *ber, LDAPControl ***controlsp )
 	    tag != LBER_ERROR && tag != LBER_END_OF_SEQORSET;
 	    tag = ber_next_element( ber, &len, last ) ) {
 		if ( curcontrols >= maxcontrols - 1 ) {
-#define CONTROL_GRABSIZE	5
+#define	CONTROL_GRABSIZE	5
 			maxcontrols += CONTROL_GRABSIZE;
 			*controlsp = (struct ldapcontrol **)NSLDAPI_REALLOC(
 			    (char *)*controlsp, maxcontrols *
@@ -200,7 +219,7 @@ nsldapi_get_controls( BerElement *ber, LDAPControl ***controlsp )
 			rc = LDAP_NO_MEMORY;
 			goto free_and_return;
 		}
-		
+
 		(*controlsp)[curcontrols++] = newctrl;
 		(*controlsp)[curcontrols] = NULL;
 
@@ -255,6 +274,33 @@ free_and_return:;
 	return( rc );
 }
 
+/*
+ * Skips forward in a ber to find a control tag, then calls on
+ * nsldapi_get_controls() to parse them into an LDAPControl list.
+ * Returns an LDAP error code.
+ */
+int
+nsldapi_find_controls( BerElement *ber, LDAPControl ***controlsp )
+{
+	ber_tag_t tag;
+	ber_len_t len;
+
+	if ( ber == NULLBER ) {
+		return( LDAP_DECODING_ERROR );
+	}
+
+	tag = ber_peek_tag( ber, &len );
+
+	while( tag != LDAP_TAG_CONTROLS && tag != LBER_DEFAULT ) {
+		tag = ber_skip_tag( ber, &len );
+		/* Skip ahead to the next sequence */
+		ber->ber_ptr += len;
+		tag = ber_peek_tag( ber, &len );
+	}
+
+	return( nsldapi_get_controls( ber, controlsp ) );
+}
+
 
 void
 LDAP_CALL
@@ -286,7 +332,30 @@ ldap_controls_free( LDAPControl **ctrls )
 	}
 }
 
+LDAPControl *
+LDAP_CALL
+ldap_find_control( const char *oid, LDAPControl **ctrls )
+{
+	int i, foundControl;
+	LDAPControl *Ctrlp = NULL;
 
+	/* find the control in the list of controls if it exists */
+	if ( ctrls == NULL ) {
+		return ( NULL );
+	}
+	foundControl = 0;
+	for ( i = 0; (( ctrls[i] != NULL ) && ( !foundControl )); i++ ) {
+		foundControl = !strcmp( ctrls[i]->ldctl_oid, oid );
+	}
+	if ( !foundControl ) {
+		return ( NULL );
+	} else {
+		/* let local var point to the control */
+		Ctrlp = ctrls[i-1];
+	}
+
+	return( Ctrlp );
+}
 
 #if 0
 LDAPControl **
@@ -471,14 +540,14 @@ nsldapi_build_control( char *oid, BerElement *ber, int freeber, char iscritical,
 	}
 
 	/* fill in the fields of this new control */
-	(*ctrlp)->ldctl_iscritical = iscritical;  
+	(*ctrlp)->ldctl_iscritical = iscritical;
 	if (( (*ctrlp)->ldctl_oid = nsldapi_strdup( oid )) == NULL ) {
-		NSLDAPI_FREE( *ctrlp ); 
+		NSLDAPI_FREE( *ctrlp );
 		if ( bvp != NULL ) {
 			ber_bvfree( bvp );
 		}
 		return( LDAP_NO_MEMORY );
-	}				
+	}
 
 	if ( bvp == NULL ) {
 		(*ctrlp)->ldctl_value.bv_len = 0;

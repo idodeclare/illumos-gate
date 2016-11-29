@@ -2,52 +2,48 @@
  * Copyright (c) 2001 by Sun Microsystems, Inc.
  * All rights reserved.
  */
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 
 /*
- * errormap.c - map NSPR and OS errors to strings
- *
- * CONFIDENTIAL AND PROPRIETARY SOURCE CODE OF NETSCAPE COMMUNICATIONS
- * CORPORATION 
- * 
- * Copyright (C) 1998-9 Netscape Communications Corporation. All Rights Reserved. 
- *
- * Use of this Source Code is subject to the terms of the applicable license
- * agreement from Netscape Communications Corporation. 
- *
- * The copyright notice(s) in this Source Code does not indicate actual or
- * intended publication of this Source Code. 
+ * errormap.c - map NSPR and NSS errors to strings
  */
-
-/* XXX ceb
- * This code was stolen from Directory server.  
- * ns/netsite/ldap/servers/slapd/errormap.c
- * OS errors are not handled, so the os error has been removed.
- */
-
 
 #if defined( _WINDOWS )
 #include <windows.h>
@@ -58,10 +54,12 @@
 #include <ssl.h>
 
 #include <ldap.h>
-
 #ifdef _SOLARIS_SDK
 #include <synch.h>
 #include <libintl.h>
+#include <ldap/ldap_ssl.h>
+#else
+#include <ldap_ssl.h>
 #endif /* _SOLARIS_SDK */
 
 
@@ -83,7 +81,11 @@ ldapssl_err2string( const int prerrno )
     const char	*s;
 
     if (( s = SECU_Strerror( (PRErrorCode)prerrno )) == NULL ) {
+#ifdef _SOLARIS_SDK
 	s = dgettext(TEXT_DOMAIN, "unknown");
+#else
+	s = "unknown";
+#endif /* _SOLARIS_SDK */
     }
 
     return( s );
@@ -96,7 +98,7 @@ ldapssl_err2string( const int prerrno )
  *	Taken from the file ns/security/cmd/lib/secerror.c on NSS_1_BRANCH.
  *	Last updated from there: 24-July-1998 by Mark Smith <mcs>
  *	Last updated from there: 14-July-1999 by chuck boatwright <cboatwri>
- *      
+ *
  *
  * All of the Directory Server specific changes are enclosed inside
  *	#ifdef NS_DIRECTORY.
@@ -107,7 +109,7 @@ ldapssl_err2string( const int prerrno )
 /*
  * XXXceb as a hack, we will locally define NS_DIRECTORY
  */
-#define NS_DIRECTORY 1
+#define	NS_DIRECTORY 1
 
 struct tuple_str {
     PRErrorCode	 errNum;
@@ -122,24 +124,24 @@ typedef struct tuple_str tuple_str;
 #else
 #define ER2(a,b)   {a, NULL},
 #define ER3(a,b,c) {a, NULL},
-#endif
+#endif /* !_SOLARIS_SDK */
 
 #include "secerr.h"
 #include "sslerr.h"
 
 #ifndef _SOLARIS_SDK
-const tuple_str errStrings[] = {
+static const tuple_str errStrings[] = {
 #else
 tuple_str errStrings[] = {
-#endif
+#endif /* !_SOLARIS_SDK */
 
 /* keep this list in asceding order of error numbers */
 #ifdef NS_DIRECTORY
 #include "sslerrstrs.h"
 #include "secerrstrs.h"
 #include "prerrstrs.h"
-/* 
- * XXXceb -- LDAPSDK won't care about disconnect 
+/*
+ * XXXceb -- LDAPSDK won't care about disconnect
 #include "disconnect_error_strings.h"
  */
 
@@ -151,7 +153,11 @@ tuple_str errStrings[] = {
 
 };
 
+#ifndef _SOLARIS_SDK
+static const PRInt32 numStrings = sizeof(errStrings) / sizeof(tuple_str);
+#else
 const PRInt32 numStrings = sizeof(errStrings) / sizeof(tuple_str);
+#endif /* !_SOLARIS_SDK */
 
 /* Returns a UTF-8 encoded constant error string for "errNum".
  * Returns NULL of errNum is unknown.
@@ -172,7 +178,7 @@ SECU_Strerror(PRErrorCode errNum) {
      * binary search depends on it.
      */
     if (!initDone) {
-	PRErrorCode lastNum = 0x80000000;
+	PRErrorCode lastNum = ((PRInt32)0x80000000);
     	for (i = low; i <= high; ++i) {
 	    num = errStrings[i].errNum;
 	    if (num <= lastNum) {
@@ -194,12 +200,12 @@ SECU_Strerror(PRErrorCode errNum) {
 			"error %d (%s)\n",
 			num, errStrings[i].errString, 0 );
 #else /* NS_DIRECTORY */
-	    	fprintf(stderr, 
+	    	fprintf(stderr,
 "sequence error in error strings at item %d\n"
 "error %d (%s)\n"
 "should come after \n"
 "error %d (%s)\n",
-		        i, lastNum, errStrings[i-1].errString, 
+		        i, lastNum, errStrings[i-1].errString,
 			num, errStrings[i].errString);
 #endif /* NS_DIRECTORY */
 #endif /* 0 */
@@ -213,11 +219,11 @@ SECU_Strerror(PRErrorCode errNum) {
     while (low + 1 < high) {
     	i = (low + high) / 2;
 	num = errStrings[i].errNum;
-	if (errNum == num) 
+	if (errNum == num)
 	    return errStrings[i].errString;
         if (errNum < num)
 	    high = i;
-	else 
+	else
 	    low = i;
     }
     if (errNum == errStrings[low].errNum)
@@ -226,7 +232,7 @@ SECU_Strerror(PRErrorCode errNum) {
     	return errStrings[high].errString;
     return NULL;
 }
-#else /* _SOLARIS_SDK */
+#else /* !_SOLARIS_SDK */
 #undef ER3
 #define	ER3(x, y, z) case (x):		\
 			s = (z);	\

@@ -2,29 +2,43 @@
  * Copyright 2002 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 /* vlistctrl.c - virtual list control implementation. */
@@ -37,17 +51,17 @@
  * to ldap_search_ext() or ldap_search_ext_s().  *ctrlp will be set to a
  * freshly allocated LDAPControl structure.  Returns an LDAP error code
  * (LDAP_SUCCESS if all goes well).
- * 
+ *
  *  Parameters
- *   ld              LDAP pointer to the desired connection 
+ *   ld              LDAP pointer to the desired connection
  *
  *   ldvlistp        the control structure.
  *
- *   ctrlp           the address of a place to put the constructed control 
+ *   ctrlp           the address of a place to put the constructed control
 
   The controlValue is an OCTET STRING
   whose value is the BER-encoding of the following SEQUENCE:
-  
+
        VirtualListViewRequest ::= SEQUENCE {
                beforeCount    INTEGER (0 .. maxInt),
                afterCount     INTEGER (0 .. maxInt),
@@ -56,7 +70,7 @@
                        index           INTEGER (0 .. maxInt),
                        contentCount    INTEGER (0 .. maxInt) }
                        byValue [1] greaterThanOrEqual assertionValue }
-  
+
   beforeCount indicates how many  entries  before  the  target  entry  the
   client  wants  the  server  to  send. afterCount indicates the number of
   entries after the target entry the client  wants  the  server  to  send.
@@ -69,17 +83,17 @@
 
  */
 
-int 
+int
 LDAP_CALL
-ldap_create_virtuallist_control( 
-    LDAP *ld, 
+ldap_create_virtuallist_control(
+    LDAP *ld,
     LDAPVirtualList *ldvlistp,
-    LDAPControl **ctrlp 
+    LDAPControl **ctrlp
 )
 {
     BerElement *ber;
     int rc;
-    
+
     if (!NSLDAPI_VALID_LDAP_POINTER( ld )) {
 	return( LDAP_PARAM_ERROR );
     }
@@ -91,16 +105,16 @@ ldap_create_virtuallist_control(
     }
 
     /* create a ber package to hold the controlValue */
-    if ( LDAP_SUCCESS != nsldapi_alloc_ber_with_options( ld, &ber )  ) 
+    if ( LDAP_SUCCESS != nsldapi_alloc_ber_with_options( ld, &ber )  )
     {
         LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL, NULL );
         return( LDAP_NO_MEMORY );
     }
 
-    if ( LBER_ERROR == ber_printf( ber, 
-                                   "{ii", 
-                                   (int)ldvlistp->ldvlist_before_count,
-                                   (int)ldvlistp->ldvlist_after_count )) 
+    if ( LBER_ERROR == ber_printf( ber,
+                                   "{ii",
+                                   ldvlistp->ldvlist_before_count,
+                                   ldvlistp->ldvlist_after_count ))
 				    /* XXX lossy casts */
     {
         LDAP_SET_LDERRNO( ld, LDAP_ENCODING_ERROR, NULL, NULL );
@@ -110,22 +124,22 @@ ldap_create_virtuallist_control(
 
     if (NULL == ldvlistp->ldvlist_attrvalue)
     {
-        if ( LBER_ERROR == ber_printf( ber, 
-                                       "t{ii}}", 
+        if ( LBER_ERROR == ber_printf( ber,
+                                       "t{ii}}",
 				       LDAP_TAG_VLV_BY_INDEX,
-                                       (int)ldvlistp->ldvlist_index, 
-                                       (int)ldvlistp->ldvlist_size ) ) 
+                                       ldvlistp->ldvlist_index,
+                                       ldvlistp->ldvlist_size ) )
 				       /* XXX lossy casts */
         {
             LDAP_SET_LDERRNO( ld, LDAP_ENCODING_ERROR, NULL, NULL );
             ber_free( ber, 1 );
             return( LDAP_ENCODING_ERROR );
         }
-    } 
-    else 
+    }
+    else
     {
-        if ( LBER_ERROR == ber_printf( ber, 
-                                      "to}", 
+        if ( LBER_ERROR == ber_printf( ber,
+                                      "to}",
 				       LDAP_TAG_VLV_BY_VALUE,
                                       ldvlistp->ldvlist_attrvalue,
 				       (int)strlen( ldvlistp->ldvlist_attrvalue )) ) {
@@ -136,10 +150,10 @@ ldap_create_virtuallist_control(
     }
 
 
-    rc = nsldapi_build_control( LDAP_CONTROL_VLVREQUEST , 
-                                ber, 
+    rc = nsldapi_build_control( LDAP_CONTROL_VLVREQUEST ,
+                                ber,
                                 1,
-                                1, 
+                                1,
                                 ctrlp );
 
     LDAP_SET_LDERRNO( ld, rc, NULL, NULL );
@@ -156,7 +170,7 @@ ldap_create_virtuallist_control(
 
   The controlValue is an OCTET STRING, whose value
   is the BER encoding of a value of the following SEQUENCE:
-  
+
        VirtualListViewResponse ::= SEQUENCE {
                targetPosition    INTEGER (0 .. maxInt),
                contentCount     INTEGER (0 .. maxInt),
@@ -173,22 +187,22 @@ ldap_create_virtuallist_control(
                        other (80) }  }
 
  */
-int 
+int
 LDAP_CALL
 ldap_parse_virtuallist_control
-( 
-    LDAP *ld, 
+(
+    LDAP *ld,
     LDAPControl **ctrls,
-    unsigned long *target_posp, 
-    unsigned long *list_sizep, 
+    ber_int_t *target_posp,
+    ber_int_t *list_sizep,
     int *errcodep
 )
 {
     BerElement		*ber;
-    int			i, foundListControl, errcode;
+    int			i, foundListControl;
+    ber_int_t		errcode;
     LDAPControl		*listCtrlp;
-    unsigned long	target_pos, list_size;
-    int			target_pos_int, list_size_int;
+    ber_int_t	target_pos, list_size;
 
     if ( !NSLDAPI_VALID_LDAP_POINTER( ld )) {
         return( LDAP_PARAM_ERROR );
@@ -204,11 +218,11 @@ ldap_parse_virtuallist_control
     if ( ctrls == NULL ) {
         LDAP_SET_LDERRNO( ld, LDAP_CONTROL_NOT_FOUND, NULL, NULL );
         return ( LDAP_CONTROL_NOT_FOUND );
-    } 
-    
+    }
+
     foundListControl = 0;
     for ( i = 0; (( ctrls[i] != NULL ) && ( !foundListControl )); i++ ) {
-        foundListControl = !strcmp( ctrls[i]->ldctl_oid, 
+        foundListControl = !strcmp( ctrls[i]->ldctl_oid,
                                     LDAP_CONTROL_VLVRESPONSE );
     }
     if ( !foundListControl ) {
@@ -216,34 +230,31 @@ ldap_parse_virtuallist_control
         return ( LDAP_CONTROL_NOT_FOUND );
     } else {
         /* let local var point to the listControl */
-        listCtrlp = ctrls[i-1];                 
+        listCtrlp = ctrls[i-1];
     }
 
     /*  allocate a Ber element with the contents of the list_control's struct berval */
     if ( ( ber = ber_init( &listCtrlp->ldctl_value ) ) == NULL ) {
         LDAP_SET_LDERRNO( ld, LDAP_NO_MEMORY, NULL, NULL );
         return( LDAP_NO_MEMORY );
-    }           
+    }
 
     /* decode the result from the Berelement */
-    if (  LBER_ERROR == ber_scanf( ber, "{iie}", &target_pos_int, &list_size_int,
+    if (  LBER_ERROR == ber_scanf( ber, "{iie}", &target_pos, &list_size,
 	    &errcode ) ) {
         LDAP_SET_LDERRNO( ld, LDAP_DECODING_ERROR, NULL, NULL );
         ber_free( ber, 1 );
         return( LDAP_DECODING_ERROR );
     }
 
-    target_pos = target_pos_int;
-    list_size = list_size_int;
-
     if ( target_posp != NULL ) {
-	*target_posp = target_pos;
+        *target_posp = target_pos;
     }
     if ( list_sizep != NULL ) {
-	*list_sizep = list_size;
+        *list_sizep = list_size;
     }
     if ( errcodep != NULL ) {
-	*errcodep = errcode;
+        *errcodep = (int)errcode;
     }
 
     /* the ber encoding is no longer needed */

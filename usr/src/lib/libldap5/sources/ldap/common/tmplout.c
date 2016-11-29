@@ -2,34 +2,48 @@
  * Copyright (c) 2001 by Sun Microsystems, Inc.
  * All rights reserved.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 
 /*
  * tmplout.c:  display template library output routines for LDAP clients
- * 
+ *
  */
 
 #include "ldap-int.h"
@@ -41,7 +55,7 @@
 
 
 /* This is totally lame, since it should be coming from time.h, but isn't. */
-#if defined(SOLARIS) 
+#if defined(SOLARIS)
 char *ctime_r(const time_t *, char *, int);
 #endif
 
@@ -68,17 +82,17 @@ static int searchaction( LDAP *ld, char *buf, char *base, LDAPMessage *entry,
 	char *dn, struct ldap_tmplitem *tip, int labelwidth, int rdncount,
 	writeptype writeproc, void *writeparm, char *eol, char *urlprefix );
 
-#define DEF_LABEL_WIDTH		15
-#define SEARCH_TIMEOUT_SECS	120
-#define OCATTRNAME		"objectClass"
+#define	DEF_LABEL_WIDTH		15
+#define	SEARCH_TIMEOUT_SECS	120
+#define	OCATTRNAME		"objectClass"
 
 
-#define NONFATAL_LDAP_ERR( err )	( err == LDAP_SUCCESS || \
+#define	NONFATAL_LDAP_ERR( err )	( err == LDAP_SUCCESS || \
 	err == LDAP_TIMELIMIT_EXCEEDED || err == LDAP_SIZELIMIT_EXCEEDED )
 
-#define DEF_LDAP_URL_PREFIX	"ldap:///"
+#define	DEF_LDAP_URL_PREFIX	"ldap:///"
 
- 
+
 int
 LDAP_CALL
 ldap_entry2text(
@@ -284,7 +298,7 @@ do_entry2text(
 	    }
 
 	    err = do_vals2text( ld, buf, vals, attr, labelwidth,
-		    LDAP_SYN_CASEIGNORESTR, writeproc, writeparm, eol, 
+		    LDAP_SYN_CASEIGNORESTR, writeproc, writeparm, eol,
 		    rdncount, urlprefix );
 	    if ( freevals ) {
 		ldap_value_free( vals );
@@ -380,7 +394,7 @@ do_entry2text(
     return( err );
 }
 
-	
+
 int
 LDAP_CALL
 ldap_entry2text_search(
@@ -558,7 +572,7 @@ do_entry2text_search(
     ldap_msgfree( ldmp );
     return( err );
 }
-	    
+
 
 int
 LDAP_CALL
@@ -669,8 +683,12 @@ do_vals2text(
 	    }
 	}
 	notascii = ( *p != '\0' );
+#ifdef _SOLARIS_SDK
 	outval = notascii ? dgettext(TEXT_DOMAIN,
 		"(unable to display non-ASCII text value)")
+#else
+	outval = notascii ? "(unable to display non-ASCII text value)"
+#endif /* _SOLARIS_SDK */
 		: vals[ i ];
 
 	writeoutval = 0;	/* if non-zero, write outval after switch */
@@ -721,8 +739,12 @@ do_vals2text(
 	    break;
 
 	case LDAP_SYN_BOOLEAN:
+#ifdef _SOLARIS_SDK
 	    outval = toupper( outval[ 0 ] ) == 'T' ?
 		dgettext(TEXT_DOMAIN, "TRUE") : dgettext(TEXT_DOMAIN, "FALSE");
+#else
+	    outval = toupper( outval[ 0 ] ) == 'T' ? "TRUE" : "FALSE";
+#endif /* _SOLARIS_SDK */
 	    ++writeoutval;
 	    break;
 
@@ -763,9 +785,14 @@ do_vals2text(
 	    break;
 
 	default:
+#ifdef _SOLARIS_SDK
 	    sprintf( buf, dgettext(TEXT_DOMAIN,
 		" Can't display item type %ld%s"),
 		    syntaxid, eol );
+#else
+	    sprintf( buf, " Can't display item type %ld%s",
+		    syntaxid, eol );
+#endif /* _SOLARIS_SDK */
 	    (*writeproc)( writeparm, buf, strlen( buf ));
 	}
 
@@ -876,7 +903,7 @@ output_dn( char *buf, char *dn, int width, int rdncount,
 
 
 
-#define HREF_CHAR_ACCEPTABLE( c )	(( c >= '-' && c <= '9' ) ||	\
+#define	HREF_CHAR_ACCEPTABLE( c )	(( c >= '-' && c <= '9' ) ||	\
 					 ( c >= '@' && c <= 'Z' ) ||	\
 					 ( c == '_' ) ||		\
 					 ( c >= 'a' && c <= 'z' ))
@@ -902,15 +929,19 @@ strcat_escaped( char *s1, char *s2 )
 }
 
 
-#define GET2BYTENUM( p )	(( *p - '0' ) * 10 + ( *(p+1) - '0' ))
+#define	GET2BYTENUM( p )	(( *p - '0' ) * 10 + ( *(p+1) - '0' ))
 
 static char *
 time2text( char *ldtimestr, int dateonly )
 {
     int			len;
     struct tm		t;
+#ifdef _SOLARIS_SDK
     char		*p, *timestr, zone, *fmterr =
 				dgettext(TEXT_DOMAIN, "badly formatted time");
+#else
+    char		*p, *timestr, zone, *fmterr = "badly formatted time";
+#endif /* _SOLARIS_SDK */
     time_t		gmttime;
 /* CTIME for this platform doesn't use this. */
 #if !defined(SUNOS4) && !defined(BSDI) && !defined(LINUX1_2) && \
@@ -990,7 +1021,7 @@ static int	dmsize[] = {
 /*
 #define	YEAR(y)		((y) >= 100 ? (y) : (y) + 1900)
 */
-#define YEAR(y)		(((y) < 1900) ? ((y) + 1900) : (y)) 
+#define	YEAR(y)		(((y) < 1900) ? ((y) + 1900) : (y))
 
 /*  */
 
@@ -1131,7 +1162,7 @@ searchaction( LDAP *ld, char *buf, char *base, LDAPMessage *entry, char *dn,
 	ldap_msgfree( ldmp );
     }
 
-    
+
     if ( vals != NULL ) {
 	ldap_value_free( vals );
     }

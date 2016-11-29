@@ -2,33 +2,47 @@
  * Copyright 2002-2003 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 #include "ldap-int.h"
 
-#define LDAP_GET_BITOPT( ld, bit ) \
+#define	LDAP_GET_BITOPT( ld, bit ) \
 	((ld)->ld_options & bit ) != 0 ? 1 : 0
 
 static int nsldapi_get_api_info( LDAPAPIInfo *aip );
@@ -71,12 +85,12 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		}
 		return( 0 );
 	}
-    /* 
-     * LDAP_OPT_DEBUG_LEVEL is global 
+    /*
+     * LDAP_OPT_DEBUG_LEVEL is global
      */
-    if (LDAP_OPT_DEBUG_LEVEL == option) 
+    if (LDAP_OPT_DEBUG_LEVEL == option)
     {
-#ifdef LDAP_DEBUG	  
+#ifdef LDAP_DEBUG
         *((int *) optdata) = ldap_debug;
 #endif /* LDAP_DEBUG */
         return ( 0 );
@@ -108,11 +122,10 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		    LDAP_GET_BITOPT( ld, LDAP_BITOPT_REFERRALS );
 		break;
 
-#ifdef LDAP_SSLIO_HOOKS
 	case LDAP_OPT_SSL:
 		*((int *) optdata) = LDAP_GET_BITOPT( ld, LDAP_BITOPT_SSL );
 		break;
-#endif
+
 	case LDAP_OPT_RESTART:
 		*((int *) optdata) = LDAP_GET_BITOPT( ld, LDAP_BITOPT_RESTART );
 		break;
@@ -122,6 +135,11 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		    LDAP_GET_BITOPT( ld, LDAP_BITOPT_RECONNECT );
 		break;
 
+	case LDAP_OPT_NOREBIND:
+		*((int *) optdata) =
+		    LDAP_GET_BITOPT( ld, LDAP_BITOPT_NOREBIND );
+		break;
+
 #ifdef LDAP_ASYNC_IO
 	case LDAP_OPT_ASYNC_CONNECT:
 		*((int *) optdata) =
@@ -129,10 +147,11 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		break;
 #endif /* LDAP_ASYNC_IO */
 
-	/* stuff in the sockbuf */
+        /* stuff in the sockbuf */
         case LDAP_X_OPT_SOCKBUF:
                 *((Sockbuf **) optdata) = ld->ld_sbp;
                 break;
+
 	case LDAP_OPT_DESC:
 		if ( ber_sockbuf_get_option( ld->ld_sbp,
 		    LBER_SOCKBUF_OPT_DESC, optdata ) != 0 ) {
@@ -147,7 +166,7 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		break;
 	case LDAP_OPT_SIZELIMIT:
 		*((int *) optdata) = ld->ld_sizelimit;
-                break;  
+                break;
 	case LDAP_OPT_TIMELIMIT:
 		*((int *) optdata) = ld->ld_timelimit;
                 break;
@@ -175,7 +194,6 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		*((void **) optdata) = ld->ld_rebind_arg;
 		break;
 
-#ifdef LDAP_SSLIO_HOOKS
 	/* i/o function pointers */
 	case LDAP_OPT_IO_FN_PTRS:
 		if ( ld->ld_io_fns_ptr == NULL ) {
@@ -201,17 +219,31 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
 		      LDAP_X_EXTIO_FNS_SIZE ) {
 	    /* struct copy */
 	    *((struct ldap_x_ext_io_fns *) optdata) = ld->ld_ext_io_fns;
-	  } else {       
+	  } else {
 	    LDAP_SET_LDERRNO( ld, LDAP_PARAM_ERROR, NULL, NULL );
 	    rc = -1;
 	  }
-		break;
-#endif /* LDAP_SSLIO_HOOKS */
+	  break;
+
+	/* get socketargp in extended i/o function */
+	case LDAP_X_OPT_SOCKETARG:
+	  if ( ber_sockbuf_get_option( ld->ld_sbp,LBER_SOCKBUF_OPT_SOCK_ARG, optdata)
+		 != 0 ) {
+		LDAP_SET_LDERRNO( ld, LDAP_LOCAL_ERROR, NULL, NULL );
+		rc = -1;
+	   }
+	   	break;
 
 	/* thread function pointers */
 	case LDAP_OPT_THREAD_FN_PTRS:
 		/* struct copy */
 		*((struct ldap_thread_fns *) optdata) = ld->ld_thread;
+		break;
+
+	/* extra thread function pointers */
+	case LDAP_OPT_EXTRA_THREAD_FN_PTRS:
+		/* struct copy */
+		*((struct ldap_extra_thread_fns *) optdata) = ld->ld_thread2;
 		break;
 
 	/* DNS function pointers */
@@ -272,59 +304,58 @@ ldap_get_option( LDAP *ld, int option, void *optdata )
                 break;
 
 #ifdef LDAP_SASLIO_HOOKS
-        /* SASL options */
-        case LDAP_OPT_X_SASL_MECH:
-                *((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_mech);
-                break;
-        case LDAP_OPT_X_SASL_REALM:
-                *((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_realm);
-                break;
-        case LDAP_OPT_X_SASL_AUTHCID:
-                *((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_authcid);
-                break;
-        case LDAP_OPT_X_SASL_AUTHZID:
-                *((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_authzid);
-                break;
-        case LDAP_OPT_X_SASL_SSF:
-                {
-                        int sc;
-                        sasl_ssf_t      *ssf;
-                        sasl_conn_t     *ctx;
-                        if( ld->ld_defconn == NULL ||
-                            ld->ld_defconn->lconn_sb == NULL ) {
-                                return -1;
-                        }
-                        ctx = (sasl_conn_t *)(ld->ld_defconn->lconn_sb->sb_sasl_ctx);
-                        if ( ctx == NULL ) {
-                                return -1;
-                        }
-                        sc = sasl_getprop( ctx, SASL_SSF, (const void **) &ssf );
-                        if ( sc != SASL_OK ) {
-                                return -1;
-                        }
-                        *((sasl_ssf_t *) optdata) = *ssf;
-                }
-                break;
-        case LDAP_OPT_X_SASL_SSF_MIN:
-                *((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.min_ssf;
-                break;
-        case LDAP_OPT_X_SASL_SSF_MAX:
-                *((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.max_ssf;
-                break;
-        case LDAP_OPT_X_SASL_MAXBUFSIZE:
-                *((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.maxbufsize;
-                break;
-        case LDAP_OPT_X_SASL_SSF_EXTERNAL:
-        case LDAP_OPT_X_SASL_SECPROPS:
-                /*
-                 * These options are write only.  Making these options
-                 * read/write would expose semi-private interfaces of libsasl
-                 * for which there are no cross platform/standardized
-                 * definitions.
-                 */
-                LDAP_SET_LDERRNO( ld, LDAP_PARAM_ERROR, NULL, NULL );
-                rc = -1;
-                break;
+	/* SASL options */
+	case LDAP_OPT_X_SASL_MECH:
+		*((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_mech);
+		break;
+	case LDAP_OPT_X_SASL_REALM:
+		*((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_realm);
+		break;
+	case LDAP_OPT_X_SASL_AUTHCID:
+		*((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_authcid);
+		break;
+	case LDAP_OPT_X_SASL_AUTHZID:
+		*((char **) optdata) = nsldapi_strdup(ld->ld_def_sasl_authzid);
+		break;
+	case LDAP_OPT_X_SASL_SSF:
+		{
+			int sc;
+			sasl_ssf_t      *ssf;
+			sasl_conn_t     *ctx;
+			if( ld->ld_defconn == NULL ) {
+				return -1;
+			}
+			ctx = (sasl_conn_t *)(ld->ld_defconn->lconn_sasl_ctx);
+			if ( ctx == NULL ) {
+				return -1;
+			}
+			sc = sasl_getprop( ctx, SASL_SSF, (const void **) &ssf );
+			if ( sc != SASL_OK ) {
+				return -1;
+			}
+			*((sasl_ssf_t *) optdata) = *ssf;
+		}
+		break;
+	case LDAP_OPT_X_SASL_SSF_MIN:
+		*((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.min_ssf;
+		break;
+	case LDAP_OPT_X_SASL_SSF_MAX:
+		*((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.max_ssf;
+		break;
+	case LDAP_OPT_X_SASL_MAXBUFSIZE:
+		*((sasl_ssf_t *) optdata) = ld->ld_sasl_secprops.maxbufsize;
+		break;
+	case LDAP_OPT_X_SASL_SSF_EXTERNAL:
+	case LDAP_OPT_X_SASL_SECPROPS:
+		/*
+		 * These options are write only.  Making these options
+		 * read/write would expose semi-private interfaces of libsasl
+		 * for which there are no cross platform/standardized
+		 * definitions.
+		 */
+		LDAP_SET_LDERRNO( ld, LDAP_PARAM_ERROR, NULL, NULL );
+		rc = -1;
+		break;
 #endif
 
 	default:
@@ -361,7 +392,7 @@ static LDAPAPIFeatureInfo nsldapi_extensions[] = {
     { 0, "X_FILTER_FUNCTIONS",		LDAP_API_FEATURE_X_FILTER_FUNCTIONS },
 };
 
-#define NSLDAPI_EXTENSIONS_COUNT	\
+#define	NSLDAPI_EXTENSIONS_COUNT	\
 	(sizeof(nsldapi_extensions)/sizeof(LDAPAPIFeatureInfo))
 
 /*

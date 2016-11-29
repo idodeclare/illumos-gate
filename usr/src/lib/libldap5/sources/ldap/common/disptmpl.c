@@ -2,30 +2,43 @@
  * Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-
 /*
- * The contents of this file are subject to the Netscape Public
- * License Version 1.1 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.mozilla.org/NPL/
+ * ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
- * Software distributed under the License is distributed on an "AS
- * IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * rights and limitations under the License.
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
  *
  * The Original Code is Mozilla Communicator client code, released
  * March 31, 1998.
  *
- * The Initial Developer of the Original Code is Netscape
- * Communications Corporation. Portions created by Netscape are
- * Copyright (C) 1998-1999 Netscape Communications Corporation. All
- * Rights Reserved.
+ * The Initial Developer of the Original Code is
+ * Netscape Communications Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either of the GNU General Public License Version 2 or later (the "GPL"),
+ * or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK *****
  */
 /*
  * Copyright (c) 1993, 1994 Regents of the University of Michigan.
@@ -97,8 +110,8 @@ static unsigned long	itemoptvals[] = {
 };
 
 
-#define ADDEF_CONSTANT	"constant"
-#define ADDEF_ADDERSDN	"addersdn"
+#define	ADDEF_CONSTANT	"constant"
+#define	ADDEF_ADDERSDN	"addersdn"
 
 
 int
@@ -112,7 +125,11 @@ ldap_init_templates( char *file, struct ldap_disptmpl **tmpllistp )
 
     *tmpllistp = NULLDISPTMPL;
 
-    if (( fp = fopen( file, "rF" )) == NULL ) {
+#ifdef _SOLARIS_SDK
+    if (( fp = NSLDAPI_FOPEN( file, "rF" )) == NULL ) {
+#else
+    if (( fp = NSLDAPI_FOPEN( file, "r" )) == NULL ) {
+#endif /* _SOLARIS_SDK */
 	return( LDAP_TMPL_ERR_FILE );
     }
 
@@ -160,13 +177,13 @@ ldap_init_templates_buf( char *buf, long buflen,
 
     *tmpllistp = prevtmpl = NULLDISPTMPL;
 
-    if ( ldap_next_line_tokens( &buf, &buflen, &toks ) != 2 ||
+    if ( nsldapi_next_line_tokens( &buf, &buflen, &toks ) != 2 ||
 	    strcasecmp( toks[ 0 ], "version" ) != 0 ) {
-	ldap_free_strarray( toks );
+	nsldapi_free_strarray( toks );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
     version = atoi( toks[ 1 ] );
-    ldap_free_strarray( toks );
+    nsldapi_free_strarray( toks );
     if ( version != LDAP_TEMPLATE_VERSION ) {
 	return( LDAP_TMPL_ERR_VERSION );
     }
@@ -187,7 +204,7 @@ ldap_init_templates_buf( char *buf, long buflen,
 
     return( rc );
 }
-	    
+
 
 
 void
@@ -238,7 +255,7 @@ free_disptmpl( struct ldap_disptmpl *tmpl )
 
 	    for ( ocp = tmpl->dt_oclist; ocp != NULL; ocp = nextocp ) {
 		nextocp = ocp->oc_next;
-		ldap_free_strarray( ocp->oc_objclasses );
+		nsldapi_free_strarray( ocp->oc_objclasses );
 		NSLDAPI_FREE( ocp );
 	    }
 	}
@@ -272,7 +289,7 @@ free_disptmpl( struct ldap_disptmpl *tmpl )
 			NSLDAPI_FREE( colp->ti_label );
 		    }
 		    if ( colp->ti_args != NULL ) {
-			ldap_free_strarray( colp->ti_args );
+			nsldapi_free_strarray( colp->ti_args );
 		    }
 		    NSLDAPI_FREE( colp );
 		}
@@ -476,14 +493,14 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * template name comes first
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	return( tokcnt == 0 ? 0 : LDAP_TMPL_ERR_SYNTAX );
     }
 
     if (( tmpl = (struct ldap_disptmpl *)NSLDAPI_CALLOC( 1,
 	    sizeof( struct ldap_disptmpl ))) == NULL ) {
-	ldap_free_strarray( toks );
+	nsldapi_free_strarray( toks );
 	return(  LDAP_TMPL_ERR_MEM );
     }
     tmpl->dt_name = toks[ 0 ];
@@ -492,8 +509,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * template plural name comes next
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -503,8 +520,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * template icon name is next
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -514,8 +531,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * template options come next
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) < 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) < 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -526,15 +543,15 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
 	    }
 	}
     }
-    ldap_free_strarray( toks );
+    nsldapi_free_strarray( toks );
 
     /*
      * object class list is next
      */
-    while (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
+    while (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
 	if (( ocp = (struct ldap_oclist *)NSLDAPI_CALLOC( 1,
 		sizeof( struct ldap_oclist ))) == NULL ) {
-	    ldap_free_strarray( toks );
+	    nsldapi_free_strarray( toks );
 	    free_disptmpl( tmpl );
 	    return( LDAP_TMPL_ERR_MEM );
 	}
@@ -554,8 +571,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * read name of attribute to authenticate as
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -569,8 +586,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * read default attribute to use for RDN
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -580,8 +597,8 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * read default location for new entries
      */
-    if (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
-	ldap_free_strarray( toks );
+    if (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) != 1 ) {
+	nsldapi_free_strarray( toks );
 	free_disptmpl( tmpl );
 	return( LDAP_TMPL_ERR_SYNTAX );
     }
@@ -595,7 +612,7 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
     /*
      * read list of rules used to define default values for new entries
      */
-    while (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
+    while (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
 	if ( strcasecmp( ADDEF_CONSTANT, toks[ 0 ] ) == 0 ) {
 	    adsource = LDAP_ADSRC_CONSTANTVALUE;
 	} else if ( strcasecmp( ADDEF_ADDERSDN, toks[ 0 ] ) == 0 ) {
@@ -606,14 +623,14 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
 	if ( adsource == 0 || tokcnt < 2 ||
 		( adsource == LDAP_ADSRC_CONSTANTVALUE && tokcnt != 3 ) ||
 		( adsource == LDAP_ADSRC_ADDERSDN && tokcnt != 2 )) {
-	    ldap_free_strarray( toks );
+	    nsldapi_free_strarray( toks );
 	    free_disptmpl( tmpl );
 	    return( LDAP_TMPL_ERR_SYNTAX );
 	}
-		
+
 	if (( adp = (struct ldap_adddeflist *)NSLDAPI_CALLOC( 1,
 		sizeof( struct ldap_adddeflist ))) == NULL ) {
-	    ldap_free_strarray( toks );
+	    nsldapi_free_strarray( toks );
 	    free_disptmpl( tmpl );
 	    return( LDAP_TMPL_ERR_MEM );
 	}
@@ -637,17 +654,17 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
      * item list is next
      */
     samerow = 0;
-    while (( tokcnt = ldap_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
+    while (( tokcnt = nsldapi_next_line_tokens( bufp, blenp, &toks )) > 0 ) {
 	if ( strcasecmp( toks[ 0 ], "item" ) == 0 ) {
 	    if ( tokcnt < 4 ) {
-		ldap_free_strarray( toks );
+		nsldapi_free_strarray( toks );
 		free_disptmpl( tmpl );
 		return( LDAP_TMPL_ERR_SYNTAX );
 	    }
 
 	    if (( ip = (struct ldap_tmplitem *)NSLDAPI_CALLOC( 1,
 		    sizeof( struct ldap_tmplitem ))) == NULL ) {
-		ldap_free_strarray( toks );
+		nsldapi_free_strarray( toks );
 		free_disptmpl( tmpl );
 		return( LDAP_TMPL_ERR_MEM );
 	    }
@@ -663,7 +680,7 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
 		    }
 		}
 		if ( itemoptions[ i ] == NULL ) {
-		    ldap_free_strarray( toks );
+		    nsldapi_free_strarray( toks );
 		    free_disptmpl( tmpl );
 		    return( LDAP_TMPL_ERR_SYNTAX );
 		}
@@ -676,7 +693,7 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
 		}
 	    }
 	    if ( itemtypes[ i ] == NULL ) {
-		ldap_free_strarray( toks );
+		nsldapi_free_strarray( toks );
 		free_disptmpl( tmpl );
 		return( LDAP_TMPL_ERR_SYNTAX );
 	    }
@@ -717,10 +734,10 @@ read_next_tmpl( char **bufp, long *blenp, struct ldap_disptmpl **tmplp,
 	    previp = ip;
 	    samerow = 0;
 	} else if ( strcasecmp( toks[ 0 ], "samerow" ) == 0 ) {
-	    ldap_free_strarray( toks );
+	    nsldapi_free_strarray( toks );
 	    samerow = 1;
 	} else {
-	    ldap_free_strarray( toks );
+	    nsldapi_free_strarray( toks );
 	    free_disptmpl( tmpl );
 	    return( LDAP_TMPL_ERR_SYNTAX );
 	}
@@ -740,7 +757,7 @@ struct tmplerror {
 	char	*e_reason;
 };
 
-#ifdef SUN
+#ifdef _SOLARIS_SDK
 static struct tmplerror ldap_tmplerrlist[] = {
 	{ LDAP_TMPL_ERR_VERSION, 0},
 	{ LDAP_TMPL_ERR_MEM,     0}, 
@@ -751,20 +768,23 @@ static struct tmplerror ldap_tmplerrlist[] = {
 #else
 static struct tmplerror ldap_tmplerrlist[] = {
 	{ LDAP_TMPL_ERR_VERSION, "Bad template version"		},
-	{ LDAP_TMPL_ERR_MEM,     "Out of memory"		}, 
+	{ LDAP_TMPL_ERR_MEM,     "Out of memory"		},
 	{ LDAP_TMPL_ERR_SYNTAX,  "Bad template syntax"		},
 	{ LDAP_TMPL_ERR_FILE,    "File error reading template"	},
 	{ -1, 0 }
 };
-#endif
+#endif /* _SOLARIS_SDK */
 
 char *
 LDAP_CALL
 ldap_tmplerr2string( int err )
 {
+#ifdef _SOLARIS_SDK
 	static int init_flag = 0;
+#endif /* _SOLARIS_SDK */
 	int	i;
 
+#ifdef _SOLARIS_SDK
 	/* Multiple threads should be ok since they assign same strings */
 	if (init_flag == 0) {
 		ldap_tmplerrlist[0].e_reason =
@@ -777,11 +797,16 @@ ldap_tmplerr2string( int err )
 			dgettext(TEXT_DOMAIN, "File error reading template");
 		init_flag = 1;
 	}
+#endif /* _SOLARIS_SDK */
 
 	for ( i = 0; ldap_tmplerrlist[i].e_code != -1; i++ ) {
 		if ( err == ldap_tmplerrlist[i].e_code )
 			return( ldap_tmplerrlist[i].e_reason );
 	}
 
+#ifdef _SOLARIS_SDK
 	return(dgettext(TEXT_DOMAIN, "Unknown error") );
+#else
+	return( "Unknown error" );
+#endif /* _SOLARIS_SDK */
 }
