@@ -39,7 +39,7 @@ LDAPOBJS=  abandon.o add.o authzidctrl.o bind.o cache.o charray.o \
         getfilter.o getoption.o getvalues.o memcache.o message.o \
         modify.o open.o os-ip.o proxyauthctrl.o psearch.o \
 	pwmodext.o pwpctrl.o referral.o \
-        rename.o request.o reslist.o result.o saslbind.o sasl.o saslio.o \
+        rename.o request.o reslist.o result.o saslbind.o saslio.o \
         sbind.o search.o setoption.o sort.o sortctrl.o srchpref.o \
         tmplout.o ufn.o unbind.o unescape.o url.o userstatusctrl.o utf8.o \
 	whoami.o ldaputf8.o vlistctrl.o \

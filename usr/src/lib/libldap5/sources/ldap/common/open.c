@@ -55,6 +55,9 @@ static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of 
 #endif
 
 #include "ldap-int.h"
+#ifdef _SOLARIS_SDK
+#include <ldappr.h>
+#endif /* _SOLARIS_SDK */
 #ifdef LDAP_SASLIO_HOOKS
 /* Valid for any ANSI C compiler */
 #include <limits.h>
@@ -443,11 +446,13 @@ nsldapi_initialize_defaults( void )
 		SASL_SEC_NOPLAINTEXT | SASL_SEC_NOANONYMOUS;
 
 	/* SASL mutex function callbacks */
+#if !defined(_SOLARIS_SDK) || defined(USE_PTHREADS)
 	sasl_set_mutex(
 		(sasl_mutex_alloc_t *)nsldapi_default_thread_fns.ltf_mutex_alloc,
 		(sasl_mutex_lock_t *)nsldapi_default_thread_fns.ltf_mutex_lock,
 		(sasl_mutex_unlock_t *)nsldapi_default_thread_fns.ltf_mutex_unlock,
 		(sasl_mutex_free_t *)nsldapi_default_thread_fns.ltf_mutex_free );
+#endif /* !_SOLARIS_SDK || USE_PTHREADS */
 
 	/* SASL memory allocation function callbacks */
 	sasl_set_alloc(
@@ -459,7 +464,9 @@ nsldapi_initialize_defaults( void )
 	/* SASL library initialization */
 	if ( sasl_client_init( client_callbacks ) != SASL_OK ) {
 		nsldapi_initialized = 0;
+#if !defined(_SOLARIS_SDK) || defined(USE_PTHREADS)
 		pthread_mutex_unlock( &nsldapi_init_mutex );
+#endif /* !_SOLARIS_SDK || USE_PTHREADS */
 		return;
 	}
 #endif

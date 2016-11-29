@@ -674,9 +674,17 @@ LDAP_API(int) LDAP_CALL ldap_memcache_init(unsigned long ttl,
 LDAP_API(int) LDAP_CALL ldap_memcache_set(LDAP *ld, LDAPMemCache *cache);
 LDAP_API(int) LDAP_CALL ldap_memcache_get(LDAP *ld, LDAPMemCache **cachep);
 LDAP_API(void) LDAP_CALL ldap_memcache_flush(LDAPMemCache *cache, char *dn,
+#ifdef _SOLARIS_SDK
+	long scope);
+#else
 	int scope);
+#endif /* _SOLARIS_SDK */
 LDAP_API(void) LDAP_CALL ldap_memcache_flush_results(LDAPMemCache *cache,
+#ifdef _SOLARIS_SDK
+	char *dn, long scope);
+#else
 	char *dn, int scope);
+#endif /* _SOLARIS_SDK */
 LDAP_API(void) LDAP_CALL ldap_memcache_destroy(LDAPMemCache *cache);
 LDAP_API(void) LDAP_CALL ldap_memcache_update(LDAPMemCache *cache);
 

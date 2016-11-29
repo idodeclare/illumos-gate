@@ -47,7 +47,11 @@
  */
 
 #include "ldap-int.h"
+#ifdef _SOLARIS_SDK
+#include <ldap/disptmpl.h>
+#else
 #include "disptmpl.h"
+#endif /* _SOLARIS_SDK */
 
 #if defined(_WINDOWS) || defined(aix) || defined(SCOOS) || defined(OSF1) || defined(SOLARIS)
 #include <time.h> /* for struct tm and ctime */

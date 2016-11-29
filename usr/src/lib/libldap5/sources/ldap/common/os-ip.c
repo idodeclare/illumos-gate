@@ -121,7 +121,7 @@ struct nsldapi_cb_statusinfo {		/* used with ext. I/O poll() callback */
 #else
 #define	NSLDAPI_CB_POLL_SD_CAST
 #endif
-#if defined(LDAP_SASLIO_HOOKS)
+#if defined(_SOLARIS_SDK) && defined(LDAP_SASLIO_HOOKS)
 #define NSLDAPI_CB_POLL_MATCH( sbp, pollfd ) \
     ( ((sbp)->sb_sd == NSLDAPI_CB_POLL_SD_CAST ((pollfd).lpoll_fd)) && \
     (((sbp)->sb_sasl_fns.lbextiofn_socket_arg == (pollfd).lpoll_socketarg) || \
@@ -130,7 +130,7 @@ struct nsldapi_cb_statusinfo {		/* used with ext. I/O poll() callback */
 #define NSLDAPI_CB_POLL_MATCH( sbp, pollfd ) \
     ((sbp)->sb_sd == NSLDAPI_CB_POLL_SD_CAST ((pollfd).lpoll_fd) && \
     (sbp)->sb_ext_io_fns.lbextiofn_socket_arg == (pollfd).lpoll_socketarg)
-#endif
+#endif /* _SOLARIS_SDK && LDAP_SASLIO_HOOKS */
 
 
 struct nsldapi_iostatus_info {
@@ -258,7 +258,7 @@ nsldapi_os_socket( LDAP *ld, int secure, int domain, int type, int protocol )
 		errmsg = dgettext(TEXT_DOMAIN, "unable to create a socket");
 #else
 		errmsg = "unable to create a socket";
-#endif _SOLARIS_SDK
+#endif /* _SOLARIS_SDK */
 		invalid_socket = 1;
 	} else {	/* valid socket -- check for overflow */
 		invalid_socket = 0;
@@ -530,7 +530,11 @@ nsldapi_connect_to_host( LDAP *ld, Sockbuf *sb, const char *hostlist,
 		s = ld->ld_extconnect_fn( hostlist, defport,
 		    ld->ld_connect_timeout, connect_opts,
 		    ld->ld_ext_session_arg,
+#ifdef _SOLARIS_SDK
+		    &sb->sb_ext_io_fns.lbextiofn_socket_arg, NULL);
+#else
 		    &sb->sb_ext_io_fns.lbextiofn_socket_arg );
+#endif /* _SOLARIS_SDK */
 
 	} else {
 #ifdef NSLDAPI_AVOID_OS_SOCKETS
@@ -1764,11 +1768,10 @@ nsldapi_compat_socket( LDAP *ld, int secure, int domain, int type,
 static int LDAP_CALLBACK
 nsldapi_ext_compat_connect( const char *hostlist, int defport, int timeout,
 	unsigned long options, struct lextiof_session_private *sessionarg,
-	struct lextiof_socket_private **socketargp
 #ifdef _SOLARIS_SDK
-	, void **not_used )
+	struct lextiof_socket_private **socketargp, char **not_used)
 #else
-	)
+	struct lextiof_socket_private **socketargp )
 #endif	/* _SOLARIS_SDK */
 {
 	NSLDAPICompatSocketInfo		*defcsip;

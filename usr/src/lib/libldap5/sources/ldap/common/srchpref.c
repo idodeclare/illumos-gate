@@ -57,7 +57,11 @@
  */
 
 #include "ldap-int.h"
+#ifdef _SOLARIS_SDK
+#include <ldap/srchpref.h>
+#else
 #include "srchpref.h"
+#endif /* _SOLARIS_SDK */
 
 static void free_searchobj( struct ldap_searchobj *so );
 static int read_next_searchobj( char **bufp, long *blenp,

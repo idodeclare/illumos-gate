@@ -227,7 +227,11 @@ static int memcache_remove_all(LDAP *ld);
 #endif /* 0 */
 static int memcache_access(LDAPMemCache *cache, int mode,
 			   void *pData1, void *pData2, void *pData3);
+#ifdef _SOLARIS_SDK
+static void memcache_flush(LDAPMemCache *cache, char *dn, long scope,
+#else
 static void memcache_flush(LDAPMemCache *cache, char *dn, int scope,
+#endif /* _SOLARIS_SDK */
 			   int flushresults);
 #ifdef LDAP_DEBUG
 static void memcache_print_list( LDAPMemCache *cache, int index );
@@ -499,7 +503,11 @@ ldap_memcache_update( LDAPMemCache *cache )
    results that included search entries. */
 void
 LDAP_CALL
+#ifdef _SOLARIS_SDK
+ldap_memcache_flush( LDAPMemCache *cache, char *dn, long scope)
+#else
 ldap_memcache_flush( LDAPMemCache *cache, char *dn, int scope )
+#endif /* _SOLARIS_SDK */
 {
     LDAPDebug( LDAP_DEBUG_TRACE,
         "ldap_memcache_flush( cache: 0x%p, dn: %s, scope: %d)\n",
@@ -511,7 +519,11 @@ ldap_memcache_flush( LDAPMemCache *cache, char *dn, int scope )
    results that returned no entries. */
 void
 LDAP_CALL
+#ifdef _SOLARIS_SDK
+ldap_memcache_flush_results( LDAPMemCache *cache, char *dn, long scope)
+#else
 ldap_memcache_flush_results( LDAPMemCache *cache, char *dn, int scope )
+#endif /* _SOLARIS_SDK */
 {
     LDAPDebug( LDAP_DEBUG_TRACE,
         "ldap_memcache_flush_results( cache: 0x%p, dn: %s, scope: %d)\n",
@@ -1706,7 +1718,11 @@ memcache_access(LDAPMemCache *cache, int mode,
 }
 
 static void
+#ifdef _SOLARIS_SDK
+memcache_flush( LDAPMemCache *cache, char *dn, long scope, int flushresults )
+#else
 memcache_flush( LDAPMemCache *cache, char *dn, int scope, int flushresults )
+#endif /* _SOLARIS_SDK */
 {
     if ( !NSLDAPI_VALID_MEMCACHE_POINTER( cache )) {
 	return;
@@ -1903,7 +1919,11 @@ htable_free(HashTable *pTable)
 static int
 msgid_hashf(int table_size, void *key)
 {
+#ifdef _SOLARIS_SDK
+    unsigned long code = (unsigned)((ldapmemcacheReqId*)key)->ldmemcrid_ld;
+#else
     unsigned code = (unsigned)((ldapmemcacheReqId*)key)->ldmemcrid_ld;
+#endif /* _SOLARIS_SDK */
     return (((code << 20) + (code >> 12)) % table_size);
 }
 
