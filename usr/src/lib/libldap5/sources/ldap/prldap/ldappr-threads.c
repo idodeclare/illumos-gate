@@ -358,7 +358,7 @@ prldap_set_ld_error( int err, char *matched, char *errmsg, void *errorarg )
 	eip->plei_errmsg = errmsg;
     }
 }
-#endif /* !_SOLARIS_SDK */
+
 
 /*
  * Utility function to free a PRLDAP_ErrorInfo structure and everything
@@ -378,6 +378,7 @@ prldap_free_errorinfo( PRLDAP_ErrorInfo *eip )
 	PR_Free( eip );
     }
 }
+#endif /* !_SOLARIS_SDK */
 
 
 /*

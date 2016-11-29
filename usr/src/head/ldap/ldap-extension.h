@@ -46,6 +46,31 @@
 extern "C" {
 #endif
 
+#ifdef _SOLARIS_SDK
+
+#include "ldap-standard.h"
+
+/* calling conventions used by library */
+#ifndef	LDAP_CALL
+#if defined(_WINDOWS) || defined(_WIN32)
+#define	LDAP_C __cdecl
+#ifndef	_WIN32
+#define	__stdcall _far _pascal
+#define	LDAP_CALLBACK _loadds
+#else
+#define	LDAP_CALLBACK
+#endif /* _WIN32 */
+#define	LDAP_PASCAL __stdcall
+#define	LDAP_CALL LDAP_PASCAL
+#else /* _WINDOWS */
+#define	LDAP_C
+#define	LDAP_CALLBACK
+#define	LDAP_PASCAL
+#define	LDAP_CALL
+#endif /* _WINDOWS */
+#endif /* LDAP_CALL */
+#endif /* _SOLARIS_SDK */
+
 #define	LDAP_PORT_MAX		65535		/* API extension */
 #define	LDAP_VERSION1   	1		/* API extension */
 #define	LDAP_VERSION    	LDAP_VERSION3	/* API extension */
@@ -506,7 +531,12 @@ typedef int
             int timeout /* milliseconds */,
             unsigned long options, /* bitmapped options */
             struct lextiof_session_private *sessionarg,
+#ifdef _SOLARIS_SDK
+            struct lextiof_socket_private **socketargp, char **host);
+#else
             struct lextiof_socket_private **socketargp);
+		timeout, options, sessionarg, socketargp );
+#endif	/* _SOLARIS_SDK */
 typedef int     (LDAP_C LDAP_CALLBACK LDAP_X_EXTIOF_CLOSE_CALLBACK )(
             int s, struct lextiof_socket_private *socketarg );
 typedef int     (LDAP_C LDAP_CALLBACK LDAP_X_EXTIOF_POLL_CALLBACK)(

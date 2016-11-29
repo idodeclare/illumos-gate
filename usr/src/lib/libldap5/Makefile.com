@@ -31,17 +31,17 @@ VERS= .5
 
 BEROBJS=	bprint.o	decode.o 	encode.o       io.o
 
-LDAPOBJS=  abandon.o add.o authzidctrl.c bind.o cache.o charray.o \
-        charset.o cldap.c compare.o compat.o control.o countvalues.o \
+LDAPOBJS=  abandon.o add.o authzidctrl.o bind.o cache.o charray.o \
+        charset.o cldap.o compare.o compat.o control.o countvalues.o \
         delete.o disptmpl.o dsparse.o error.o extendop.o free.o freevalues.o \
         friendly.o getattr.o getdn.o getdxbyname.o \
-	geteffectiverightsctrl.c getentry.o \
+	geteffectiverightsctrl.o getentry.o \
         getfilter.o getoption.o getvalues.o memcache.o message.o \
         modify.o open.o os-ip.o proxyauthctrl.o psearch.o \
-	pwmodext.c pwpctrl.c referral.o \
-        rename.o request.o reslist.o result.o saslbind.o sasl.o saslio.c \
+	pwmodext.o pwpctrl.o referral.o \
+        rename.o request.o reslist.o result.o saslbind.o sasl.o saslio.o \
         sbind.o search.o setoption.o sort.o sortctrl.o srchpref.o \
-        tmplout.o ufn.o unbind.o unescape.o url.o userstatusctrl.c utf8.c \
+        tmplout.o ufn.o unbind.o unescape.o url.o userstatusctrl.o utf8.o \
 	whoami.o ldaputf8.o vlistctrl.o \
         cram_md5.o secutil.o spagectrl.o digest_md5.o
 

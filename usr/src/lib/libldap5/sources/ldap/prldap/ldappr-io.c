@@ -68,7 +68,11 @@ static int LDAP_CALLBACK prldap_poll( LDAP_X_PollFD fds[], int nfds,
 static int LDAP_CALLBACK prldap_connect( const char *hostlist, int defport,
 	int timeout, unsigned long options,
 	struct lextiof_session_private *sessionarg,
+#ifdef _SOLARIS_SDK
+	struct lextiof_socket_private **socketargp, void **dhost);
+#else
 	struct lextiof_socket_private **socketargp );
+#endif	/* _SOLARIS_SDK */
 static int LDAP_CALLBACK prldap_close( int s,
 	struct lextiof_socket_private *socketarg );
 static int LDAP_CALLBACK prldap_newhandle( LDAP *ld,

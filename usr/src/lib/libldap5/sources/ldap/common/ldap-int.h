@@ -85,13 +85,24 @@
 #ifdef macintosh
 #include "lber-int.h"
 #else /* macintosh */
+#ifdef _SOLARIS_SDK
+#include "../ber/lber-int.h"
+#else
 #include "../liblber/lber-int.h"
+#endif /* _SOLARIS_SDK */
 #endif /* macintosh */
 
+#ifdef _SOLARIS_SDK
+#include <ldap.h>
+#include <ldaprot.h>
+#include <ldaplog.h>
+#include <portable.h>
+#else
 #include "ldap.h"
 #include "ldaprot.h"
 #include "ldaplog.h"
 #include "portable.h"
+#endif /* _SOLARIS_SDK */
 
 #ifdef LDAP_ASYNC_IO
 #ifdef NEED_FILIO

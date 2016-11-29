@@ -60,8 +60,11 @@
 #include <sslproto.h>
 #include <ldap.h>
 #ifdef _SOLARIS_SDK
+#include <synch.h>
 #include <ldap/ldap_ssl.h>
 #include <solaris-int.h>
+#else
+#include <ldap_ssl.h>
 #endif /* _SOLARIS_SDK */
 #include <nss.h>
 
@@ -93,10 +96,9 @@ static int		inited = 0;
 #ifdef _SOLARIS_SDK
 mutex_t			inited_mutex = DEFAULTMUTEX;
 #endif	/* _SOLARIS_SDK */
-#if 0	/* UNNEEDED BY LIBLDAP */
+
 static char  tokDes[34] = "Internal (Software) Database     ";
 static char ptokDes[34] = "Internal (Software) Token        ";
-#endif	/* UNNEEDED BY LIBLDAP */
 
 
 /* IN:					     */
