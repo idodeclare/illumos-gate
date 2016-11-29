@@ -1271,3 +1271,4 @@ ldap_sasl_interactive_bind_s( LDAP *ld, const char *dn,
 }
 
 #endif
+#endif
