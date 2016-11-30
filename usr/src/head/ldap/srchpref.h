@@ -60,7 +60,7 @@ extern "C" {
 
 /* calling conventions used by library */
 #ifndef LDAP_CALL
-#if defined( _WINDOWS ) || defined( _WIN32 )
+#if defined(_WINDOWS) || defined(_WIN32)
 #define	LDAP_C __cdecl
 #ifndef _WIN32
 #define	__stdcall _far _pascal
@@ -152,4 +152,3 @@ struct ldap_searchobj *so);
 }
 #endif
 #endif /* _SRCHPREF_H */
-

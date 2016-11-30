@@ -46,9 +46,9 @@
 extern "C" {
 #endif
 
-#if defined (WIN32) || defined (_WIN32) || defined(_CONSOLE)
+#if defined(WIN32) || defined(_WIN32) || defined(_CONSOLE)
 #include <windows.h>
-#if defined( _WINDOWS )
+#if defined(_WINDOWS)
 #include <winsock.h>
 #endif
 #elif defined(macintosh)

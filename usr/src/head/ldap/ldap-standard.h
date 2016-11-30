@@ -48,13 +48,9 @@
 extern "C" {
 #endif
 
-#include "ldap-platform.h"
+#include <ldap/ldap-platform.h>
 
-#ifdef _SOLARIS_SDK
 #include <lber.h>
-#else
-#include "lber.h"
-#endif /* _SOLARIS_SDK */
 
 #define	LDAP_PORT		389
 #define	LDAPS_PORT		636

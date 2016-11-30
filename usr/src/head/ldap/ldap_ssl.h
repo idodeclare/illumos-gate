@@ -74,7 +74,8 @@ LDAP * LDAP_CALL ldapssl_init(const char *defhost, int defport,
  */
 int LDAP_CALL ldapssl_shutdown();
 
-/* Initialize LDAP library for TLS(SSL) and sends StartTLS extended
+/*
+ * Initialize LDAP library for TLS(SSL) and sends StartTLS extended
  * operation to the Directory Server.
  * Returns LDAP_SUCCESS if all goes well.
  */
@@ -217,7 +218,7 @@ int LDAP_CALL ldapssl_enable_clientauth(LDAP *ld, char *keynickname,
  *
  * Returns 0 if all goes well.
  */
-int LDAP_CALL ldapssl_set_strength( LDAP *ld, int sslstrength);
+int LDAP_CALL ldapssl_set_strength(LDAP *ld, int sslstrength);
 
 
 /*
@@ -240,14 +241,14 @@ int LDAP_CALL ldapssl_get_option(LDAP *ld, int option, int *onp);
  * open LDAP connection into SSL, and update the socket and session
  * information accordingly. Returns 0 if all goes well.
  */
-int LDAP_CALL ldapssl_import_fd (LDAP *ld, int secure);
+int LDAP_CALL ldapssl_import_fd(LDAP *ld, int secure);
 
 /*
  * Reset an LDAP session from SSL to a non-secure status. Basically,
  * this function undoes the work done by ldapssl_install_routines.
  * Returns 0 if all goes well.
  */
-int LDAP_CALL ldapssl_reset_to_nonsecure (LDAP *ld);
+int LDAP_CALL ldapssl_reset_to_nonsecure(LDAP *ld);
 
 #ifdef __cplusplus
 }

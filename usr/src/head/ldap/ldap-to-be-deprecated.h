@@ -72,9 +72,9 @@ extern "C" {
 typedef int	(LDAP_C LDAP_CALLBACK LDAP_IOF_SELECT_CALLBACK)(int nfds,
 	fd_set *readfds, fd_set *writefds, fd_set *errorfds,
 	struct timeval *timeout);
-typedef LBER_SOCKET (LDAP_C LDAP_CALLBACK LDAP_IOF_SOCKET_CALLBACK)(
-	int domain, int type, int protocol);
-typedef int	(LDAP_C LDAP_CALLBACK LDAP_IOF_IOCTL_CALLBACK)( LBER_SOCKET s,
+typedef LBER_SOCKET (LDAP_C LDAP_CALLBACK
+	LDAP_IOF_SOCKET_CALLBACK)(int domain, int type, int protocol);
+typedef int	(LDAP_C LDAP_CALLBACK LDAP_IOF_IOCTL_CALLBACK)(LBER_SOCKET s,
 	int option, ...);
 typedef int	(LDAP_C LDAP_CALLBACK LDAP_IOF_CONNECT_CALLBACK)(
 	LBER_SOCKET s, struct sockaddr *name, int namelen);
@@ -101,7 +101,7 @@ struct ldap_io_fns {
  * DNS resolver callbacks (an API extension --LDAP_API_FEATURE_X_DNS_FUNCTIONS).
  * Note that gethostbyaddr() is not currently used.
  */
-#define	LDAP_OPT_DNS_FN_PTRS            0x60    /* 96 - API extension */
+#define	LDAP_OPT_DNS_FN_PTRS	0x60    /* 96 - API extension */
 
 typedef struct LDAPHostEnt {
     char	*ldaphe_name;	/* official name of host */
@@ -121,11 +121,11 @@ typedef int (LDAP_C LDAP_CALLBACK LDAP_DNSFN_GETPEERNAME)(
 	LDAP *ld, struct sockaddr *netaddr, char *buffer, int buflen);
 
 struct ldap_dns_fns {
-        void                            *lddnsfn_extradata;
-        int                             lddnsfn_bufsize;
-        LDAP_DNSFN_GETHOSTBYNAME        *lddnsfn_gethostbyname;
-        LDAP_DNSFN_GETHOSTBYADDR        *lddnsfn_gethostbyaddr;
-	LDAP_DNSFN_GETPEERNAME          *lddnsfn_getpeername;
+	void		*lddnsfn_extradata;
+	int			lddnsfn_bufsize;
+	LDAP_DNSFN_GETHOSTBYNAME	*lddnsfn_gethostbyname;
+	LDAP_DNSFN_GETHOSTBYADDR	*lddnsfn_gethostbyaddr;
+	LDAP_DNSFN_GETPEERNAME		*lddnsfn_getpeername;
 };
 
 /*

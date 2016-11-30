@@ -60,7 +60,7 @@ extern "C" {
 
 /* calling conventions used by library */
 #ifndef LDAP_CALL
-#if defined( _WINDOWS ) || defined( _WIN32 )
+#if defined(_WINDOWS) || defined(_WIN32)
 #define	LDAP_C __cdecl
 #ifndef _WIN32
 #define	__stdcall _far _pascal
@@ -370,7 +370,7 @@ ldap_entry2html_search(LDAP *ld, char *dn, char *base, LDAPMessage *entry,
 
 LDAP_API(char *)
 LDAP_CALL
-ldap_tmplerr2string( int err);
+ldap_tmplerr2string(int err);
 
 #ifdef __cplusplus
 }

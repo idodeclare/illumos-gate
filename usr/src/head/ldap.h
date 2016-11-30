@@ -70,7 +70,8 @@ extern "C" {
 /* Extensions to the LDAP standard */
 #include <ldap/ldap-extension.h>
 
-/* A deprecated API is an API that we recommend you no longer use,
+/*
+ * A deprecated API is an API that we recommend you no longer use,
  * due to improvements in the LDAP C SDK. While deprecated APIs are
  * currently still implemented, they may be removed in future
  * implementations, and we recommend using other APIs.
