@@ -57,6 +57,7 @@ static char copyright[] = "@(#) Copyright (c) 1995 Regents of the University of 
 #include "ldap-int.h"
 #ifdef _SOLARIS_SDK
 #include <ldappr.h>
+#include "../prldap/ldappr-int.h"
 #endif /* _SOLARIS_SDK */
 #ifdef LDAP_SASLIO_HOOKS
 /* Valid for any ANSI C compiler */

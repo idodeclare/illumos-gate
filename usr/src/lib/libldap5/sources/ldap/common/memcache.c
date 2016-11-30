@@ -1616,7 +1616,11 @@ memcache_access(LDAPMemCache *cache, int mode,
 	     (mode == MEMCACHE_ACCESS_FLUSH_RESULTS)) {
 
 	int i, list_id, bDone;
+#ifdef _SOLARIS_SDK
+	long scope = (long)pData2;
+#else
 	int scope = (int)pData2;
+#endif /* _SOLARIS_SDK */
 	char *dn = (char*)pData1;
 	char *dnTmp;
 	BerElement ber;
@@ -1920,7 +1924,8 @@ static int
 msgid_hashf(int table_size, void *key)
 {
 #ifdef _SOLARIS_SDK
-    unsigned long code = (unsigned)((ldapmemcacheReqId*)key)->ldmemcrid_ld;
+    unsigned long code = (unsigned long)
+        ((ldapmemcacheReqId*)key)->ldmemcrid_ld;
 #else
     unsigned code = (unsigned)((ldapmemcacheReqId*)key)->ldmemcrid_ld;
 #endif /* _SOLARIS_SDK */

@@ -95,7 +95,6 @@ extern int _sasl_server_new(void *ctx, const char *service,
 	const sasl_callback_t *callbacks,
 	unsigned flags, sasl_conn_t **pconn);
 
-static int nsldapi_sasl_close( LDAP *ld, Sockbuf *sb );
 static void destroy_sasliobuf(Sockbuf *sb);
 
 /*
@@ -765,54 +764,6 @@ nsldapi_sasl_install( LDAP *ld, LDAPConn *lconn )
 }
 
 #ifdef _SOLARIS_SDK
-static int
-nsldapi_sasl_cvterrno( LDAP *ld, int err, char *msg )
-{
-	int rc = LDAP_LOCAL_ERROR;
-
-	switch (err) {
-	case SASL_OK:
-		rc = LDAP_SUCCESS;
-		break;
-	case SASL_NOMECH:
-		rc = LDAP_AUTH_UNKNOWN;
-		break;
-	case SASL_BADSERV:
-		rc = LDAP_CONNECT_ERROR;
-		break;
-	case SASL_DISABLED:
-	case SASL_ENCRYPT:
-	case SASL_EXPIRED:
-	case SASL_NOUSERPASS:
-	case SASL_NOVERIFY:
-	case SASL_PWLOCK:
-	case SASL_TOOWEAK:
-	case SASL_UNAVAIL:
-	case SASL_WEAKPASS:
-		rc = LDAP_INAPPROPRIATE_AUTH;
-		break;
-	case SASL_BADAUTH:
-	case SASL_NOAUTHZ:
-		rc = LDAP_INVALID_CREDENTIALS;
-		break;
-	case SASL_NOMEM:
-		rc = LDAP_NO_MEMORY;
-		break;
-	case SASL_NOUSER:
-		rc = LDAP_NO_SUCH_OBJECT;
-		break;
-	case SASL_CONTINUE:
-	case SASL_FAIL:
-	case SASL_INTERACT:
-	default:
-		rc = LDAP_LOCAL_ERROR;
-		break;
-	}
-
-	LDAP_SET_LDERRNO( ld, rc, NULL, msg );
-	return( rc );
-}
-
 static void
 destroy_sasliobuf(Sockbuf *sb)
 {
@@ -823,20 +774,6 @@ destroy_sasliobuf(Sockbuf *sb)
 		sb->sb_sasl_bfsz = 0;
 		sb->sb_sasl_ilen = 0;
 	}
-}
-
-static int
-nsldapi_sasl_close( LDAP *ld, Sockbuf *sb )
-{
-	sasl_conn_t	*ctx = (sasl_conn_t *)sb->sb_sasl_ctx;
-
-	destroy_sasliobuf(sb);
-
-	if( ctx != NULL ) {
-		sasl_dispose( &ctx );
-		sb->sb_sasl_ctx = NULL;
-	}
-	return( LDAP_SUCCESS );
 }
 
 static int
@@ -874,7 +811,9 @@ nsldapi_sasl_do_bind( LDAP *ld, const char *dn,
 	}   
 
 	/* should have a valid ld connection - now create sasl connection */
-	if ((rc = nsldapi_sasl_open(ld)) != LDAP_SUCCESS) {
+	if ((rc = nsldapi_sasl_open(ld, ld->ld_defconn,
+	    (sasl_conn_t **)&(ld->ld_defconn->lconn_sb->sb_sasl_ctx), 0)) !=
+	    LDAP_SUCCESS) {
 		LDAP_SET_LDERRNO( ld, rc, NULL, NULL );
 		return( rc );
 	}
@@ -1016,7 +955,7 @@ nsldapi_sasl_do_bind( LDAP *ld, const char *dn,
 				"SASL install encryption, for SSF: %lu\n",
 				(unsigned long) *ssf, 0, 0 );
 		}
-		rc = nsldapi_sasl_install(ld, ld->ld_conns->lconn_sb, ctx, ssf);
+		rc = nsldapi_sasl_install(ld, ld->ld_conns);
 	}
 
 	return( rc );
