@@ -119,6 +119,11 @@ char ** ldap_get_reference_urls(LDAP *ld, LDAPMessage *res);
 
 
 /*
+ * URL functions:
+ */
+int LDAP_CALL ldap_url_parse_nodn(const char *url, LDAPURLDesc **ludpp);
+
+/*
  * Additional URL functions plus Character set, Search Preference
  * and Display Template functions moved from internal header files
  */

@@ -456,6 +456,14 @@ put_complex_filter(
 	return( next );
 }
 
+#ifdef _SOLARIS_SDK
+int
+ldap_put_filter( BerElement *ber, char *str )
+{
+	return put_filter(ber, str);
+}
+#endif /* _SOLARIS_SDK */
+
 static int
 put_filter( BerElement *ber, char *str )
 {

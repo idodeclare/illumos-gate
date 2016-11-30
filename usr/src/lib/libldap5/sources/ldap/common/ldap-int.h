@@ -818,6 +818,10 @@ int nsldapi_build_search_req( LDAP *ld, const char *base, int scope,
 	LDAPControl **serverctrls, LDAPControl **clientctrls,
 	int timelimit, int sizelimit, int msgid, BerElement **berp );
 
+#ifdef _SOLARIS_SDK
+int ldap_put_filter( BerElement *ber, char *str );
+#endif /* _SOLARIS_SDK */
+
 /*
  * in unbind.c
  */

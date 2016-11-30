@@ -174,6 +174,33 @@ ldap_url_parse( const char *url, LDAPURLDesc **ludpp )
 }
 
 
+#ifdef _SOLARIS_SDK
+/* same as ldap_url_parse(), but dn is not require */
+int
+LDAP_CALL
+ldap_url_parse_nodn(const char *url, LDAPURLDesc **ludpp)
+{
+/*
+ *  Pick apart the pieces of an LDAP URL.
+ */
+	int	rc;
+
+	if ((rc = nsldapi_url_parse(url, ludpp, 0)) == 0) {
+		if ((*ludpp)->lud_scope == -1) {
+			(*ludpp)->lud_scope = LDAP_SCOPE_BASE;
+		}
+		if ((*ludpp)->lud_filter == NULL) {
+			(*ludpp)->lud_filter = "(objectclass=*)";
+		}
+		if ((*ludpp)->lud_dn && *((*ludpp)->lud_dn) == '\0') {
+			(*ludpp)->lud_dn = NULL;
+		}
+	}
+
+	return (rc);
+}
+#endif /* _SOLARIS_SDK */
+
 /*
  * like ldap_url_parse() with a few exceptions:
  *   1) if dn_required is zero, a missing DN does not generate an error
