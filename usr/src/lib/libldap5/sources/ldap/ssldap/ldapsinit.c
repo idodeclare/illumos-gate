@@ -1494,7 +1494,7 @@ ldapssl_libldap_compat_strdup(const char *s1)
 }
 
 
-
+#if 0	/* NOT_NEEDED_IN_LIBLDAP */
 /* there are patches and kludges.  this is both.  force some linkers to
  * link this stuff in
  */
@@ -1514,6 +1514,7 @@ int stubs_o_stuff( void )
     return 0;
 
 }
+#endif	/* NOT_NEEDED_IN_LIBLDAP */
 
 
 /*
