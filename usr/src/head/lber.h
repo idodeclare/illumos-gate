@@ -127,7 +127,7 @@ extern "C" {
 #define	LBER_OPT_ON ((void *) 1)
 #define	LBER_OPT_OFF	((void *) 0)
 
-#ifdef _SOLARIS_SDK
+#if 0
 typedef unsigned long	ber_len_t;   /* for BER len */
 typedef unsigned long	ber_tag_t;   /* for BER tags */
 typedef long		ber_int_t;   /* for BER ints, enums, and Booleans */
