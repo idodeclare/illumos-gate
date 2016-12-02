@@ -127,19 +127,11 @@ extern "C" {
 #define	LBER_OPT_ON ((void *) 1)
 #define	LBER_OPT_OFF	((void *) 0)
 
-#if 0
-typedef unsigned long	ber_len_t;   /* for BER len */
-typedef unsigned long	ber_tag_t;   /* for BER tags */
-typedef long		ber_int_t;   /* for BER ints, enums, and Booleans */
-typedef unsigned long	ber_uint_t; /* unsigned equivalent of ber_int_t */
-typedef long		ber_slen_t; /* signed equivalent of ber_len_t */
-#else
 typedef unsigned int	ber_len_t;   /* for BER len */
 typedef unsigned int	ber_tag_t;   /* for BER tags */
 typedef int		ber_int_t;   /* for BER ints, enums, and Booleans */
 typedef unsigned int	ber_uint_t; /* unsigned equivalent of ber_int_t */
 typedef int		ber_slen_t; /* signed equivalent of ber_len_t */
-#endif /* _SOLARIS_SDK */
 
 typedef struct berval {
 	ber_len_t	bv_len;

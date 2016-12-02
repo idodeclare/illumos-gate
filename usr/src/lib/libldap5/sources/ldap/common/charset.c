@@ -101,7 +101,16 @@ ldap_translate_from_t61( LDAP *ld, char **bufp, unsigned long *lenp,
 		return( LDAP_SUCCESS );
 	}
 
+#ifdef _SOLARIS_SDK
+	ber_uint_t	blen;
+	int			result;
+
+	result = (*ld->ld_lber_decode_translate_proc)( bufp, &blen, free_input );
+	*lenp = blen;
+	return (result);
+#else
 	return( (*ld->ld_lber_decode_translate_proc)( bufp, lenp, free_input ));
+#endif /* _SOLARIS_SDK */
 }
 
 
@@ -113,7 +122,16 @@ ldap_translate_to_t61( LDAP *ld, char **bufp, unsigned long *lenp,
 		return( LDAP_SUCCESS );
 	}
 
+#ifdef _SOLARIS_SDK
+	ber_uint_t	blen;
+	int			result;
+
+	result = (*ld->ld_lber_encode_translate_proc)( bufp, &blen, free_input );
+	*lenp = blen;
+	return (result);
+#else
 	return( (*ld->ld_lber_encode_translate_proc)( bufp, lenp, free_input ));
+#endif /* _SOLARIS_SDK */
 }
 
 
