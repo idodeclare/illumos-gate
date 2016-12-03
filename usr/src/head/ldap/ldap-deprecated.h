@@ -132,7 +132,11 @@ typedef struct _LDAPVersion {
 LDAP_API(int) LDAP_CALL ldap_version(LDAPVersion *ver);
 
 /* use ldap_create_filter() instead of ldap_build_filter() */
+#ifdef _SOLARIS_SDK
+LDAP_API(void) LDAP_CALL ldap_build_filter(char *buf, ssize_t buflen,
+#else
 LDAP_API(void) LDAP_CALL ldap_build_filter(char *buf, unsigned long buflen,
+#endif /* _SOLARIS_SDK */
 	char *pattern, char *prefix, char *suffix, char *attr,
 	char *value, char **valwords);
 /* use ldap_set_filter_additions() instead of ldap_setfilteraffixes() */

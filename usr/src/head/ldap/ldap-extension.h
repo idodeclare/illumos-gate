@@ -652,7 +652,11 @@ typedef struct ldap_filt_desc LDAPFiltDesc; /* opaque filter desc handle */
  */
 LDAP_API(LDAPFiltDesc *) LDAP_CALL ldap_init_getfilter(char *fname);
 LDAP_API(LDAPFiltDesc *) LDAP_CALL ldap_init_getfilter_buf(char *buf,
+#ifdef _SOLARIS_SDK
+	ssize_t buflen);
+#else
 	long buflen);
+#endif /* _SOLARIS_SDK */
 LDAP_API(LDAPFiltInfo *) LDAP_CALL ldap_getfirstfilter(LDAPFiltDesc *lfdp,
 	char *tagpat, char *value);
 LDAP_API(LDAPFiltInfo *) LDAP_CALL ldap_getnextfilter(LDAPFiltDesc *lfdp);

@@ -449,7 +449,7 @@ int str_parse_line(char *line, char **type, char **value, int *vlen);
  */
 int ldap_create_sort_control (LDAP *ld, LDAPsortkey **sortKeyList, const char ctl_iscritical, LDAPControl **ctrlp);
 
-int ldap_parse_sort_control(LDAP *ld, LDAPControl **ctrlp, unsigned long *result, char **attribute);
+int ldap_parse_sort_control(LDAP *ld, LDAPControl **ctrlp, int *result, char **attribute);
 
 int ldap_create_sort_keylist(LDAPsortkey ***sortKeyList, const char *string_rep);
 
@@ -460,7 +460,7 @@ void ldap_free_sort_keylist(LDAPsortkey **sortKeyList);
  */
 int ldap_create_virtuallist_control(LDAP *ld, LDAPVirtualList *ldvlistp, LDAPControl **ctrlp);
 
-int ldap_parse_virtuallist_control(LDAP *ld, LDAPControl **ctrls, unsigned long *target_posp, unsigned long *list_sizep, int *errcodep);
+int ldap_parse_virtuallist_control(LDAP *ld, LDAPControl **ctrls, int *target_posp, int *list_sizep, int *errcodep);
 
 /*
  * in ldapsinit.c
@@ -520,7 +520,7 @@ int ldap_memcache_init(unsigned long ttl, unsigned long size, char **baseDNs, st
 
 int ldap_memcache_set(LDAP *ld, LDAPMemCache *cache);
 int ldap_memcache_get(LDAP *ld, LDAPMemCache **cachep);
-void ldap_memcache_flush(LDAPMemCache *cache, char *dn, int scope);
+void ldap_memcache_flush(LDAPMemCache *cache, char *dn, long scope);
 void ldap_memcache_destroy(LDAPMemCache *cache);
 void ldap_memcache_update(LDAPMemCache *cache);
 

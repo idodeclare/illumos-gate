@@ -75,7 +75,12 @@ ldap_init_getfilter( char *fname )
 {
     FILE		*fp;
     char		*buf;
+#ifdef _SOLARIS_SDK
+    ssize_t		rlen;
+    long		len;
+#else
     long		rlen, len;
+#endif /* _SOLARIS_SDK */
     int 		eof;
     LDAPFiltDesc	*lfdp;
 
@@ -123,7 +128,11 @@ ldap_init_getfilter( char *fname )
 
 LDAPFiltDesc *
 LDAP_CALL
+#ifdef _SOLARIS_SDK
+ldap_init_getfilter_buf( char *buf, ssize_t buflen )
+#else
 ldap_init_getfilter_buf( char *buf, long buflen )
+#endif /* _SOLARIS_SDK */
 {
     LDAPFiltDesc	*lfdp;
     LDAPFiltList	*flp, *nextflp;
@@ -533,7 +542,11 @@ ldap_create_filter( char *filtbuf, unsigned long buflen, char *pattern,
  */
 void
 LDAP_CALL
+#ifdef _SOLARIS_SDK
+ldap_build_filter( char *filtbuf, ssize_t buflen, char *pattern,
+#else
 ldap_build_filter( char *filtbuf, unsigned long buflen, char *pattern,
+#endif /* _SOLARIS_SDK */
 	char *prefix, char *suffix, char *attr, char *value, char **valwords )
 {
     (void)ldap_create_filter( filtbuf, buflen, pattern, prefix, suffix, attr,
