@@ -2033,8 +2033,13 @@ multi_result(ns_ldap_cookie_t *cookie)
 	int		i, rc;
 	int		errCode;
 	int		finished = 0;
+#ifdef _SOLARIS_SDK
+	ber_int_t	target_posp = 0;
+	ber_int_t	list_size = 0;
+#else
 	unsigned long	target_posp = 0;
 	unsigned long	list_size = 0;
+#endif /* _SOLARIS_SDK */
 	unsigned int	count = 0;
 	char 		**referrals = NULL;
 

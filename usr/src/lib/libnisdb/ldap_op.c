@@ -1692,8 +1692,13 @@ retry_noVLV:
 				goto cleanup;
 			}
 			if (retCtrls != 0) {
+#ifdef _SOLARIS_SDK
+				ber_int_t	targetPosP = 0;
+				ber_int_t	listSize = 0;
+#else
 				unsigned long	targetPosP = 0;
 				unsigned long	listSize = 0;
+#endif /* _SOLARIS_SDK */
 
 				stat = ldap_parse_virtuallist_control(lc->ld,
 					retCtrls, &targetPosP, &listSize,
