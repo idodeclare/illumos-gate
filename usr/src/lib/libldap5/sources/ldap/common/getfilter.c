@@ -150,7 +150,12 @@ ldap_init_getfilter_buf( char *buf, long buflen )
     fip = NULL;
     tag = NULL;
 
+#ifdef _SOLARIS_SDK
+    long	lbuflen = buflen;
+    while ( lbuflen > 0 && ( tokcnt = nsldapi_next_line_tokens( &buf, &lbuflen,
+#else
     while ( buflen > 0 && ( tokcnt = nsldapi_next_line_tokens( &buf, &buflen,
+#endif /* _SOLARIS_SDK */
 	    &tok )) > 0 ) {
 	switch( tokcnt ) {
 	case 1:		/* tag line */
