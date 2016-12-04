@@ -441,11 +441,7 @@ filter_add_value( char *f, char *flimit, char *v, int escape_all )
 
 int
 LDAP_CALL
-#ifdef _SOLARIS_SDK
-ldap_create_filter( char *filtbuf, size_t buflen, char *pattern,
-#else
 ldap_create_filter( char *filtbuf, unsigned long buflen, char *pattern,
-#endif /* _SOLARIS_SDK */
 	char *prefix, char *suffix, char *attr, char *value, char **valwords )
 {
 	char	*p, *f, *flimit;

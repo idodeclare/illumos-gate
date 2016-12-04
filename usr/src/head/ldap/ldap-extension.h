@@ -662,11 +662,7 @@ LDAP_API(LDAPFiltInfo *) LDAP_CALL ldap_getfirstfilter(LDAPFiltDesc *lfdp,
 LDAP_API(LDAPFiltInfo *) LDAP_CALL ldap_getnextfilter(LDAPFiltDesc *lfdp);
 LDAP_API(int) LDAP_CALL ldap_set_filter_additions(LDAPFiltDesc *lfdp,
 	char *prefix, char *suffix);
-#ifdef _SOLARIS_SDK
-LDAP_API(int) LDAP_CALL ldap_create_filter(char *buf, size_t buflen,
-#else
 LDAP_API(int) LDAP_CALL ldap_create_filter(char *buf, unsigned long buflen,
-#endif /* _SOLARIS_SDK */
 	char *pattern, char *prefix, char *suffix, char *attr,
 	char *value, char **valwords);
 LDAP_API(void) LDAP_CALL ldap_getfilter_free(LDAPFiltDesc *lfdp);
