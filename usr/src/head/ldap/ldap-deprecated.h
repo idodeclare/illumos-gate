@@ -133,7 +133,7 @@ LDAP_API(int) LDAP_CALL ldap_version(LDAPVersion *ver);
 
 /* use ldap_create_filter() instead of ldap_build_filter() */
 #ifdef _SOLARIS_SDK
-LDAP_API(void) LDAP_CALL ldap_build_filter(char *buf, ssize_t buflen,
+LDAP_API(void) LDAP_CALL ldap_build_filter(char *buf, size_t buflen,
 #else
 LDAP_API(void) LDAP_CALL ldap_build_filter(char *buf, unsigned long buflen,
 #endif /* _SOLARIS_SDK */
