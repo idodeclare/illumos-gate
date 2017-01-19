@@ -122,3 +122,7 @@ warlock_ddi.files:
 
 usba.files:
 	@cd ../usba; pwd; $(MAKE) warlock
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

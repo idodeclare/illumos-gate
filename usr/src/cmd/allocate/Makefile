@@ -188,3 +188,7 @@ strip :
 		$(STRIP) $(PROG)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(ALLSCRIPTS) $(CLOBBERFILES) $(OBJS) $(POFILE) \
+	  $(POFILES) $(PROG) $(RTLCKS) $(SCRIPTS)

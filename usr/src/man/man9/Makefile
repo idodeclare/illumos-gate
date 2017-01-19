@@ -29,3 +29,6 @@ intro.9		:= LINKSRC = ../man9e/Intro.9e
 include		$(SRC)/man/Makefile.man
 
 install: 	$(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

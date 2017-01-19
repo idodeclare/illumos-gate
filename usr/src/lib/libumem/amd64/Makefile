@@ -36,3 +36,7 @@ TYPES=library standalone
 INSTALL_DEPS_library = $(ROOTLINKS64) $(ROOTLINT64) $(ROOTLIBS64)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) -d $(CURTYPE) $(CLEANFILES) $(CLOBBERTARGFILES) \
+	  $(DUPLICATE_SRC) $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -758,3 +758,6 @@ ypxfr_2perday.1m		:= LINKSRC = ypxfr.1m
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -140,3 +140,6 @@ scsi.files:
 cmlb.files:
 	@cd ../cmlb; pwd; $(MAKE) warlock
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

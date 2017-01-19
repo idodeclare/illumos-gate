@@ -161,3 +161,6 @@ clean:  rpcclean
 	$(RM) $(CLEANFILES)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG) $(REL_NDMP_H)

@@ -26,3 +26,6 @@
 #
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILE) $(OBJS) $(POFILE) $(POFILES) $(PROG)

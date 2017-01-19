@@ -32,3 +32,6 @@ include		../../Makefile.mount
 include		../../Makefile.mount.targ
 
 CERRWARN +=	-_gcc=-Wno-uninitialized
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

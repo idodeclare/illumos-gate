@@ -151,3 +151,6 @@ lint:
 	$(LINT.c) $(PROG).c $(LINTLIBS)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -26,3 +26,6 @@ clean:
 install:	$(ROOTUSRSBINPROG)
 
 include		$(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

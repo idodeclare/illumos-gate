@@ -101,3 +101,6 @@ check:	$(CHKMANIFEST)
 
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LLOBJS) $(OBJS) $(PROG)

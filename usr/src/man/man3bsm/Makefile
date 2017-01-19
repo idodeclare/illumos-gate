@@ -154,3 +154,6 @@ setddfile.3bsm		:= LINKSRC = getddent.3bsm
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

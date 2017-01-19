@@ -144,3 +144,6 @@ warlock_ddi.files:
 s1394.files:
 	@cd ../s1394; pwd; $(MAKE) warlock
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

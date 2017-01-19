@@ -41,3 +41,6 @@ lint:
 	$(LINT.c) strconf.c $(LDLIBS)
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

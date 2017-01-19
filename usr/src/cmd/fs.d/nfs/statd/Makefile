@@ -62,3 +62,6 @@ lint:		lint_SRCS
 
 clean:
 		$(RM) $(OBJS) $(TYPEPROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG) $(TYPEPROG)

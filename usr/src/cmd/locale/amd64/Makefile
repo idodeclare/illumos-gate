@@ -38,3 +38,6 @@ include ../../Makefile.cmd.64
 catalog:
 
 install: all
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

@@ -35,3 +35,6 @@ package:	$(ROOTPROG)
 lint:		$(LINTOUT32) $(SGSLINTOUT)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

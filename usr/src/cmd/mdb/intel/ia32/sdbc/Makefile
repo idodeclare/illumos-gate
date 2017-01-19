@@ -35,3 +35,7 @@ include ../../Makefile.ia32
 include ../../../Makefile.module
 include ../../../common/modules/sdbc/Makefile.com
 CPPFLAGS += -I$(AVSBASE)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

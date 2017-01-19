@@ -35,3 +35,7 @@ include ../Makefile.smbsrv
 $(GENSRCS): common/smb_status_gen.awk $(SRC)/uts/common/smb/ntstatus.h
 	$(AWK) -f common/smb_status_gen.awk \
 	  $(SRC)/uts/common/smb/ntstatus.h > $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

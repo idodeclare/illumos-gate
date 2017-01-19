@@ -66,3 +66,7 @@ lintlib:
 	$(LINT) $(LINTFLAGS) $(LINT_CPPFLAGS) -o lpreq llib-llpreq
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

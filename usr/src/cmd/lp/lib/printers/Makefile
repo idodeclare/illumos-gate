@@ -71,3 +71,7 @@ lintlib:
 	$(LINT) $(LINTFLAGS) $(LINT_CPPFLAGS) -o lpprt llib-llpprt
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

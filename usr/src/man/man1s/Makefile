@@ -28,3 +28,6 @@ make.1s		:= LINKSRC = ../man1/make.1
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -31,3 +31,7 @@ SRCS = sp_monitor.c
 include ../../Makefile.plugin
 
 LDLIBS += -lipmi -lsysevent
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	  $(DMOD_OBJS) $(LINTFILES) $(OBJS) $(PROG)

@@ -37,3 +37,6 @@ LDFLAGS += -R/usr/lib/fm/$(MACH64)
 include ../../Makefile.targ
 
 install: all $(ROOTPROG64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

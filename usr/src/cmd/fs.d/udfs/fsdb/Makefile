@@ -118,3 +118,5 @@ putback :
 	-keywords fsdb.c
 	-keywords Makefile
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

@@ -72,3 +72,6 @@ check:
 	$(CSTYLE) -p -P $(SRCS:%=%)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

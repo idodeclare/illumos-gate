@@ -129,3 +129,7 @@ $(WARLOCK_OK): $(WARLOCK_OUT) $(WLCMD_DIR)/usb_ah.wlcmd warlock_ddi.files
 
 warlock_ddi.files:
 	cd ../warlock; pwd; $(MAKE) warlock
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

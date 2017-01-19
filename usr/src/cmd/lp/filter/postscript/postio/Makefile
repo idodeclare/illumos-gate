@@ -69,3 +69,6 @@ lint:		lint_SRCS
 include		../../../../Makefile.targ
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

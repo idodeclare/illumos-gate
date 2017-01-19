@@ -48,3 +48,5 @@ lint:	lint_PROG
 
 include $(SRC)/cmd/Makefile.targ
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

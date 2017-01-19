@@ -2098,3 +2098,6 @@ va_start.9f				:= LINKSRC = va_arg.9f
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

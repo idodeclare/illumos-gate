@@ -31,3 +31,6 @@ include		../Makefile.com
 lint:		$(LINTOUT32)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

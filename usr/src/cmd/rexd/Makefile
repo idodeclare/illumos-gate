@@ -126,3 +126,6 @@ rex.o:		rex.h
 
 nfs_subr.o:	../fs.d/nfs/lib/nfs_subr.c
 	$(COMPILE.c)  ../fs.d/nfs/lib/nfs_subr.c
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANOBJS) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -286,3 +286,6 @@ java-version:
 		$(ECHO) No Java compiler found;		\
 		exit 1;					\
 	fi
+
+.DONE :
+	$(MAKE_GITIGNORE)

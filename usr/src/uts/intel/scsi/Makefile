@@ -125,3 +125,7 @@ warlock: $(MODULE).ok
 
 %.ll: $(UTSBASE)/common/io/scsi/conf/%.c
 	$(WLCC) $(CPPFLAGS) -DDEBUG -o $@ $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

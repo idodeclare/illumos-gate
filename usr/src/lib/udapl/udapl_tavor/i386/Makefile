@@ -31,3 +31,7 @@ i386_XARCH += i386.il
 pics/%.o: i386.il
 
 install: all $(ROOTLIBS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

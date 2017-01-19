@@ -27,3 +27,6 @@ LDLIBS += -L$(ROOT)/usr/lib/fm -lfmevent -lnvpair
 LDFLAGS += -R/usr/lib/fm
 
 install: all $(ROOTPROG32)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(BZIP2OBJS) $(CLOBBERFILES) $(OBJS) $(PROG)

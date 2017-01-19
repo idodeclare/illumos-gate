@@ -34,3 +34,6 @@ include ../Makefile.subdirs
 
 check := TARGET += check
 check : $(SUBDIRS)
+
+.DONE :
+	$(MAKE_GITIGNORE)

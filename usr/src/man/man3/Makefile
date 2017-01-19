@@ -39,3 +39,6 @@ request_set.3	:= LINKSRC = hosts_access.3
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -100,3 +100,7 @@ clean:
 	$(RM) $(OBJS) $(PSRC_C) $(LEXINTSRCS) $(CLEANFILES)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LEXINTSRCS) $(OBJS) \
+	  $(PROG) $(PSRC_C)

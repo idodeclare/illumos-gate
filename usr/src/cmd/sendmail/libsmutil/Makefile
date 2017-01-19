@@ -61,3 +61,6 @@ depend obj:
 install: all
 	
 include		../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG) $(libsmutil)

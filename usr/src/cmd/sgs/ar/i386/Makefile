@@ -33,3 +33,7 @@ package:	all $(ROOTPROG) $(ROOTXPG4PROG) $(ROOTCCSBINLINK)
 
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG) \
+	  $(XPG4OBJS)

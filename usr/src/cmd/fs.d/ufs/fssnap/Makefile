@@ -62,3 +62,6 @@ lint:	lint_SRCS
 
 clean:     
 	$(RM) $(FSSNAPOBJS) $(TOPOBJS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(FSSNAPOBJS) $(PROG) $(TOPOBJS)

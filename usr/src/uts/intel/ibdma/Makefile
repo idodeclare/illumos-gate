@@ -124,3 +124,7 @@ $(WARLOCK_OK): $(WARLOCK_OUT)
 		$(UTSBASE)/common/sys/ib/mgt/ibdma/ibdma_impl.h \
 		$(UTSBASE)/common/sys/ib/mgt/ibdma/ibdma.h
 	$(WLCC)  $(CPPFLAGS) -DDEBUG -o $@ $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

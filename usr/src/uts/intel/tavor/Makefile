@@ -138,3 +138,7 @@ $(WARLOCK_OK): $(WARLOCK_OUT) warlock_ddi.files $(WLCMD_DIR)/tavor.wlcmd
 
 warlock_ddi.files:
 	@cd $(UTSBASE)/intel/warlock; pwd; $(MAKE) warlock
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

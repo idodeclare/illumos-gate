@@ -53,3 +53,6 @@ $(PROG):	$(OBJS)
 	$(POST_PROCESS)
 
 include	../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

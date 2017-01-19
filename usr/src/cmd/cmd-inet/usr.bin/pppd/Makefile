@@ -122,3 +122,6 @@ lint:		$(SUBDIRS) $(LINTOBJS)
 clobber:	$(SUBDIRS)
 
 include		../../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(EXOBJS) $(OBJS) $(PROG)
