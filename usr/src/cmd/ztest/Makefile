@@ -34,6 +34,8 @@ include ../Makefile.cmd
 $(INTEL_BLD)SUBDIRS	= $(MACH)
 $(BUILD64)SUBDIRS	+= $(MACH64)
 
+CLOBBERFILES    += $(ROOTBASHPROG)
+
 all	:=	TARGET = all
 install	:=	TARGET = install
 clean	:=	TARGET = clean
@@ -46,9 +48,6 @@ all lint:	$(SUBDIRS) $(BASHPROG)
 
 clean:	$(SUBDIRS)
 	$(RM) $(BASHPROG)
-
-clobber:	$(SUBDIRS) clean
-	$(RM) $(ROOTBASHPROG)
 
 install:	$(SUBDIRS) $(ROOTBASHPROG)
 	-$(RM) $(ROOTPROG)
