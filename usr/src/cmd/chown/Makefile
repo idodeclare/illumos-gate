@@ -66,3 +66,6 @@ $(XD):
 	-@mkdir -p $@
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(EXOBJS) $(PROG) $(XD)

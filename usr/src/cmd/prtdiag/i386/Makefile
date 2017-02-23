@@ -38,3 +38,6 @@ LDFLAGS += -R/usr/lib/fm
 all:	$(PROG)
 
 include $(SRCDIR)/i386/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINT_OBJS) $(OBJS) $(PROG)

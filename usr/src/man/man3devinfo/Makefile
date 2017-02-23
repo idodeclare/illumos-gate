@@ -208,3 +208,6 @@ di_prop_lookup_strings.3devinfo		:= LINKSRC = di_prop_lookup_bytes.3devinfo
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

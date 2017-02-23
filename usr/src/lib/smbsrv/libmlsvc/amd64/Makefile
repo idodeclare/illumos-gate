@@ -33,3 +33,7 @@ include ../../../Makefile.lib.64
 DYNFLAGS +=	-R/usr/lib/smbsrv/$(MACH64)
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64) $(ROOTLINT64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

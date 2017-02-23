@@ -56,3 +56,6 @@ $(NETYP)/inityp2l: inityp2l
 	$(INS.file) inityp2l
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS)

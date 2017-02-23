@@ -31,3 +31,6 @@ include $(SRC)/Makefile.master.64
 include ../../Makefile.targ
 
 install: all $(ROOTPROG64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

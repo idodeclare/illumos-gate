@@ -39,3 +39,6 @@ catalog:	$(POFILE)
 lint:
 
 .KEEP_STATE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

@@ -59,3 +59,5 @@ include ../Makefile.targ
 $(ROOTSBIN)/%: %
 	$(INS.file)
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

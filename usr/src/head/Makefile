@@ -440,3 +440,6 @@ rpcsvc/%.h:	rpcsvc/%.x
 rpcsvc/nis.h:	rpcsvc/nis.x
 	$(RPCGEN) $(RPCGENFLAGS) rpcsvc/nis.x |\
 	$(SED) -e '/EDIT_START/,$$ d' > $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(REL_RPCSVC_GEN_HDRS)

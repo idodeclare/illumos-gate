@@ -572,3 +572,6 @@ ypprot_err.3nsl				:= LINKSRC = ypclnt.3nsl
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

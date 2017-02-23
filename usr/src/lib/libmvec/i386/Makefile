@@ -27,3 +27,7 @@ SRCS		= $(SRCS_mvec)
 install: all $(ROOTLIBS) $(ROOTLINKS)
 
 include $(SRC)/lib/libm/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

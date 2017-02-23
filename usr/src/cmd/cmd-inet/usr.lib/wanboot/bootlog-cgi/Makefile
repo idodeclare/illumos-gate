@@ -39,3 +39,6 @@ all:		$(PROG)
 install:	all $(ROOTCMD)
 
 include ../../../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(UNIGNOREFILES:%=-x %) $(CLOBBERFILES) $(PROG)

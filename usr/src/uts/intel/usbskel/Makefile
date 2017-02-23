@@ -145,3 +145,6 @@ ehci_files:
 warlock_ddi.files:
 	cd ../warlock; pwd; $(MAKE) warlock
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

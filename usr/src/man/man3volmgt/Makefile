@@ -43,3 +43,6 @@ volmgt_symdev.3volmgt	:= LINKSRC = volmgt_symname.3volmgt
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

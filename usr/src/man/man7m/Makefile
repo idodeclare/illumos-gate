@@ -55,3 +55,6 @@ vuidm5p.7m	:= LINKSRC = vuidmice.7m
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -162,3 +162,6 @@ generic.po: FRC
 
 FRC:
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG) \
+	  $(RSRC)

@@ -33,3 +33,7 @@ include ../Makefile.com
 TYPES=library standalone
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) -d $(CURTYPE) $(CLEANFILES) $(CLOBBERTARGFILES) \
+	  $(DUPLICATE_SRC) $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

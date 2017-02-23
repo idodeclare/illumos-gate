@@ -185,3 +185,6 @@ common.po:	../chmod/common.c
 		$(RM) messages.po common.c.i
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

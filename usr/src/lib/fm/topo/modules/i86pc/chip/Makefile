@@ -31,3 +31,7 @@ chip_serial.c chip_smbios.c
 
 include ../../Makefile.plugin
 LDLIBS += -lipmi -lfmd_agent -lumem -lsmbios
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	  $(PROG)

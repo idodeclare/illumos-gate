@@ -35,3 +35,7 @@ include ../../../Makefile.module
 
 CPPFLAGS += -erroff=E_NON_CONST_INIT
 CPPFLAGS += -I$(COMSTARBASE)/port/fct -I$(COMSTARBASE)/stmf
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

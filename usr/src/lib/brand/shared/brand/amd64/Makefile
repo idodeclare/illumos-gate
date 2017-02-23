@@ -30,3 +30,7 @@ include $(SRC)/lib/Makefile.lib.64
 CPPFLAGS += 		-D_SYSCALL32
 
 install: all
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

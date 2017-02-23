@@ -78,3 +78,6 @@ $(ROOTDIRS):
 
 %.h: %.x
 	$(RPCGEN) $(RPCGENFLAGS) -h $< -o $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_HDRS)

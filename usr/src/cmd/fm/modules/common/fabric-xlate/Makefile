@@ -41,3 +41,7 @@ LDLIBS += -luutil -lxml2 -L$(ROOTLIB)/fm -ltopo
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-uninitialized
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	  $(DMOD_OBJS) $(LINTFILES) $(OBJS) $(PROG)

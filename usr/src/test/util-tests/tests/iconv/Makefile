@@ -47,3 +47,6 @@ $(TESTDIR):
 
 $(TESTDIR)/%: %
 	$(INS.file)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(SHFILES)

@@ -43,3 +43,7 @@ package:	all $(ROOTPROG64) $(ROOTCCSBINLINK64)
 
 include		../Makefile.targ
 include		../../Makefile.sub.64
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG) \
+	  $(XPG4OBJS)

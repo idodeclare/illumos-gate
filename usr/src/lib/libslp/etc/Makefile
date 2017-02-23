@@ -49,3 +49,6 @@ clobber:
 
 $(DIRS):
 	$(INS.dir)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

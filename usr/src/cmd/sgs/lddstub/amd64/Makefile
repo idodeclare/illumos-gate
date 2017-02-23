@@ -38,3 +38,6 @@ install:	all $(ROOTLIB64)/$(PROG)
 
 include		../Makefile.targ
 include		../../Makefile.sub.64
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

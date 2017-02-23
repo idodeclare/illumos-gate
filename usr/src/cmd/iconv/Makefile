@@ -64,3 +64,6 @@ $(POFILE):	$(PIFILES)
 .KEEP_STATE:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

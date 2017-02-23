@@ -148,3 +148,6 @@ doc:
 	cd $(TOP); umask 022; \
 	$(JAVADOC) $(JAVASRCDIR)/*.java $(XDOCLINT_OPTION) -notimestamp -classpath \
      	$(CLASSPATH) -d $(DOCAPIDIR) -public $(DNSSD_PKG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEAN_FILES)

@@ -184,3 +184,6 @@ ppc_literal_escapes.3tecla	:= LINKSRC = pca_lookup_file.3tecla
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

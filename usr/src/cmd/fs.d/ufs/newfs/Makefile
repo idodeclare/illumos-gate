@@ -65,3 +65,6 @@ $(POFILE):	$(SRCS)
 	$(XGETTEXT) $(XGETFLAGS)        $(POFILE).i
 	sed "/^domain/d" messages.po >  $@
 	$(RM) $(POFILE).i messages.po
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

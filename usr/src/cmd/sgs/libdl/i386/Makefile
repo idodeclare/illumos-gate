@@ -31,3 +31,7 @@ DYNFLAGS +=	-F /usr/lib/ld.so.1
 install:	all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
 
 include		$(SRC)/lib/Makefile.filter.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	  $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

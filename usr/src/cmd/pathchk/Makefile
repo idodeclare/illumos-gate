@@ -45,3 +45,6 @@ lint:	lint_PROG
 XGETFLAGS += -a -x $(PROG).xcl
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

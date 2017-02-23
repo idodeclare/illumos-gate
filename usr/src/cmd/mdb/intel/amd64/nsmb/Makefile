@@ -46,3 +46,7 @@ C99MODE=	$(C99_ENABLE)
 # we need to create this directory.
 $(ROOTKMOD):
 	$(INS.dir)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

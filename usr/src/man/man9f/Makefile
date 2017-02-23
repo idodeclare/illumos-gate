@@ -2118,3 +2118,6 @@ vmem_size.9f				:= LINKSRC = vmem_walk.9f
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

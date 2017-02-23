@@ -30,3 +30,6 @@ include ../../Makefile.targ
 LDLIBS += -lzfs
 
 install: all $(ROOTPROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

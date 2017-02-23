@@ -62,3 +62,6 @@ clobber: clean
 	$(RM) $(PROG) $(CLOBBERFILES)
 
 lint:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

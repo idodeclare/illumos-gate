@@ -111,3 +111,6 @@ mblk.9s			:= LINKSRC = msgb.9s
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

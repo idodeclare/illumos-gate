@@ -17,3 +17,6 @@ PROG=sha2_test
 include ../../Makefile.subdirs
 
 install: all $(CMD32)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

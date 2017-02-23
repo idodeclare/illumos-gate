@@ -70,3 +70,6 @@ $(POFILES):
 	$(RM) messages.po
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(POFILE) $(POFILES)

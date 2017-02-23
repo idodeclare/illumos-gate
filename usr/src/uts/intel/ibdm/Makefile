@@ -126,3 +126,7 @@ $(WARLOCK_OK): $(WARLOCK_OUT)
 		$(UTSBASE)/common/sys/ib/mgt/ibdm/ibdm_impl.h \
 		$(UTSBASE)/common/sys/ib/mgt/ibdm/ibdm_ibnex.h
 	$(WLCC)  $(CPPFLAGS) -DDEBUG -o $@ $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

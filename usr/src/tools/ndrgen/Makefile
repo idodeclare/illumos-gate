@@ -68,3 +68,6 @@ ndrgen1: $(OBJS)
 	$(POST_PROCESS)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

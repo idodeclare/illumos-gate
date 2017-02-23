@@ -63,3 +63,6 @@ lint_vtinfo:
 	$(LINT.c) $(VTINFO_SRC) $(LDLIBS)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

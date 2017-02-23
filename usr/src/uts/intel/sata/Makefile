@@ -138,3 +138,7 @@ $(WARLOCK_OK):   $(WARLOCK_OUT)
 
 %.ll: $(UTSBASE)/common/io/sata/impl/%.c
 	$(WLCC) $(CPPFLAGS) -DDEBUG -o $@ $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	  $(WARLOCK_OK) $(WARLOCK_OUT)

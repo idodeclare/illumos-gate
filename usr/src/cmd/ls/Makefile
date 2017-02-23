@@ -67,3 +67,6 @@ $(DCFILE): $(PROG).c
 FRC:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

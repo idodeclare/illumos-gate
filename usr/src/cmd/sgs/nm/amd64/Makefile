@@ -75,3 +75,6 @@ lint:		$(LINTOUT64) $(SGSLINTOUT)
 include		../../Makefile.targ
 include		../../../Makefile.targ
 include		../../Makefile.sub.64
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -48,3 +48,5 @@ ${ROOTLIB}/%: %
 
 include ../../Makefile.targ
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(KSHPROG) $(PROG)

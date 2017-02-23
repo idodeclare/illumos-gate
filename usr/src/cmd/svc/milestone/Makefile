@@ -162,3 +162,6 @@ $(ROOT)/lib/svc/share/%: %.share
 	$(INS.rename)
 
 clean lint _msg:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(BUILTXML)

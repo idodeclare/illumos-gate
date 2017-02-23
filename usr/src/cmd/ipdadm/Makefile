@@ -43,3 +43,6 @@ lint: lint_PROG
 install: $(PROG) $(ROOTUSRSBINPROG)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

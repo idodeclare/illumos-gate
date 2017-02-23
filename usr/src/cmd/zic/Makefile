@@ -132,3 +132,6 @@ $(POFILE3):	$(POFILES3)
 	$(RM) $@
 	@/bin/sh ./do_pofile.sh > $@
  
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

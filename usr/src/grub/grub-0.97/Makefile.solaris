@@ -53,3 +53,6 @@ $(SRC_DIR):
 
 
 _FORCE:
+
+.DONE :
+	$(MAKE_GITIGNORE)

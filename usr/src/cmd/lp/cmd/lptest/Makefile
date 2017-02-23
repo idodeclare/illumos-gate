@@ -69,3 +69,6 @@ lint:
 		$(LINT.c) $(PROG).c $(LDLIBS)
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

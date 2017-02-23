@@ -71,3 +71,6 @@ clobber:	clean
 lint:
 
 .KEEP_STATE:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_FILES)

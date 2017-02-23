@@ -102,3 +102,6 @@ lint:
 		$(LINT.c) $(SRCS) $(LDLIBS)
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

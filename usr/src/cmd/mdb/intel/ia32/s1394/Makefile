@@ -36,3 +36,7 @@ include ../../../Makefile.module
 
 # Needed to #include <sys/1394/s1394.h>
 CPPFLAGS += -I$(SRC)/uts/common
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	  $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)
