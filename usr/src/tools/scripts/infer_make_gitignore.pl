@@ -241,8 +241,8 @@ if ($force_make || @macros > 0) {
 			$llen += length($m);
 			if ($i + 1 < @macros) {
 				if ($llen + 1 + length($macros[$i + 1]) > 70) {
-					$make_gitignore_cmd .= " \\\n\t  ";
-					$llen = 3;
+					$make_gitignore_cmd .= " \\\n\t    ";
+					$llen = 5;
 				}
 				else {
 					$make_gitignore_cmd .= " ";
