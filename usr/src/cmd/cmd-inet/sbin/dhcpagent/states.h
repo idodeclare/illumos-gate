@@ -21,7 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+ * Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
  */
 
 #ifndef	STATES_H
@@ -209,10 +209,11 @@ struct dhcp_smach_s {
 	char		*dsm_msg_reqhost;
 
 	/*
-	 * The determined FQDN is remembered here between the DISCOVER/SOLICIT
-	 * and the REQUEST.
+	 * The domain name offered by v4 DNSdmain or inferred from v6
+	 * DNSSearch is decoded here for use (if configured and needed) to
+	 * determine an FQDN.
 	 */
-	char		*dsm_reqfqdn;
+	char		*dsm_offer_domainname;
 
 	/*
 	 * V4 and V6 use slightly different timers.  For v4, we must count

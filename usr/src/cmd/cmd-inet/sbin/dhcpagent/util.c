@@ -77,7 +77,8 @@
 #define	ETCNODENAME		"/etc/nodename"
 
 static	boolean_t	is_fqdn(const char *);
-static int			dhcp_assemble_fqdn(dhcp_smach_t *dsmp);
+static int		dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen,
+			    dhcp_smach_t *dsmp);
 
 /*
  * pkt_type_to_string(): stringifies a packet type
@@ -802,9 +803,8 @@ dhcp_add_hostname_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 }
 
 /*
- * dhcp_add_fqdn_opt(): Set CD_CLIENTFQDN option if dsm_reqfqdn is not NULL
- *			 or if dhcp_assemble_fqdn() initializes it. If dsm_reqfqdn
- *			 cannot be set, no option will be added.
+ * dhcp_add_fqdn_opt(): Set CD_CLIENTFQDN option if dhcp_assemble_fqdn()
+ *			 initializes an FQDN, or else do nothing.
  *
  *   input: dhcp_pkt_t *: pointer to DHCP message being constructed;
  *	    dhcp_smach_t *: pointer to interface DHCP state machine;
@@ -884,25 +884,25 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 	const uint8_t	S_BITPOS = 7 - 7;
 	const uint8_t	E_BITPOS = 7 - 5;
 	const size_t	OPT_FQDN_METALEN = 3, OPT_V6_FQDN_METALEN = 1;
+	char		fqdnbuf[MAXNAMELEN];
 	uint_t		fqdncode;
 	u_char		enc_fqdnbuf[MAXNAMELEN];
 	uint8_t		fqdnopt[MAXNAMELEN + OPT_FQDN_METALEN];
 	size_t		len, metalen;
 
-	if (dsmp->dsm_reqfqdn == NULL && dhcp_assemble_fqdn(dsmp) != 0)
+	if (dhcp_assemble_fqdn(fqdnbuf, sizeof (fqdnbuf), dsmp) != 0)
 		return (-1);
 
 	/* encode the FQDN in canonical wire format */
 
-	if (ns_name_pton2(dsmp->dsm_reqfqdn, enc_fqdnbuf, sizeof (enc_fqdnbuf),
-	    &len) < 0) {
+	if (ns_name_pton2(fqdnbuf, enc_fqdnbuf, sizeof (fqdnbuf), &len) < 0) {
 		dhcpmsg(MSG_WARNING, "dhcp_add_fqdn_opt: error encoding domain"
-		    " name %s", dsmp->dsm_reqfqdn);
+		    " name %s", fqdnbuf);
 		return (-1);
 	}
 
 	dhcpmsg(MSG_DEBUG, "dhcp_add_fqdn_opt: interface FQDN is %s"
-	    " for %s", dsmp->dsm_reqfqdn, dsmp->dsm_name);
+	    " for %s", fqdnbuf, dsmp->dsm_name);
 
 	bzero(fqdnopt, sizeof (fqdnopt));
 	if (dsmp->dsm_isv6) {
@@ -921,37 +921,35 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 }
 
 /*
- * dhcp_assemble_fqdn(): Set dsm_reqfqdn if REQUEST_FQDN is set and
+ * dhcp_assemble_fqdn(): Set fqdnbuf if REQUEST_FQDN is set and
  *			 either a host name was sent in the IPC message (e.g., from
  *			 ipadm(1M) -h,--reqhost) or the interface is primary and a
  *			 nodename(4) is defined. If the host name is not already fully
  *			 qualified per is_fqdn(), then a value from
- *			 /etc/default/dhcpagent--if defined--is used to construct an
+ *			 /etc/default/dhcpagent if defined or else an offered domain
+ *			 name if DF_ADOPT_DOMAINNAME is set is used to construct an
  *			 FQDN.
  *
- *			 If no FQDN can be determined, dsm_reqfqdn will be NULL.
- *
- *   input: dhcp_smach_t *: pointer to interface DHCP state machine;
- *  output: 0 if dsm_reqfqdn was assigned; non-zero if otherwise;
+ *   input: char *: pointer to buffer to which FQDN will be written;
+ *	    size_t length of buffer;
+ *	    dhcp_smach_t *: pointer to interface DHCP state machine;
+ *  output: 0 if fqdnbuf was assigned a valid FQDN; non-zero if otherwise;
  */
 
 static int
-dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
+dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen, dhcp_smach_t *dsmp)
 {
-	char		fqdnbuf[MAXNAMELEN], nodename[MAXNAMELEN], *reqhost;
+	char		nodename[MAXNAMELEN], *reqhost;
 	size_t		pos, len;
 
-	if (dsmp->dsm_reqfqdn != NULL) {
-		free(dsmp->dsm_reqfqdn);
-		dsmp->dsm_reqfqdn = NULL;
-	}
 
 	if (!df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6, DF_REQUEST_FQDN))
 		return (-1);
 
 	dhcpmsg(MSG_DEBUG, "dhcp_assemble_fqdn: DF_REQUEST_FQDN");
 
-	bzero(fqdnbuf, sizeof (fqdnbuf));
+	/* It's convenient to ensure fqdnbuf is NULL terminated at any point */
+	bzero(fqdnbuf, buflen);
 
 	reqhost = dsmp->dsm_msg_reqhost;
 	if (ipadm_is_nil_hostname(reqhost) &&
@@ -967,8 +965,7 @@ dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
 		return (-1);
 	}
 
-	if ((pos = strlcpy(fqdnbuf, reqhost, sizeof (fqdnbuf))) >=
-	    sizeof (fqdnbuf)) {
+	if ((pos = strlcpy(fqdnbuf, reqhost, buflen)) >= buflen) {
 		dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: too long reqhost %s"
 		    " for %s", reqhost, dsmp->dsm_name);
 		return (-1);
@@ -981,10 +978,22 @@ dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
 		size_t		needdots;
 		const char	*domainname;
 
+		/*
+		 * Use a static DNS_DOMAINNAME if defined in
+		 * /etc/default/dhcpagent. Otherwise, if DF_ADOPT_DOMAINNAME
+		 * is set, then use an offered domain name if available.
+		 */
 		domainname = df_get_string(dsmp->dsm_name, dsmp->dsm_isv6,
 		    DF_DNS_DOMAINNAME);
+		if (ipadm_is_nil_hostname(domainname) &&
+		    df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6,
+		        DF_ADOPT_DOMAINNAME)) {
+			domainname = dsmp->dsm_offer_domainname;
+		}
+
 		if (ipadm_is_nil_hostname(domainname)) {
-			dhcpmsg(MSG_DEBUG, "dhcp_assemble_fqdn: no domain name for %s",
+			dhcpmsg(MSG_DEBUG,
+			    "dhcp_assemble_fqdn: no domain name for %s",
 			    dsmp->dsm_name);
 			return (-1);
 		}
@@ -996,15 +1005,16 @@ dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
 		len = strlen(domainname);
 		needdots = 1 + (domainname[len - 1] != '.');
 
-		if (pos + len + needdots >= sizeof (fqdnbuf)) {
-			dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: too long FQDN %s.%s"
-			    " for %s", fqdnbuf, domainname, dsmp->dsm_name);
+		if (pos + len + needdots >= buflen) {
+			dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: too long"
+			    " FQDN %s.%s for %s", fqdnbuf, domainname,
+			    dsmp->dsm_name);
 			return (-1);
 		}
 
 		/* add separator and then domain name */
 		fqdnbuf[pos++] = '.';
-		(void) strlcpy(fqdnbuf + pos, domainname, sizeof (fqdnbuf) - pos);
+		(void) strlcpy(fqdnbuf + pos, domainname, buflen - pos);
 		pos += len;
 
 		/* ensure the final character is '.' */
@@ -1018,11 +1028,6 @@ dhcp_assemble_fqdn(dhcp_smach_t *dsmp)
 		return (-1);
 	}
 
-	free(dsmp->dsm_reqfqdn);
-	if ((dsmp->dsm_reqfqdn = strdup(fqdnbuf)) == NULL) {
-		dhcpmsg(MSG_WARNING, "dhcp_assemble_fqdn: cannot allocate memory");
-		return (-1);
-	}
 	return (0);
 }
 

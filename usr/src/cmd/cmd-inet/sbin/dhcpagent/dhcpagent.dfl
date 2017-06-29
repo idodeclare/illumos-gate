@@ -130,10 +130,19 @@
 # By default, the DHCP agent will not attempt to construct an FQDN from a
 # PQDN specified by the -h,--reqhost option of ipadm(1M), by the ncu
 # ip-reqhost property of nwamcfg(1M), or by nodename(4).  Set and
-# uncomment the following parameter to indicate a static DNS domain name
-# to be used by the DHCP agent to construct an FQDN if necessary.
+# uncomment the following parameter to indicate a domain name to be used by
+# the DHCP agent to construct if necessary an FQDN.
 #
 # DNS_DOMAINNAME=
+
+# By default, the DHCP agent will not attempt to use a domain name returned
+# by the DHCP server to construct an FQDN from a PQDN specified by the
+# -h,--reqhost option of ipadm(1M), by the ncu ip-reqhost property of
+# nwamcfg(1M), or by nodename(4).  Set and uncomment the following parameter
+# to indicate that a returned DHCPv4 DNSdmain or DHCPv6 DNSsearch value
+# should be adopted by the DHCP agent to construct if necessary an FQDN.
+#
+# ADOPT_DOMAINNAME=yes
 
 # By default, the DHCP agent will try to request the hostname currently
 # associated with the interface performing DHCP.  If this option is

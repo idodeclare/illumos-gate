@@ -21,7 +21,7 @@
 /*
  * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
- * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+ * Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
  *
  * REQUESTING state of the client state machine.
  */
@@ -48,6 +48,7 @@
 
 static PKT_LIST		*select_best(dhcp_smach_t *);
 static void		request_failed(dhcp_smach_t *);
+static void		take_offered_domainname(dhcp_smach_t *, PKT_LIST *);
 static stop_func_t	stop_requesting;
 
 /*
@@ -248,6 +249,8 @@ dhcp_requesting(iu_tq_t *tqp, void *arg)
 
 		return;
 	}
+
+	take_offered_domainname(dsmp, offer);
 
 	if (isv6) {
 		const char *estr, *msg;
@@ -1220,4 +1223,115 @@ stop_requesting(dhcp_smach_t *dsmp, unsigned int n_requests)
 	} else {
 		return (B_FALSE);
 	}
+}
+
+/*
+ * get_offered_domainname_v6(): decode a defined v6 DNSSearch value if it
+ *				exists to return a copy of the first domain
+ *				name in the list.
+ *
+ *   input: dhcp_smach_t *: the state machine REQUESTs are being sent from;
+ *	    PKT_LIST *: the best packet to be used to construct a REQUEST;
+ *  output: const char *: NULL or a copy of the first domain name
+ *		('\0' terminated);
+ */
+
+static const char *
+get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
+{
+	char	*domainname = NULL;
+
+	dhcpv6_option_t	*d6o;
+	uint_t		optlen;
+
+	if ((d6o = dhcpv6_pkt_option(offer, NULL, DHCPV6_OPT_DNS_SEARCH,
+	    &optlen)) != NULL) {
+		dhcp_symbol_t	*symp;
+
+		symp = inittab_getbycode(
+		    ITAB_CAT_STANDARD | ITAB_CAT_V6, ITAB_CONS_INFO,
+		    d6o.d6o_code);
+		if (symp != NULL) {
+			domainname = inittab_decode(symp, d6o, 0, B_FALSE);
+			if (domainname != NULL) {
+				char	*sp;
+
+				sp = strchr(sp, ' ');
+				if (sp != NULL)
+					*sp = '\0';
+			}
+			free(symp);
+		}
+	}
+
+	return (domainname);
+}
+
+/*
+ * get_offered_domainname_v6(): decode a defined v4 DNSdmain value if it
+ *				exists to return a copy of the domain
+ *				name.
+ *
+ *   input: dhcp_smach_t *: the state machine REQUESTs are being sent from;
+ *	    PKT_LIST *: the best packet to be used to construct a REQUEST;
+ *  output: const char *: NULL or a copy of the domain name ('\0' terminated);
+ */
+
+static const char *
+get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
+{
+	char		*domainname = NULL;
+	DHCP_OPT	*opt;
+
+	if ((opt = offer->opts[CD_DNSDOMAIN]) != NULL) {
+		uint8_t		*valptr;
+		dhcp_symbol_t	*symp;
+
+		valptr = (uint8_t *)opt + DHCP_OPT_META_LEN;
+
+		symp = inittab_getbycode(
+		    ITAB_CAT_STANDARD, ITAB_CONS_INFO, opt->code);
+		if (symp != NULL) {
+			domainname = inittab_decode(symp, valptr,
+			    opt->len, B_TRUE);
+			if (domainname != NULL) {
+				char	*sp;
+
+				sp = strchr(sp, ' ');
+				if (sp != NULL)
+					*sp = '\0';
+			}
+			free(symp);
+		}
+	}
+
+	return (domainname);
+}
+
+/*
+ * take_offered_domainname(): assign dsm_offer_domainname from
+ *			      get_offered_domainname_v6 or
+ *			      get_offered_domainname_v4 as appropriate or
+ *			      leave the field NULL if no option is present.
+ *
+ *   input: dhcp_smach_t *: the state machine REQUESTs are being sent from;
+ *	    PKT_LIST *: the best packet to be used to construct a REQUEST;
+ *  output: void
+ */
+
+static void
+take_offered_domainname(dhcp_smach_t *dsmp, PKT_LIST *offer)
+{
+	char	*domainname = NULL;
+
+	free(dsmp->dsm_offer_domainname);
+	dsmp->dsm_offer_domainname = NULL;
+
+	if (dsmp->dsm_isv6) {
+		domainname = get_offered_domainname_v6(dsmp, offer);
+	} else {
+		domainname = get_offered_domainname_v4(dsmp, offer);
+	}
+
+	dsmp->dsm_offer_domainname = domainname;
 }

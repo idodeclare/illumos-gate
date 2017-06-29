@@ -59,6 +59,7 @@ enum {
 	DF_REQUEST_FQDN,	/* request client FQDN associated with interface */
 	DF_V4_DEFAULT_IAID_DUID,	/* always IAID/DUID if no DF_CLIENT_ID */
 	DF_DNS_DOMAINNAME,	/* static domain name if not explicit in --reqhost */
+	DF_ADOPT_DOMAINNAME,	/* adopt DHCP domain if not explicit in --reqhost */
 };
 
 #define	DHCP_AGENT_DEFAULTS	"/etc/default/dhcpagent"

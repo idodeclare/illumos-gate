@@ -64,6 +64,7 @@ static struct dhcp_default defaults[] = {
 	{ "REQUEST_FQDN",	 "1",	 0,   0	  },
 	{ "V4_DEFAULT_IAID_DUID",  "0",	 0,   0	  },
 	{ "DNS_DOMAINNAME",  NULL,	 0,   0	  },
+	{ "ADOPT_DOMAINNAME",	 "0",	 0,   0	  },
 };
 
 /*

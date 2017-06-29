@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+ * Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
  *
  * This module contains core functions for managing DHCP state machine
  * instances.
@@ -334,7 +334,7 @@ free_smach(dhcp_smach_t *dsmp)
 	free(dsmp->dsm_routers);
 	free(dsmp->dsm_reqhost);
 	free(dsmp->dsm_msg_reqhost);
-	free(dsmp->dsm_reqfqdn);
+	free(dsmp->dsm_offer_domainname);
 	free(dsmp);
 
 	/* no big deal if this fails */
@@ -1230,8 +1230,8 @@ reset_smach(dhcp_smach_t *dsmp)
 	 * it is reset from another external message.
 	 */
 
-	free(dsmp->dsm_reqfqdn);
-	dsmp->dsm_reqfqdn = NULL;
+	free(dsmp->dsm_offer_domainname);
+	dsmp->dsm_offer_domainname = NULL;
 
 	cancel_smach_timers(dsmp);
 

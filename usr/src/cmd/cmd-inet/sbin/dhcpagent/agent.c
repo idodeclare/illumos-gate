@@ -20,7 +20,7 @@
  */
 /*
  * Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+ * Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
  */
 
 #include <sys/types.h>
@@ -1081,8 +1081,6 @@ dhcp_smach_set_msg_reqhost(dhcp_smach_t *dsmp, ipc_action_t *iap)
 		free(dsmp->dsm_msg_reqhost);
 		dsmp->dsm_msg_reqhost = NULL;
 	}
-	free(dsmp->dsm_reqfqdn);
-	dsmp->dsm_reqfqdn = NULL;
 
 	/*
 	 * if a STANDARD/HOSTNAME was sent in the IPC request, then copy that
