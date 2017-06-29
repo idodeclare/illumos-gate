@@ -50,7 +50,7 @@
 
 static PKT_LIST		*select_best(dhcp_smach_t *);
 static void		request_failed(dhcp_smach_t *);
-static void		take_offered_domainname(dhcp_smach_t *, PKT_LIST *);
+static void		copy_offered_domainname(dhcp_smach_t *, PKT_LIST *);
 static stop_func_t	stop_requesting;
 
 /*
@@ -252,7 +252,7 @@ dhcp_requesting(iu_tq_t *tqp, void *arg)
 		return;
 	}
 
-	take_offered_domainname(dsmp, offer);
+	copy_offered_domainname(dsmp, offer);
 
 	if (isv6) {
 		const char *estr, *msg;
@@ -1326,7 +1326,7 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
  */
 
 static void
-take_offered_domainname(dhcp_smach_t *dsmp, PKT_LIST *offer)
+copy_offered_domainname(dhcp_smach_t *dsmp, PKT_LIST *offer)
 {
 	char	*domainname = NULL;
 
