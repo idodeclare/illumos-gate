@@ -37,6 +37,8 @@
 #include <netinet/udp_var.h>
 #include <arpa/inet.h>
 #include <dhcp_hostconf.h>
+#include <dhcp_inittab.h>
+#include <dhcp_symbol.h>
 #include <dhcpagent_util.h>
 #include <dhcpmsg.h>
 
@@ -1246,13 +1248,17 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 
 	if ((d6o = dhcpv6_pkt_option(offer, NULL, DHCPV6_OPT_DNS_SEARCH,
 	    &optlen)) != NULL) {
+		uint8_t		*valptr;
 		dhcp_symbol_t	*symp;
+
+		valptr = (uint8_t *)d6o;
 
 		symp = inittab_getbycode(
 		    ITAB_CAT_STANDARD | ITAB_CAT_V6, ITAB_CONS_INFO,
-		    d6o.d6o_code);
+		    d6o->d6o_code);
 		if (symp != NULL) {
-			domainname = inittab_decode(symp, d6o, 0, B_FALSE);
+			domainname = inittab_decode(symp, valptr,
+			    optlen, B_FALSE);
 			if (domainname != NULL) {
 				char	*sp;
 
