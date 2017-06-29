@@ -1262,7 +1262,7 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 			if (domainname != NULL) {
 				char	*sp;
 
-				sp = strchr(sp, ' ');
+				sp = strchr(domainname, ' ');
 				if (sp != NULL)
 					*sp = '\0';
 			}
@@ -1303,7 +1303,7 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
 			if (domainname != NULL) {
 				char	*sp;
 
-				sp = strchr(sp, ' ');
+				sp = strchr(domainname, ' ');
 				if (sp != NULL)
 					*sp = '\0';
 			}
