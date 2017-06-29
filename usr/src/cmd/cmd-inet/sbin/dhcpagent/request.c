@@ -1328,7 +1328,7 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
 static void
 take_offered_domainname(dhcp_smach_t *dsmp, PKT_LIST *offer)
 {
-	char	*domainname = NULL;
+	const char	*domainname = NULL;
 
 	free(dsmp->dsm_offer_domainname);
 	dsmp->dsm_offer_domainname = NULL;
