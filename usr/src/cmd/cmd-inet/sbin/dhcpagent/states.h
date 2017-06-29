@@ -206,14 +206,14 @@ struct dhcp_smach_s {
 	 * `ipadm -T dhcp -h ...') to request is remembered here until it is
 	 * reset by another external message.
 	 */
-	const char	*dsm_msg_reqhost;
+	char	*dsm_msg_reqhost;
 
 	/*
 	 * The domain name offered by v4 DNSdmain or inferred from v6
 	 * DNSSearch is decoded here for use (if configured and needed) to
 	 * determine an FQDN.
 	 */
-	const char	*dsm_offer_domainname;
+	char	*dsm_offer_domainname;
 
 	/*
 	 * V4 and V6 use slightly different timers.  For v4, we must count
