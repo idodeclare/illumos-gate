@@ -1228,23 +1228,42 @@ stop_requesting(dhcp_smach_t *dsmp, unsigned int n_requests)
 }
 
 /*
+ * terminate_at_space(): Reset the first space, 0x20, to 0x0 in the
+ *			 specified string.
+ *
+ *   input: char *: NULL or a null-terminated string;
+ *  output: void.
+ */
+
+static void
+terminate_at_space(char *value)
+{
+	if (value != NULL) {
+		char	*sp;
+
+		sp = strchr(value, ' ');
+		if (sp != NULL)
+			*sp = '\0';
+	}
+}
+
+/*
  * get_offered_domainname_v6(): decode a defined v6 DNSSearch value if it
  *				exists to return a copy of the first domain
  *				name in the list.
  *
  *   input: dhcp_smach_t *: the state machine REQUESTs are being sent from;
  *	    PKT_LIST *: the best packet to be used to construct a REQUEST;
- *  output: const char *: NULL or a copy of the first domain name
+ *  output: char *: NULL or a copy of the first domain name
  *		('\0' terminated);
  */
 
 static char *
 get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 {
-	char	*domainname = NULL;
-
-	dhcpv6_option_t	*d6o;
-	uint_t		optlen;
+	char			*domainname = NULL;
+	dhcpv6_option_t		*d6o;
+	uint_t			optlen;
 
 	if ((d6o = dhcpv6_pkt_option(offer, NULL, DHCPV6_OPT_DNS_SEARCH,
 	    &optlen)) != NULL) {
@@ -1259,13 +1278,7 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 		if (symp != NULL) {
 			domainname = inittab_decode(symp, valptr,
 			    optlen, B_FALSE);
-			if (domainname != NULL) {
-				char	*sp;
-
-				sp = strchr(domainname, ' ');
-				if (sp != NULL)
-					*sp = '\0';
-			}
+			terminate_at_space(domainname);
 			free(symp);
 		}
 	}
@@ -1280,7 +1293,7 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
  *
  *   input: dhcp_smach_t *: the state machine REQUESTs are being sent from;
  *	    PKT_LIST *: the best packet to be used to construct a REQUEST;
- *  output: const char *: NULL or a copy of the domain name ('\0' terminated);
+ *  output: char *: NULL or a copy of the domain name ('\0' terminated);
  */
 
 static char *
@@ -1300,13 +1313,7 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
 		if (symp != NULL) {
 			domainname = inittab_decode(symp, valptr,
 			    opt->len, B_TRUE);
-			if (domainname != NULL) {
-				char	*sp;
-
-				sp = strchr(domainname, ' ');
-				if (sp != NULL)
-					*sp = '\0';
-			}
+			terminate_at_space(domainname);
 			free(symp);
 		}
 	}

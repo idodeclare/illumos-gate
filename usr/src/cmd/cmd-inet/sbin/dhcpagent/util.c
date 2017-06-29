@@ -803,12 +803,12 @@ dhcp_add_hostname_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 }
 
 /*
- * dhcp_add_fqdn_opt(): Set CD_CLIENTFQDN option if dhcp_assemble_fqdn()
- *			 initializes an FQDN, or else do nothing.
+ * dhcp_add_fqdn_opt(): Set client FQDN option if dhcp_assemble_fqdn()
+ *			initializes an FQDN, or else do nothing.
  *
  *   input: dhcp_pkt_t *: pointer to DHCP message being constructed;
  *	    dhcp_smach_t *: pointer to interface DHCP state machine;
- *  output: 0 if a CLIENT_FQDN was added; non-zero if otherwise;
+ *  output: 0 if a client FQDN was added; non-zero if otherwise;
  */
 
 int
@@ -927,7 +927,7 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
  *			 nodename(4) is defined. If the host name is not already fully
  *			 qualified per is_fqdn(), then a value from
  *			 /etc/default/dhcpagent if defined or else an offered domain
- *			 name if DF_ADOPT_DOMAINNAME is set is used to construct an
+ *			 name for ADOPT_DOMAINNAME if active is used to construct an
  *			 FQDN.
  *
  *   input: char *: pointer to buffer to which FQDN will be written;
