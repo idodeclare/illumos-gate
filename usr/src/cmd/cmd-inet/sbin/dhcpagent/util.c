@@ -991,6 +991,8 @@ dhcp_pick_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
 {
 	const char	*domainname;
 
+	*namebuf = '\0';
+
 	/*
 	 * Try to use a static DNS_DOMAINNAME if defined in
 	 * /etc/default/dhcpagent.
@@ -1069,8 +1071,6 @@ dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen, dhcp_smach_t *dsmp)
 	if (!is_fqdn(reqhost)) {
 		char		domainname[MAXNAMELEN];
 		size_t		needdots;
-
-		*domainname = '\0';
 
 		if (dhcp_pick_domainname(domainname, sizeof (domainname),
 		     dsmp) != 0) {

@@ -136,8 +136,8 @@
 # DNS_DOMAINNAME=
 
 # By default, the DHCP agent will not attempt to use a domain name returned
-# by the DHCP server or domain in resolv.conf(4) to construct an FQDN from a
-# PQDN specified by the -h,--reqhost option of ipadm(1M), by the ncu
+# by the DHCP server or the domain in resolv.conf(4) to construct an FQDN
+# from a PQDN specified by the -h,--reqhost option of ipadm(1M), by the ncu
 # ip-reqhost property of nwamcfg(1M), or by nodename(4).  Set and uncomment
 # the following parameter to indicate that a returned DHCPv4 DNSdmain, the
 # primary entry from a returned DHCPv6 DNSsearch value, or the domain from
