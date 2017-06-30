@@ -922,6 +922,97 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 }
 
 /*
+ * dhcp_adopt_domainname(): Set namebuf if either dsm_offer_domainname or
+ *			    resolv's "default domain (deprecated)" is defined.
+ *
+ *   input: char *: pointer to buffer to which domain name will be written;
+ *	    size_t length of buffer;
+ *	    dhcp_smach_t *: pointer to interface DHCP state machine;
+ *  output: 0 if namebuf was set to a valid domain name; else non-zero.
+ */
+
+static int
+dhcp_adopt_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
+{
+	const char		*domainname;
+	struct __res_state	res_state;
+	int			lasterrno;
+
+	domainname = dsmp->dsm_offer_domainname;
+
+	if (ipadm_is_nil_hostname(domainname)) {
+		domainname = NULL;
+
+		/*
+		 * fall back to resolv's "default domain (deprecated)"
+		 */
+		bzero(&res_state, sizeof (struct __res_state));
+
+		if ((lasterrno = res_ninit(&res_state)) != 0) {
+			dhcpmsg(MSG_WARNING, "dhcp_adopt_domainname: error %d"
+			    " initializing resolver", lasterrno);
+			return (-1);
+		}
+
+		if (!ipadm_is_nil_hostname(res_state.defdname))
+			domainname = res_state.defdname;
+
+		/* N.b. res_state.defdname survives the following call */
+		res_ndestroy(&res_state);
+	}
+
+	if (domainname == NULL)
+		return (-1);
+
+	if (strlcpy(namebuf, domainname, buflen) >= buflen) {
+		dhcpmsg(MSG_WARNING,
+		    "dhcp_adopt_domainname: too long adopted domain"
+		    " name %s for %s", domainname, dsmp->dsm_name);
+		return (-1);
+	}
+
+	return (0);
+}
+
+/*
+ * dhcp_pick_domainname(): Set namebuf if DNS_DOMAINNAME is defined in
+ *			   /etc/default/dhcpagent or if dhcp_pick_domainname()
+ *			   succeeds.
+ *
+ *   input: char *: pointer to buffer to which domain name will be written;
+ *	    size_t length of buffer;
+ *	    dhcp_smach_t *: pointer to interface DHCP state machine;
+ *  output: 0 if namebuf was set to a valid domain name; else non-zero.
+ */
+
+static int
+dhcp_pick_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
+{
+	const char	*domainname;
+
+	/*
+	 * Try to use a static DNS_DOMAINNAME if defined in
+	 * /etc/default/dhcpagent.
+	 */
+	domainname = df_get_string(dsmp->dsm_name, dsmp->dsm_isv6,
+	    DF_DNS_DOMAINNAME);
+	if (!ipadm_is_nil_hostname(domainname)) {
+		if (strlcpy(namebuf, domainname, buflen) >= buflen) {
+			dhcpmsg(MSG_WARNING, "dhcp_pick_domainname: too long"
+			    " DNS_DOMAINNAME %s for %s", domainname,
+			    dsmp->dsm_name);
+			return (-1);
+		}
+		return (0);
+	} else if (df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6,
+	    DF_ADOPT_DOMAINNAME)) {
+		return dhcp_adopt_domainname(namebuf, buflen, dsmp);
+	} else {
+		return (-1);
+	}
+}
+
+/*
  * dhcp_assemble_fqdn(): Set fqdnbuf if REQUEST_FQDN is set and
  *			 either a host name was sent in the IPC message (e.g., from
  *			 ipadm(1M) -h,--reqhost) or the interface is primary and a
@@ -976,23 +1067,13 @@ dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen, dhcp_smach_t *dsmp)
 	 * If not yet FQDN, construct if possible
 	 */
 	if (!is_fqdn(reqhost)) {
+		char		domainname[MAXHOSTNAMELEN];
 		size_t		needdots;
-		const char	*domainname;
 
-		/*
-		 * Use a static DNS_DOMAINNAME if defined in
-		 * /etc/default/dhcpagent. Otherwise, if DF_ADOPT_DOMAINNAME
-		 * is set, then use an offered domain name if available.
-		 */
-		domainname = df_get_string(dsmp->dsm_name, dsmp->dsm_isv6,
-		    DF_DNS_DOMAINNAME);
-		if (ipadm_is_nil_hostname(domainname) &&
-		    df_get_bool(dsmp->dsm_name, dsmp->dsm_isv6,
-		        DF_ADOPT_DOMAINNAME)) {
-			domainname = dsmp->dsm_offer_domainname;
-		}
+		*domainname = '\0';
 
-		if (ipadm_is_nil_hostname(domainname)) {
+		if (dhcp_pick_domainname(domainname, sizeof (domainname),
+		     dsmp) != 0) {
 			dhcpmsg(MSG_DEBUG,
 			    "dhcp_assemble_fqdn: no domain name for %s",
 			    dsmp->dsm_name);
