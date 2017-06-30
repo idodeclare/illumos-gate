@@ -977,7 +977,7 @@ dhcp_adopt_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
 
 /*
  * dhcp_pick_domainname(): Set namebuf if DNS_DOMAINNAME is defined in
- *			   /etc/default/dhcpagent or if dhcp_pick_domainname()
+ *			   /etc/default/dhcpagent or if dhcp_adopt_domainname()
  *			   succeeds.
  *
  *   input: char *: pointer to buffer to which domain name will be written;
