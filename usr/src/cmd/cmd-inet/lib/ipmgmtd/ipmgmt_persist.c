@@ -922,8 +922,7 @@ ipmgmt_aobjmap_op(ipmgmt_aobjmap_t *nodep, uint32_t op)
 			head->am_family = nodep->am_family;
 			head->am_flags = nodep->am_flags;
 			head->am_atype = nodep->am_atype;
-			(void) memcpy(&head->am_atype_cache, &nodep->am_atype_cache,
-			    sizeof (head->am_atype_cache));
+			head->am_atype_cache = nodep->am_atype_cache;
 		} else {
 			for (head = aobjmap.aobjmap_head; head != NULL;
 			    head = head->am_next) {
