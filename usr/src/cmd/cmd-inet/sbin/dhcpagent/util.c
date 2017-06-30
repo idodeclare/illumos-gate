@@ -943,8 +943,6 @@ dhcp_adopt_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
 	domainname = dsmp->dsm_offer_domainname;
 
 	if (ipadm_is_nil_hostname(domainname)) {
-		domainname = NULL;
-
 		/*
 		 * fall back to resolv's "default domain (deprecated)"
 		 */
@@ -956,6 +954,7 @@ dhcp_adopt_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
 			return (-1);
 		}
 
+		domainname = NULL;
 		if (!ipadm_is_nil_hostname(res_state.defdname))
 			domainname = res_state.defdname;
 
