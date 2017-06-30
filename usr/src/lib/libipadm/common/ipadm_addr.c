@@ -3253,9 +3253,9 @@ i_ipadm_dhcp_status(ipadm_addrobj_t addr, dhcp_status_t *status,
 	dhcp_ipc_type_t		type = DHCP_STATUS;
 	dhcp_ipc_request_t	*request;
 	dhcp_ipc_reply_t	*reply;
-	dhcp_status_t	*private_status;
+	dhcp_status_t		*private_status;
 	size_t			reply_size;
-	int				error;
+	int			error;
 
 	if (addr->ipadm_af == AF_INET6)
 		type |= DHCP_V6;
