@@ -1069,7 +1069,7 @@ dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen, dhcp_smach_t *dsmp)
 	 * If not yet FQDN, construct if possible
 	 */
 	if (!is_fqdn(reqhost)) {
-		char		domainname[MAXHOSTNAMELEN];
+		char		domainname[MAXNAMELEN];
 		size_t		needdots;
 
 		*domainname = '\0';
