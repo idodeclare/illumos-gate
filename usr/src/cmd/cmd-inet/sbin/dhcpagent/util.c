@@ -782,7 +782,7 @@ dhcp_add_hostname_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 		reqhost = nodename;
 	}
 
-	if (reqhost != NULL && reqhost != dsmp->dsm_reqhost) {
+	if (reqhost != NULL) {
 		free(dsmp->dsm_reqhost);
 		if ((dsmp->dsm_reqhost = strdup(reqhost)) == NULL)
 			dhcpmsg(MSG_WARNING, "dhcp_add_hostname_opt: cannot allocate "
