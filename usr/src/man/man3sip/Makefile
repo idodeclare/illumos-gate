@@ -491,3 +491,6 @@ sip_unregister_sent_by.3sip		:= LINKSRC = sip_register_sent_by.3sip
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -74,3 +74,6 @@ $(POFILE):	$(TABFILES) do_pofile.sh
 		@/bin/sh do_pofile.sh > $@
 
 include		$(SRC)/data/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

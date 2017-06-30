@@ -32,3 +32,6 @@ PROG	=	in.daytimed
 MANIFEST=	daytime.xml
 
 include ../Makefile.inetsvc
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

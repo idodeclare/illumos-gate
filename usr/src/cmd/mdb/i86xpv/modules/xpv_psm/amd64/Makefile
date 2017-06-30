@@ -46,3 +46,7 @@ CPPFLAGS += -I$(SRC)/uts/i86pc
 CPPFLAGS += -I$(SRC)/uts/intel
 
 CERRWARN += -_gcc=-Wno-unused-function
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

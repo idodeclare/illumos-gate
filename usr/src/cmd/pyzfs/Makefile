@@ -46,3 +46,6 @@ $(ROOTLIB)/zfs/%: %
 	$(INS.pyfile)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG) $(PYOBJS)

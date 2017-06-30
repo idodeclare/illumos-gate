@@ -41,3 +41,6 @@ $(ROOTLIBXHCI)/%: % $(ROOTLIBXHCI)
 	$(INS.file)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

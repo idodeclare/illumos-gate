@@ -28,3 +28,6 @@ include ../../Makefile.cmd.64
 WRAPOPT = -64
 
 install: all $(ROOTPROG64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

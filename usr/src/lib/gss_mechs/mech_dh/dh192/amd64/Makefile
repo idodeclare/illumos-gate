@@ -36,3 +36,7 @@ all:    $(LIBS)
 #install:   all $(ROOTLIBDIR64) .WAIT $(ROOTLIBS64) .WAIT $(ROOTLINKS64)
 # We don't really install. This is for debugging only.
 install: all
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -83,3 +83,7 @@ lint:
 
 
 include ../../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(KCMDOBJS) $(OBJS) $(PROG) \
+	    $(YOBJS)

@@ -88,3 +88,7 @@ lint:		 $(LINTOUT32) $(SGSLINTOUT)
 
 include		../../../Makefile.targ
 include		../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG) \
+	    $(XPG4OBJS)

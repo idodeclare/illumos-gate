@@ -77,3 +77,6 @@ clean:
 FRC:
 
 include ../../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

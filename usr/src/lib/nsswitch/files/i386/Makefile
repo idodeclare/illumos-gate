@@ -34,3 +34,7 @@ LIBS =		$(DYNLIB1)
 include		../../Makefile.targ
 
 install:	all $(ROOTLIBS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

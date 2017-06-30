@@ -28,3 +28,6 @@ LIBPROG=	nfsfind
 SRCS=		nfsfind.sh
 
 include		../../Makefile.fstype
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

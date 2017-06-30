@@ -31,3 +31,7 @@ include ../Makefile.com
 all:  $(LIBS)
 
 install: all $(ROOTLIBS) $(ROOTLINKSCCC)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

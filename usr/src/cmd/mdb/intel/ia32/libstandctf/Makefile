@@ -29,3 +29,6 @@
 include ../../../../Makefile.cmd
 include ../../Makefile.ia32
 include ../../../Makefile.libstandctf
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

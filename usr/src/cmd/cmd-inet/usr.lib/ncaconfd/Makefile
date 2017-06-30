@@ -48,3 +48,6 @@ clean:
 include ../../../Makefile.targ
 
 lint:	lint_PROG
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

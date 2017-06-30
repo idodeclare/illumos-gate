@@ -49,3 +49,5 @@ CPPFLAGS += -I.
 %.ln: %.s
 	$(LINT.s) $<
 
+.DONE :
+	$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

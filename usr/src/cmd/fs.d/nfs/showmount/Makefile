@@ -71,3 +71,6 @@ $(POFILE):      $(SRCS)
 
 clean:     
 	$(RM) $(OBJS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

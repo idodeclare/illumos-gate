@@ -39,3 +39,6 @@ kstat_write.3kstat		:= LINKSRC = kstat_read.3kstat
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

@@ -412,3 +412,6 @@ pwritev.2			:= LINKSRC = write.2
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

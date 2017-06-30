@@ -60,3 +60,6 @@ $(ROOTDIR):
 	$(INS.dir)
 
 check:	$(CHECKHDRS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_FILES)

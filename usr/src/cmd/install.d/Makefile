@@ -49,3 +49,6 @@ clean:
 lint:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

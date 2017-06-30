@@ -75,3 +75,6 @@ lint:		lint_PROG
 include		../../../../Makefile.targ
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

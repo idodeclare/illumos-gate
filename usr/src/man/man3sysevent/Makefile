@@ -52,3 +52,6 @@ sysevent_unsubscribe_event.3sysevent	:= LINKSRC = sysevent_subscribe_event.3syse
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

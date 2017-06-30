@@ -32,3 +32,6 @@ PROG	=	in.chargend
 MANIFEST=	chargen.xml
 
 include ../Makefile.inetsvc
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

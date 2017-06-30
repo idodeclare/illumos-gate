@@ -82,3 +82,6 @@ $(ROOTLINK):	$(ROOTLIB) $(ROOTBIN)/dscfglockd
 FRC:
 
 include	../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(POFILES) $(PROG)

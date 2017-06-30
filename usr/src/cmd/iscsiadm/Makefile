@@ -69,3 +69,6 @@ clean:
 	-$(RM) $(OBJS) $(COMMON_OBJS) 
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(COMMON_OBJS) $(OBJS) $(PROG)

@@ -112,3 +112,6 @@ $(OBJS_DIR)/sha1-x86_64.ln: sha1-x86_64.s
 
 sha1-x86_64.s: $(COMDIR)/sha1/amd64/sha1-x86_64.pl
 	$(PERL) $? $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

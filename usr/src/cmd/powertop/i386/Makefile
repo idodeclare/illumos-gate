@@ -41,3 +41,6 @@ $(PROG): $(MACH_OBJS) $(COMMON_OBJS)
 	$(COMPILE.c) -o $@ $<
 
 install: all $(ROOTPROG32)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

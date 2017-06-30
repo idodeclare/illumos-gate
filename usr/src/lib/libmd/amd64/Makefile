@@ -70,3 +70,7 @@ sha256-x86_64.s: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 		$(PERL) $? $@
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

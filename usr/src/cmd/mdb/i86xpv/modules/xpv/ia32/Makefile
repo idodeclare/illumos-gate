@@ -44,3 +44,7 @@ CPPFLAGS += -I$(SRC)/uts/common
 CPPFLAGS += -I$(SRC)/uts/i86xpv
 CPPFLAGS += -I$(SRC)/uts/i86pc
 CPPFLAGS += -I$(SRC)/uts/intel
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

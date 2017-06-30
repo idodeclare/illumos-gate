@@ -40,3 +40,6 @@ include		../../Makefile.mount
 include		../../Makefile.mount.targ
 
 CERRWARN +=	-_gcc=-Wno-unused-variable
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

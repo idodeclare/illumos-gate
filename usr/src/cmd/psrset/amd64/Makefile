@@ -33,3 +33,5 @@ include ../../Makefile.cmd.64
 
 install: all $(ROOTUSRSBINPROG64)
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

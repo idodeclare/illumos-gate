@@ -756,3 +756,6 @@ vidputs.3xcurses		:= LINKSRC = vidattr.3xcurses
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

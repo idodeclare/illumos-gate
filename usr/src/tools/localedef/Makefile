@@ -54,3 +54,6 @@ clean:
 		$(RM) $(PROG) $(CLEANFILES)
 
 include		$(SRC)/tools/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

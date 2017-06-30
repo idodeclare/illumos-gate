@@ -42,3 +42,6 @@ clean:
 lint:
 
 include ../Makefile.ucbtarg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

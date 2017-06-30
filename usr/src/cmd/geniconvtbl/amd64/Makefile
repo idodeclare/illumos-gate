@@ -46,3 +46,6 @@ install: all  $(ROOTITM64) $(ROOTLINKS64)
 both: $(ITM) $(PROG)
 
 catalog:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

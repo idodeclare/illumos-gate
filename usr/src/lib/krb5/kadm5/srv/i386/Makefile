@@ -33,3 +33,7 @@ DYNFLAGS += $(KRB5LIB)/libkdb.so $(KRB5LIB)/libdyn.so
 LDLIBS += -L $(ROOTLIBDIR) -lgss -lnsl -lc -lsocket
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

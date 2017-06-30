@@ -62,3 +62,7 @@ clean:
 lint: lint_SRCS
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(COMMON_OBJS) $(OBJS) $(POFILES) \
+	    $(PROG)

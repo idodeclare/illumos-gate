@@ -235,3 +235,6 @@ tsalarm_set.3ext		:= LINKSRC = tsalarm_get.3ext
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

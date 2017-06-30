@@ -35,3 +35,6 @@ all:		$(PROG)
 install:	all $(ROOTLIB_APPCERT) $(ROOTLIB_APPCERT_PROG)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

@@ -32,3 +32,6 @@ LDLIBS += -L$(ROOTLIB)/fm/$(MACH64) -lfmd_agent -ltopo
 LDFLAGS += -R/usr/lib/fm/$(MACH64)
 
 install: all $(ROOTPROG64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

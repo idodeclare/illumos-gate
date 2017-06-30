@@ -56,3 +56,6 @@ expand_cmd.c:
 	$(RM) $@; cp expand.c $@
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

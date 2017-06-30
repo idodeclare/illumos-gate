@@ -40,3 +40,6 @@ CERRWARN +=	-_gcc=-Wno-uninitialized
 SRCS=	$(LIBPROG).c
 
 lint:	lint_SRCS
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

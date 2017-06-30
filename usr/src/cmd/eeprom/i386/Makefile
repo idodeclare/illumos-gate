@@ -34,3 +34,6 @@ OBJS += benv.o benv_kvm.o
 all:	$(PROG)
 
 include $(SRCDIR)/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINT_OBJS) $(OBJS) $(PROG)

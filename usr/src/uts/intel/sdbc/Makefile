@@ -170,3 +170,6 @@ $(OBJS_DIR)/sd_iob_impl7.o:	$(OBJS_DIR)/sd_iob_impl7.c
 #	Include common targets.
 #
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)
