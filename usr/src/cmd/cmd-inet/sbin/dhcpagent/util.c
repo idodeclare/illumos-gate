@@ -1015,13 +1015,12 @@ dhcp_pick_domainname(char *namebuf, size_t buflen, dhcp_smach_t *dsmp)
 
 /*
  * dhcp_assemble_fqdn(): Set fqdnbuf if REQUEST_FQDN is set and
- *			 either a host name was sent in the IPC message (e.g., from
- *			 ipadm(1M) -h,--reqhost) or the interface is primary and a
- *			 nodename(4) is defined. If the host name is not already fully
- *			 qualified per is_fqdn(), then a value from
- *			 /etc/default/dhcpagent if defined or else an offered domain
- *			 name for ADOPT_DOMAINNAME if active is used to construct an
- *			 FQDN.
+ *			 either a host name was sent in the IPC message (e.g.,
+ *			 from ipadm(1M) -h,--reqhost) or the interface is
+ *			 primary and a nodename(4) is defined. If the host
+ *			 name is not already fully qualified per is_fqdn(),
+ *			 then dhcp_pick_domainname() is tried to select a
+ *			 domain to be used to construct an FQDN.
  *
  *   input: char *: pointer to buffer to which FQDN will be written;
  *	    size_t length of buffer;
@@ -1041,7 +1040,7 @@ dhcp_assemble_fqdn(char *fqdnbuf, size_t buflen, dhcp_smach_t *dsmp)
 
 	dhcpmsg(MSG_DEBUG, "dhcp_assemble_fqdn: DF_REQUEST_FQDN");
 
-	/* It's convenient to ensure fqdnbuf is NULL terminated at any point */
+	/* It's convenient to ensure fqdnbuf is always null-terminated */
 	bzero(fqdnbuf, buflen);
 
 	reqhost = dsmp->dsm_msg_reqhost;

@@ -4,7 +4,7 @@
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License"). You may not use this file except in compliance with the License. You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.
 .\" See the License for the specific language governing permissions and limitations under the License. When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE. If applicable, add the following below this CDDL HEADER, with the
 .\" fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH DHCPAGENT 1M "Jun 29, 2017"
+.TH DHCPAGENT 1M "Jun 30, 2017"
 .SH NAME
 dhcpagent \- Dynamic Host Configuration Protocol (DHCP) client daemon
 .SH SYNOPSIS
@@ -739,8 +739,7 @@ or an FQDN (i.e., a "rooted" domain name ending with a '.' or one inferred
 to be an FQDN if it contains at least three DNS labels such as
 srv.example.com).  If a PQDN is specified, then an FQDN is constructed if
 \fBDNS_DOMAINNAME\fR is defined or if \fBADOPT_DOMAINNAME\fR is set to
-\fIyes\fR and an eligible domain name (as described below) is returned by
-the DHCP server.
+\fIyes\fR and an eligible domain name (as described below) is available.
 .sp
 If an FQDN is sent, \fBREQUEST_HOSTNAME\fR processing will not be done,
 per RFC 4702 (3.1):  "clients that send the Client FQDN option in their
@@ -771,10 +770,11 @@ option is not used.
 .ad
 .sp .6
 .RS 4n
-Indicates that a domain name returned by the DHCP server should be adopted
-if needed to construct an FQDN from a PQDN specified by the
-\fB-h,--reqhost\fR option of \fBipadm\fR(1M), by the ncu \fBip-reqhost\fR
-property of \fBnwamcfg\fR(1M), or by \fBnodename\fR(4).
+Indicates that a domain name returned by the DHCP server or \fBdomain\fR
+from \fBresolv.conf\fR(4) should be adopted if needed to construct an FQDN
+from a PQDN specified by the \fB-h,--reqhost\fR option of \fBipadm\fR(1M),
+by the ncu \fBip-reqhost\fR property of \fBnwamcfg\fR(1M), or by
+\fBnodename\fR(4).
 If the \fIhostname\fR value is already an FQDN, then the value of this
 option is not applicable.
 The eligible DHCP option for domain name is either a DHCPv4 \fBDNSdmain\fR
@@ -842,7 +842,7 @@ Interface Stability	Committed
 .LP
 \fBdhcpinfo\fR(1), \fBifconfig\fR(1M), \fBinit\fR(1M), \fBin.mpathd\fR(1M),
 \fBin.ndpd\fR(1M), \fBipadm\fR(1M), \fBnwamcfg\fR(1M), \fBsyslog\fR(3C),
-\fBnodename\fR(4), \fBattributes\fR(5), \fBdhcp\fR(5)
+\fBnodename\fR(4), \fBresolv.conf\fR(4), \fBattributes\fR(5), \fBdhcp\fR(5)
 .sp
 .LP
 \fI\fR
