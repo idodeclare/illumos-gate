@@ -37,7 +37,9 @@
 #include <string.h>
 #include <dhcpmsg.h>
 #include <ctype.h>
+#include <arpa/inet.h>
 #include <arpa/nameser.h>
+#include <resolv.h>
 #include <netdb.h>
 #include <fcntl.h>
 #include <stdio.h>
