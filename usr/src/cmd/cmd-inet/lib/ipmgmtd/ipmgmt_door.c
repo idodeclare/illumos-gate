@@ -472,8 +472,7 @@ ipmgmt_aobjop_handler(void *argp)
 		aobjrval.ir_family = head->am_family;
 		aobjrval.ir_flags = head->am_flags;
 		aobjrval.ir_atype = head->am_atype;
-		(void) memcpy(&aobjrval.ir_atype_cache, &head->am_atype_cache,
-		    sizeof (aobjrval.ir_atype_cache));
+		aobjrval.ir_atype_cache = head->am_atype_cache;
 		(void) pthread_rwlock_unlock(&aobjmap.aobjmap_rwlock);
 		break;
 	case IPMGMT_CMD_LIF2ADDROBJ:
@@ -502,8 +501,7 @@ ipmgmt_aobjop_handler(void *argp)
 		    sizeof (aobjrval.ir_aobjname));
 		aobjrval.ir_atype = head->am_atype;
 		aobjrval.ir_flags = head->am_flags;
-		(void) memcpy(&aobjrval.ir_atype_cache, &head->am_atype_cache,
-		    sizeof (aobjrval.ir_atype_cache));
+		aobjrval.ir_atype_cache = head->am_atype_cache;
 		(void) pthread_rwlock_unlock(&aobjmap.aobjmap_rwlock);
 		break;
 	default:
