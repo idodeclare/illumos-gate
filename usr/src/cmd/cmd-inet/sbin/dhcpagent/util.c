@@ -885,9 +885,9 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 	const uint8_t	E_BITPOS = 7 - 5;
 	const size_t	OPT_FQDN_METALEN = 3, OPT_V6_FQDN_METALEN = 1;
 	char		fqdnbuf[MAXNAMELEN];
-	uint_t		fqdncode;
 	u_char		enc_fqdnbuf[MAXNAMELEN];
 	uint8_t		fqdnopt[MAXNAMELEN + OPT_FQDN_METALEN];
+	uint_t		fqdncode;
 	size_t		len, metalen;
 
 	if (dhcp_assemble_fqdn(fqdnbuf, sizeof (fqdnbuf), dsmp) != 0)
@@ -895,7 +895,8 @@ dhcp_add_fqdn_opt(dhcp_pkt_t *dpkt, dhcp_smach_t *dsmp)
 
 	/* encode the FQDN in canonical wire format */
 
-	if (ns_name_pton2(fqdnbuf, enc_fqdnbuf, sizeof (fqdnbuf), &len) < 0) {
+	if (ns_name_pton2(fqdnbuf, enc_fqdnbuf, sizeof (enc_fqdnbuf),
+	    &len) < 0) {
 		dhcpmsg(MSG_WARNING, "dhcp_add_fqdn_opt: error encoding domain"
 		    " name %s", fqdnbuf);
 		return (-1);
