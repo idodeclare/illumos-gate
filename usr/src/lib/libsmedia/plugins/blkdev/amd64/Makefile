@@ -33,3 +33,7 @@ include ../../../../Makefile.lib.64
 all:    $(LIBS) $(TXTS)
 
 install: all $(PLUGINDIR64) .WAIT $(PLUGINS64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

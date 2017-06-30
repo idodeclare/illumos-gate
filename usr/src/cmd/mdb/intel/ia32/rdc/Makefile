@@ -35,3 +35,7 @@ include ../../../common/modules/rdc/Makefile.com
 CPPFLAGS += -erroff=E_STATIC_UNUSED
 
 CERRWARN += -_gcc=-Wno-unused-function
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

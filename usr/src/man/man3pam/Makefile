@@ -60,3 +60,6 @@ pam_end.3pam			:= LINKSRC = pam_start.3pam
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

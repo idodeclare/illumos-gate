@@ -52,3 +52,6 @@ install:	all $(ROOTCMD) $(ROOTMANIFEST) $(ROOTSVCMETHOD)
 check:		$(CHKMANIFEST)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

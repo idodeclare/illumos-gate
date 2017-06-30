@@ -32,3 +32,7 @@ include ../Makefile.com
 DYNFLAGS	+= $(ROOT)/usr/lib/passwdutil.so.1
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

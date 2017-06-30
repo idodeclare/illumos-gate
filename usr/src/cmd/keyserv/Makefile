@@ -129,3 +129,7 @@ key_prot.h : $(ROOT)/usr/include/rpcsvc/key_prot.x
 	$(RPCGEN) -h $(ROOT)/usr/include/rpcsvc/key_prot.x > key_prot.h
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(OUTSIDE_UTIL_OBJS) \
+	    $(PROG)

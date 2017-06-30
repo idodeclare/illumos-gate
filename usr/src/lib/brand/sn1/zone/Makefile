@@ -50,3 +50,7 @@ clean:
 install: $(PROGS) $(ROOTPROGS) $(ROOTXMLDOCS) $(ROOTTEMPLATES)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(POFILE) $(POFILES) $(PROG) \
+	    $(PROGS)

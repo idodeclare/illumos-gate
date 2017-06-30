@@ -74,3 +74,6 @@ $(TESTDIR):
 
 $(TESTDIR)/%: %
 	$(INS.file)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(PROG)

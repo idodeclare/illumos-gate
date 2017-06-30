@@ -65,3 +65,6 @@ lint:
 	$(LINT.c) th_manage.c $(LDLIBS) -ldevice
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJECTS) $(PROG)

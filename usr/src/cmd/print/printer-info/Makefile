@@ -65,4 +65,5 @@ strip lint:
 
 
 
-
+.DONE :
+	$(MAKE_GITIGNORE) $(PROG)

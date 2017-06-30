@@ -91,3 +91,6 @@ clean clobber:
 	$(RM) $(CLEANFILES)
 
 lint:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES)

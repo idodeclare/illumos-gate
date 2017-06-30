@@ -49,3 +49,6 @@ lint strip _msg:
 
 clean clobber:
 	-$(RM) $(PROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(PROG)

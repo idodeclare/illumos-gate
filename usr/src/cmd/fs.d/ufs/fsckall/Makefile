@@ -37,3 +37,6 @@ install:	all
 
 clean:
 	$(RM) $(LIBPROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LIBPROG) $(PROG)

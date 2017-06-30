@@ -75,3 +75,6 @@ $(USR_PSM_LIB_DIR)/%:		% $(USR_PSM_LIB_DIR)
 	$(SYMLINK) ../../$(PLATFORM)/lib/$(PROG) $(PROG)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

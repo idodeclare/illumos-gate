@@ -53,3 +53,6 @@ install: all $(ROOTSCRIPTS)
 
 $(ROOTLIBFM)/% $(ROOTLIBFMD)/%: %
 	$(INS.file)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(SCRIPTS)

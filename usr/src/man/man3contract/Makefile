@@ -181,3 +181,6 @@ ct_tmpl_set_informative.3contract	:= LINKSRC = ct_tmpl_activate.3contract
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

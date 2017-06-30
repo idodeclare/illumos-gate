@@ -17,3 +17,6 @@ PROG = rm_lnkcnt_zero_file
 
 include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS) $(PROG)

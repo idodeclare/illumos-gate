@@ -42,3 +42,6 @@ fstyp_mod_ident.3fstyp		:= LINKSRC = fstyp_mod_init.3fstyp
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

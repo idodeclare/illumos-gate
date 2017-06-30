@@ -50,3 +50,5 @@ AS_CPPFLAGS += -I$(SRC)/uts/i86pc
 %.ln: %.s
 	$(LINT.s) $<
 
+.DONE :
+	$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

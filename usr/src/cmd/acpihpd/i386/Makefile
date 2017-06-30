@@ -35,3 +35,6 @@ include ../Makefile.com
 install: all $(USR_PSM_LIBS)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

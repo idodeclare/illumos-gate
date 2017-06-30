@@ -53,3 +53,6 @@ picl_set_propval_by_name.3picl	:= LINKSRC = picl_set_propval.3picl
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

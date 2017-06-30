@@ -35,3 +35,7 @@ include $(SRC)/lib/Makefile.lib.64
 CFLAGS64 += $(C_PICFLAGS64)
 
 install: all
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

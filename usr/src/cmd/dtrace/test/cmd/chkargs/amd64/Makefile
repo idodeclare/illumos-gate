@@ -29,3 +29,6 @@ include ../Makefile.com
 include $(SRC)/cmd/Makefile.cmd.64
 
 install: $(ROOTPROG64) $(ROOTISAEXEC)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(PROG) $(ROOTISAEXEC)

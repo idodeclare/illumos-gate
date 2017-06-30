@@ -87,3 +87,6 @@ $(ROOTBIN):
 install: all $(ROOTBIN) $(ROOTPROG)
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG) $(STAT_COMMON_OBJS)

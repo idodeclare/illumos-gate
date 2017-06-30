@@ -30,3 +30,6 @@ include ../../Makefile.com
 include ../../Makefile.targ
 
 install: all $(ROOTPROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

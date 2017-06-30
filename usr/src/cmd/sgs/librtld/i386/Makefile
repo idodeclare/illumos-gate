@@ -36,3 +36,7 @@ install:	all $(ROOTFS_DYNLIB)
 lint:		$(LINTLIB) $(LINTOUT32) $(SGSLINTOUT)
 
 include		$(SRC)/cmd/sgs/librtld/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

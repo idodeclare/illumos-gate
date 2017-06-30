@@ -43,3 +43,6 @@ clean:
 	$(RM) elfextract
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

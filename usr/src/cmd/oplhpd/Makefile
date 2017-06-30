@@ -84,3 +84,6 @@ $(USR_PSM_LIB64_DIR)/%: % $(USR_PSM_LIB64_DIR)
 	$(INS.file)
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

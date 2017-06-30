@@ -43,3 +43,7 @@ install:	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
 lint:		lintcheck
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

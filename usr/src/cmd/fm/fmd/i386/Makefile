@@ -27,3 +27,7 @@
 
 include ../../../Makefile.cmd
 include ../Makefile.fmd
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(DMOD) $(DMOD_LINT) $(DMOD_OBJS) \
+	    $(LINTFILES) $(OBJS) $(PROG)

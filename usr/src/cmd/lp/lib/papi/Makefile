@@ -79,3 +79,7 @@ lint:	lintcheck
 
 include		../../../../lib/Makefile.targ
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

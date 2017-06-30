@@ -121,3 +121,7 @@ clean:
 lint:	lint_PROG
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG) $(X4) $(X6) $(XPG4) \
+	    $(XPG4EXOBJS) $(XPG6) $(XPG6EXOBJS)

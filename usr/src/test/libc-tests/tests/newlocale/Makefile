@@ -19,3 +19,7 @@ PROG = newlocale_test
 ARCHPROG = newlocale_test
 
 include ../Makefile.com
+
+.DONE :
+	$(MAKE_GITIGNORE) $(ARCHPROG) $(KSHPROG) $(OBJS32) $(OBJS64) \
+	    $(PROG32) $(PROG64)

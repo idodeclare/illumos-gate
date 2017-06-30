@@ -92,3 +92,5 @@ include ../Makefile.targ
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINT_FILES) $(OBJS) $(PROG)

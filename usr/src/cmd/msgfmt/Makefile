@@ -122,3 +122,8 @@ gnu_po.c + y.tab.h:	gnu_po.y
 gnu_lex.o:	y.tab.h
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(BOBJS) $(CLEANFILES) $(CLOBBERFILES) $(COBJS) \
+	    $(GOBJS) $(LOBJS) $(LXOBJS) $(POFILE) $(POFILES) $(PROG) $(SOBJS) \
+	    $(XOBJS) $(YOBJS)

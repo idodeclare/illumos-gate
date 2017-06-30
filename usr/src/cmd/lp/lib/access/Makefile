@@ -65,3 +65,7 @@ lintlib:
 	$(LINT.c) $(LINTFLAGS) -o lpacc llib-llpacc 
 
 include		../Makefile.msg
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

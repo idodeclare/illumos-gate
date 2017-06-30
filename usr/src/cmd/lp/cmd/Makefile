@@ -93,3 +93,6 @@ $(SUBDIRS):	FRC
 include		../Makefile.lp.msg
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

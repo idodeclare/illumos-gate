@@ -44,3 +44,7 @@ CPPFLAGS += -I$(SRC)/cmd/svc/configd -I$(SRC)/cmd/svc/common -I$(SRC)/common/svc
 
 %.ln: $(MODSRCS_DIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

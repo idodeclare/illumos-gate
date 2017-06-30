@@ -123,3 +123,6 @@ $(SUBDIRS):	FRC
 FRC:
 
 include $(SRC)/Makefile.msg.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

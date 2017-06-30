@@ -65,3 +65,6 @@ umem_cache_free.3malloc		:= LINKSRC = umem_cache_create.3malloc
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

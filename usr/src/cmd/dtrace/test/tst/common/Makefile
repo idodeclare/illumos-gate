@@ -169,3 +169,6 @@ usdt/lazyprobe.h: usdt/lazyprobe.d
 
 SUBDIRS = java_api
 include ../../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

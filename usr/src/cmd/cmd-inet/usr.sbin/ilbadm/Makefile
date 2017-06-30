@@ -70,3 +70,6 @@ check:	$(SRCS) $(PROG).h
 	$(HDRCHK) $(PROG).h
 
 include ../../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(POFILES) $(PROG)

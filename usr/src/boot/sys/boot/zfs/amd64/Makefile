@@ -18,3 +18,6 @@ include ../Makefile.com
 CFLAGS +=	-mno-red-zone -m64 -fPIC
 
 MACHINE=	$(MACH64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)
