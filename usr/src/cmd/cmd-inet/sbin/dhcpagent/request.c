@@ -1267,11 +1267,11 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 
 	if ((d6o = dhcpv6_pkt_option(offer, NULL, DHCPV6_OPT_DNS_SEARCH,
 	    &optlen)) != NULL) {
-		uint8_t		*valptr;
+		uchar_t		*valptr;
 		uint16_t	d6o_code;
 		dhcp_symbol_t	*symp;
 
-		valptr = (uint8_t *)d6o;
+		valptr = (uchar_t *)d6o;
 		d6o_code = ntohs(d6o->d6o_code);
 
 		symp = inittab_getbycode(
@@ -1289,7 +1289,7 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 }
 
 /*
- * get_offered_domainname_v6(): decode a defined v4 DNSdmain value if it
+ * get_offered_domainname_v4(): decode a defined v4 DNSdmain value if it
  *				exists to return a copy of the domain
  *				name.
  *
@@ -1305,10 +1305,10 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
 	DHCP_OPT	*opt;
 
 	if ((opt = offer->opts[CD_DNSDOMAIN]) != NULL) {
-		uint8_t		*valptr;
+		uchar_t		*valptr;
 		dhcp_symbol_t	*symp;
 
-		valptr = (uint8_t *)opt + DHCP_OPT_META_LEN;
+		valptr = (uchar_t *)opt + DHCP_OPT_META_LEN;
 
 		symp = inittab_getbycode(
 		    ITAB_CAT_STANDARD, ITAB_CONS_INFO, opt->code);
@@ -1324,7 +1324,7 @@ get_offered_domainname_v4(dhcp_smach_t *dsmp, PKT_LIST *offer)
 }
 
 /*
- * take_offered_domainname(): assign dsm_offer_domainname from
+ * copy_offered_domainname(): assign dsm_offer_domainname from
  *			      get_offered_domainname_v6 or
  *			      get_offered_domainname_v4 as appropriate or
  *			      leave the field NULL if no option is present.
