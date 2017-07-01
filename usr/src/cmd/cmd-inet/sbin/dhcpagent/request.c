@@ -1268,13 +1268,15 @@ get_offered_domainname_v6(dhcp_smach_t *dsmp, PKT_LIST *offer)
 	if ((d6o = dhcpv6_pkt_option(offer, NULL, DHCPV6_OPT_DNS_SEARCH,
 	    &optlen)) != NULL) {
 		uint8_t		*valptr;
+		uint16_t	d6o_code;
 		dhcp_symbol_t	*symp;
 
 		valptr = (uint8_t *)d6o;
+		d6o_code = ntohs(d6o->d6o_code);
 
 		symp = inittab_getbycode(
 		    ITAB_CAT_STANDARD | ITAB_CAT_V6, ITAB_CONS_INFO,
-		    d6o->d6o_code);
+		    d6o_code);
 		if (symp != NULL) {
 			domainname = inittab_decode(symp, valptr,
 			    optlen, B_FALSE);
