@@ -134,7 +134,9 @@ mapfiles: bldtools
 	@cd common/mapfiles; pwd; $(MAKE) install
 
 clean: $(SUBDIRS) head pkg
-clobber: $(SUBDIRS) head pkg clobber_local
+clobber: clobber_gitignore $(SUBDIRS) head pkg clobber_local
+clobber_gitignore:
+	$(FIND) . -type f -name '.gitignore*' -print0 | $(XARGS) -0 rm
 clobber_local:
 	@cd tools; pwd; $(MAKE) clobber
 	@cd common/mapfiles; pwd; $(MAKE) clobber
