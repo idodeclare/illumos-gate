@@ -12,12 +12,14 @@
 #
 # Copyright 2022 Oxide Computer Company
 # Copyright 2023 MNX Cloud, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
 PROGS = basic_args basic_read multipoll
+OBJS =	$(PROGS:%=%.o)
 COMMON_OBJS = common.o
 
 poll_test := LDLIBS += -lsocket
@@ -38,7 +40,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
-	-$(RM) $(COMMON_OBJS)
+	-$(RM) $(COMMON_OBJS) $(OBJS)
 
 $(CMDS): $(ROOTOPTSIGFD) $(PROGS)
 

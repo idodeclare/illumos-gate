@@ -23,12 +23,14 @@
 # Copyright (c) 2012, 2016 by Delphix. All rights reserved.
 # Copyright 2017 RackTop Systems.
 # Copyright 2020 Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 PROG=		ztest
 BASHPROG=	zloop
 ROOTBASHPROG=	$(ROOTBIN)/$(BASHPROG)
 
-CLOBBERFILES=	$(BASHPROG)
+CLOBBERFILES +=	$(BASHPROG) $(ROOTBASHPROG)
 
 OBJS= $(PROG).o
 

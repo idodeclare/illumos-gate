@@ -11,6 +11,7 @@
 
 #
 # Copyright 2024 Bill Sommerfeld <sommerfeld@hamachi.org>
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 TESTDIR	= $(ROOT)/opt/crypto-tests/tests/longhash
@@ -40,6 +41,8 @@ CMDS = $(PROGS:%=$(TESTDIR)/%)
 
 $(CMDS) := FILEMODE = 0555
 
+CLEANFILES +=	*.o $(PROGS)
+
 all: $(PROGS)
 
 %_32: %.32.o $(COMMON_OBJS_32)
@@ -64,7 +67,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
-	-$(RM) *.o $(PROGS)
+	-$(RM) $(CLEANFILES)
 
 $(CMDS): $(TESTDIR) $(PROGS)
 

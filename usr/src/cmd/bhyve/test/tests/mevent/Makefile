@@ -13,6 +13,7 @@
 # Copyright 2018 Joyent, Inc.
 # Copyright 2022 Oxide Computer Company
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 TESTSUBDIR =	mevent
@@ -26,11 +27,14 @@ PROG = \
 		vnode_zvol
 
 SUPOBJS =	mevent.o testlib.o
+OBJS =		$(PROG:%=%.o) $(SUPOBJS)
 
 include ../../Makefile.com
 
 CMDS =		$(PROG:%=$(TESTDIR)/%)
 $(CMDS) :=	FILEMODE = 0555
+
+CLOBBERFILES +=	$(OBJS)
 
 all: $(PROG)
 

@@ -22,6 +22,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -45,10 +46,12 @@ MANIFEST=$(MANIFESTDIR)/test.jar-manifest
 TEST_JAR=$(JAR_SRCDIR)/test.jar
 PROTO_TEST_JAR=$(JAR_DSTDIR)/test.jar
 
+CLEANFILES +=	$(CLASSDIR)/*.class
+
 default: $(TEST_JAR)
 
 clean:
-	$(RM) $(CLASSDIR)/*.class
+	$(RM) $(CLEANFILES)
 
 clobber: clean
 	$(RM) $(TEST_JAR)

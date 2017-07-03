@@ -20,6 +20,8 @@
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2022 Garrett D'Amore
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 SYMPROG= hosts inetd.conf networks protocols services netmasks
 
@@ -31,6 +33,15 @@ ETCPROG= $(SYMPROG) $(EDITPROG) $(PROG)
 SUBDIRS= default dhcp init.d ike ppp secret sock2path.d
 
 include ../../Makefile.cmd
+
+# $(SRC)/cmd/Makefile.cmd sets up clobber-related macros to include $(PROG),
+# but almost all elements of PROG here are committed. Redefine therefore the
+# cmd clobber macro to exclude $(PROG), and define UNIGNOREFILES as an explicit
+# accounting of the committed state.
+CMDCLOBBEREES=	$(CLOBBERFILES)
+CLOBBERFILES=	datemsk.ndpd
+UNIGNOREFILES=	ipsecinit.sample ipqosconf.1.sample ipqosconf.2.sample \
+    ipqosconf.3.sample
 
 all:=		TARGET= all
 install:=	TARGET= install
@@ -84,7 +95,7 @@ FRC:
 datemsk.ndpd: datemsk.template
 	@while read i; do echo $$i; done < datemsk.template > $@
 
-clean clobber:
-	$(RM) datemsk.ndpd
+clean:
 
-lint:
+clobber: clean
+	$(RM) $(CLOBBERFILES)
