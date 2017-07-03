@@ -24,6 +24,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2015 RackTop Systems.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROG= link
@@ -32,7 +33,9 @@ OBJS= link.o
 
 include ../Makefile.cmd
 
-clean $(XPG4) := OBJS += values-xpg4.o
+$(XPG4) := OBJS += values-xpg4.o
+
+CLOBBERFILES +=	$(OBJS) values-xpg4.o
 
 FILEMODE= 0555
 
@@ -54,7 +57,6 @@ values-xpg4.o: ../../lib/crt/common/values-xpg4.c
 	$(COMPILE.c) -o $@ ../../lib/crt/common/values-xpg4.c
 
 clean:
-	$(RM) $(OBJS)
 
 lint:	lint_PROG
 

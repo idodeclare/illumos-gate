@@ -66,7 +66,7 @@ all: $(PROGS32) $(PROGS64)
 install: $(ROOTOPTPROGS) $(ROOTHEXSPD)
 
 clean:
-	$(RM) *.o
+	$(RM) $(OBJS32) $(OBJS64)
 
 clobber: clean
 	$(RM) $(PROGS32) $(PROGS64)

@@ -22,6 +22,7 @@
 #
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 FSTYPE=		ufs
@@ -36,6 +37,7 @@ include		../Makefile.roll
 
 OBJS=		$(LIBPROG).o $(ROLLOBJS)
 SRCS=		$(LIBPROG).c $(ROLLSRCS)
+CLEANFILES +=	$(LIBPROG).o
 
 # No msg catalog here.
 POFILE=
@@ -48,7 +50,7 @@ $(LIBPROG):	$(OBJS)
 		$(POST_PROCESS)
 
 clean:
-		$(RM) $(LIBPROG).o
+		$(RM) $(CLEANFILES)
 
 $(ROOTLIBFSTYPE)/$(DCOPY):	$(ROOTLIBFSTYPE)/$(LIBPROG)
 		-$(RM) $@; $(LN) $(ROOTLIBFSTYPE)/$(LIBPROG) $@

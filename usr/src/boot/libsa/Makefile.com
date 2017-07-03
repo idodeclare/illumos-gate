@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2019 Joyent, Inc.
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/boot/Makefile.inc
@@ -31,6 +32,8 @@ SMOFF += uninitialized
 # needs work
 objs/printf.o := SMOFF += 64bit_shift
 pics/printf.o := SMOFF += 64bit_shift
+
+CLOBBERFILES +=	machine x86
 
 machine:
 	$(RM) machine
@@ -61,6 +64,8 @@ pics/%.o objs/%.o:	$(LZ4)/%.c
 pics/%.o objs/%.o:	$(SRC)/common/util/%.c
 	$(COMPILE.c) -o $@ $<
 
-clean: clobber
-clobber:
-	$(RM) $(CLEANFILES) machine x86
+clean:
+	$(RM) $(CLEANFILES)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
