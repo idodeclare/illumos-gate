@@ -11,6 +11,7 @@
 
 #
 # Copyright 2024 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
@@ -35,6 +36,7 @@ COMMON_SRCS = \
 
 TESTDIR = unit
 
+include $(SRC)/Makefile.master
 include $(SRC)/test/nvme-tests/Makefile.com
 
 CPPFLAGS += -I$(SRC)/common/nvme

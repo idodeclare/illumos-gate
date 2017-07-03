@@ -11,6 +11,7 @@
 
 #
 # Copyright 2024 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
@@ -26,6 +27,7 @@ PROGS = \
 COMMON_SRCS = libnvme_test_common.c
 TESTDIR = libnvme
 
+include $(SRC)/Makefile.master
 include $(SRC)/test/nvme-tests/Makefile.com
 
 LDLIBS += -lnvme
