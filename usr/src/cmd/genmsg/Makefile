@@ -21,6 +21,7 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 include ../Makefile.cmd
@@ -54,6 +55,8 @@ OBJS =          $(C_OBJS) $(PSRC_Y:%.y=%.o) $(LEXOBJS)
 PSRC_C =        $(PSRC_Y:%.y=%.c)
 SRCS =          $(C_OBJS:%.o=%.c) $(PSRC_C) $(LEXINTSRCS)
 
+CLEANFILES +=	$(OBJS) $(PSRC_C) $(LEXINTSRCS) y.tab.h *.po
+
 .KEEP_STATE:
 
 all:    $(PROG)
@@ -83,6 +86,6 @@ $(POFILE):      $(SRCS)
 	$(RM) $(POFILE).i messages.po
 
 clean:
-	$(RM) $(OBJS) $(PSRC_C) $(LEXINTSRCS) y.tab.h *.po
+	$(RM) $(CLEANFILES)
 
 include ../Makefile.targ
