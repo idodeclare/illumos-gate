@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 BINPROG=	mail
@@ -32,7 +33,8 @@ PROG=	       $(BINPROG)
 include ../Makefile.cmd
 
 CLOBBERFILES=	$(PROG)
-CLEANFILES=	$(MAILOBJS)
+
+CLEANFILES =	$(OBJS) $(MAILOBJS)
 
 MAILOBJS=	add_recip.o cat.o ckdlivopts.o \
 		cksaved.o clr_hinfo.o copyback.o copylet.o \
@@ -117,7 +119,7 @@ $(ROOTBIN)/rmail:
 	$(RM) $@; $(SYMLINK) mail $@
 
 clean:
-	$(RM) $(OBJS) $(MAILOBJS)
+	$(RM) $(CLEANFILES)
 
-clobber:
-	$(RM) $(OBJS) $(MAILOBJS) mail
+clobber: clean
+	$(RM) $(CLOBBERFILES)
