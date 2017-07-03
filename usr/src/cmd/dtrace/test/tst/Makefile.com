@@ -24,6 +24,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 include $(SRC)/cmd/Makefile.cmd
 
@@ -70,14 +72,16 @@ CERRWARN +=	-_gcc=-Wno-unused-variable
 # not linted
 SMATCH=off
 
+CLOBBERFILES += \
+    $(CSRCS:%.c=%.exe) $(CSRCS:%.c=%.o) \
+    $(SSRCS:%.S=%.exe) $(SSRCS:%.S=%.o) \
+    $(DSRCS:%.d=%.o)
+
 all: $(EXES)
 
 clean lint:
 
 clobber: FRC
-	-$(RM) $(CSRCS:%.c=%.exe) $(CSRCS:%.c=%.o)
-	-$(RM) $(SSRCS:%.S=%.exe) $(SSRCS:%.S=%.o)
-	-$(RM) $(DSRCS:%.d=%.o)
 	-$(RM) $(CLOBBERFILES)
 
 install: $(ROOT_TSTS) $(ROOT_EXES)
