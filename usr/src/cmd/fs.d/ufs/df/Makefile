@@ -24,6 +24,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
+#
 
 FSTYPE=		ufs
 LIBPROG=	df
@@ -32,6 +34,7 @@ ATTMK=		$(LIBPROG)
 include		../../Makefile.fstype
 
 OBJS=	df.o
+CLEANFILES +=	$(OBJS)
 
 CPPFLAGS +=	-D_LARGEFILE64_SOURCE
 LDLIBS += -ladm
@@ -58,4 +61,4 @@ $(LIBPROG):	$(OBJS)
 		$(POST_PROCESS)
 
 clean:
-		$(RM) $(LIBPROG).o
+		$(RM) $(CLEANFILES)
