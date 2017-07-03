@@ -10,6 +10,7 @@
 #
 
 # Copyright 2023 Richard Lowe
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 
 include $(SRC)/lib/libsqlite/Makefile.com
 include $(SRC)/tools/Makefile.tools
@@ -30,6 +31,8 @@ CERRWARN += -_gcc=-Wno-unused-function
 
 LIBLINKS = libsqlite-sys.so
 
+CLOBBERFILES +=	sqlite.h
+
 .KEEP_STATE:
 
 $(PICS): sqlite.h
@@ -48,6 +51,5 @@ $(ROOTONBLDLIBMACH)/$(DYNLIB): $(DYNLIB)
 $(ROOTONBLDLIBMACH)/$(LIBLINKS): $(ROOTONBLDLIBMACH)/$(DYNLIB)
 		@$(RM) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
 		$(SYMLINK) $(DYNLIB) $(ROOTONBLDLIBMACH)/$(LIBLINKS)
-
 
 include $(SRC)/lib/libsqlite/Makefile.targ
