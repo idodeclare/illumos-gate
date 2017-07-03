@@ -11,8 +11,9 @@
 
 #
 # Copyright (c) 2019 by Chelsio Communications, Inc.
-#
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
+#
 
 PROG =  cxgbetool
 OBJS =	cxgbetool.o cudbg.o cudbg_view.o fastlz_api.o fastlz.o cudbg_common.o
@@ -26,6 +27,8 @@ CFLAGS += $(CCVERBOSE) -I$(SRC)/uts/common/io/cxgbe/t4nex -I$(SRC)/uts/common/io
 
 LDLIBS += -ldevinfo
 SMOFF += all_func_returns
+
+CLOBBERFILES +=	$(OBJS)
 
 all: $(PROG)
 

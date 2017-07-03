@@ -24,6 +24,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2019 Garrett D'Amore <garrett@damore.org>
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # cmd/sendmail/Makefile
 #
@@ -40,6 +41,8 @@ ROOTDIRS=	$(ROOT)/var/spool/mqueue $(ROOT)/var/spool/clientmqueue
 $(ROOTDIRS):=	DIRMODE = 0750
 $(ROOT)/var/spool/clientmqueue:=	DIRMODE = 0770
 
+CLOBBERFILES +=	THIRDPARTYLICENSE
+
 all:=           TARGET= all
 install:=       TARGET= install
 clean:=         TARGET= clean
@@ -55,7 +58,7 @@ install: 	$(ROOTDIRS) $(SUBDIRS) $(ROOTMANIFEST) $(ROOTSVCSH)
 all install:	THIRDPARTYLICENSE
 
 clobber:	FRC
-	$(RM) THIRDPARTYLICENSE
+	$(RM) $(CLOBBERFILES)
 
 .PARALLEL:	$(SUBDIRS)
 

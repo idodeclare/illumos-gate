@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright 2019 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -29,6 +30,8 @@ LDFLAGS +=	-znocombreloc
 efi_main.o := CPPFLAGS += -DLOADER_EFI=L\"loader32.efi\"
 CFLAGS +=	-m32
 CCASFLAGS +=	-m32
+
+CLOBBERFILES +=	machine x86
 
 $(OBJS):	machine x86
 

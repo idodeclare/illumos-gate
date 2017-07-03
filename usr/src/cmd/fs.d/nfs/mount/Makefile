@@ -20,6 +20,7 @@
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2018, Joyent, Inc. All rights reserved.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # cmd/fs.d/nfs/mount/Makefile
 
@@ -65,7 +66,8 @@ CFLAGS += $(CCVERBOSE)
 nfs_sec.o :=	CPPFLAGS += -DWNFS_SEC_NEGO
 
 ROOTETCPROG	= $(LIBPROG:%=$(ROOTETCFSTYPE)/%)
-CLOBBERFILES	+= $(LIBPROG)
+
+CLOBBERFILES	+= $(LIBPROG) webnfs.x webnfs.h webnfs_xdr.c webnfs_client.c
 
 .KEEP_STATE:
 
@@ -121,4 +123,4 @@ $(POFILE): $(SRCS) webnfs.h
 install:	$(ROOTETCPROG)
 
 clean:
-	$(RM) $(OBJS) webnfs.x webnfs.h webnfs_xdr.c webnfs_client.c
+	$(RM) $(OBJS)

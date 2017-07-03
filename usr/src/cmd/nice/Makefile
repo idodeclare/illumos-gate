@@ -22,6 +22,7 @@
 #
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROG= nice
@@ -31,7 +32,9 @@ OBJS= nice.o
 include ../Makefile.cmd
 CFLAGS += $(CCVERBOSE)
 
-clean $(XPG4) := OBJS += values-xpg4.o
+$(XPG4) := OBJS += values-xpg4.o
+
+CLOBBERFILES +=	$(OBJS) values-xpg4.o
 
 .KEEP_STATE:
 
@@ -47,7 +50,6 @@ values-xpg4.o: ../../lib/crt/common/values-xpg4.c
 	$(COMPILE.c) -o $@ ../../lib/crt/common/values-xpg4.c
 
 clean:
-	$(RM) $(OBJS)
 
 lint:	lint_PROG
 

@@ -117,7 +117,7 @@ SRCS =	check.c fields.c initialize.c internal.c \
 
 POFILES = $(SRCS:.c=.po)
 XGETFLAGS += -a -x sort.xcl
-CLOBBERFILES = $(DCFILE) $(POFILE) $(POFILES)
+CLOBBERFILES += $(DCFILE) $(POFILE) $(POFILES)
 
 ROOTLINK = $(PROG:%=$(ROOTBIN64)/%)
 

@@ -22,6 +22,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROG = jdtrace
@@ -57,10 +58,12 @@ $(PROTO_JDTRACE_JAR) := FILEMODE = 0644
 $(CMD) := FILEMODE = 0555
 $(XLIST) := FILEMODE = 0444
 
+CLEANFILES +=	$(CLASSDIR)/*.class
+
 all: $(JDTRACE_JAR) $(PROG)
 
 clean:
-	-$(RM) $(CLASSDIR)/*.class
+	-$(RM) $(CLEANFILES)
 
 clobber: clean
 	-$(RM) $(JDTRACE_JAR)

@@ -20,6 +20,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROG=		mv
@@ -37,9 +38,10 @@ ROOTXPG4LINKS= $(ROOTXPG4BIN)/$(CPFILE) $(ROOTXPG4BIN)/$(LNFILE)
 include ../Makefile.cmd
 include ../Makefile.ctf
 
-clean $(XPG4)	:= OBJS += values-xpg4.o
+$(XPG4)	:= OBJS += values-xpg4.o
 
-CLOBBERFILES += $(CPFILE) $(LNFILE)
+CLOBBERFILES += $(CPFILE) $(LNFILE) $(OBJS) $(XPG4OBJS) values-xpg4.o \
+    xpg4_values-xpg4.o
 CFLAGS	+=	$(CCVERBOSE)
 $(XPG4) := CFLAGS += -DXPG4
 XGETFLAGS += -a -x mv.xcl
@@ -94,6 +96,5 @@ $(ROOTXPG4LINKS):	$(ROOTXPG4PROG)
 	$(LN) $(ROOTXPG4PROG) $@
 
 clean:
-	$(RM) $(OBJS) $(XPG4OBJS)
 
 include ../Makefile.targ
