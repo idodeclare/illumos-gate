@@ -21,6 +21,7 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 # cmd/pools/poold/com/sun/solaris/domain/pools/Makefile
 
@@ -45,12 +46,14 @@ SOURCE =	Move.java \
 
 all install: $(SOURCE:.java=.class)
 
+CLEANFILES +=	*.class
+
 # Since more than one class file can be generated from a java source
 # file, any failure causes all class files to be removed.
 
 .FAILED: clean
 
 clean:
-	$(RM) *.class
+	$(RM) $(CLEANFILES)
 
 include $(SRC)/cmd/Makefile.targ

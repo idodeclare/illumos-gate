@@ -24,6 +24,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2020 Peter Tribble
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -138,15 +139,20 @@ API_CLASSNAMES=\
 API_CLASSES=${API_CLASSNAMES:%=%.class}
 DTRACE_API_CLASSES=${API_CLASSES:%=$(CLASSES)/$(PKGPATH)/%}
 
+CLEANFILES +=	$(CLASSES)/$(PKGPATH)/*.class
+
+CLEANDIRS +=	$(DOCAPI)
+
+CLOBBERFILES +=	$(JARS)/*.jar
 
 all:            $(CLASSES) $(DTRACE_API_CLASSES)
 
 clean:
-		-$(RM) $(CLASSES)/$(PKGPATH)/*.class
-		-$(RM) -r $(DOCAPI)
+		-$(RM) $(CLEANFILES)
+		-$(RM) -r $(CLEANDIRS)
 
 clobber:	clean
-		-$(RM) $(JARS)/*.jar
+		-$(RM) $(CLOBBERFILES)
 
 # Make the class dir, if it doesn't exist
 $(CLASSES):

@@ -20,6 +20,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 # cmd/sendmail/aux/Makefile
@@ -36,7 +37,8 @@ USRSBINPROG=	etrn makemap editmap
 LIBSMTPSMPROG= mailq
 
 # $(PROG) by default
-CLOBBERFILES=	$(LIBPROG) $(USRSBINPROG) $(LIBSMTPSMPROG)
+CLOBBERFILES=	$(LIBPROG) $(USRSBINPROG) $(LIBSMTPSMPROG) \
+    convtime.o editmap.o mail.local.o makemap.o rfc2047.o smrsh.o
 
 OBJS=		$(PROG:%=%.o)
 
