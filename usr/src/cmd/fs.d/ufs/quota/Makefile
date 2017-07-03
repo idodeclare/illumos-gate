@@ -23,6 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 FSTYPE=		ufs
 LIBPROG=	quota
@@ -36,6 +38,9 @@ include		../../Makefile.fstype
 OBJS=		quota.o rquota_xdr.o replica.o
 SRCS=		$(OBJS:%.o=%.c)
 XFILE=		$(ROOT)/usr/include/rpcsvc/rquota.x
+
+CLOBBERFILES +=	rquota_xdr.c
+
 CPPFLAGS +=	-I $(ROOT)/usr/include/sys -D_LARGEFILE64_SOURCE
 LDLIBS +=		-lnsl
 
@@ -53,7 +58,7 @@ $(LIBPROG):	$(OBJS)
 		$(POST_PROCESS)
 
 clean:
-		$(RM) $(OBJS) rquota_xdr.c
+		$(RM) $(OBJS)
 
 $(ROOTUSRSBIN)/$(LIBPROG):
 		-$(RM) $@; $(SYMLINK) $(LINKVALUE) $@

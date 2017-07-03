@@ -24,6 +24,8 @@
 #
 # Copyright (c) 2018, Joyent, Inc.
 # Copyright 2025 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2016 Chris Fraire <cfraire@me.com>
+#
 
 PROG= ed
 XPG4PROG= ed
@@ -60,6 +62,10 @@ MAPFILE.INT =	../expr/mapfile-intf
 LDFLAGS +=	$(MAPFILE.INT:%=-Wl,-M%)
 
 POFILE= ed_cmd.po
+
+CLOBBERFILES +=	$(XPG4) $(XPG6) compile.c.i
+
+CLOBBERDIRS +=	edobjs.xpg4 edobjs.xpg6
 
 %.po: ../expr/%.c
 	$(COMPILE.cpp) $< > $*.c.i
@@ -125,7 +131,6 @@ values-xpg6.o: ../../lib/crt/common/values-xpg6.c
 	$(POST_PROCESS_O)
 
 clean:
-	-@rm -rf $(OBJS) $(XPG4) $(XPG6) edobjs.xpg4 edobjs.xpg6 \
-		compile.c.i
+	-$(RM) $(OBJS)
 
 include ../Makefile.targ

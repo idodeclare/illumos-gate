@@ -21,6 +21,7 @@
 #
 # Copyright (c) 2007, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2018-2021 Tintri by DDN, Inc. All rights reserved.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 
@@ -71,6 +72,7 @@ ROOTSMBDDIR = $(ROOTLIB)/smbsrv
 ROOTSMBDFILE = $(PROG:%=$(ROOTSMBDDIR)/%)
 
 OBJS=
+CLEANFILES +=	fksmb_encrypt_pkcs.o test_decrypt.o test_encrypt.o utils.o
 
 .KEEP_STATE:
 
@@ -79,7 +81,7 @@ all: $(PROG)
 install: all $(ROOTSMBDFILE)
 
 clean:
-	-$(RM) *.o
+	-$(RM) $(CLEANFILES)
 
 lint:
 

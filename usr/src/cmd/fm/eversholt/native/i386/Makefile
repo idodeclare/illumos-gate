@@ -22,7 +22,9 @@
 #
 # Copyright 2004 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
+include $(SRC)/Makefile.master
 include ../../../../Makefile.cmd
 include ../Makefile.com
