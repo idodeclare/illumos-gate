@@ -11,12 +11,16 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2025 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = posix_spawn
 
 PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64) getsid.64
+
+OBJS32 = $(PROGS32:%=%.o)
+OBJS64 = $(PROGS64:%=%.o)
 
 ROOTOPTDIR = $(ROOT)/opt/libc-tests/tests
 ROOTOPTPROGS =	$(PROGS32:%=$(ROOTOPTDIR)/%) \
