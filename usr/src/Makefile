@@ -27,6 +27,7 @@
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2018 Joyent, Inc.
 # Copyright 2019 OmniOS Community Edition (OmniOSce) Association.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -135,7 +136,9 @@ mapfiles: bldtools
 	@cd common/mapfiles; pwd; $(MAKE) install
 
 clean: $(SUBDIRS) head pkg
-clobber: $(SUBDIRS) head pkg clobber_local
+clobber: clobber_gitignore .WAIT $(SUBDIRS) head pkg clobber_local
+clobber_gitignore:
+	$(FIND) . -type f -name '.gitignore*' -print0 | $(XARGS) -0 rm
 clobber_local:
 	@cd tools; pwd; $(MAKE) clobber
 	@cd common/mapfiles; pwd; $(MAKE) clobber
