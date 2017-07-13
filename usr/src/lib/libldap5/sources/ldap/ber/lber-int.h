@@ -102,7 +102,11 @@ extern "C" {
 
 #include <memory.h>
 #include <string.h>
+#ifdef _SOLARIS_SDK
+#include <portable.h>
+#else
 #include "portable.h"
+#endif /* _SOLARIS_SDK */
 
 #ifdef _WINDOWS
 #  if defined(FD_SETSIZE)
@@ -122,11 +126,12 @@ extern "C" {
 #define	stderr NULL
 #endif
 
-#include "lber.h"
-
 #ifdef _SOLARIS_SDK
+#include <lber.h>
 #include <libintl.h>
-#include "solaris-int.h"
+#include <solaris-int.h>
+#else
+#include "lber.h"
 #endif
 
 #ifdef macintosh

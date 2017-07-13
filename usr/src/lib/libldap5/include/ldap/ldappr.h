@@ -45,7 +45,11 @@
 #ifndef LDAP_PR_H
 #define	LDAP_PR_H
 
+#ifdef _SOLARIS_SDK
+#include <nspr.h>
+#else
 #include "nspr.h"
+#endif /* _SOLARIS_SDK */
 
 /*
  * ldappr.h - prototypes for functions that tie libldap into NSPR (Netscape
