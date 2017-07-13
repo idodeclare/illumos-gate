@@ -29,9 +29,12 @@ PROG= dd
 include ../Makefile.cmd
 
 CFLAGS += $(CCVERBOSE)
-CERRWARN += $(CNOWARN_UNINIT)
 CPPFLAGS += -D_FILE_OFFSET_BITS=64
 LDLIBS += -lcmdutils
+
+# re-enable warnings that we can tolerate, which are disabled by default
+# in Makefile.master
+CERRWARN += -_gcc=-Wsign-compare
 
 .KEEP_STATE:
 
@@ -40,7 +43,5 @@ all: $(PROG)
 install: all $(ROOTPROG)
 
 clean:
-
-lint:	lint_PROG
 
 include ../Makefile.targ

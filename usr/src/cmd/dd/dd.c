@@ -27,6 +27,7 @@
  * Copyright (c) 2014, Joyent, Inc.  All rights reserved.
  * Copyright (c) 2014 by Delphix. All rights reserved.
  * Copyright 2021 Oxide Computer Company
+ * Copyright 2017, 2021 Chris Fraire <cfraire@me.com>.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -100,6 +101,7 @@
 #define	NERR		010	/* flag - proceed on input errors */
 #define	SYNC		020	/* flag - pad short input blocks with nulls */
 #define	FULLBLOCK	040	/* flag - accumulate full blocks of input */
+#define	C_SPARSE	0100	/* flag - seek past sparse blocks in output */
 #define	BADLIMIT	5	/* give up if no progress after BADLIMIT trys */
 #define	SVR4XLATE	0	/* use default EBCDIC translation */
 #define	BSDXLATE	1	/* use BSD-compatible EBCDIC translation */
@@ -110,7 +112,7 @@
 	"	   [iseek=n] [oseek=n] [seek=n] [stride=n] [istride=n]\n"\
 	"	   [ostride=n] [count=n] [conv=[ascii][,ebcdic][,ibm]\n"\
 	"	   [,asciib][,ebcdicb][,ibmb][,block|unblock][,lcase|ucase]\n"\
-	"	   [,swab][,noerror][,notrunc][,sync]]\n"\
+	"	   [,noerror][,notrunc][,sparse][,swab][,sync]]\n"\
 	"	   [iflag=[fullblock]] [oflag=[dsync][sync]]\n"
 
 /* Global references */
@@ -121,6 +123,8 @@ static int	match(char *);
 static void		term(int);
 static unsigned long long	number(long long);
 static unsigned char	*flsh(void);
+static unsigned char	*flsh2(boolean_t);
+static void		dd_close();
 static void		stats(boolean_t);
 
 /* Local data definitions */
@@ -165,6 +169,11 @@ static char		*ifile;		/* input file name pointer */
 static char		*ofile;		/* output file name pointer */
 static unsigned char	*ibuf;		/* input buffer pointer */
 static unsigned char	*obuf;		/* output buffer pointer */
+static off_t		pending;	/* pending sparse data bytes */
+static off_t		stride_pending;	/* pending sparse stride bytes */
+static off_t		seek_offset;	/* offset of last seek past output */
+					/* hole for sparse data bytes but */
+					/* not sparse stride bytes */
 
 static hrtime_t		startt;		/* hrtime copy started */
 static uint64_t		prog_secs;	/* number of seconds of progress */
@@ -699,6 +708,10 @@ main(int argc, char **argv)
 					cflag |= SYNC;
 					continue;
 				}
+				if (match("sparse")) {
+					cflag |= C_SPARSE;
+					continue;
+				}
 				goto badarg;
 			}
 			continue;
@@ -1087,6 +1100,7 @@ main(int argc, char **argv)
 					while (obc) {
 						(void) flsh();
 					}
+					(void) dd_close();
 					term(2);
 				} else {
 					stats(B_FALSE);
@@ -1155,6 +1169,7 @@ main(int argc, char **argv)
 						case BLOCK:
 						case LCBLOCK:
 						case UCBLOCK:
+						default:
 							ic = ' ';
 							break;
 
@@ -1191,7 +1206,7 @@ main(int argc, char **argv)
 			/* If no more files to read, flush the output buffer */
 
 			if (--files <= 0) {
-				(void) flsh();
+				(void) dd_close();
 				if ((close(obf) != 0) ||
 				    (fclose(stdout) != 0)) {
 					perror(gettext("dd: close error"));
@@ -1265,7 +1280,7 @@ main(int argc, char **argv)
 		case LCNBIBM:
 		case UCNBIBM:
 			while ((c = ibc) != 0) {
-				if (c > (obs - obc)) {
+				if ((unsigned)c > (obs - obc)) {
 					c = obs - obc;
 				}
 				ibc -= c;
@@ -1358,7 +1373,7 @@ main(int argc, char **argv)
 		case LCASCII:
 		case UCASCII:
 			while ((c = ibc) != 0) {
-				if (c > (cbs - cbc)) {
+				if ((unsigned)c > (cbs - cbc)) {
 					/* if more than one record, */
 					c = cbs - cbc;
 					/* only copy one record */
@@ -1462,7 +1477,7 @@ main(int argc, char **argv)
 
 				/* If anything left, copy until newline */
 
-				if (c > (cbs - cbc + 1)) {
+				if ((unsigned)c > (cbs - cbc + 1)) {
 					c = cbs - cbc + 1;
 				}
 				ibc -= c;
@@ -1581,7 +1596,9 @@ main(int argc, char **argv)
 					c += cbs - cbc;
 					cbc = 0;
 					if (c > 0) {
-					/* Use the right kind of blank */
+						/*
+						 * Use the right kind of blank
+						 */
 
 						switch (conv) {
 						case BLOCK:
@@ -1609,11 +1626,11 @@ main(int argc, char **argv)
 							*op++ = ic;
 						} while (--c);
 					}
-				}
-
-			/* If not end of line, this line may be too long */
-
-				else if (cbc > cbs) {
+				} else if (cbc > cbs) {
+					/*
+					 * If not end of line, this line may
+					 * be too long
+					 */
 					skipf = 1; /* note skip in progress */
 					obc--;
 					op--;
@@ -1739,11 +1756,14 @@ number(long long big)
 			string = cs;
 			n *= number(BIG);
 
-		/* FALLTHROUGH */
-		/* Fall into exit test, recursion has read rest of string */
-		/* End of string, check for a valid number */
+			/*
+			 * Fall into exit test; recursion has read rest of
+			 * string
+			 */
+			/* FALLTHROUGH */
 
 		case '\0':
+			/* End of string, check for a valid number */
 			if ((n > big) || (n < 0)) {
 				(void) fprintf(stderr, "dd: %s \"%llu\"\n",
 				    gettext("argument out of range:"), n);
@@ -1761,7 +1781,7 @@ number(long long big)
 
 /* flsh *************************************************************** */
 /*									*/
-/* Flush the output buffer, move any excess bytes down to the beginning	*/
+/* Call flsh2(boolean_t) with B_FALSE					*/
 /*									*/
 /* Arg:		none							*/
 /* Global args:	obuf, obc, obs, nofr, nopr, ostriden			*/
@@ -1774,20 +1794,89 @@ number(long long big)
 static unsigned char *
 flsh(void)
 {
-	unsigned char *op, *cp;
-	int bc;
-	unsigned int oc;
+	return (flsh2(B_FALSE));
+}
 
-	if (obc) {			/* don't flush if the buffer is empty */
+/* flsh2 ************************************************************** */
+/*									*/
+/* Flush the output buffer, move any excess bytes down to the		*/
+/* beginning, and optionally force lseek() (when conv=sparse is active)	*/
+/* for pending or stride_pending.					*/
+/*									*/
+/* Arg:		force - certainly lseek for pending or stride_pending	*/
+/* Global args:	obuf, obc, obs, nofr, nopr, ostriden			*/
+/*									*/
+/* Return:	Pointer to the first free byte in the output buffer.	*/
+/*		Also reset `obc' to account for moved bytes.		*/
+/*									*/
+/* ********************************************************************	*/
+
+static unsigned char *
+flsh2(boolean_t force)
+{
+	unsigned char	*op = obuf;
+
+	if (obc > 0) {			/* don't flush if the buffer is empty */
+		unsigned char	*cp;
+		boolean_t	sparse;
+		int		bc;
+		unsigned int	oc, i, partialhere = 0;
+
 		if (obc >= obs) {
 			oc = obs;
 			nofr++;		/* count a full output buffer */
 		} else {
 			oc = obc;
 			nopr++;		/* count a partial output buffer */
+			partialhere = 1;
 		}
-		bc = write(obf, (char *)obuf, oc);
-		if (bc != oc) {
+
+		/*
+		 * If ostride is active and a partial block was already
+		 * written, then abort since the ostride would no longer
+		 * align with block boundaries.
+		 */
+		if (ostriden > 0 && nopr > partialhere) {
+			(void) fprintf(stderr, "dd: %s",
+			    gettext("cannot continue ostride after partial "
+			    "record\n"));
+			term(2);
+		}
+
+		sparse = B_FALSE;
+		if (cflag & C_SPARSE) {
+			sparse = B_TRUE;	/* Is buffer sparse? */
+			for (i = 0; i < oc; i++) {
+				if (obuf[i] != 0) {
+					sparse = B_FALSE;
+					break;
+				}
+			}
+		}
+
+		if (sparse) {
+			/*
+			 * Once here, any potential stride_pending NUL bytes
+			 * become certain `pending' NUL bytes.
+			 */
+			pending += stride_pending;
+			stride_pending = 0;
+			pending += oc;
+			bc = oc;
+		} else {
+			if (pending != 0 || stride_pending != 0) {
+				if (lseek(obf, pending + stride_pending,
+				    SEEK_CUR) == -1) {
+					perror("lseek");
+					exit(2);
+				}
+				pending = 0;
+				stride_pending = 0;
+			}
+			bc = write(obf, (char *)obuf, oc);
+			seek_offset = 0;
+		}
+		if (bc != (int)oc) {
 			if (bc < 0) {
 				perror("write");
 			} else {
@@ -1798,14 +1887,11 @@ flsh(void)
 			term(2);
 		}
 
-		if (ostriden > 0 && lseek(obf, ostriden * ((off_t)obs),
-		    SEEK_CUR) == -1) {
-			perror("lseek");
-			exit(2);
+		if (ostriden > 0) {
+			stride_pending = ostriden * ((off_t)obs);
 		}
 
 		obc -= oc;
-		op = obuf;
 		obytes += bc;
 
 		/* If any data in the conversion buffer, move it into */
@@ -1818,9 +1904,79 @@ flsh(void)
 				*op++ = *cp++;
 			} while (--bc);
 		}
-		return (op);
 	}
-	return (obuf);
+
+	if (force || !(cflag & C_SPARSE)) {
+		/*
+		 * Seek past hole of `pending' and stride_pending NUL bytes.
+		 */
+		if (pending != 0 || stride_pending != 0) {
+			seek_offset = lseek(obf, pending + stride_pending,
+			    SEEK_CUR);
+			if (seek_offset == -1) {
+				perror("lseek");
+				exit(2);
+			}
+
+			/*
+			 * Because `pending' NUL bytes are certainly written
+			 * while stride_pending NUL bytes are possibly written
+			 * (i.e. only if a subsequent data write occurs),
+			 * record the reached offset after seeking for
+			 * `pending' (i.e., subtract any stride_pending value).
+			 * Then if no more (non-sparse) data need to be
+			 * written, the offset equals the desired final file
+			 * size inclusive of just the `pending' hole (or 0 if
+			 * no adjustment is necessary).
+			 */
+			if (pending != 0)
+				seek_offset -= stride_pending;
+			else
+				seek_offset = 0;
+			pending = 0;
+			stride_pending = 0;
+		}
+	}
+
+	return (op);
+}
+
+/* dd_close *********************************************************** */
+/*									*/
+/* Clean up any remaining I/O, and flush output.  If necessary, write	*/
+/* a final NUL hole.							*/
+/*									*/
+/* Arg:		none							*/
+/*									*/
+/* Return:	void							*/
+/*									*/
+/* ********************************************************************	*/
+
+static void
+dd_close(void)
+{
+	(void) flsh2(B_TRUE);
+
+	/*
+	 * If the file ends with a hole, write a single, last NUL at the
+	 * appropriate offset in order to extend the file up to the end of the
+	 * hole. A simple ftruncate() would be more desirable, but that only
+	 * works for a regular file (VREG vnode type) and not say for a ZVOL
+	 * (VBLK vnode type).
+	 */
+	if (seek_offset > 0) {
+		const unsigned char ZERO = '\0';
+
+		if (lseek(obf, seek_offset - 1, SEEK_SET) == -1) {
+			perror("lseek");
+			exit(2);
+		}
+		if (write(obf, (void *)&ZERO, 1) != 1) {
+			perror("write");
+			exit(2);
+		}
+		seek_offset = 0;
+	}
 }
 
 /* term *************************************************************** */

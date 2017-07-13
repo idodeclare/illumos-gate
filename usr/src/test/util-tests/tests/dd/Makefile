@@ -8,43 +8,36 @@
 # source.  A copy of the CDDL is also available via the Internet at
 # http://www.illumos.org/license/CDDL.
 #
-
 #
-# Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2017 Chris Fraire <cfraire@me.com>.
 #
 
-include $(SRC)/Makefile.master
+include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-ROOTOPTPKG = $(ROOT)/opt/util-tests
-ROOTBIN = $(ROOTOPTPKG)/bin
+ROOTOPTPKG =	$(ROOT)/opt/util-tests
+ROOTDDBIN =	$(ROOTOPTPKG)/tests/dd
 
-KSHFILES =	utiltest
-PLFILES =	mkrandzero bincomp
-PROGS =		$(KSHFILES) $(PLFILES)
+KSHFILES =	dd_copy_test
+SCRIPTFILES =	$(KSHFILES)
 
-CMDS = $(PROGS:%=$(ROOTBIN)/%)
-$(CMDS) := FILEMODE = 0555
+CMDS =		$(SCRIPTFILES:%=$(ROOTDDBIN)/%)
+$(CMDS) :=	FILEMODE = 0555
 
 all clean:
 
 install: $(CMDS)
 
 clobber: clean
-	$(RM) $(PROGS)
+	$(RM) $(SCRIPTFILES)
 
-$(CMDS): $(ROOTBIN)
+$(CMDS): $(ROOTDDBIN)
 
-$(ROOTBIN):
+$(ROOTDDBIN):
 	$(INS.dir)
 
-$(ROOTBIN)/%: %
+$(ROOTDDBIN)/%: %
 	$(INS.file)
 
 $(KSHFILES): $$@.ksh
 	$(CP) $@.ksh $@
-
-$(PLFILES): $$@.pl
-	$(CP) $@.pl $@

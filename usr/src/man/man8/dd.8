@@ -46,8 +46,9 @@
 .\" Copyright (c) 2014, Joyent, Inc.  All rights Reserved.
 .\" Copyright (c) 2014 by Delphix. All rights reserved.
 .\" Copyright 2021 Oxide Computer Company
+.\" Copyright 2017 Chris Fraire <cfraire@me.com>.
 .\"
-.Dd October 24, 2021
+.Dd November 7, 2021
 .Dt DD 8
 .Os
 .Sh NAME
@@ -463,10 +464,6 @@ and
 .Cm ucase
 symbols are mutually exclusive.
 .Bl -hang
-.It Cm swab
-Swaps every pair of input bytes.
-If the current input record is an odd number of bytes, the last byte in the
-input record is ignored.
 .It Cm noerror
 Does not stop processing on an input error.
 When an input error occurs, a diagnostic message is written on standard error,
@@ -485,6 +482,18 @@ of
 (See also the preceding
 .Cm of Ns = Ns Ar file
 operand.)
+.It Cm sparse
+If one or more output blocks would consist solely of
+.Cm NUL
+bytes, try to seek the output file by the required space (instead of filling
+the blocks with
+.Cm NUL
+bytes),
+resulting in a sparse file.
+.It Cm swab
+Swaps every pair of input bytes.
+If the current input record is an odd number of bytes, the last byte in the
+input record is ignored.
 .It Cm sync
 Pads every input block to the size of the
 .Cm ibs Ns =

@@ -16,6 +16,7 @@
 # Copyright 2017 Jason King
 # Copyright 2020 Joyent, Inc.
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
+# Copyright 2017 Chris Fraire <cfraire@me.com>.
 #
 
 SUBDIRS =		\
@@ -25,6 +26,7 @@ SUBDIRS =		\
 	cpio		\
 	ctf		\
 	date		\
+	dd		\
 	demangle	\
 	dis		\
 	dladm		\
