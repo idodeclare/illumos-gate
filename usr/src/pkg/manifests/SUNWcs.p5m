@@ -30,6 +30,7 @@
 # Copyright (c) 2011, 2015 by Delphix. All rights reserved.
 # Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2024 Oxide Computer Company
+# Copyright 2017 Chris Fraire <cfraire@me.com>
 #
 
 <include SUNWcs.man1.inc>
@@ -1623,6 +1624,8 @@ license usr/src/cmd/cron/THIRDPARTYLICENSE \
     license=usr/src/cmd/cron/THIRDPARTYLICENSE
 license usr/src/cmd/csh/THIRDPARTYLICENSE \
     license=usr/src/cmd/csh/THIRDPARTYLICENSE
+license usr/src/cmd/dd/THIRDPARTYLICENSE \
+    license=usr/src/cmd/dd/THIRDPARTYLICENSE
 license usr/src/cmd/eeprom/THIRDPARTYLICENSE \
     license=usr/src/cmd/eeprom/THIRDPARTYLICENSE
 license usr/src/cmd/fs.d/ufs/THIRDPARTYLICENSE \

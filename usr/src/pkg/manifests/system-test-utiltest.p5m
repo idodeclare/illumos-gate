@@ -17,6 +17,7 @@
 # Copyright 2017 Jason King.
 # Copyright 2022 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2024 Oxide Computer Company
+# Copyright 2017 Chris Fraire <cfraire@me.com>
 #
 
 set name=pkg.fmri value=pkg:/system/test/utiltest@$(PKGVERS)
@@ -28,6 +29,8 @@ set name=variant.arch value=$(ARCH)
 dir  path=opt/util-tests
 file path=opt/util-tests/README mode=0444
 dir  path=opt/util-tests/bin
+file path=opt/util-tests/bin/bincomp mode=0555
+file path=opt/util-tests/bin/mkrandzero mode=0555
 file path=opt/util-tests/bin/print_json mode=0555
 file path=opt/util-tests/bin/utiltest mode=0555
 dir  path=opt/util-tests/runfiles
@@ -1138,6 +1141,8 @@ file path=opt/util-tests/tests/ctf/test-reference.c mode=0555
 file path=opt/util-tests/tests/ctf/test-sou.c mode=0555
 file path=opt/util-tests/tests/ctf/test-weak.c mode=0555
 file path=opt/util-tests/tests/date_test mode=0555
+dir  path=opt/util-tests/tests/dd
+file path=opt/util-tests/tests/dd/dd_copy_test mode=0555
 dir  path=opt/util-tests/tests/demangle
 file path=opt/util-tests/tests/demangle/afl-fast mode=0555
 file path=opt/util-tests/tests/demangle/gcc-libstdc++ mode=0555

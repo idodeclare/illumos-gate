@@ -21,6 +21,7 @@
 
 #
 # Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2017 Chris Fraire <cfraire@me.com>.
 #
 
 OK, so you've got approval to integrate code, and you want to know how to
@@ -54,11 +55,11 @@ properly communicate the license terms.  What do you do next?
       source code, the THIRDPARTYLICENSE files may actually be build
       targets in your Makefiles.
 
-      EXAMPLE: usr/src/cmd/perl/Makefile
+      EXAMPLE: usr/src/lib/libc/Makefile
 
       If the corresponding copyright will change dates frequently,
       then this approach can work well, because you won't need to
-      update the license files manually.                                        
+      update the license files manually.
 
       If you do this, then your license file should be a dependency of
       both the all and install targets, and should be removed via
