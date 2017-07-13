@@ -12,8 +12,9 @@
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-SUBDIRS = dis dladm iconv libnvpair_json printf xargs
+SUBDIRS = dd dis dladm iconv libnvpair_json printf xargs
 
 include $(SRC)/test/Makefile.com

@@ -26,6 +26,7 @@
  * Copyright 2012, Josef 'Jeff' Sipek <jeffpc@31bits.net>. All rights reserved.
  * Copyright (c) 2014, Joyent, Inc.  All rights reserved.
  * Copyright (c) 2014 by Delphix. All rights reserved.
+ * Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
@@ -97,6 +98,7 @@
 #define	SWAB		04	/* flag - swap bytes before conversion */
 #define	NERR		010	/* flag - proceed on input errors */
 #define	SYNC		020	/* flag - pad short input blocks with nulls */
+#define	C_SPARSE	040	/* flag - seek past sparse blocks in output */
 #define	BADLIMIT	5	/* give up if no progress after BADLIMIT trys */
 #define	SVR4XLATE	0	/* use default EBCDIC translation */
 #define	BSDXLATE	1	/* use BSD-compatible EBCDIC translation */
@@ -105,10 +107,10 @@
 	"usage: dd [if=file] [of=file] [ibs=n|nk|nb|nxm] [obs=n|nk|nb|nxm]\n"\
 	"	   [bs=n|nk|nb|nxm] [cbs=n|nk|nb|nxm] [files=n] [skip=n]\n"\
 	"	   [iseek=n] [oseek=n] [seek=n] [stride=n] [istride=n]\n"\
-	"	   [ostride=n] [count=n] [conv=[ascii] [,ebcdic][,ibm]\n"\
+	"	   [ostride=n] [count=n] [conv=[ascii][,ebcdic][,ibm]\n"\
 	"	   [,asciib][,ebcdicb][,ibmb][,block|unblock][,lcase|ucase]\n"\
-	"	   [,swab][,noerror][,notrunc][,sync]]\n"\
-	"	   [oflag=[dsync][sync]]\n"
+	"	   [,noerror][,notrunc][,sparse][,swab][,sync]]\n"\
+	"	   [oflag=[dsync][,sync]]\n"
 
 /* Global references */
 
@@ -118,6 +120,8 @@ static int	match(char *);
 static void		term();
 static unsigned long long	number();
 static unsigned char	*flsh();
+static unsigned char	*flsh2(boolean_t);
+static void		dd_close();
 static void		stats();
 
 /* Local data definitions */
@@ -161,6 +165,11 @@ static char		*ifile;		/* input file name pointer */
 static char		*ofile;		/* output file name pointer */
 static unsigned char	*ibuf;		/* input buffer pointer */
 static unsigned char	*obuf;		/* output buffer pointer */
+static off_t		pending;	/* pending sparse data bytes */
+static off_t		stride_pending;	/* pending sparse stride bytes */
+static off_t		seek_offset;	/* offset of last seek past output */
+				/* hole for sparse data bytes but */
+				/* not sparse stride bytes */
 
 static hrtime_t		startt;		/* hrtime copy started */
 static unsigned long long	obytes;	/* output bytes */
@@ -522,104 +531,83 @@ main(int argc, char **argv)
 
 	/* not getopt()'ed because dd has no options but only operand(s) */
 
-	for (c = optind; c < argc; c++)
-	{
+	for (c = optind; c < argc; c++) {
 		string = argv[c];
-		if (match("ibs="))
-		{
+		if (match("ibs=")) {
 			ibs = (unsigned)number(BIG);
 			continue;
 		}
-		if (match("obs="))
-		{
+		if (match("obs=")) {
 			obs = (unsigned)number(BIG);
 			continue;
 		}
-		if (match("cbs="))
-		{
+		if (match("cbs=")) {
 			cbs = (unsigned)number(BIG);
 			continue;
 		}
-		if (match("bs="))
-		{
+		if (match("bs=")) {
 			bs = (unsigned)number(BIG);
 			continue;
 		}
-		if (match("if="))
-		{
+		if (match("if=")) {
 			ifile = string;
 			continue;
 		}
-		if (match("of="))
-		{
+		if (match("of=")) {
 			ofile = string;
 			continue;
 		}
-		if (match("skip="))
-		{
+		if (match("skip=")) {
 			skip = number(BIG);
 			continue;
 		}
-		if (match("iseek="))
-		{
+		if (match("iseek=")) {
 			iseekn = number(BIG);
 			continue;
 		}
-		if (match("oseek="))
-		{
+		if (match("oseek=")) {
 			oseekn = number(BIG);
 			continue;
 		}
-		if (match("seek="))		/* retained for compatibility */
-		{
+		if (match("seek=")) {
+			/* retained for compatibility */
 			oseekn = number(BIG);
 			continue;
 		}
-		if (match("ostride="))
-		{
+		if (match("ostride=")) {
 			ostriden = ((off_t)number(BIG)) - 1;
 			continue;
 		}
-		if (match("istride="))
-		{
+		if (match("istride=")) {
 			istriden = ((off_t)number(BIG)) - 1;
 			continue;
 		}
-		if (match("stride="))
-		{
+		if (match("stride=")) {
 			istriden = ostriden = ((off_t)number(BIG)) - 1;
 			continue;
 		}
-		if (match("count="))
-		{
+		if (match("count=")) {
 			count = number(BIG);
 			ecount = B_TRUE;
 			continue;
 		}
-		if (match("files="))
-		{
+		if (match("files=")) {
 			files = (int)number(BIG);
 			continue;
 		}
-		if (match("conv="))
-		{
-			for (;;)
-			{
-				if (match(","))
-				{
+		if (match("conv=")) {
+			for (;;) {
+				if (match(",")) {
 					continue;
 				}
-				if (*string == '\0')
-				{
+				if (*string == '\0') {
 					break;
 				}
-				if (match("block"))
-				{
+				if (match("block")) {
 					conv = BLOCK;
 					continue;
 				}
-				if (match("unblock"))
-				{
+				if (match("unblock")) {
 					conv = UNBLOCK;
 					continue;
 				}
@@ -627,95 +615,81 @@ main(int argc, char **argv)
 				/* ebcdicb, ibmb, and asciib must precede */
 				/* ebcdic, ibm, and ascii in this test */
 
-				if (match("ebcdicb"))
-				{
+				if (match("ebcdicb")) {
 					conv = EBCDIC;
 					trantype = BSDXLATE;
 					continue;
 				}
-				if (match("ibmb"))
-				{
+				if (match("ibmb")) {
 					conv = IBM;
 					trantype = BSDXLATE;
 					continue;
 				}
-				if (match("asciib"))
-				{
+				if (match("asciib")) {
 					conv = ASCII;
 					trantype = BSDXLATE;
 					continue;
 				}
-				if (match("ebcdic"))
-				{
+				if (match("ebcdic")) {
 					conv = EBCDIC;
 					trantype = SVR4XLATE;
 					continue;
 				}
-				if (match("ibm"))
-				{
+				if (match("ibm")) {
 					conv = IBM;
 					trantype = SVR4XLATE;
 					continue;
 				}
-				if (match("ascii"))
-				{
+				if (match("ascii")) {
 					conv = ASCII;
 					trantype = SVR4XLATE;
 					continue;
 				}
-				if (match("lcase"))
-				{
+				if (match("lcase")) {
 					cflag |= LCASE;
 					continue;
 				}
-				if (match("ucase"))
-				{
+				if (match("ucase")) {
 					cflag |= UCASE;
 					continue;
 				}
-				if (match("swab"))
-				{
+				if (match("swab")) {
 					cflag |= SWAB;
 					continue;
 				}
-				if (match("noerror"))
-				{
+				if (match("noerror")) {
 					cflag |= NERR;
 					continue;
 				}
-				if (match("notrunc"))
-				{
+				if (match("notrunc")) {
 					trunc = 0;
 					continue;
 				}
-				if (match("sync"))
-				{
+				if (match("sync")) {
 					cflag |= SYNC;
+					continue;
+				}
+				if (match("sparse")) {
+					cflag |= C_SPARSE;
 					continue;
 				}
 				goto badarg;
 			}
 			continue;
 		}
-		if (match("oflag="))
-		{
-			for (;;)
-			{
-				if (match(","))
-				{	
+		if (match("oflag=")) {
+			for (;;) {
+				if (match(",")) {
 					continue;
 				}
-				if (*string == '\0')
-				{
+				if (*string == '\0') {
 					break;
 				}
-				if (match("dsync"))
-				{
+				if (match("dsync")) {
 					oflag |= O_DSYNC;
 					continue;
 				}
-				if (match("sync"))
-				{
+				if (match("sync")) {
 					oflag |= O_SYNC;
 					continue;
 				}
@@ -725,43 +699,37 @@ main(int argc, char **argv)
 		}
 		badarg:
 		(void) fprintf(stderr, "dd: %s \"%s\"\n",
-			gettext("bad argument:"), string);
+		    gettext("bad argument:"), string);
 		exit(2);
 	}
 
 	/* Perform consistency checks on options, decode strange conventions */
 
-	if (bs)
-	{
+	if (bs) {
 		ibs = obs = bs;
 	}
-	if ((ibs == 0) || (obs == 0))
-	{
+	if ((ibs == 0) || (obs == 0)) {
 		(void) fprintf(stderr, "dd: %s\n",
-			gettext("buffer sizes cannot be zero"));
+		    gettext("buffer sizes cannot be zero"));
 		exit(2);
 	}
 	if (ostriden == (off_t)-1) {
 		(void) fprintf(stderr, "dd: %s\n",
-			gettext("stride must be greater than zero"));
+		    gettext("stride must be greater than zero"));
 		exit(2);
 	}
 	if (istriden == (off_t)-1) {
 		(void) fprintf(stderr, "dd: %s\n",
-			gettext("stride must be greater than zero"));
+		    gettext("stride must be greater than zero"));
 		exit(2);
 	}
-	if (conv == COPY)
-	{
-		if ((bs == 0) || (cflag&(LCASE|UCASE)))
-		{
+	if (conv == COPY) {
+		if ((bs == 0) || (cflag&(LCASE|UCASE))) {
 			conv = REBLOCK;
 		}
 	}
-	if (cbs == 0)
-	{
-		switch (conv)
-		{
+	if (cbs == 0) {
+		switch (conv) {
 		case BLOCK:
 		case UNBLOCK:
 			conv = REBLOCK;
@@ -783,8 +751,7 @@ main(int argc, char **argv)
 
 	/* Expand options into lower and upper case versions if necessary */
 
-	switch (conv)
-	{
+	switch (conv) {
 	case REBLOCK:
 		if (cflag&LCASE)
 			conv = LCREBLOCK;
@@ -859,18 +826,14 @@ main(int argc, char **argv)
 	/* Open the input file, or duplicate standard input */
 
 	ibf = -1;
-	if (ifile)
-	{
+	if (ifile) {
 		ibf = open(ifile, 0);
-	}
-	else
-	{
+	} else {
 		ifile = "";
 		ibf = dup(0);
 	}
 
-	if (ibf == -1)
-	{
+	if (ibf == -1) {
 		(void) fprintf(stderr, "dd: %s: ", ifile);
 		perror("open");
 		exit(2);
@@ -879,17 +842,15 @@ main(int argc, char **argv)
 	/* Open the output file, or duplicate standard output */
 
 	obf = -1;
-	if (ofile)
-	{
-		if (trunc == 0)	/* do not truncate output file */
+	if (ofile) {
+		if (trunc == 0) {
+			/* do not truncate output file */
 			obf = open(ofile, (O_WRONLY|O_CREAT|oflag),
-			(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
-		else if (oseekn && (trunc == 1))
-		{
+			    (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
+		} else if (oseekn && (trunc == 1)) {
 			obf = open(ofile, O_WRONLY|O_CREAT|oflag,
-			(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
-			if (obf == -1)
-			{
+			    (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
+			if (obf == -1) {
 				(void) fprintf(stderr, "dd: %s: ", ofile);
 				perror("open");
 				exit(2);
@@ -897,24 +858,20 @@ main(int argc, char **argv)
 			(void) fstat(obf, &file_stat);
 			if (((file_stat.st_mode & S_IFMT) == S_IFREG) &&
 			    (ftruncate(obf, (((off_t)oseekn) * ((off_t)obs)))
-				== -1))
-			{
+			    == -1)) {
 				perror("ftruncate");
 				exit(2);
 			}
-		}
-		else
+		} else {
 			obf = open(ofile, O_WRONLY|O_CREAT|O_TRUNC|oflag,
-			(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
-	}
-	else
-	{
+			    (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH));
+		}
+	} else {
 		ofile = "";
 		obf = dup(1);
 	}
 
-	if (obf == -1)
-	{
+	if (obf == -1) {
 		(void) fprintf(stderr, "dd: %s: ", ofile);
 		perror("open");
 		exit(2);
@@ -926,22 +883,20 @@ main(int argc, char **argv)
 
 	/* If no conversions, the input buffer is the output buffer */
 
-	if (conv == COPY)
-	{
+	if (conv == COPY) {
 		obuf = ibuf;
 	}
 
 	/* Expand memory to get an output buffer. Leave enough room at the */
 	/* end to convert a logical record when doing block conversions. */
 
-	else
-	{
+	else {
 		obuf = (unsigned char *)valloc(obs + cbs + 10);
 	}
-	if ((ibuf == (unsigned char *)NULL) || (obuf == (unsigned char *)NULL))
-	{
+	if ((ibuf == (unsigned char *)NULL) ||
+	    (obuf == (unsigned char *)NULL)) {
 		(void) fprintf(stderr,
-			"dd: %s\n", gettext("not enough memory"));
+		    "dd: %s\n", gettext("not enough memory"));
 		exit(2);
 	}
 
@@ -950,8 +905,7 @@ main(int argc, char **argv)
 	 * Also enable it to be queried via SIGINFO and SIGUSR1
 	 */
 
-	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
-	{
+	if (signal(SIGINT, SIG_IGN) != SIG_IGN) {
 		(void) signal(SIGINT, term);
 	}
 
@@ -974,32 +928,22 @@ main(int argc, char **argv)
 
 	/* Skip input blocks */
 
-	while (skip)
-	{
+	while (skip) {
 		ibc = read(ibf, (char *)ibuf, ibs);
-		if (ibc == (unsigned)-1)
-		{
-			if (++nbad > BADLIMIT)
-			{
+		if (ibc == (unsigned)-1) {
+			if (++nbad > BADLIMIT) {
 				(void) fprintf(stderr, "dd: %s\n",
-					gettext("skip failed"));
+				    gettext("skip failed"));
 				exit(2);
-			}
-			else
-			{
+			} else {
 				perror("read");
 			}
-		}
-		else
-		{
-			if (ibc == 0)
-			{
+		} else {
+			if (ibc == 0) {
 				(void) fprintf(stderr, "dd: %s\n",
 				gettext("cannot skip past end-of-file"));
 				exit(3);
-			}
-			else
-			{
+			} else {
 				nbad = 0;
 			}
 		}
@@ -1008,16 +952,14 @@ main(int argc, char **argv)
 
 	/* Seek past input blocks */
 
-	if (iseekn && lseek(ibf, (((off_t)iseekn) * ((off_t)ibs)), 1) == -1)
-	{
+	if (iseekn && lseek(ibf, (((off_t)iseekn) * ((off_t)ibs)), 1) == -1) {
 		perror("lseek");
 		exit(2);
 	}
 
 	/* Seek past output blocks */
 
-	if (oseekn && lseek(obf, (((off_t)oseekn) * ((off_t)obs)), 1) == -1)
-	{
+	if (oseekn && lseek(obf, (((off_t)oseekn) * ((off_t)obs)), 1) == -1) {
 		perror("lseek");
 		exit(2);
 	}
@@ -1035,8 +977,7 @@ main(int argc, char **argv)
 	/* Grab our start time for siginfo purposes */
 	startt = gethrtime();
 
-	for (;;)
-	{
+	for (;;) {
 		if (nstats != 0) {
 			stats();
 			nstats = 0;
@@ -1045,8 +986,7 @@ main(int argc, char **argv)
 		if ((count == 0 && ecount == B_FALSE) || (nifr+nipr < count)) {
 		/* If proceed on error is enabled, zero the input buffer */
 
-			if (cflag&NERR)
-			{
+			if (cflag&NERR) {
 				ip = ibuf + ibs;
 				c = ibs;
 				if (c & 1)	/* if the size is odd, */
@@ -1074,25 +1014,20 @@ main(int argc, char **argv)
 
 			/* Process input errors */
 
-			if (ibc == (unsigned)-1)
-			{
+			if (ibc == (unsigned)-1) {
 				perror("read");
-				if (((cflag&NERR) == 0) || (++nbad > BADLIMIT))
-				{
-					while (obc)
-					{
+				if (((cflag&NERR) == 0) ||
+				    (++nbad > BADLIMIT)) {
+					while (obc) {
 						(void) flsh();
 					}
+					(void) dd_close();
 					term(2);
-				}
-				else
-				{
+				} else {
 					stats();
 					ibc = ibs; /* assume a full block */
 				}
-			}
-			else
-			{
+			} else {
 				nbad = 0;
 			}
 		}
@@ -1107,10 +1042,8 @@ main(int argc, char **argv)
 
 		/* Process end of file */
 
-		if (ibc == 0)
-		{
-			switch (conv)
-			{
+		if (ibc == 0) {
+			switch (conv) {
 			case UNBLOCK:
 			case LCUNBLOCK:
 			case UCUNBLOCK:
@@ -1120,11 +1053,9 @@ main(int argc, char **argv)
 
 				/* Trim trailing blanks from the last line */
 
-				if ((c = cbc) != 0)
-				{
+				if ((c = cbc) != 0) {
 					do {
-						if ((*--op) != ' ')
-						{
+						if ((*--op) != ' ') {
 							op++;
 							break;
 						}
@@ -1135,8 +1066,7 @@ main(int argc, char **argv)
 
 					/* Flush the output buffer if full */
 
-					while (obc >= obs)
-					{
+					while (obc >= obs) {
 						op = flsh();
 					}
 				}
@@ -1154,16 +1084,13 @@ main(int argc, char **argv)
 
 			/* Pad trailing blanks if the last line is short */
 
-				if (cbc)
-				{
+				if (cbc) {
 					obc += c = cbs - cbc;
 					cbc = 0;
-					if (c > 0)
-					{
+					if (c > 0) {
 					/* Use the right kind of blank */
 
-						switch (conv)
-						{
+						switch (conv) {
 						case BLOCK:
 						case LCBLOCK:
 						case UCBLOCK:
@@ -1194,8 +1121,7 @@ main(int argc, char **argv)
 
 				/* Flush the output buffer if full */
 
-				while (obc >= obs)
-				{
+				while (obc >= obs) {
 					op = flsh();
 				}
 				break;
@@ -1203,36 +1129,29 @@ main(int argc, char **argv)
 
 			/* If no more files to read, flush the output buffer */
 
-			if (--files <= 0)
-			{
-				(void) flsh();
-				if ((close(obf) != 0) || (fclose(stdout) != 0))
-				{
+			if (--files <= 0) {
+				(void) dd_close();
+				if ((close(obf) != 0) ||
+				    (fclose(stdout) != 0)) {
 					perror(gettext("dd: close error"));
 					exit(2);
 				}
 				term(0);	/* successful exit */
-			}
-			else
-			{
+			} else {
 				continue;	/* read the next file */
 			}
 		}
 
 		/* Normal read, check for special cases */
 
-		else if (ibc == ibs)
-		{
+		else if (ibc == ibs) {
 			nifr++;		/* count another full input record */
-		}
-		else
-		{
+		} else {
 			nipr++;		/* count a partial input record */
 
 			/* If `sync' enabled, pad nulls */
 
-			if ((cflag&SYNC) && ((cflag&NERR) == 0))
-			{
+			if ((cflag&SYNC) && ((cflag&NERR) == 0)) {
 				c = ibs - ibc;
 				ip = ibuf + ibs;
 				do {
@@ -1247,8 +1166,7 @@ main(int argc, char **argv)
 
 		/* Swap the bytes in the input buffer if necessary */
 
-		if (cflag&SWAB)
-		{
+		if (cflag&SWAB) {
 			ip = ibuf;
 			if (ibc & 1)	/* if the byte count is odd, */
 			{
@@ -1265,8 +1183,7 @@ main(int argc, char **argv)
 		/* Select the appropriate conversion loop */
 
 		ip = ibuf;
-		switch (conv)
-		{
+		switch (conv) {
 
 		/* Simple copy: no conversion, preserve the input block size */
 
@@ -1289,16 +1206,13 @@ main(int argc, char **argv)
 		case NBIBM:
 		case LCNBIBM:
 		case UCNBIBM:
-			while ((c = ibc) != 0)
-			{
-				if (c > (obs - obc))
-				{
+			while ((c = ibc) != 0) {
+				if (c > (obs - obc)) {
 					c = obs - obc;
 				}
 				ibc -= c;
 				obc += c;
-				switch (conv)
-				{
+				switch (conv) {
 				case REBLOCK:
 					do {
 						*op++ = *ip++;
@@ -1371,8 +1285,7 @@ main(int argc, char **argv)
 					} while (--c);
 					break;
 				}
-				if (obc >= obs)
-				{
+				if (obc >= obs) {
 					op = flsh();
 				}
 			}
@@ -1386,8 +1299,7 @@ main(int argc, char **argv)
 		case ASCII:
 		case LCASCII:
 		case UCASCII:
-			while ((c = ibc) != 0)
-			{
+			while ((c = ibc) != 0) {
 				if (c > (cbs - cbc))
 						/* if more than one record, */
 				{
@@ -1397,8 +1309,7 @@ main(int argc, char **argv)
 				ibc -= c;
 				cbc += c;
 				obc += c;
-				switch (conv)
-				{
+				switch (conv) {
 				case UNBLOCK:
 					do {
 						*op++ = *ip++;
@@ -1438,12 +1349,10 @@ main(int argc, char **argv)
 
 				/* Trim trailing blanks if the line is full */
 
-				if (cbc == cbs)
-				{
+				if (cbc == cbs) {
 					c = cbs; /* `do - while' is usually */
 					do {		/* faster than `for' */
-						if ((*--op) != ' ')
-						{
+						if ((*--op) != ' ') {
 							op++;
 							break;
 						}
@@ -1454,8 +1363,7 @@ main(int argc, char **argv)
 
 					/* Flush the output buffer if full */
 
-					while (obc >= obs)
-					{
+					while (obc >= obs) {
 						op = flsh();
 					}
 				}
@@ -1473,24 +1381,20 @@ main(int argc, char **argv)
 		case IBM:
 		case LCIBM:
 		case UCIBM:
-			while ((c = ibc) != 0)
-			{
+			while ((c = ibc) != 0) {
 				int nlflag = 0;
 
 			/* We may have to skip to the end of a long line */
 
-				if (skipf)
-				{
+				if (skipf) {
 					do {
-						if ((ic = *ip++) == '\n')
-						{
+						if ((ic = *ip++) == '\n') {
 							skipf = 0;
 							c--;
 							break;
 						}
 					} while (--c);
-					if ((ibc = c) == 0)
-					{
+					if ((ibc = c) == 0) {
 						continue;
 							/* read another block */
 					}
@@ -1498,24 +1402,19 @@ main(int argc, char **argv)
 
 				/* If anything left, copy until newline */
 
-				if (c > (cbs - cbc + 1))
-				{
+				if (c > (cbs - cbc + 1)) {
 					c = cbs - cbc + 1;
 				}
 				ibc -= c;
 				cbc += c;
 				obc += c;
 
-				switch (conv)
-				{
+				switch (conv) {
 				case BLOCK:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = ic;
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1524,12 +1423,9 @@ main(int argc, char **argv)
 
 				case LCBLOCK:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = utol[ic];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1538,12 +1434,9 @@ main(int argc, char **argv)
 
 				case UCBLOCK:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = ltou[ic];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1552,12 +1445,9 @@ main(int argc, char **argv)
 
 				case EBCDIC:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = atoe[ic];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1566,12 +1456,9 @@ main(int argc, char **argv)
 
 				case LCEBCDIC:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = atoe[utol[ic]];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1580,12 +1467,9 @@ main(int argc, char **argv)
 
 				case UCEBCDIC:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = atoe[ltou[ic]];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1594,12 +1478,9 @@ main(int argc, char **argv)
 
 				case IBM:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
+						if ((ic = *ip++) != '\n') {
 							*op++ = atoibm[ic];
-						}
-						else
-						{
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1608,12 +1489,10 @@ main(int argc, char **argv)
 
 				case LCIBM:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
-						*op++ = atoibm[utol[ic]];
-						}
-						else
-						{
+						if ((ic = *ip++) != '\n') {
+							*op++ =
+							    atoibm[utol[ic]];
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1622,12 +1501,10 @@ main(int argc, char **argv)
 
 				case UCIBM:
 					do {
-						if ((ic = *ip++) != '\n')
-						{
-						*op++ = atoibm[ltou[ic]];
-						}
-						else
-						{
+						if ((ic = *ip++) != '\n') {
+							*op++ =
+							    atoibm[ltou[ic]];
+						} else {
 							nlflag = 1;
 							break;
 						}
@@ -1638,18 +1515,17 @@ main(int argc, char **argv)
 			/* If newline found, update all the counters and */
 			/* pointers, pad with trailing blanks if necessary */
 
-				if (nlflag)
-				{
+				if (nlflag) {
 					ibc += c - 1;
 					obc += cbs - cbc;
 					c += cbs - cbc;
 					cbc = 0;
-					if (c > 0)
-					{
-					/* Use the right kind of blank */
+					if (c > 0) {
+						/*
+						 * Use the right kind of blank
+						 */
 
-						switch (conv)
-						{
+						switch (conv) {
 						case BLOCK:
 						case LCBLOCK:
 						case UCBLOCK:
@@ -1675,12 +1551,11 @@ main(int argc, char **argv)
 							*op++ = ic;
 						} while (--c);
 					}
-				}
-
-			/* If not end of line, this line may be too long */
-
-				else if (cbc > cbs)
-				{
+				} else if (cbc > cbs) {
+					/*
+					 * If not end of line, this line may
+					 * be too long
+					 */
 					skipf = 1; /* note skip in progress */
 					obc--;
 					op--;
@@ -1690,8 +1565,7 @@ main(int argc, char **argv)
 
 				/* Flush the output buffer if full */
 
-				while (obc >= obs)
-				{
+				while (obc >= obs) {
 					op = flsh();
 				}
 			}
@@ -1716,21 +1590,17 @@ main(int argc, char **argv)
 /* ********************************************************************	*/
 
 static int
-match(s)
-char *s;
+match(char *s)
 {
 	char *cs;
 
 	cs = string;
-	while (*cs++ == *s)
-	{
-		if (*s++ == '\0')
-		{
+	while (*cs++ == *s) {
+		if (*s++ == '\0') {
 			goto true;
 		}
 	}
-	if (*s != '\0')
-	{
+	if (*s != '\0') {
 		return (0);
 	}
 
@@ -1756,8 +1626,7 @@ true:
 /* ********************************************************************	*/
 
 static unsigned long long
-number(big)
-long long big;
+number(long long big)
 {
 	char *cs;
 	long long n;
@@ -1765,14 +1634,11 @@ long long big;
 
 	cs = string;
 	n = 0;
-	while ((*cs >= '0') && (*cs <= '9') && (n <= cut))
-	{
+	while ((*cs >= '0') && (*cs <= '9') && (n <= cut)) {
 		n = n*10 + *cs++ - '0';
 	}
-	for (;;)
-	{
-		switch (*cs++)
-		{
+	for (;;) {
+		switch (*cs++) {
 
 		case 'Z':
 			n *= 1024;
@@ -1815,22 +1681,24 @@ long long big;
 			string = cs;
 			n *= number(BIG);
 
-		/* FALLTHROUGH */
-		/* Fall into exit test, recursion has read rest of string */
-		/* End of string, check for a valid number */
+			/*
+			 * Fall into exit test; recursion has read rest of
+			 * string
+			 */
+			/* FALLTHROUGH */
 
 		case '\0':
-			if ((n > big) || (n < 0))
-			{
+			/* End of string, check for a valid number */
+			if ((n > big) || (n < 0)) {
 				(void) fprintf(stderr, "dd: %s \"%llu\"\n",
-					gettext("argument out of range:"), n);
+				    gettext("argument out of range:"), n);
 				exit(2);
 			}
 			return (n);
 
 		default:
 			(void) fprintf(stderr, "dd: %s \"%s\"\n",
-				gettext("bad numeric argument:"), string);
+			    gettext("bad numeric argument:"), string);
 			exit(2);
 		}
 	} /* never gets here */
@@ -1838,7 +1706,7 @@ long long big;
 
 /* flsh *************************************************************** */
 /*									*/
-/* Flush the output buffer, move any excess bytes down to the beginning	*/
+/* Call flsh2(boolean_t) with B_FALSE					*/
 /*									*/
 /* Arg:		none							*/
 /* Global args:	obuf, obc, obs, nofr, nopr, ostriden			*/
@@ -1848,15 +1716,34 @@ long long big;
 /*									*/
 /* ********************************************************************	*/
 
-static unsigned char
-*flsh()
+static unsigned char *
+flsh(void)
 {
-	unsigned char *op, *cp;
-	int bc;
-	unsigned int oc;
+	return (flsh2(B_FALSE));
+}
 
-	if (obc)			/* don't flush if the buffer is empty */
-	{
+/* flsh *************************************************************** */
+/*									*/
+/* Flush the output buffer, move any excess bytes down to the beginning	*/
+/*									*/
+/* Arg:		force - certainly lseek for pending or stride_pending	*/
+/* Global args:	obuf, obc, obs, nofr, nopr, ostriden			*/
+/*									*/
+/* Return:	Pointer to the first free byte in the output buffer.	*/
+/*		Also reset `obc' to account for moved bytes.		*/
+/*									*/
+/* ********************************************************************	*/
+
+static unsigned char *
+flsh2(boolean_t force)
+{
+	unsigned char	*op = obuf;
+
+	if (obc > 0) {
+		unsigned char	*cp;
+		int		bc, sparse;
+		unsigned int	oc, i, partialhere = 0;
+
 		if (obc >= obs) {
 			oc = obs;
 			nofr++;		/* count a full output buffer */
@@ -1865,26 +1752,69 @@ static unsigned char
 		{
 			oc = obc;
 			nopr++;		/* count a partial output buffer */
+			partialhere = 1;
 		}
-		bc = write(obf, (char *)obuf, oc);
+
+		/*
+		 * If ostride is active and a partial block was already
+		 * written, then abort since the ostride would no longer
+		 * align with block boundaries.
+		 */
+		if (ostriden > 0 && nopr > partialhere) {
+			(void) fprintf(stderr, "dd: %s",
+			    gettext("cannot continue ostride after"
+			    " partial record\n"));
+			term(2);
+		}
+
+		sparse = 0;
+		if (cflag & C_SPARSE) {
+			sparse = 1;	/* Is buffer sparse? */
+			for (i = 0; i < oc; i++) {
+				if (obuf[i] != 0) {
+					sparse = 0;
+					break;
+				}
+			}
+		}
+
+		if (sparse) {
+			/*
+			 * Once here, any potential stride_pending NUL bytes
+			 * become certain `pending' NUL bytes.
+			 */
+			pending += stride_pending;
+			stride_pending = 0;
+			pending += oc;
+			bc = oc;
+		} else {
+			if (pending != 0 || stride_pending != 0) {
+				if (lseek(obf, pending + stride_pending,
+				    SEEK_CUR) == -1) {
+					perror("lseek");
+					exit(2);
+				}
+				pending = 0;
+				stride_pending = 0;
+			}
+			bc = write(obf, (char *)obuf, oc);
+			seek_offset = 0;
+		}
 		if (bc != oc) {
 			if (bc < 0)
 				perror("write");
 			else
 			(void) fprintf(stderr,
-				gettext("dd: unexpected short write, "
-				"wrote %d bytes, expected %d\n"), bc, oc);
+			    gettext("dd: unexpected short write, "
+			    "wrote %d bytes, expected %d\n"), bc, oc);
 			term(2);
 		}
 
-		if (ostriden > 0 && lseek(obf, ostriden * ((off_t)obs),
-		    SEEK_CUR) == -1) {
-			perror("lseek");
-			exit(2);
+		if (ostriden > 0) {
+			stride_pending = ostriden * ((off_t)obs);
 		}
 
 		obc -= oc;
-		op = obuf;
 		obytes += bc;
 
 		/* If any data in the conversion buffer, move it into */
@@ -1897,9 +1827,81 @@ static unsigned char
 				*op++ = *cp++;
 			} while (--bc);
 		}
-		return (op);
 	}
-	return (obuf);
+
+	if (force || !(cflag & C_SPARSE)) {
+		/*
+		 * Seek past hole of `pending' and stride_pending NUL
+		 * bytes.
+		 */
+		if (pending != 0 || stride_pending != 0) {
+			seek_offset = lseek(obf, pending + stride_pending,
+			    SEEK_CUR);
+			if (seek_offset == -1) {
+				perror("lseek");
+				exit(2);
+			}
+
+			/*
+			 * Because `pending' NUL bytes are certainly
+			 * written while stride_pending NUL bytes are
+			 * possibly written i.e. only if a subsequent data
+			 * write occurs, record the reached offset after
+			 * seeking for `pending' (i.e., subtract any
+			 * stride_pending value). Then if no more (non-
+			 * sparse) data need to be written, the offset
+			 * equals the desired final file size inclusive of
+			 * just the `pending' hole (or 0 if no adjustment
+			 * is necessary).
+			 */
+			if (pending != 0)
+				seek_offset -= stride_pending;
+			else
+				seek_offset = 0;
+			pending = 0;
+			stride_pending = 0;
+		}
+	}
+
+	return (op);
+}
+
+/* dd_close *********************************************************** */
+/*									*/
+/* Clean up any remaining I/O, and flush output.  If necessary, write	*/
+/* a final NUL hole.							*/
+/*									*/
+/* Arg:		none							*/
+/*									*/
+/* Return:	void							*/
+/*									*/
+/* ********************************************************************	*/
+
+static void
+dd_close(void)
+{
+	(void) flsh2(B_TRUE);
+
+	/*
+	 * If the file ends with a hole, write a single, last NUL at the
+	 * appropriate offset in order to extend the file up to the end of
+	 * the hole. A simple ftruncate would be more desirable, but that
+	 * only works for a regular file (VREG vnode type) and not say for
+	 * a ZVOL (VBLK vnode type).
+	 */
+	if (seek_offset > 0) {
+		const unsigned char ZERO = '\0';
+
+		if (lseek(obf, seek_offset - 1, SEEK_SET) == -1) {
+			perror("lseek");
+			exit(2);
+		}
+		if (write(obf, (void *)&ZERO, 1) != 1) {
+			perror("write");
+			exit(2);
+		}
+		seek_offset = 0;
+	}
 }
 
 /* term *************************************************************** */
@@ -1913,8 +1915,7 @@ static unsigned char
 /* ********************************************************************	*/
 
 static void
-term(c)
-int c;
+term(int c)
 {
 	stats();
 	exit(c);
@@ -1941,7 +1942,7 @@ stats()
 	(void) fprintf(stderr, gettext("%llu+%llu records out\n"), nofr, nopr);
 	if (ntrunc) {
 		(void) fprintf(stderr,
-			gettext("%llu truncated record(s)\n"), ntrunc);
+		    gettext("%llu truncated record(s)\n"), ntrunc);
 	}
 
 	/*

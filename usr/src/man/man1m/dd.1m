@@ -11,7 +11,7 @@
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
 .\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
 .\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH DD 1M "Dec 12, 2014"
+.TH DD 1M "July 25, 2017"
 .SH NAME
 dd \- convert and copy a file
 .SH SYNOPSIS
@@ -367,15 +367,6 @@ no mapping is specified are not modified by this conversion.
 .RE
 
 The \fBlcase\fR and \fBucase\fR symbols are mutually exclusive.
-.sp
-.ne 2
-.na
-\fB\fBswab\fR\fR
-.ad
-.RS 11n
-Swaps every pair of input bytes. If the current input record is an odd number
-of bytes, the last byte in the input record is ignored.
-.RE
 
 .sp
 .ne 2
@@ -400,6 +391,27 @@ the output.
 Does not truncate the output file. Preserves blocks in the output file not
 explicitly written by this invocation of \fBdd\fR. (See also the preceding
 \fBof=\fR\fIfile\fR operand.)
+.RE
+
+.sp
+.ne 2
+.na
+\fBsparse\fR
+.ad
+.RS 11n
+If one or more output blocks would consist solely of \fBNUL\fR bytes, try
+to seek the output file by the required space instead of filling them with
+\fBNUL\fRs, resulting in a sparse file.
+.RE
+
+.sp
+.ne 2
+.na
+\fBswab\fR
+.ad
+.RS 11n
+Swaps every pair of input bytes. If the current input record is an odd number
+of bytes, the last byte in the input record is ignored.
 .RE
 
 .sp

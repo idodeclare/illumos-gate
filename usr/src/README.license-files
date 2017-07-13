@@ -54,7 +54,7 @@ properly communicate the license terms.  What do you do next?
       source code, the THIRDPARTYLICENSE files may actually be build
       targets in your Makefiles.
 
-      EXAMPLE: usr/src/cmd/perl/Makefile
+      EXAMPLE: usr/src/lib/libc/Makefile
 
       If the corresponding copyright will change dates frequently,
       then this approach can work well, because you won't need to

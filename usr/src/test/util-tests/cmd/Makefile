@@ -12,6 +12,7 @@
 #
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright (c) 2012 by Delphix. All rights reserved.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -20,19 +21,30 @@ include $(SRC)/test/Makefile.com
 ROOTOPTPKG = $(ROOT)/opt/util-tests
 ROOTBIN = $(ROOTOPTPKG)/bin
 
-PROGS = utiltest
+KSHFILES =	utiltest
+PLFILES =	mkrandzero bincomp
+PROGS =		$(KSHFILES) $(PLFILES)
 
 CMDS = $(PROGS:%=$(ROOTBIN)/%)
 $(CMDS) := FILEMODE = 0555
 
-all lint clean clobber:
+all lint clean:
 
 install: $(CMDS)
+
+clobber: clean
+	$(RM) $(PROGS)
 
 $(CMDS): $(ROOTBIN)
 
 $(ROOTBIN):
 	$(INS.dir)
 
-$(ROOTBIN)/%: %.ksh
-	$(INS.rename)
+$(ROOTBIN)/%: %
+	$(INS.file)
+
+$(KSHFILES): $$@.ksh
+	$(CP) $@.ksh $@
+
+$(PLFILES): $$@.pl
+	$(CP) $@.pl $@

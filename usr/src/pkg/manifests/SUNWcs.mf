@@ -25,6 +25,7 @@
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
 # Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2017 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 <include SUNWcs.man1.inc>
@@ -1653,6 +1654,8 @@ license usr/src/cmd/cron/THIRDPARTYLICENSE \
     license=usr/src/cmd/cron/THIRDPARTYLICENSE
 license usr/src/cmd/csh/THIRDPARTYLICENSE \
     license=usr/src/cmd/csh/THIRDPARTYLICENSE
+license usr/src/cmd/dd/THIRDPARTYLICENSE \
+    license=usr/src/cmd/dd/THIRDPARTYLICENSE
 license usr/src/cmd/eeprom/THIRDPARTYLICENSE \
     license=usr/src/cmd/eeprom/THIRDPARTYLICENSE
 license usr/src/cmd/fs.d/ufs/THIRDPARTYLICENSE \
