@@ -21,6 +21,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 DEFAULTFILES =	cron.dfl
@@ -114,6 +115,7 @@ OBJS =		$(NOBJS) $(XPG4COMMONOBJS) $(XPG4ATOBJS) $(XPG4CTOBJS) \
 
 SRCS =		$(NOBJS:%.o=%.c) $(GETRESPSRC)
 
+CLEANFILES +=	att1.h att1.c att2.c
 CLOBBERFILES +=	$(SCRIPT) $(XPG4SCRIPT)
 
 $(ROOTLIBCRON) :=		SYMLNKDEST = ../../etc/cron.d
@@ -219,7 +221,7 @@ $(POFILE):	$(POFILES)
 	$(RM) $@; cat $(POFILES) > $@
 
 clean :
-		$(RM) $(OBJS) att1.h att1.c att2.c
+		$(RM) $(OBJS) $(CLEANFILES)
 
 lint :		lint_SRCS
 

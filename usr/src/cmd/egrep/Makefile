@@ -22,6 +22,7 @@
 #
 # Copyright 2005 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PROG= egrep
@@ -33,6 +34,8 @@ CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-implicit-function-declaration
 CERRWARN += -_gcc=-Wno-unused-variable
 CERRWARN += -_gcc=-Wno-unused-label
+
+CLEANFILES +=	$(PROG).c
 
 .KEEP_STATE:
 
@@ -48,7 +51,7 @@ $(PROG).c: $(PROG).y
 	$(RM) y1.c y.tab.c
 
 clean:
-	$(RM) $(PROG).c
+	$(RM) $(CLEANFILES)
 
 lint:	lint_PROG
 

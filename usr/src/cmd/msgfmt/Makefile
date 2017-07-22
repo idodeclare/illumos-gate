@@ -26,6 +26,7 @@
 #         All Rights Reserved
 #
 # Copyright 2017 Joyent, Inc.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 # cmd/msgfmt/Makefile
@@ -69,6 +70,8 @@ CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-unused-variable
 
+CLEANFILES +=	gnu_po.c y.tab.h xgettext.lx.c
+
 .KEEP_STATE:
 
 .PARALLEL:	$(SOBJS) $(GOBJS) $(YOBJS) $(COBJS) $(BOBJS) $(LOBJS) \
@@ -103,7 +106,7 @@ install: all $(ROOTBINPROG) $(ROOTLIBPROG)
 clean:  
 	$(RM) $(SOBJS) $(GOBJS) $(YOBJS) $(COBJS) \
 		$(XOBJS) $(LXOBJS) $(BOBJS) $(LOBJS) \
-		$(POFILE) $(POFILES) gnu_po.c y.tab.h xgettext.lx.c
+		$(POFILE) $(POFILES) $(CLEANFILES)
 
 lint:	gnu_po.c y.tab.h
 	$(LINT.c) $(SOBJS:%.o=%.c) $(COBJS:%.o=%.c) $(LDLIBS)

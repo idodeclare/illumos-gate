@@ -21,9 +21,15 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 ROOTTERMINFO = $(ROOTSHLIB)/terminfo
+
+CLEANFILES +=	kmdb_terminfo.c kmdb_modlinktest.c kmdb_modlinktest.o \
+    kaif_off.h kmdb_context_off.h \
+    mdb_lex.c mdb_grammar.c mdb_grammar.h y.tab.h y.tab.c y.output \
+    $(PROG).core
 
 $(PROG).core: $(OBJS) $(KMDBLIBS) $(MAPFILE)
 	$(LD) -r $(BREDUCE) $(ZNOVERSION) $(ZDEFS) -M$(MAPFILE) -o $@ $(OBJS) \
@@ -40,11 +46,9 @@ clean.lint:
 	$(RM) $(ALLLINTFILES)
 
 clean:
-	$(RM) $(OBJS) $(KCTLOBJS) $(PROG).core $(MAPFILE)
+	$(RM) $(OBJS) $(KCTLOBJS) $(MAPFILE)
 	$(RM) $(MAPFILE_INTERMEDIATE)
-	$(RM) kmdb_terminfo.c kmdb_modlinktest.c kmdb_modlinktest.o
-	$(RM) kaif_off.h kmdb_context_off.h
-	$(RM) mdb_lex.c mdb_grammar.c mdb_grammar.h y.tab.h y.tab.c y.output
+	$(RM) $(CLEANFILES)
 
 clobber: clean clean.lint
 	$(RM) $(PROG)

@@ -12,6 +12,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Copyright 2014 Alexander Pyhalov
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 
@@ -24,7 +25,7 @@ include ../Makefile.cmd
 MWOBJS=		fgetln.o fparseln.o mailwrapper.o
 
 CLOBBERFILES=	$(PROG)
-CLEANFILES=	$(MWOBJS)
+CLEANFILES=	$(MWOBJS) mailwrapper
 
 SRCS=	 	$(MWOBJS:%.o=%.c)
 
@@ -94,7 +95,7 @@ lint:
 	$(LINT.c) $(SRCS)
 
 clean:
-	$(RM) $(OBJS) $(MWOBJS) mailwrapper
+	$(RM) $(OBJS) $(CLEANFILES)
 
 clobber: clean
-	$(RM) $(ROOTSYMLINKS) $(ROOTLIBPROG) $(ROOTETCFILES)
+	$(RM) $(ROOTSYMLINKS) $(ROOTLIBPROG) $(ROOTETCFILES) $(CLOBBERFILES)

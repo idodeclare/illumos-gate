@@ -21,12 +21,15 @@
 #
 # Copyright (c) 1990, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2010 Nexenta Systems, Inc.  All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 ETCFILES= ioctl.syscon passwd shadow motd
 FTPDFILES= ftpusers
 KVMFILES= README
 SMBFILES= smbpasswd
+
+CLOBBERFILES +=	motd smbpasswd
 
 include ../../Makefile.cmd
 
@@ -52,13 +55,6 @@ all: $(ETCFILES) $(KVMFILES) $(SMBFILES) $(FTPDFILES)
 
 install: all $(ROOTETCFILES) $(ROOTETCFTPDFILES) $(ROOTUSRKVMFILES) $(ROOTVARSMBFILES) $(ROOTETCFTPUSERSLINK)
 
-clean:
-	$(RM) $(ROOTETCFTPUSERSLINK)
-
-lint:
-
-clobber:
-
 motd:	FRC
 	@-$(ECHO) "rebuilding motd"
 	@$(RELEASE_BUILD)-$(ECHO) "The Illumos Project\tSunOS $(RELEASE)\t$(VERSION)\t$(RELEASE_DATE)" > motd
@@ -69,11 +65,12 @@ motd:	FRC
 smbpasswd:
 	$(TOUCH) smbpasswd
 
-clean:
-
 lint:
 
-clobber:
-	$(RM) motd smbpasswd
+clean:
+	$(RM) $(ROOTETCFTPUSERSLINK)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 FRC:

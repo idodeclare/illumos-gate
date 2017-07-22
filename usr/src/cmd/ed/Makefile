@@ -21,6 +21,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PROG= ed
@@ -32,6 +33,8 @@ XPG4EDOBJ= edobjs.xpg4/ed.o edobjs.xpg4/compile.o  values-xpg4.o
 XPG6EDOBJ= edobjs.xpg6/ed.o edobjs.xpg6/compile.o  values-xpg6.o
 OBJS= $(EDOBJ) $(XPG4EDOBJ) $(XPG6EDOBJ)
 SRCS= ./ed.c ../expr/compile.c 
+
+CLEANFILES +=	edobjs.xpg4 edobjs.xpg6 compile.c.i
 
 POFILES= $(EDOBJ:%.o=%.po)
 
@@ -110,8 +113,7 @@ values-xpg6.o: ../../lib/common/common/values-xpg6.c
 	$(COMPILE.c) -o $@ ../../lib/common/common/values-xpg6.c
 
 clean:
-	-@rm -rf $(OBJS) $(XPG4) $(XPG6) edobjs.xpg4 edobjs.xpg6 \
-		compile.c.i
+	-@rm -rf $(OBJS) $(XPG4) $(XPG6) $(CLEANFILES)
 
 lint:	lint_PROG
 

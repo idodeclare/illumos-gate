@@ -22,6 +22,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -162,16 +163,17 @@ API_CLASSNAMES=\
 API_CLASSES=${API_CLASSNAMES:%=%.class}
 DTRACE_API_CLASSES=${API_CLASSES:%=$(CLASSES)/$(PKGPATH)/%}
 
+CLEANFILES +=	$(CLASSES)/$(PKGPATH)/*.class $(JNI)/*.h
+CLOBBERFILES +=	$(JARS)/*.jar
 
-all:            $(CLASSES) $(DTRACE_API_CLASSES) $(JNI)/$(APIHDR)
+all:            $(CLASSES) $(DTRACE_API_CLASSES) $(JNIHDRS)
 
 clean:
-		-$(RM) $(CLASSES)/$(PKGPATH)/*.class
-		-$(RM) $(JNI)/*.h
+		-$(RM) $(CLEANFILES)
 		-$(RM) -r $(DOCAPI)
 
 clobber:	clean
-		-$(RM) $(JARS)/*.jar
+		-$(RM) $(CLOBBERFILES)
 
 # Make the class dir, if it doesn't exist
 $(CLASSES):
@@ -181,7 +183,7 @@ $(CLASSES):
 $(JNI):
 		-@mkdir -p $@
 
-$(JNI)/$(APIHDR): $(JNI) $(DTRACE_JNI_CLASSES)
+$(JNIHDRS): $(JNI) $(DTRACE_JNI_CLASSES)
 		$(JAVAH) -o $@ -classpath $(CLASSES) $(JNI_FULL_CLASSNAMES)
 		-@touch $@
 

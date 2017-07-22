@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -20,10 +21,11 @@ LIB=		zfsboot
 
 all: libzfsboot.a
 
-clean: clobber
+clean:
+	$(RM) $(CLEANFILES) $(OBJS)
 
-clobber:
-	$(RM) machine x86 $(OBJS) libzfsboot.a
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 CC=     $(GCC_ROOT)/bin/gcc
 CPPFLAGS=
@@ -42,6 +44,7 @@ CFLAGS +=	-mno-mmx -mno-3dnow -mno-sse -mno-sse2 -mno-sse3 -msoft-float
 CFLAGS +=	-Wformat -Wall -std=gnu99
 
 CLEANFILES +=    machine x86
+CLOBBERFILES +=	libzfsboot.a
 
 machine:
 	$(RM) machine

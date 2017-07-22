@@ -21,8 +21,8 @@
 #
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-#
 # Copyright (c) 2015 by Delphix. All rights reserved.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
 PROG:sh=	basename `pwd`
@@ -36,6 +36,8 @@ include ../Makefile.cmd
 $(INTEL_BLD)SUBDIRS	= $(MACH)
 $(BUILD64)SUBDIRS	+= $(MACH64)
 
+CLOBBERFILES +=	$(ROOTBASHPROG)
+
 all	:=	TARGET = all
 install	:=	TARGET = install
 clean	:=	TARGET = clean
@@ -46,7 +48,8 @@ lint	:=	TARGET = lint
 
 all lint:	$(SUBDIRS) $(BASHPROG)
 
-clean clobber:	$(SUBDIRS)
+clean:	$(SUBDIRS)
+	$(RM) $(BASHPROG)
 
 install:	$(SUBDIRS) $(ROOTBASHPROG)
 	-$(RM) $(ROOTPROG)

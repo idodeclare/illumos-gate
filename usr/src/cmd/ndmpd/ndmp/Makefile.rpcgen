@@ -1,6 +1,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 # 
 
 #
@@ -36,7 +37,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-all: $(NDMP_DIR)/ndmp.h $(NDMP_DIR)/ndmp_xdr.c $(NDMP_DIR)/ndmp_xdr.h
+LOCAL_NDMP_H =	ndmp.h ndmp_xdr.c ndmp_xdr.h
+REL_NDMP_H =	$(LOCAL_NDMP_H:%=$(NDMP_DIR)/%)
+
+all: $(REL_NDMP_H)
 
 $(NDMP_DIR)/ndmp.h: $(NDMP_DIR)/ndmp.x
 	$(RPCGEN) -C -h -o $(NDMP_DIR)/ndmp.h $(NDMP_DIR)/ndmp.x
@@ -48,4 +52,4 @@ $(NDMP_DIR)/ndmp_xdr.h: $(NDMP_DIR)/ndmp.x
 	$(RPCGEN) -C -h -o $(NDMP_DIR)/ndmp_xdr.h $(NDMP_DIR)/ndmp.x
 
 rpcclean:
-	rm -f $(NDMP_DIR)/ndmp.h $(NDMP_DIR)/ndmp_xdr.h $(NDMP_DIR)/ndmp_xdr.c
+	$(RM) $(REL_NDMP_H)
