@@ -55,19 +55,22 @@
 use strict;
 use warnings;
 use Cwd qw(realpath getcwd);
+use File::Basename;
 use File::Spec::Functions qw(abs2rel splitdir);
 use Getopt::Long;
 
-my $cwd = realpath(getcwd);
-my $gitignore = "$cwd/.gitignore";
+our $cwd = realpath(getcwd);
+affirm_in_git_repo($cwd);
+
+our $gitignore = "$cwd/.gitignore";
 
 our ($opt_d, $opt_v, @opt_x, $disc);
 GetOptions(
-  'v' => \$opt_v,
-  'd=s' => \$opt_d,
-  'x=s' => \@opt_x)
-  or die "Usage: $0 [-v] [-d <discriminator>] "
-  . "[-x file-path]* [file-path ...]\n";
+    'v' => \$opt_v,
+    'd=s' => \$opt_d,
+    'x=s' => \@opt_x)
+    or die "Usage: $0 [-v] [-d <discriminator>] "
+        . "[-x file-path]* [file-path ...]\n";
 
 # (the commas will be marker characters for discriminated .gitignore files)
 $disc = $opt_d ? ",$opt_d," : "";
@@ -78,10 +81,10 @@ $disc = $opt_d ? ",$opt_d," : "";
 # to be handled by the root illumos-gate/.gitignore.
 my %uniq;
 my @lines = sort { lc($a) cmp lc($b) }
-  map { normalize_gitignore_entry($_) }
-  grep { my $r = !exists $uniq{$_}; $uniq{$_} = 1; $r; }
-  grep { !is_opt_excluded($_) }
-  grep { !is_already_ignored($_) } @ARGV;
+    map { normalize_gitignore_entry($_) }
+    grep { my $r = !exists $uniq{$_}; $uniq{$_} = 1; $r; }
+    grep { !is_opt_excluded($_) }
+    grep { !is_already_ignored($_) } @ARGV;
 my $contents = join("", map { s/$/\n/r; } @lines);
 
 # Write or clean up in parent directories any "subdir" .gitignore*-* files
@@ -114,8 +117,7 @@ for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 			print "Removing defunct $gitignore_subnodisc.\n" if $opt_v;
 			unlink $gitignore_subnodisc;
 		}
-	}
-	else {
+	} else {
 		# otherwise, clean up any formerly-discriminated files
 		map { unlink } glob "$cwd/$dotdot.gitignore,*,-$subdir";
 	}
@@ -127,8 +129,7 @@ if ($opt_d) {
 	my $gitignore_disc = "$gitignore$disc";
 	write_if_different($gitignore_disc, $contents);
 	$contents = "";
-}
-else {
+} else {
 	# otherwise, clean up any formerly-discriminated files
 	map { unlink } glob "$gitignore,*,*";
 }
@@ -151,9 +152,9 @@ write_if_different($gitignore, $contents);
 sub is_already_ignored {
 	my ($file) = @_;
 	return $file eq "lint.out"
-	  || $file =~ m`^debug(?:32|64)/`
-	  || ($file =~ m`^\.([^/]*)$` && length($1) < 5) # e.g., .po; not .bashrc
-	  || $file =~ /\.(?:class|exec|jar|ln|o|tmp)$/;
+	    || $file =~ m`^debug(?:32|64)/`
+	    || ($file =~ m`^\.([^/]*)$` && length($1) < 5) # e.g., .po; not .bashrc
+	    || $file =~ /\.(?:class|exec|jar|ln|o|tmp)$/;
 }
 
 # return true if the arg matches an -x <file-path> switch
@@ -176,7 +177,7 @@ sub write_if_different {
 	}
 	elsif (!$has_file or !is_equal_contents($file, $contents)) {
 		open(my $fh, ">$file")
-		  or die "Error opening $file for writing\n";
+		    or die "Error opening $file for writing\n";
 		print $fh $contents or die "Error writing $file\n";
 	}
 }
@@ -192,7 +193,7 @@ sub is_equal_contents {
 	my $is_equal = $contents eq $fcontents;
 
 	printf("$gitignore has matching content: %s\n", $is_equal ? "yes" : "no")
-	  if $opt_v;
+	    if $opt_v;
 	return $is_equal;
 }
 
@@ -216,8 +217,7 @@ sub normalize_gitignore_entry {
 			$entry = $rel;
 			return "#$entry" if !defined $clink || $clink !~ m`^\Q$cwd/`;
 			# otherwise, leave $entry as is
-		}
-		else {
+		} else {
 			my $realentry = realpath($entry);
 			# the double-# prevents pattern-matching for @addenda
 			return "##$entry" if !defined $realentry;
@@ -260,4 +260,26 @@ sub condense_link {
 		$lroot =~ s`/[^/]+$``;
 	}
 	return "$lroot/$link";
+}
+
+# Confirm that cwd or above is a Git repo (-d .git) or else short-circuit
+# any generation of .gitignore* i.e., if a build is run from an archive of
+# or a Mercurial repo of illumos-gate.
+sub affirm_in_git_repo {
+	my ($p) = @_;
+
+	chop $p if length($p) > 1 && substr($p, -1, 1) eq "/";
+	do {
+		if (-d "$p/.git") {
+			return;
+		} else {
+			(undef, $p) = fileparse($p);
+			chop $p;
+		}
+	} while (length($p) > 0 && $p ne "./");
+
+	warn "noop: Not a git repository"
+	    . " (or any of the parent directories): .git\n"
+	    if exists $ENV{MAKE_GITIGNORE_DEBUG};
+	exit;
 }
