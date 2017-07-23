@@ -12,6 +12,7 @@
 #
 # Copyright 2011, Richard Lowe
 # Copyright 2017 Nexenta Systems, Inc.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 MANDOC=		$(ONBLD_TOOLS)/bin/${MACH}/mandoc
@@ -60,8 +61,8 @@ check:		$(MANCHECKS)
 
 clean:
 
-clobber:
-		$(RM) $(MANLINKS)
+clobber: clean
+		$(RM) $(MANLINKS) $(CLOBBERFILES)
 
 .PARALLEL:
 

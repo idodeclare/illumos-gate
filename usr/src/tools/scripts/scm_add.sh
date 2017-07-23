@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # CDDL HEADER START
 #
@@ -18,42 +19,44 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+#
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-include ../Makefile.lib
+# Default to use `git add'
+export SCM_ADD="${SCM_ADD:-git add}"
 
-HDR =		dns_sd.h
-HDRDIR =	common
-SUBDIRS	=	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+function usage {
+	prog="$(basename "$0")"
+	>&2 echo \
+"Usage: $0 <contrib file> ...
 
-all := 		TARGET = all
-clean :=	TARGET = clean
-clobber :=	TARGET = clobber
-install	:=	TARGET = install
-lint	:= 	TARGET = lint
+	Run to add a source file to source code management software,
+	after first removing extraneous whitespace line endings.
 
-.KEEP_STATE:
+	e.g., $prog path/to/dns-sd.1
 
-all install: install_h $(SUBDIRS) .WAIT java
+	SCM_ADD	set env var to override the default, $SCM_ADD
+"
+	exit 1
+}
 
-clean clobber: $(SUBDIRS) java
+if [ $# -eq 0 ]; then
+	usage
+fi
 
-ROOTHDRDIR=	$(ROOT)/usr/include
-ROOTHDRS=	$(HDR:%=$(ROOTHDRDIR)/%)
+# affirm that SCM_ADD is defined
+if [ -z "$SCM_ADD" ]; then
+	>&2 echo "ERROR: SCM_ADD is not defined"
+	exit 2
+fi
 
-install_h:	common .WAIT $(ROOTHDRS)
-
-check:
-
-lint: $(SUBDIRS)
-
-$(SUBDIRS) common java: FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
-
-include ../Makefile.targ
+# remove extraneous, line-ending whitespace; and run the SCM_ADD command
+perl -p -i -e 'use strict;
+    use warnings;
+    BEGIN { undef $/ }
+    # strip line-ending tabs and spaces
+    s/[\x20\t]+$//mg;
+    # strip file-ending tabs and spaces
+    s/[\x20\t]+$//s;
+    ' "$@" && $SCM_ADD "$@" || exit 2

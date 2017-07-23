@@ -21,13 +21,14 @@
 #
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
-#ident	"%Z%%M%	%I%	%E% SMI"
 
 include		$(SRC)/lib/Makefile.lib
 
 POFILE	=	libjdns_sd.po
 
+EARLY_SUBDIRS =	common com/apple
 SUBDIRS =	$(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
@@ -39,9 +40,9 @@ lint	:=	TARGET= lint
 
 .KEEP_STATE:
 
-all install clean clobber lint: com/apple .WAIT $(SUBDIRS)
+all install clean clobber lint:	$(EARLY_SUBDIRS) .WAIT $(SUBDIRS)
 
-com/apple $(SUBDIRS):	FRC
+$(EARLY_SUBDIRS) $(SUBDIRS):	FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:
