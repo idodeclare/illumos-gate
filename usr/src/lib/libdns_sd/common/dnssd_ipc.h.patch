@@ -1,0 +1,21 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSShared/dnssd_ipc.h	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/lib/libdns_sd/common/dnssd_ipc.h	2017-07-24 09:23:37.000000000 -0500
+@@ -158,6 +158,8 @@ typedef enum
+ 
+ #if defined(_WIN64)
+ #   pragma pack(push,4)
++#elif !defined(__GNUC__)
++#   pragma pack(1)
+ #endif
+ 
+ // Define context object big enough to hold a 64-bit pointer,
+@@ -183,6 +185,8 @@ typedef packedstruct
+ 
+ #if defined(_WIN64)
+ #   pragma pack(pop)
++#elif !defined(__GNUC__)
++#   pragma pack()
+ #endif
+ 
+ // routines to write to and extract data from message buffers.

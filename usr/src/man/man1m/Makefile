@@ -16,6 +16,7 @@
 # Copyright (c) 2013, 2016 by Delphix. All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2017 Nexenta Systems, Inc.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 include		$(SRC)//Makefile.master
@@ -749,9 +750,32 @@ ypxfr_1perday.1m		:= LINKSRC = ypxfr.1m
 ypxfr_1perhour.1m		:= LINKSRC = ypxfr.1m
 ypxfr_2perday.1m		:= LINKSRC = ypxfr.1m
 
+# mDNSResponder source code files
+SRC_MDNSSHARED =	$(SRC)/contrib/mDNSResponder/mDNSShared
+SRC_MDNSSHARED_MODFILES +=	dns-sd.1m mdnsd.1m
+
+CLOBBERFILES +=	$(SRC_MDNSSHARED_MODFILES)
+
 
 .KEEP_STATE:
 
 include		$(SRC)/man/Makefile.man
 
-install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+install:	transform .WAIT $(ROOTMANFILES) $(ROOTMANLINKS)
+
+# mDNSResponder transformation targets
+transform:	$(SRC_MDNSSHARED_MODFILES)
+
+rediff:
+	$(REDIFF_MOD) $(SRC_MDNSSHARED)/dns-sd.1 dns-sd.1m
+	$(REDIFF_MOD) $(SRC_MDNSSHARED)/mDNSResponder.8 mdnsd.1m
+
+recontrib:
+	$(SCM_ADD) $(SRC_MDNSSHARED)/dns-sd.1 \
+	    $(SRC_MDNSSHARED)/mDNSResponder.8
+
+dns-sd.1m:	$(SRC_MDNSSHARED)/dns-sd.1 $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_MDNSSHARED)/dns-sd.1
+
+mdnsd.1m:	$(SRC_MDNSSHARED)/mDNSResponder.8 $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_MDNSSHARED)/mDNSResponder.8

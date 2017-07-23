@@ -27,6 +27,7 @@
 # Copyright 2015 Gary Mills
 # Copyright 2015 Igor Kozhukhov <ikozhukhov@gmail.com>
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 #
@@ -144,6 +145,10 @@ RM=		/usr/bin/rm -f
 CUT=		/usr/bin/cut
 NM=		/usr/ccs/bin/nm
 DIFF=		/usr/bin/diff
+PATCH=		/usr/bin/patch
+REDIFF_COPY=	$(SRC)/tools/scripts/rediff_copy.sh
+REDIFF_MOD=	$(SRC)/tools/scripts/rediff_mod.sh
+SCM_ADD=	$(SRC)/tools/scripts/scm_add.sh
 GREP=		/usr/bin/grep
 EGREP=		/usr/bin/egrep
 ELFWRAP=	/usr/bin/elfwrap

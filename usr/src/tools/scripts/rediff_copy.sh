@@ -1,3 +1,4 @@
+#!/bin/sh
 #
 # CDDL HEADER START
 #
@@ -18,42 +19,32 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+#
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-include ../Makefile.lib
+function usage {
+	prog="$(basename "$0")"
+	>&2 echo \
+"Usage: $0 <contrib file> <illumos-src-file>
 
-HDR =		dns_sd.h
-HDRDIR =	common
-SUBDIRS	=	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+	Run to confirm that the input files are identical.
 
-all := 		TARGET = all
-clean :=	TARGET = clean
-clobber :=	TARGET = clobber
-install	:=	TARGET = install
-lint	:= 	TARGET = lint
+	e.g., $prog path/to/dns-sd.1 path/to/dns-sd.1m
+"
+	exit 1
+}
 
-.KEEP_STATE:
+if [ $# -ne 2 ]; then
+	usage
+fi
 
-all install: install_h $(SUBDIRS) .WAIT java
+# affirm that the input files exist
+ls "$1" > /dev/null && ls "$2" > /dev/null || exit 2
 
-clean clobber: $(SUBDIRS) java
-
-ROOTHDRDIR=	$(ROOT)/usr/include
-ROOTHDRS=	$(HDR:%=$(ROOTHDRDIR)/%)
-
-install_h:	common .WAIT $(ROOTHDRS)
-
-check:
-
-lint: $(SUBDIRS)
-
-$(SUBDIRS) common java: FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
-
-include ../Makefile.targ
+# affirm that the input files are identical, or else show diffs
+diff "$1" "$2"
+if [ $? -ne 0 ]; then
+	>&2 echo "ERROR: an unexpected diff exists between $1 and $2"
+	exit 2
+fi
