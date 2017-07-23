@@ -113,7 +113,7 @@
              err = mStatus_NoError;
          }
      }
-@@ -1413,7 +1442,7 @@ mDNSexport int mDNSPlatformMemCmp(const 
+@@ -1413,7 +1442,7 @@ mDNSexport int mDNSPlatformMemCmp(const
  
  mDNSexport void mDNSPlatformQsort(void *base, int nel, int width, int (*compar)(const void *, const void *))
  {

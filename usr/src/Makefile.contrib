@@ -18,42 +18,40 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+#
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-include ../Makefile.lib
+include Makefile.master
 
-HDR =		dns_sd.h
-HDRDIR =	common
-SUBDIRS	=	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+TARGET =		transform
+clean:=			TARGET= clean
+clobber:=		TARGET= clobber
+rediff:=		TARGET= rediff
+rediff_dns_sd:=		TARGET= rediff
+recontrib:=		TARGET= recontrib
+recontrib_dns_sd:=	TARGET= recontrib
 
-all := 		TARGET = all
-clean :=	TARGET = clean
-clobber :=	TARGET = clobber
-install	:=	TARGET = install
-lint	:= 	TARGET = lint
+SRC_MDNS_SUBDIRS =	lib/libdns_sd/common \
+    lib/libdns_sd/java/com/apple/dnssd/docs/examples/src \
+    lib/libdns_sd/java/com/apple/dnssd \
+    lib/libdns_sd/java/common \
+    cmd/cmd-inet/usr.bin/dns-sd \
+    cmd/cmd-inet/usr.lib/mdnsd \
+    man/man1m
+SRC_CONTRIB_SUBDIRS =	$(SRC_MDNS_SUBDIRS)
 
-.KEEP_STATE:
+transform:	transform_dns_sd
 
-all install: install_h $(SUBDIRS) .WAIT java
+rediff:	rediff_dns_sd
 
-clean clobber: $(SUBDIRS) java
+recontrib:	recontrib_dns_sd
 
-ROOTHDRDIR=	$(ROOT)/usr/include
-ROOTHDRS=	$(HDR:%=$(ROOTHDRDIR)/%)
+transform_dns_sd rediff_dns_sd recontrib_dns_sd:	$(SRC_MDNS_SUBDIRS)
 
-install_h:	common .WAIT $(ROOTHDRS)
+clean clobber:	$(SRC_CONTRIB_SUBDIRS)
 
-check:
-
-lint: $(SUBDIRS)
-
-$(SUBDIRS) common java: FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
+$(SRC_CONTRIB_SUBDIRS):	FRC
+	cd $@ && $(MAKE) $(TARGET)
 
 FRC:
-
-include ../Makefile.targ

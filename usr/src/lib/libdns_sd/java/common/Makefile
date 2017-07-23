@@ -18,42 +18,37 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+#
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-include ../Makefile.lib
+include         $(SRC)/lib/Makefile.lib
 
-HDR =		dns_sd.h
-HDRDIR =	common
-SUBDIRS	=	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+# mDNSResponder source code files
+SRC_JAVA =	$(SRC)/contrib/mDNSResponder/mDNSShared/Java
+SRC_JAVA_MODFILES +=	JNISupport.c
 
-all := 		TARGET = all
-clean :=	TARGET = clean
-clobber :=	TARGET = clobber
-install	:=	TARGET = install
-lint	:= 	TARGET = lint
+CLOBBERFILES +=	$(SRC_JAVA_MODFILES)
 
 .KEEP_STATE:
 
-all install: install_h $(SUBDIRS) .WAIT java
+all install:	transform
 
-clean clobber: $(SUBDIRS) java
+clean:
 
-ROOTHDRDIR=	$(ROOT)/usr/include
-ROOTHDRS=	$(HDR:%=$(ROOTHDRDIR)/%)
+clobber:	clean
+	$(RM) $(CLOBBERFILES)
 
-install_h:	common .WAIT $(ROOTHDRS)
+# mDNSResponder transformation targets
+transform:	$(SRC_JAVA_MODFILES)
 
-check:
+rediff:
+	for f in $(SRC_JAVA_MODFILES); do \
+		$(REDIFF_MOD) -p $(SRC_JAVA)/"$$f" "$$f"; \
+	done
 
-lint: $(SUBDIRS)
+recontrib:
+	$(SCM_ADD) $(SRC_JAVA_MODFILES:%=$(SRC_JAVA)/%)
 
-$(SUBDIRS) common java: FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
-
-include ../Makefile.targ
+$(SRC_JAVA_MODFILES):	$(SRC_JAVA)/$$@ $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_JAVA)/$@

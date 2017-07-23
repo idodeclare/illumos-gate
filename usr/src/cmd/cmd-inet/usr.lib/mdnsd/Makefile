@@ -21,10 +21,37 @@
 # Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 PROG=		mdnsd
 MANIFEST=	multicast.xml
+
+# mDNSResponder source code files
+SRC_MDNSCORE =	$(SRC)/contrib/mDNSResponder/mDNSCore
+SRC_MDNSCORE_COPYFILES +=	anonymous.c anonymous.h CryptoAlg.c \
+    CryptoAlg.h DNSCommon.h DNSDigest.c dnssec.h nsec.h uDNS.h
+SRC_MDNSCORE_MODFILES +=	DNSCommon.c mDNS.c mDNSDebug.h \
+    mDNSEmbeddedAPI.h uDNS.c
+SRC_MDNSCORE_FILES +=	$(SRC_MDNSCORE_COPYFILES) $(SRC_MDNSCORE_MODFILES)
+
+SRC_MDNSPOSIX =	$(SRC)/contrib/mDNSResponder/mDNSPosix
+SRC_MDNSPOSIX_COPYFILES +=	mDNSPosix.h mDNSUNP.h
+SRC_MDNSPOSIX_MODFILES +=	mDNSPosix.c mDNSUNP.c PosixDaemon.c
+SRC_MDNSPOSIX_FILES +=	$(SRC_MDNSPOSIX_COPYFILES) \
+    $(SRC_MDNSPOSIX_MODFILES)
+
+SRC_MDNSSHARED =	$(SRC)/contrib/mDNSResponder/mDNSShared
+SRC_MDNSSHARED_COPYFILES +=	GenLinkedList.c GenLinkedList.h \
+    mDNSDebug.c PlatformCommon.h uds_daemon.h
+SRC_MDNSSHARED_MODFILES +=	PlatformCommon.c uds_daemon.c
+SRC_MDNSSHARED_FILES +=	$(SRC_MDNSSHARED_COPYFILES) \
+    $(SRC_MDNSSHARED_MODFILES)
+
+SRC_MDNS_FILES +=	$(SRC_MDNSCORE_FILES)  $(SRC_MDNSPOSIX_FILES) \
+    $(SRC_MDNSSHARED_FILES)
+
+CLOBBERFILES +=	$(SRC_MDNS_FILES)
 
 CMN_DIR=	$(SRC)/lib/libdns_sd/common
 CMN_OBJS=	dnssd_ipc.o
@@ -62,7 +89,7 @@ $(ROOTMANIFEST)		:= FILEMODE= 444
 
 all:	$(PROG)
 
-$(PROG): $(OBJS)
+$(PROG):	transform .WAIT $(OBJS)
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
@@ -86,6 +113,52 @@ clean:
 lint:		lint_SRCS
 
 include ../../../Makefile.targ
+
+# mDNSResponder transformation targets
+transform:	$(SRC_MDNS_FILES)
+
+rediff:
+	for f in $(SRC_MDNSCORE_COPYFILES); do \
+		$(REDIFF_COPY) $(SRC_MDNSCORE)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_MDNSCORE_MODFILES); do \
+		$(REDIFF_MOD) -p $(SRC_MDNSCORE)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_MDNSPOSIX_COPYFILES); do \
+		$(REDIFF_COPY) $(SRC_MDNSPOSIX)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_MDNSPOSIX_MODFILES); do \
+		$(REDIFF_MOD) -p $(SRC_MDNSPOSIX)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_MDNSSHARED_COPYFILES); do \
+		$(REDIFF_COPY) $(SRC_MDNSSHARED)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_MDNSSHARED_MODFILES); do \
+		$(REDIFF_MOD) -p $(SRC_MDNSSHARED)/"$$f" "$$f"; \
+	done
+
+recontrib:
+	$(SCM_ADD) $(SRC_MDNSCORE_FILES:%=$(SRC_MDNSCORE)/%) \
+	    $(SRC_MDNSPOSIX_FILES:%=$(SRC_MDNSPOSIX)/%) \
+	    $(SRC_MDNSSHARED_FILES:%=$(SRC_MDNSSHARED)/%)
+
+$(SRC_MDNSCORE_COPYFILES):	$(SRC_MDNSCORE)/$$@
+	$(CP) $(SRC_MDNSCORE)/$@ $@
+
+$(SRC_MDNSCORE_MODFILES):	$(SRC_MDNSCORE)/$$@ $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_MDNSCORE)/$@
+
+$(SRC_MDNSPOSIX_COPYFILES):	$(SRC_MDNSPOSIX)/$$@
+	$(CP) $(SRC_MDNSPOSIX)/$@ $@
+
+$(SRC_MDNSPOSIX_MODFILES):	$(SRC_MDNSPOSIX)/$$@ $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_MDNSPOSIX)/$@
+
+$(SRC_MDNSSHARED_COPYFILES):	$(SRC_MDNSSHARED)/$$@
+	$(CP) $(SRC_MDNSSHARED)/$@ $@
+
+$(SRC_MDNSSHARED_MODFILES):	$(SRC_MDNSSHARED)/$$@ $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_MDNSSHARED)/$@
 
 .DONE :
 	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

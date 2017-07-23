@@ -11,11 +11,20 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 # cmd/cmd-inet/usr.bin/dns-sd/Makefile
 
 PROG=		dns-sd
+
+# mDNSResponder source code files
+SRC_CLIENTS =	$(SRC)/contrib/mDNSResponder/Clients
+SRC_CLIENTS_COPYFILES +=	ClientCommon.c ClientCommon.h
+SRC_CLIENTS_MODFILES +=	dns-sd.c
+SRC_CLIENTS_FILES +=	$(SRC_CLIENTS_COPYFILES) $(SRC_CLIENTS_MODFILES)
+
+CLOBBERFILES +=	$(SRC_CLIENTS_FILES)
 
 include ../../../Makefile.cmd
 include ../../Makefile.cmd-inet
@@ -33,7 +42,7 @@ all: $(PROG)
 
 ROOTPROG=   $(PROG:%=$(ROOTBIN)/%)
 
-$(PROG): $(OBJS)
+$(PROG):	transform .WAIT $(OBJS)
 	$(LINK.c) $(OBJS) -o $@ $(LDLIBS)
 	$(POST_PROCESS)
 
@@ -45,6 +54,26 @@ clean:
 lint:  lint_SRCS
 
 include ../../../Makefile.targ
+
+# mDNSResponder transformation targets
+transform:	$(SRC_CLIENTS_FILES)
+
+rediff:
+	for f in $(SRC_CLIENTS_COPYFILES); do \
+		$(REDIFF_COPY) $(SRC_CLIENTS)/"$$f" "$$f"; \
+	done
+	for f in $(SRC_CLIENTS_MODFILES); do \
+		$(REDIFF_MOD) -p $(SRC_CLIENTS)/"$$f" "$$f"; \
+	done
+
+recontrib:
+	$(SCM_ADD) $(SRC_CLIENTS_FILES:%=$(SRC_CLIENTS)/%)
+
+$(SRC_CLIENTS_COPYFILES):	$(SRC_CLIENTS)/$$@
+	$(CP) $(SRC_CLIENTS)/$@ $@
+
+$(SRC_CLIENTS_MODFILES):	$(SRC_CLIENTS)/$$@ $$@.patch
+	$(PATCH) -s -o $@ < $@.patch $(SRC_CLIENTS)/$@
 
 .DONE :
 	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

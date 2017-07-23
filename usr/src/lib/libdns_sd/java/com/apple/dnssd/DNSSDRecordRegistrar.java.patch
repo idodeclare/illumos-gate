@@ -1,7 +1,7 @@
 # illumos revision
 --- usr/src/contrib/mDNSResponder/mDNSShared/Java/DNSSDRecordRegistrar.java	2017-07-24 09:23:31.000000000 -0500
 +++ usr/src/lib/libdns_sd/java/com/apple/dnssd/DNSSDRecordRegistrar.java	2017-07-24 09:23:39.000000000 -0500
-@@ -43,15 +43,12 @@
+@@ -43,15 +43,12 @@ public interface	DNSSDRecordRegistrar ex
  					The class of the resource record, as defined in nameser.h
  					(usually 1 for the Internet class).
  		<P>

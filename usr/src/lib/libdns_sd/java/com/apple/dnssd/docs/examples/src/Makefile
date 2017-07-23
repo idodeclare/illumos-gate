@@ -18,42 +18,39 @@
 #
 # CDDL HEADER END
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
+#
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
-include ../Makefile.lib
+include         $(SRC)/lib/Makefile.lib
 
-HDR =		dns_sd.h
-HDRDIR =	common
-SUBDIRS	=	$(MACH)
-$(BUILD64)SUBDIRS += $(MACH64)
+# mDNSResponder source code files
+SRC_JAVA =	$(SRC)/contrib/mDNSResponder/Clients/Java
+SRC_JAVA_COPYFILES +=	BrowserApp.java BrowserApp.manifest \
+    SimpleChat.java SimpleChat.manifest SwingBrowseListener.java \
+    SwingDomainListener.java SwingQueryListener.java
 
-all := 		TARGET = all
-clean :=	TARGET = clean
-clobber :=	TARGET = clobber
-install	:=	TARGET = install
-lint	:= 	TARGET = lint
+CLOBBERFILES +=	$(SRC_JAVA_COPYFILES)
 
 .KEEP_STATE:
 
-all install: install_h $(SUBDIRS) .WAIT java
+all install:	transform
 
-clean clobber: $(SUBDIRS) java
+clean:
 
-ROOTHDRDIR=	$(ROOT)/usr/include
-ROOTHDRS=	$(HDR:%=$(ROOTHDRDIR)/%)
+clobber:	clean
+	$(RM) $(CLOBBERFILES)
 
-install_h:	common .WAIT $(ROOTHDRS)
+# mDNSResponder transformation targets
+transform:	$(SRC_JAVA_COPYFILES)
 
-check:
+rediff:
+	for f in $(SRC_JAVA_COPYFILES); do \
+		$(REDIFF_COPY) $(SRC_JAVA)/"$$f" "$$f"; \
+	done
 
-lint: $(SUBDIRS)
+recontrib:
+	$(SCM_ADD) $(SRC_JAVA_COPYFILES:%=$(SRC_JAVA)/%)
 
-$(SUBDIRS) common java: FRC
-	@cd $@; pwd; $(MAKE) $(TARGET)
-
-FRC:
-
-include ../Makefile.targ
+$(SRC_JAVA_COPYFILES):	$(SRC_JAVA)/$$@
+	$(CP) $(SRC_JAVA)/$@ $@
