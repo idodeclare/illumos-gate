@@ -1,0 +1,101 @@
+#
+# CDDL HEADER START
+#
+# The contents of this file are subject to the terms of the
+# Common Development and Distribution License (the "License").
+# You may not use this file except in compliance with the License.
+#
+# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
+# or http://www.opensolaris.org/os/licensing.
+# See the License for the specific language governing permissions
+# and limitations under the License.
+#
+# When distributing Covered Code, include this CDDL HEADER in each
+# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
+# If applicable, add the following below this CDDL HEADER, with the
+# fields enclosed by brackets "[]" replaced with your own identifying
+# information: Portions Copyright [yyyy] [name of copyright owner]
+#
+# CDDL HEADER END
+#
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
+#
+
+contrib/mDNSResponder
+=====================
+
+Multicast DNS and Service Discovery support in illumos is provided using
+the Apple Bonjour source code.
+
+Importing a new version of mDNSResponder
+----------------------------------------
+
+1. Download a new tarball from Apple
+http://developer.apple.com/networking/bonjour/download/ and extract to a
+temporary directory e.g. /tmp/mDNSResponder-765.50.9.
+
+Extracting to a temporary directory and then using cp helps avoid copying
+some (but not all) dot files (e.g., .gitignore) contained in the tarball.
+
+2. Copy the new files into illumos src:
+
+    $ cp /tmp/mDNSResponder-765.50.9/* contrib/mDNSResponder/
+
+3. Add to SCM the source files used by dns_sd in illumos. By using the
+following make target, only the explicitly used contrib source files will
+be added to SCM, leaving out unneeded source such as Apple's "mDNSWindows"
+and "mDNSVxWorks" implementations:
+
+    $ make -f Makefile.contrib recontrib_dns_sd
+
+4. Run the following make target to test the current patches against the
+new source:
+
+    $ make -f Makefile.contrib transform_dns_sd
+
+5. Handle any patch rejects by either adding the rejected changes manually
+with any necessary revisions or by deciding the rejected changes can be
+ignored.
+
+Use the following to find and inspect the rejects:
+
+    $ find . -name '*.rej' | xargs less
+
+Edit the (non-contrib) transformed files directly to incorporate any
+rejected changes.
+
+6. Build illumos, and work if necessary to get a successful build by making
+any necessary, additional revisions.
+
+7. Re-diff the illumos dns_sd source to the contrib/mDNSResponder source to
+affirm that files indicated in dns_sd Makefiles as simple copies are still
+identical to Apple source and that files indicated as patched versions have
+patches successfully generated:
+
+    $ make -f Makefile.contrib rediff_dns_sd
+
+If a source file must be newly patched to build with the latest version,
+rediff_dns_sd will fail because the source file is indicated in the
+appropriate Makefile to be a simple copy. Edit the Makefile to shift the
+file from a COPY group to a MOD group (e.g., from SRC_MDNSSHARED_COPYFILES
+to SRC_MDNSSHARED_MODFILES in lib/libdns_sd/common/Makefile).
+
+If a source file no longer needs to be patched to build with the latest
+version, rediff_dns_sd will fail. Edit the appropriate Makefile to shift
+the file from a MOD group to a COPY group. Furthermore, remove the
+formerly-needed patch from source control.
+
+Re-run rediff_dns_sd after any revisions, and confirm its success.
+
+8. Add any new patches created by rediff_dns_sd to source control.
+
+9. If any new Apple files are needed by illumos dns_sd, then edit the
+appropriate Makefile to add to either a COPY or MOD group, and run
+recontrib_dns_sd, transform_dns_sd, and rediff_dns_sd as described above.
+
+10. Commit all revised Makefiles and patches, and confirm a successful
+illumos build. (At the moment, there is no other illumos C "glue" code for
+dns_sd that should have to be committed.)
+
+10. Lastly, clean the working directory fully (e.g., using git-clean), and
+re-run the build with full lint to confirm its success.
