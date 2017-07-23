@@ -86,3 +86,6 @@ putback:
 	-cstyle -p labelit.c
 	-keywords labelit.c
 	-keywords Makefile
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

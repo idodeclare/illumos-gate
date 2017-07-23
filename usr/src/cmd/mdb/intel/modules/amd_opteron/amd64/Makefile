@@ -38,3 +38,7 @@ CPPFLAGS += -I$(SRC)/uts/intel
 CPPFLAGS += -I$(SRC)/uts/i86pc
 
 CERRWARN += -_gcc=-Wno-uninitialized
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

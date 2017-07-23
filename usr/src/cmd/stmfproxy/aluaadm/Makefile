@@ -78,3 +78,6 @@ cmdparse.o: $(COMMONBASE)/cmdparse/cmdparse.c
 lint:	lint_SRCS
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

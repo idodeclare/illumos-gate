@@ -50,3 +50,7 @@ CPPFLAGS += -I$(UTILDIR) -I$(BRDIR)
 
 %.ln: $(UTILDIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

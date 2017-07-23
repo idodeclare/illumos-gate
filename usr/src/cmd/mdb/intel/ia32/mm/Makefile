@@ -22,3 +22,7 @@ MODSRCS = mm.c
 include ../../../../Makefile.cmd
 include ../../Makefile.ia32
 include ../../../Makefile.module
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

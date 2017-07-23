@@ -216,3 +216,6 @@ clobber: clean
 	$(RM) $(CLOBBERFILES)
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

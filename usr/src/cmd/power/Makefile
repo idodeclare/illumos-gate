@@ -147,3 +147,7 @@ cstyle:
 	cat $< > $@
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(POFILE) $(POFILES) \
+	    $(POWERCONF) $(PROG)

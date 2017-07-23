@@ -36,3 +36,7 @@ include ../../Makefile.lib.64
 amd64_C_PICFLAGS = $(amd64_C_BIGPICFLAGS)
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

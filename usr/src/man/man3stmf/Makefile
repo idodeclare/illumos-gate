@@ -72,3 +72,6 @@ stmfGetLuProp.3stmf		:= LINKSRC = stmfSetLuProp.3stmf
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

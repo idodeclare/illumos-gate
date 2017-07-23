@@ -156,3 +156,6 @@ clobber: clean
 
 lint:	$(SUBDIRS)
 	$(LINT.c) $(SRCS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG) $(SHFILE1)

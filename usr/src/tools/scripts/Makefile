@@ -177,3 +177,5 @@ nightly: nightly.sh stdenv.sh
 
 include ../Makefile.targ
 
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

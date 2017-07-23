@@ -54,3 +54,6 @@ $(PROG): $(OBJS)
 include ../../Makefile.targ
 
 install: all .WAIT $(ROOTUSRSBINPROG)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -17,3 +17,6 @@ PROG = dir_rd_update
 
 include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS) $(PROG)

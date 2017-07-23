@@ -47,3 +47,7 @@ include ../../../Makefile.targ
 
 # append this value late after all include statements
 CLEANFILES +=	ao_gendisp.pl
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES) \
+	    $(PERLFILES)

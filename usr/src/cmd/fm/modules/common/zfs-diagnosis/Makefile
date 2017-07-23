@@ -31,3 +31,7 @@ include ../../Makefile.plugin
 
 LDLIBS += -L$(ROOTLIB)/fm -luutil -lzfs -ltopo
 LDFLAGS += -R/usr/lib/fm
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINTFILES) $(OBJS) $(PROG)

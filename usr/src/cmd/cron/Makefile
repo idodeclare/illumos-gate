@@ -229,3 +229,6 @@ strip :
 		$(STRIP) $(PROG) $(XPG4) $(XPG6)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -33,3 +33,7 @@ CPPFLAGS += -_gcc=-Wno-pointer-to-int-cast -_gcc=-Wno-int-to-pointer-cast
 all: $(LIBS)
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

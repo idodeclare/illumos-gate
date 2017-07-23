@@ -69,3 +69,6 @@ clean:
 lint:	lint_SRCS
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG) $(RMOBJ) $(XPG4RMOBJ)

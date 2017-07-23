@@ -19,3 +19,6 @@ CFLAGS +=	-march=i386 -m32 -fno-reorder-functions
 CFLAGS +=	-mpreferred-stack-boundary=2
 
 MACHINE=	$(MACH)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS)

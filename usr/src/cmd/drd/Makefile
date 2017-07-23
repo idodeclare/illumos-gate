@@ -94,3 +94,6 @@ clean:
 
 include ../Makefile.targ
 include ../../Makefile.psm.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINT_FILES) $(OBJS) $(PROG)

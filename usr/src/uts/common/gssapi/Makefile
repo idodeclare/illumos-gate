@@ -97,3 +97,6 @@ clean:
 	$(RM) $(DERIVED_FILES)
 
 clobber: clean
+
+.DONE :
+	$(MAKE_GITIGNORE) $(DERIVED_FILES)

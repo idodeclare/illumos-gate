@@ -20,3 +20,6 @@ include $(SRC)/cmd/Makefile.cmd
 LDLIBS += -lnvpair
 
 include ../Makefile.subdirs
+
+.DONE :
+	$(MAKE_GITIGNORE) $(OBJS) $(PROG)

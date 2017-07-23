@@ -56,3 +56,6 @@ install: all $(ROOTPYFILES)
 clean:
 
 clobber: clean pyclobber
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERDIRS) $(CLOBBERFILES)

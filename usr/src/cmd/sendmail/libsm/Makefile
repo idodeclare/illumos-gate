@@ -80,3 +80,6 @@ t-%:	t-%.c
 	./$@
 
 include		../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG) $(TESTS) $(libsm)

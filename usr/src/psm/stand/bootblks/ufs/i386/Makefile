@@ -73,3 +73,6 @@ clean:
 
 clobber: clean
 	$(RM) $(PROGS) $(INSTALLBOOT)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(INSTALLBOOT) $(PROGS)

@@ -46,3 +46,6 @@ lint:		lint_PROG
 
 $(ROOTUSRSBIN)/$(LIBPROG):
 		-$(RM) $@; $(SYMLINK) $(LINKVALUE) $@
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

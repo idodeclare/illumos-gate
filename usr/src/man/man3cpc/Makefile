@@ -157,3 +157,6 @@ pctx_run.3cpc				:= LINKSRC = pctx_capture.3cpc
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

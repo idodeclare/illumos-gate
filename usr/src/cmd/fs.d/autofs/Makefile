@@ -218,3 +218,6 @@ clean:	clean_dump
 	$(RM) $(OBJS) $(CLEANFILES)
 
 check:	$(CHKMANIFEST)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

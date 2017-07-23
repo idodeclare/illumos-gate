@@ -65,3 +65,6 @@ generic.po: FRC
 
 $(MSGDOMAIN):
 	$(INS.dir)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES)

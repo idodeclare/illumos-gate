@@ -34,3 +34,6 @@ all: $(PROG)
 install: all $(ROOTPROG64)
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

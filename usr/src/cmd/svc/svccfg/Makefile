@@ -177,3 +177,6 @@ lint: $(LNTS)
 include ../../Makefile.targ
 
 FRC:
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LNTS) $(MYOBJS) $(PROG)

@@ -39,3 +39,6 @@ install:	all $(ROOTPROG) $(ROOTCCSBINLINK)
 lint:		$(LINTOUT32) $(SGSLINTOUT)
 
 include		../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

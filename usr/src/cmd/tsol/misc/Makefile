@@ -51,3 +51,6 @@ lint:
 _msg:
 
 include ../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ETCTSOLFILES) $(PROG) $(SCRIPT)

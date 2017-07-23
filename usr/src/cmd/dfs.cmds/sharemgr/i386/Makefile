@@ -28,3 +28,6 @@
 include ../Makefile.com
 
 $(SHAREMGR64)install: $(ROOTUSRSBINPROG32) ; $(LN_ISAEXEC)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

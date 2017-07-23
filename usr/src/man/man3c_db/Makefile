@@ -117,3 +117,6 @@ td_thr_sigsetmask.3c_db		:= LINKSRC = td_thr_setsigpending.3c_db
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

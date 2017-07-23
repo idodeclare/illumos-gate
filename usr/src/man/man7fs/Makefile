@@ -48,3 +48,6 @@ stdout.7fs	:= LINKSRC = fd.7fs
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

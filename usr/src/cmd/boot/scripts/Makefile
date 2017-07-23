@@ -27,3 +27,6 @@
 include $(SRC)/Makefile.master
 
 include Makefile.$(MACH)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(BOOTPROG) $(CLOBBERFILES) $(METHODPROG) $(PROG)

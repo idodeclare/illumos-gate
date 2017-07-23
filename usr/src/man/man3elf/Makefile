@@ -188,3 +188,6 @@ gelf_xlatetom.3elf		:= LINKSRC = gelf.3elf
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE :
+	$(MAKE_GITIGNORE) $(MANLINKS)

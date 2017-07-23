@@ -36,3 +36,6 @@ install: all $(ROOTPROG64)
 	$(INSTALL.ksh.64bit)
 
 include ../../Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJECTS) $(PROG)

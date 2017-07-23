@@ -73,3 +73,7 @@ $(PROG).po: $(PROG) $(ATTR) $(AGETTEXT)
 lint:
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE :
+	$(MAKE_GITIGNORE) $(AGETTEXT) $(ATTR) $(CLOBBERFILES) $(PROG) \
+	    $(STRIPTEXT)

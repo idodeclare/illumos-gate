@@ -27,3 +27,7 @@ ISASRCDIR =	.
 include ../Makefile.com
 
 install: all
+
+.DONE :
+	$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)
