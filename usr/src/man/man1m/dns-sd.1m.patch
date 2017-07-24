@@ -1,0 +1,283 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSShared/dns-sd.1	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/man/man1m/dns-sd.1m	2017-07-24 09:23:51.000000000 -0500
+@@ -14,34 +14,46 @@
+ .\" See the License for the specific language governing permissions and
+ .\" limitations under the License.
+ .\"
+-.Dd April 2004              \" Date
+-.Dt dns-sd 1                \" Document Title
+-.Os Darwin                  \" Operating System
++.\" Copyright 2016 Toomas Soome <tsoome@me.com>
++.\"
++.Dd Jan 28, 2016            \" Date
++.Dt DNS-SD 1M               \" Document Title
++.Os illumos                 \" Operating System
+ .\"
+ .Sh NAME
+ .Nm dns-sd
+ .Nd Multicast DNS (mDNS) & DNS Service Discovery (DNS-SD) Test Tool \" For whatis
+ .\"
+ .Sh SYNOPSIS
+-.Nm Fl E
++.Nm
++.Op Fl E
+ .Pp
+-.Nm Fl F
++.Nm
++.Op Fl F
+ .Pp
+-.Nm Fl R Ar name type domain port Op Ar key=value ...
++.Nm
++.Op Fl R Ar name type domain port Op Ar key=value ...
+ .Pp
+-.Nm Fl B Ar      type domain
++.Nm
++.Op Fl B Ar      type domain
+ .Pp
+-.Nm Fl L Ar name type domain
++.Nm
++.Op Fl L Ar name type domain
+ .Pp
+-.Nm Fl P Ar name type domain port host IP Op Ar key=value ...
++.Nm
++.Op Fl P Ar name type domain port host IP Op Ar key=value ...
+ .Pp
+-.Nm Fl q Ar name rrtype rrclass
++.Nm
++.Op Fl q Ar name rrtype rrclass
+ .Pp
+-.Nm Fl Z Ar      type domain
++.Nm
++.Op Fl Z Ar      type domain
+ .Pp
+-.Nm Fl G Ns \ v4/v6/v4v6 Ar      name
++.Nm
++.Op Fl G Ns \ v4/v6/v4v6 Ar      name
+ .Pp
+-.Nm Fl V
++.Nm
++.Op Fl V
+ .\"
+ .Sh DESCRIPTION
+ The
+@@ -67,18 +79,18 @@
+ .Nm
+ command is primarily intended for interactive use.
+ Because its command-line arguments and output format are subject to change,
+-invoking it from a shell script will generally be fragile. Additionally,
+-the asynchronous nature of DNS Service Discovery does
+-not lend itself easily to script-oriented programming. For example,
+-calls like "browse" never complete; the action of performing a "browse"
+-sets in motion machinery to notify the client whenever instances of
+-that service type appear or disappear from the network. These
+-notifications continue to be delivered indefinitely, for minutes,
++invoking it from a shell script will generally be fragile.
++Additionally, the asynchronous nature of DNS Service Discovery does
++not lend itself easily to script-oriented programming.
++For example, calls like "browse" never complete; the action of performing a
++"browse" sets in motion machinery to notify the client whenever instances of
++that service type appear or disappear from the network.
++These notifications continue to be delivered indefinitely, for minutes,
+ hours, or even days, as services come and go, until the client
+-explicitly terminates the call. This style of asynchronous interaction
+-works best with applications that are either multi-threaded, or use a
+-main event-handling loop to receive keystrokes, network data, and other
+-asynchronous event notifications as they happen.
++explicitly terminates the call.
++This style of asynchronous interaction works best with applications that are
++either multi-threaded, or use a main event-handling loop to receive keystrokes,
++network data, and other asynchronous event notifications as they happen.
+ .br
+ If you wish to perform DNS Service Discovery operations from a
+ scripting language, then the best way to do this is not to execute the
+@@ -91,18 +103,16 @@
+ .Pa <http://rubyforge.org/projects/dnssd/> .
+ .br
+ Similar bindings for other languages are also in development.
+-.Pp
+ .Bl -tag -width E
+ .It Nm Fl E
+ return a list of domains recommended for registering(advertising) services.
+-.Pp
+ .It Nm Fl F
+ return a list of domains recommended for browsing services.
+ .Pp
+-Normally, on your home network, the only domain you are likely to see is "local".
++Normally, on your home network, the only domain you are likely to see is
++"local".
+ However if your network administrator has created Domain Enumeration records,
+ then you may also see other recommended domains for registering and browsing.
+-.Pp
+ .It Nm Fl R Ar name type domain port Op Ar key=value ...
+ register (advertise) a service in the specified
+ .Ar domain
+@@ -125,8 +135,10 @@
+ .Ar domain
+ is the domain in which to register the service.
+ In current implementations, only the local multicast domain "local" is
+-supported. In the future, registering will be supported in any arbitrary
+-domain that has a working DNS Update server [RFC 2136]. The
++supported.
++In the future, registering will be supported in any arbitrary domain that has a
++working DNS Update server [RFC 2136].
++The
+ .Ar domain
+ "." is a synonym for "pick a sensible default" which today
+ means "local".
+@@ -137,8 +149,8 @@
+ .Pp
+ Additional attributes of the service may optionally be described by
+ key/value pairs, which are stored in the advertised service's DNS TXT
+-record. Allowable keys and values are listed with the service
+-registration at
++record.
++Allowable keys and values are listed with the service registration at
+ .Pa http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml .
+ .It Nm Fl B Ar type domain
+ browse for instances of service
+@@ -150,7 +162,8 @@
+ .Ar type Ns s
+ see
+ .Pa http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xml .
+-as described above. Omitting the
++as described above.
++Omitting the
+ .Ar domain
+ or using "." means "pick a sensible default."
+ .It Nm Fl L Ar name type domain
+@@ -159,42 +172,43 @@
+ available, the port number on which the service is listening, and (if
+ present) TXT record attributes describing properties of the service.
+ .Pp
+-Note that in a typical application, browsing may only happen rarely, while lookup
+-(or "resolving") happens every time the service is used. For example, a
+-user browses the network to pick a default printer fairly rarely, but once
+-a default printer has been picked, that named service is resolved to its
+-current IP address and port number every time the user presses Cmd-P to
++Note that in a typical application, browsing may only happen rarely, while
++lookup (or "resolving") happens every time the service is used.
++For example, a user browses the network to pick a default printer fairly rarely,
++but once a default printer has been picked, that named service is resolved to
++its current IP address and port number every time the user presses Cmd-P to
+ print.
+-.Pp
+ .It Nm Fl P Ar name type domain port host IP Op Ar key=value ...
+-create a proxy advertisement for a service running on(offered by) some other machine.
++create a proxy advertisement for a service running on(offered by) some other
++machine.
+ The two new options are Host, a name for the device and IP, the address of it.
+ .Pp
+-The service for which you create a proxy advertisement does not necessarily have to be on your local network.
++The service for which you create a proxy advertisement does not necessarily have
++to be on your local network.
+ You can set up a local proxy for a website on the Internet.
+-.Pp
+ .It Nm Fl q Ar name rrtype rrclass
+ look up any DNS name, resource record type, and resource record class,
+ not necessarily DNS-SD names and record types.
+ If rrtype is not specified, it queries for the IPv4 address of the name,
+-if rrclass is not specified, IN class is assumed. If the name is not a fully
+-qualified domain name, then search domains may be appended.
+-.Pp
++if rrclass is not specified, IN class is assumed.
++If the name is not a fully qualified domain name, then search domains may be
++appended.
+ .It Nm Fl Z Ar type domain
+ browse for service instances and display output in zone file format.
+-.Pp
+ .It Nm Fl G Ns \ v4/v6/v4v6 Ar name
+ look up the IP address information of the name.
+ If v4 is specified, the IPv4 address of the name is looked up,
+-if v6 is specified the IPv6 address is looked up. If v4v6 is specified both the IPv4 and IPv6
+-address is looked up. If the name is not a fully qualified domain name,
+-then search domains may be appended.
+-.Pp
++if v6 is specified the IPv6 address is looked up.
++If v4v6 is specified both the IPv4 and IPv6 address is looked up.
++If the name is not a fully qualified domain name, then search domains may be
++appended.
+ .It Nm Fl V
+ return the version of the currently running daemon/system service.
+ .El
++.Sh FILES
++.Pa /usr/bin/dns-sd \" Pathname
++.\"
+ .Sh EXAMPLES
+-.Pp
+ To advertise the existence of LPR printing service on port 515 on this
+ machine, such that it will be discovered by the Mac OS X printing software
+ and other DNS-SD compatible printing clients, use:
+@@ -202,9 +216,9 @@
+ .Dl Nm Fl R Ns \ \&"My Test\&" _printer._tcp. \&. 515 pdl=application/postscript
+ .Pp
+ For this registration to be useful, you need to actually have LPR service
+-available on port 515. Advertising a service that does not exist is not
+-very useful, and will be confusing and annoying to other people on the
+-network.
++available on port 515.
++Advertising a service that does not exist is not very useful, and will be
++confusing and annoying to other people on the network.
+ .Pp
+ Similarly, to advertise a web page being served by an HTTP
+ server on port 80 on this machine, such that it will show up in the
+@@ -222,21 +236,23 @@
+ example given above to advertise a web page, and you should see the
+ "Add" event reported to the
+ .Nm Fl B
+-window. Now press Ctrl-C in the
++window.
++Now press Ctrl-C in the
+ .Nm Fl R
+ window and you should see the "Remove" event reported to the
+ .Nm Fl B
+ window.
+ .Pp
+-In the example below, the www.apple.com web page is advertised as a service called "apple",
++In the example below, the www.apple.com web page is advertised as a service
++called "apple",
+ running on a target host called apple.local, which resolves to 17.149.160.49.
+ .Pp
+ .Dl Nm Fl P Ns \ apple _http._tcp \&"\&"\& 80 apple.local 17.149.160.49
+ .Pp
+ The Bonjour menu in the Safari web browser will now show "apple".
+ The same IP address can be reached by entering apple.local in the web browser.
+-In either case, the request will be resolved to the IP address and browser will show
+-contents associated with www.apple.com.
++In either case, the request will be resolved to the IP address and browser will
++show contents associated with www.apple.com.
+ .Pp
+ If a client wants to be notified of changes in server state, it can
+ initiate a query for the service's particular record and leave it running.
+@@ -244,23 +260,16 @@
+ .Pp
+ .Dl Nm Fl q Ns \ someone@ex1._presence._tcp.local txt
+ .Pp
+-Everytime status of that user(someone) changes, you will see a new TXT record result reported.
++Everytime status of that user(someone) changes, you will see a new TXT record
++result reported.
+ .Pp
+ You can also query for a unicast name like www.apple.com and monitor its status.
+ .Pp
+ .Dl Nm Fl q Ns \ www.apple.com
+-.Pp
+-.Sh FILES
+-.Pa /usr/bin/dns-sd \" Pathname
+-.\"
++.Sh INTERFACE STABILITY
++.Sy Volatile .
+ .Sh SEE ALSO
+-.Xr mDNSResponder 8
+-.\"
+-.Sh BUGS
+-.Nm
+-bugs are tracked in Apple Radar component "mDNSResponder".
+-.\"
+-.Sh HISTORY
+-The
+-.Nm
+-command first appeared in Mac OS X 10.4 (Tiger).
++.Xr mdnsd 1M ,
++.Xr ping 1M ,
++.Xr traceroute 1M ,
++.Xr resolv.conf 4

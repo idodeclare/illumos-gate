@@ -1,0 +1,24 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/Clients/dns-sd.c	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/cmd/cmd-inet/usr.bin/dns-sd/dns-sd.c	2017-07-24 09:23:51.000000000 -0500
+@@ -1156,7 +1156,7 @@ static void DNSSD_API addrinfo_reply(DNS
+         const unsigned char       *b  = (const unsigned char *      )&s6->sin6_addr;
+         if (!if_indextoname(s6->sin6_scope_id, if_name))
+             snprintf(if_name, sizeof(if_name), "<%d>", s6->sin6_scope_id);
+-            snprintf(addr, sizeof(addr), "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X%%%s",
++        snprintf(addr, sizeof(addr), "%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X:%02X%02X%%%s",
+             b[0x0], b[0x1], b[0x2], b[0x3], b[0x4], b[0x5], b[0x6], b[0x7],
+             b[0x8], b[0x9], b[0xA], b[0xB], b[0xC], b[0xD], b[0xE], b[0xF], if_name);
+     }
+@@ -1779,7 +1779,11 @@ Fail:
+ 
+ // NOT static -- otherwise the compiler may optimize it out
+ // The "@(#) " pattern is a special prefix the "what" command looks for
++#ifndef MDNS_VERSIONSTR_NODTS
+ const char VersionString_SCCS[] = "@(#) dns-sd " STRINGIFY(mDNSResponderVersion) " (" __DATE__ " " __TIME__ ")";
++#else
++const char VersionString_SCCS[] = "@(#) dns-sd " STRINGIFY(mDNSResponderVersion);
++#endif
+ 
+ #if _BUILDING_XCODE_PROJECT_
+ // If the process crashes, then this string will be magically included in the automatically-generated crash log

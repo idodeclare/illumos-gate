@@ -1,0 +1,15 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSCore/mDNSDebug.h	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/cmd/cmd-inet/usr.lib/mdnsd/mDNSDebug.h	2017-07-24 09:23:47.000000000 -0500
+@@ -87,9 +87,9 @@ extern "C" {
+     #define MDNS_GNU_VA_ARGS            0
+     #define MDNS_HAS_VA_ARG_MACROS      1
+ #else
+-    #define MDNS_C99_VA_ARGS            0
++    #define MDNS_C99_VA_ARGS            1
+     #define MDNS_GNU_VA_ARGS            0
+-    #define MDNS_HAS_VA_ARG_MACROS      0
++    #define MDNS_HAS_VA_ARG_MACROS      1
+ #endif
+ 
+ #if (MDNS_HAS_VA_ARG_MACROS)

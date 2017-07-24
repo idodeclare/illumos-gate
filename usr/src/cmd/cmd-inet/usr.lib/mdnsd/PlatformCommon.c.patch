@@ -1,0 +1,18 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSShared/PlatformCommon.c	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/cmd/cmd-inet/usr.lib/mdnsd/PlatformCommon.c	2017-07-24 09:23:48.000000000 -0500
+@@ -64,8 +64,12 @@ mDNSexport void mDNSPlatformSourceAddrFo
+     }
+     else return;
+ 
+-    if ((connect(sock, &addr.s, inner_len)) < 0)
+-    { LogMsg("mDNSPlatformSourceAddrForDest: connect %#a failed errno %d (%s)", dst, errno, strerror(errno)); goto exit; }
++    if ((connect(sock, &addr.s, inner_len)) < 0) {
++	if (errno != ENETUNREACH)
++		LogMsg("mDNSPlatformSourceAddrForDest: connect %#a failed errno %d (%s)", dst, errno,
++		    strerror(errno));
++	goto exit;
++    }
+ 
+     if ((getsockname(sock, &addr.s, &len)) < 0)
+     { LogMsg("mDNSPlatformSourceAddrForDest: getsockname failed errno %d (%s)", errno, strerror(errno)); goto exit; }
