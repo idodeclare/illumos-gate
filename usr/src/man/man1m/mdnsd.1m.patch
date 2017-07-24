@@ -1,0 +1,133 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSShared/mDNSResponder.8	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/man/man1m/mdnsd.1m	2017-07-24 09:23:51.000000000 -0500
+@@ -14,12 +14,14 @@
+ .\" See the License for the specific language governing permissions and
+ .\" limitations under the License.
+ .\"
+-.Dd April 2004              \" Date
+-.Dt mDNSResponder 8         \" Document Title
+-.Os Darwin                  \" Operating System
++.\" Copyright 2016 Toomas Soome <tsoome@me.com>
++.\"
++.Dd Jan 28, 2016        \" Date
++.Dt MDNSD 1M            \" Document Title
++.Os illumos             \" Operating System
+ .\"
+ .Sh NAME
+-.Nm mDNSResponder
++.Nm mdnsd
+ .Nd Multicast and Unicast DNS daemon    \" Name Description for whatis database
+ .\"
+ .Sh SYNOPSIS
+@@ -28,12 +30,9 @@
+ .Sh DESCRIPTION
+ .Nm
+ (also known as
+-.Nm mdnsd
++.Nm mDNSResponder
+ on some systems)
+-is a daemon invoked at boot time to implement Multicast DNS and DNS Service Discovery. On
+-Mac OS X 10.6 (Snow Leopard),
+-.Nm
+-is also the system-wide Unicast DNS Resolver.
++is a daemon invoked at boot time to implement Multicast DNS and DNS Service Discovery.
+ .Pp
+ .Nm
+ listens on UDP port 5353 for Multicast DNS Query packets.
+@@ -49,10 +48,9 @@
+ has no user-specifiable command-line argument, and users should not run
+ .Nm
+ manually.
+-.Pp
+ .Sh LOGGING
+ There are several methods with which to examine
+-.Nm Ns 's internal state for debugging and diagnostic purposes. The syslog(1)
++.Nm Ns 's internal state for debugging and diagnostic purposes. The syslog(3C)
+ logging levels map as follows:
+ .Pp
+ .Dl Error - Error messages
+@@ -65,46 +63,19 @@
+ A SIGUSR1 signal toggles additional logging, with Warning and Notice
+ enabled by default:
+ .Pp
+-.Dl % sudo killall -USR1 mDNSResponder
+-.Pp
+-Once this logging is enabled, users can additionally use syslog(1)
+-to change the log filter for the process. For example, to enable log levels Emergency - Debug:
+-.Pp
+-.Dl % sudo syslog -c mDNSResponder -d
++.Dl % sudo pkill -USR1 mdnsd
+ .Pp
+ A SIGUSR2 signal toggles packet logging:
+ .Pp
+-.Dl % sudo killall -USR2 mDNSResponder
+-.Pp
+-A SIGINFO signal will dump a snapshot summary of the internal state to
+-.Pa /var/log/system.log Ns :
+-.Pp
+-.Dl % sudo killall -INFO mDNSResponder
+-.Sh OPTIONAL ARGUMENTS
+-.Nm
+-accepts the following optional arguments:
+-.Bl -tag -width "AlwaysAppendSearchDomains"
+-.It Fl AlwaysAppendSearchDomains
+-Append search domains for multi-labeled Partially Qualified Domain Name as well as single-labeled Partially Qualified Domain Name.
+-This argument is not recommended because of the extra DNS traffic it generates and its adverse effect on battery life.
+-.It Fl NoMulticastAdvertisements
+-Prevent the system from advertising Bonjour services via Multicast DNS.
+-.El
++.Dl % sudo pkill -USR2 mdnsd
+ .Pp
+-To cause
+-.Nm
+-to run with these optional arguments when it launches on OS X 10.11 (El Capitan) and later, set the
+-.Sy AlwaysAppendSearchDomains
+-or
+-.Sy NoMulticastAdvertisements
+-boolean keys to true in /Library/Preferences/com.apple.mDNSResponder.plist and reboot.
++A SIGINFO signal will dump a snapshot summary of the internal state:
+ .Pp
++.Dl % sudo pkill -INFO mdnsd
+ .Sh FILES
+-.Pa /usr/sbin/mDNSResponder
+-.Pa /Library/Preferences/com.apple.mDNSResponder.plist
+-.Pp
++.Pa /usr/lib/inet/mdnsd \" Pathname
++.\"
+ .Sh INFO
+-.Pp
+ For information on Multicast DNS, see
+ .Pa http://www.multicastdns.org/
+ .Pp
+@@ -119,17 +90,19 @@
+ .Nm , see
+ .Pa http://developer.apple.com/darwin/projects/bonjour/
+ .\"
+-.Sh BUGS
+-.Nm
+-bugs are tracked in Apple Radar component "mDNSResponder".
++.Sh INTERFACE STABILITY
++.Sy Volatile .
++.Sh SEE ALSO
++.Xr dns-sd 1M
+ .\"
+-.Sh HISTORY
++.Sh NOTES
+ The
+ .Nm
+-daemon first appeared in Mac OS X 10.2 (Jaguar).
+-.Pp
+-Also available from the Darwin open source repository
+-(though not officially supported by Apple) are
+-.Nm
+-daemons for other platforms, including Microsoft Windows,
+-Linux, FreeBSD, NetBSD, Solaris, and other POSIX systems.
++service is managed by the service management facility,
++\fBsmf\fR(5), under the service identifier:
++.sp
++.Dl svc:/network/dns/multicast:default
++.sp
++Administrative actions on this service, such as enabling, disabling, or
++requesting restart, can be performed using \fBsvcadm\fR(1M). The service's
++status can be queried using the \fBsvcs\fR(1) command.

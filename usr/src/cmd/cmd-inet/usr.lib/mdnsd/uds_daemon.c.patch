@@ -1,0 +1,38 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSShared/uds_daemon.c	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/cmd/cmd-inet/usr.lib/mdnsd/uds_daemon.c	2017-07-24 09:23:50.000000000 -0500
+@@ -1144,11 +1144,13 @@ mDNSlocal void regrecord_callback(mDNS *
+ // This accounts for 2 places (connect_callback, request_callback)
+ mDNSlocal void set_peer_pid(request_state *request)
+ {
++#ifdef LOCAL_PEERPID
+     pid_t           p    = (pid_t) -1;
+     socklen_t       len  = sizeof(p);
++
+     request->pid_name[0] = '\0';
+     request->process_id  = -1;
+-#ifdef LOCAL_PEERPID
++
+     if (request->sd < 0)
+         return;
+     // to extract the pid value
+@@ -1161,7 +1163,9 @@ mDNSlocal void set_peer_pid(request_stat
+     request->process_id = p;
+     debugf("set_peer_pid: Client PEERPID is %d %s", p, request->pid_name);
+ #else   // !LOCAL_PEERPID
+-    len = 0;
++    request->pid_name[0] = '\0';
++    request->process_id  = -1;
++
+     LogInfo("set_peer_pid: Not Supported on this version of OS");
+     if (request->sd < 0)
+         return;
+@@ -5131,7 +5135,7 @@ mDNSexport int udsserver_init(dnssd_sock
+         FILE *fp = fopen(PID_FILE, "w");
+         if (fp != NULL)
+         {
+-            fprintf(fp, "%d\n", getpid());
++            fprintf(fp, "%d\n", (int)getpid());
+             fclose(fp);
+         }
+     }

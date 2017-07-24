@@ -1,0 +1,19 @@
+# illumos revision
+--- usr/src/contrib/mDNSResponder/mDNSCore/DNSCommon.c	2017-07-24 09:23:31.000000000 -0500
++++ usr/src/cmd/cmd-inet/usr.lib/mdnsd/DNSCommon.c	2017-07-24 09:23:44.000000000 -0500
+@@ -3808,8 +3808,13 @@ mDNSexport mStatus mDNSSendDNSMessage(mD
+     SwapDNSHeaderBytes(msg);
+ 
+     // Dump the packet with the HINFO and TSIG
+-    if (mDNS_PacketLoggingEnabled && !mDNSOpaque16IsZero(msg->h.id))
+-        DumpPacket(m, status, mDNStrue, sock && (sock->flags & kTCPSocketFlags_UseTLS) ? "TLS" : sock ? "TCP" : "UDP", mDNSNULL, src ? src->port : MulticastDNSPort, dst, dstport, msg, end);
++    if (mDNS_PacketLoggingEnabled && !mDNSOpaque16IsZero(msg->h.id)) {
++	mDNSIPPort port = MulticastDNSPort;
++        DumpPacket(m, status, mDNStrue,
++	    sock && (sock->flags & kTCPSocketFlags_UseTLS) ?
++	    "TLS" : sock ? "TCP" : "UDP", mDNSNULL,
++	    src ? src->port : port, dst, dstport, msg, end);
++    }
+ 
+     // put the number of additionals back the way it was
+     msg->h.numAdditionals = numAdditionals;
