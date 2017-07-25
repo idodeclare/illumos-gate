@@ -38,9 +38,9 @@ Extracting to a temporary directory and then using cp helps avoid copying
 some (but not all) dot files (e.g., .gitignore) contained in the tarball.
 
 2. Remove all existing mDNSResponder code from the SCM. This is a temporary
-removal for source code that has been updated by Apple and will be added
-back in a later step, but the removal will leave permanently deleted any
-source code files which are no longer present in latest tarball.
+removal for source code that has been updated by Apple and which will be
+added back in a later step, but the removal will leave permanently deleted
+any source code files which are no longer present in latest tarball.
 
 E.g., for Git:
 
