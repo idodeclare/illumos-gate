@@ -37,23 +37,34 @@ temporary directory e.g. /tmp/mDNSResponder-765.50.9.
 Extracting to a temporary directory and then using cp helps avoid copying
 some (but not all) dot files (e.g., .gitignore) contained in the tarball.
 
-2. Copy the new files into illumos src:
+2. Remove all existing mDNSResponder code from the SCM. This is a temporary
+removal for source code that has been updated by Apple and will be added
+back in a later step, but the removal will leave permanently deleted any
+source code files which are no longer present in latest tarball.
+
+E.g., for Git:
+
+    $ git rm contrib/mDNSResponder/*
+    # Git may have also removed the directory, so recreate if necessary:
+    $ mkdir -p contrib/mDNSResponder
+
+3. Copy the new files into illumos src:
 
     $ cp /tmp/mDNSResponder-765.50.9/* contrib/mDNSResponder/
 
-3. Add to SCM the source files used by dns_sd in illumos. By using the
+4. Add to the SCM the source files used by dns_sd in illumos. By using the
 following make target, only the explicitly used contrib source files will
 be added to SCM, leaving out unneeded source such as Apple's "mDNSWindows"
 and "mDNSVxWorks" implementations:
 
     $ make -f Makefile.contrib recontrib_dns_sd
 
-4. Run the following make target to test the current patches against the
+5. Run the following make target to test the current patches against the
 new source:
 
     $ make -f Makefile.contrib transform_dns_sd
 
-5. Handle any patch rejects by either adding the rejected changes manually
+6. Handle any patch rejects by either adding the rejected changes manually
 with any necessary revisions or by deciding the rejected changes can be
 ignored.
 
@@ -64,10 +75,10 @@ Use the following to find and inspect the rejects:
 Edit the (non-contrib) transformed files directly to incorporate any
 rejected changes.
 
-6. Build illumos, and work if necessary to get a successful build by making
+7. Build illumos, and work if necessary to get a successful build by making
 any necessary, additional revisions.
 
-7. Re-diff the illumos dns_sd source to the contrib/mDNSResponder source to
+8. Re-diff the illumos dns_sd source to the contrib/mDNSResponder source to
 affirm that files indicated in dns_sd Makefiles as simple copies are still
 identical to Apple source and that files indicated as patched versions have
 patches successfully generated:
@@ -87,15 +98,18 @@ formerly-needed patch from source control.
 
 Re-run rediff_dns_sd after any revisions, and confirm its success.
 
-8. Add any new patches created by rediff_dns_sd to source control.
+9. Add any new patches created by rediff_dns_sd to source control.
 
-9. If any new Apple files are needed by illumos dns_sd, then edit the
+10. If any new Apple files are needed by illumos dns_sd, then edit the
 appropriate Makefile to add to either a COPY or MOD group, and run
 recontrib_dns_sd, transform_dns_sd, and rediff_dns_sd as described above.
 
-10. Commit all revised Makefiles and patches, and confirm a successful
+11. Commit all revised Makefiles and patches, and confirm a successful
 illumos build. (At the moment, there is no other illumos C "glue" code for
 dns_sd that should have to be committed.)
 
-10. Lastly, clean the working directory fully (e.g., using git-clean), and
+12. Lastly, clean the working directory fully (e.g., using git-clean), and
 re-run the build with full lint to confirm its success.
+
+(Testing the dns_sd services is outside the scope of this README but needs
+to be done at least after the first successful build.)
