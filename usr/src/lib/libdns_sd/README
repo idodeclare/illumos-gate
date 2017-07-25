@@ -1,7 +1,4 @@
 #
-# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
-# Use is subject to license terms.
-#
 # CDDL HEADER START
 #
 # The contents of this file are subject to the terms of the
@@ -21,36 +18,43 @@
 #
 # CDDL HEADER END
 #
-Updated from upstream version mDNSResponder-625.41.2
-Updated from upstream version mDNSResponder-576.30.4
+#
+# Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
+# Use is subject to license terms.
+# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
+#
 
-Multicast DNS and Service Discovery support in Solaris using the
-Apple Bonjour source code (v107.6). Apple Bonjour source can be 
-downloaded from: 
- 	http://developer.apple.com/networking/bonjour/download/
+Multicast DNS and Service Discovery support in illumos using the
+Apple Bonjour 32- and 64-bit capable source code (v625.41.2). Apple
+Bonjour source can be downloaded from:
+
+  https://opensource.apple.com/tarballs/mDNSResponder/
+
 The following components are integrated from the Apple Bonjour
-source in Solaris:
-  libdns_sd: 	usr/src/lib/libdns_sd <dns_sd.h>
-  libjdns_sd:   usr/src/lib/libdns_sd/java/common
-  dnssd.jar:    usr/src/lib/libdns_sd/java/com (incl. examples)
-  mdnsd:	usr/src/cmd/cmd-inet/usr.lib/mdnsd
-  dns-sd:	usr/src/cmd/cmd-inet/usr.bin/dns-sd.c
+source in illumos:
 
-Following fixes have been made to the Apple Bonjour source 
-integrated in Solaris:
-* 64-bit support by adding pad bytes in ipc_msg_hdr_struct
-* 64-bit support in libjdns_sd, dnssd.jar (JNISupport.c, DNSSD.java)
-* mdnsd switches to user 'noaccess' and not 'nobody' after init
+  libdns_sd:	usr/src/lib/libdns_sd <dns_sd.h>
+  libjdns_sd:	usr/src/lib/libdns_sd/java/common
+  dnssd.jar:	usr/src/lib/libdns_sd/java/com (incl. examples)
+  mdnsd:	usr/src/cmd/cmd-inet/usr.lib/mdnsd
+  dns-sd:	usr/src/cmd/cmd-inet/usr.bin/dns-sd
+
+Following fixes have been made to the Apple Bonjour source
+integrated in illumos:
+* mdnsd switches to user 'noaccess' and not 'nobody' after init (redefined
+  MDNSD_USER in mdnsd Makefile)
 * Fixes to support IPv6 (mDNSPosix.c, mDNSUNP.c)
+* Fix not to report ENETUNREACH as an error (PlatformCommon.c, mDNSPosix.c)
 * Fix error raised when uDNS.c is compiled with Sun Studio compiler
-* Fix in dnssd_clientstub.c to not check errno when recvmsg returns 0
-* mDNSDebug.c modified to not send msgs directly to console when 
+* Revise to use SIGINFO (not SIGUSR1) to dump state log, and to use
+  SIGUSR1 to toggle logging and SIGUSR2 to toggle packet logging
+* mDNSDebug.c modified to not send msgs directly to console when
   syslog call returns an error. Logs the messages at LOG_INFO level
   and not LOG_ERR
 
 In addition the project introduces the following changes:
-* A new nss_mdns module is introduced to use Multicast DNS (mdns) 
-  for resolving link-local hostnames and is located at: 
+* A new nss_mdns module is introduced to use Multicast DNS (mdns)
+  for resolving link-local hostnames and is located at:
     usr/src/lib/nsswitch/mdns
 * snoop updated to decode mDNS packets
 * updated /etc/services to include mdns
@@ -61,5 +65,5 @@ In addition the project introduces the following changes:
   Both authorizations added in network management execution profile.
 * Default nsswitch.dns includes mdns as source for hosts & ipnodes
 * nscd daemon updated to support mdns
-* SUNWdsdu and SUNWdsdr packages deliver all the new mDNS 
+* SUNWdsdu and SUNWdsdr packages deliver all the new mDNS
   service discovery components.
