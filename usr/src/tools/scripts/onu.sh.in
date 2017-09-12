@@ -41,6 +41,7 @@ usage()
 	echo "\t-r : configure publisher only"
 	echo "\t-s : source BE to clone"
 	echo "\t-t : new BE name"
+	echo "\t-T : install system/test packages"
 	echo "\t-u uri : origin URI for redist repository"
 	echo "\t-U prefix:  prefix for redist repository"
 	echo "\t-v : verbose"
@@ -104,6 +105,10 @@ update()
 	configure_publishers $root
 
 	do_cmd pkg -R $root image-update
+
+	[ "$testspkgs" -ne 0 ] && do_cmd pkg -R $root install \
+	    system/test/libctest system/test/ostest system/test/utiltest \
+	    system/test/zfstest
 }
 
 update_zone()
@@ -142,6 +147,7 @@ update_zone()
 
 sourcebe=""
 targetbe=""
+testspkgs=0
 uri=""
 repodir=""
 consolidation="osnet"
@@ -150,7 +156,7 @@ no_zones=0
 zone_warned=0
 reposonly=0
 
-while getopts :c:d:Ors:t:U:u:vZ i ; do
+while getopts :c:d:Ors:t:TU:u:vZ i ; do
 	case $i in
 	c)
 		consolidation=$OPTARG
@@ -168,6 +174,9 @@ while getopts :c:d:Ors:t:U:u:vZ i ; do
 		;;
 	t)
 		targetbe=$OPTARG
+		;;
+	T)
+		testspkgs=1
 		;;
 	U)
 		redistpub=$OPTARG
