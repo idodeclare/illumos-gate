@@ -362,10 +362,10 @@ cmpsize vblk "$ddc_if00" '<=' .05
 # with the default bs=512. Run with an explicit, larger bs.
 
 setuptest vblk
-epass "$ddc_if11" stride=4 conv=sparse
-epass "$ddc_if11" iseek=1 oseek=1 stride=4 conv=sparse
-epass "$ddc_if11" iseek=2 oseek=2 stride=4 conv=sparse
-epass "$ddc_if11" iseek=3 oseek=3 stride=4 conv=sparse
+epass "$ddc_if11" stride=4 bs=4096 conv=sparse
+epass "$ddc_if11" iseek=1 oseek=1 stride=4 bs=4096 conv=sparse
+epass "$ddc_if11" iseek=2 oseek=2 stride=4 bs=4096 conv=sparse
+epass "$ddc_if11" iseek=3 oseek=3 stride=4 bs=4096 conv=sparse
 cmpbytes "$ddc_if11"
 cmpsize vblk "$ddc_if11" '~=' .05
 
