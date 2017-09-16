@@ -30,7 +30,7 @@
  */
 
 /*	Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T	*/
-/*	  All Rights Reserved  	*/
+/*	  All Rights Reserved	*/
 
 /*
  *	convert and copy
@@ -168,8 +168,8 @@ static unsigned char	*obuf;		/* output buffer pointer */
 static off_t		pending;	/* pending sparse data bytes */
 static off_t		stride_pending;	/* pending sparse stride bytes */
 static off_t		seek_offset;	/* offset of last seek past output */
-				/* hole for sparse data bytes but */
-				/* not sparse stride bytes */
+					/* hole for sparse data bytes but */
+					/* not sparse stride bytes */
 
 static hrtime_t		startt;		/* hrtime copy started */
 static unsigned long long	obytes;	/* output bytes */

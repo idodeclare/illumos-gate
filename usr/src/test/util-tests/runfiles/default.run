@@ -12,7 +12,6 @@
 #
 # Copyright (c) 2012 by Delphix. All rights reserved.
 # Copyright 2014 Garrett D'Amore <garrett@damore.org>
-# Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 #
 
 [DEFAULT]
@@ -32,8 +31,3 @@ outputdir = /var/tmp/test_results
 tests = ['json_00_blank', 'json_01_boolean', 'json_02_numbers',
     'json_03_empty_arrays', 'json_04_number_arrays', 'json_05_strings',
     'json_06_nested', 'json_07_nested_arrays']
-
-[/opt/util-tests/tests/dd]
-user = root
-timeout = 90
-tests = ['dd_copy_test']

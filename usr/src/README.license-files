@@ -59,7 +59,7 @@ properly communicate the license terms.  What do you do next?
 
       If the corresponding copyright will change dates frequently,
       then this approach can work well, because you won't need to
-      update the license files manually.                                        
+      update the license files manually.
 
       If you do this, then your license file should be a dependency of
       both the all and install targets, and should be removed via
