@@ -1,25 +1,13 @@
-#!/usr/bin/perl
+#!/usr/perl5/bin/perl
 #
-# CDDL HEADER START
+# This file and its contents are supplied under the terms of the
+# Common Development and Distribution License ("CDDL"), version 1.0.
+# You may only use this file in accordance with the terms of version
+# 1.0 of the CDDL.
 #
-# The contents of this file are subject to the terms of the
-# Common Development and Distribution License (the "License").
-# You may not use this file except in compliance with the License.
-#
-# You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE
-# or http://www.illumos.org/license/CDDL (originally
-# http://www.opensolaris.org/os/licensing).
-#
-# See the License for the specific language governing permissions
-# and limitations under the License.
-#
-# When distributing Covered Code, include this CDDL HEADER in each
-# file and include the License file at usr/src/OPENSOLARIS.LICENSE.
-# If applicable, add the following below this CDDL HEADER, with the
-# fields enclosed by brackets "[]" replaced with your own identifying
-# information: Portions Copyright [yyyy] [name of copyright owner]
-#
-# CDDL HEADER END
+# A full copy of the text of the CDDL should have accompanied this
+# source.  A copy of the CDDL is also available via the Internet at
+# http://www.illumos.org/license/CDDL.
 #
 #
 # Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
@@ -45,12 +33,9 @@ my $usage = "Usage: $0 -f <outfile> -b <numbytes>
 
 	-K blocksize default is $BLOCKSIZE
 	-p % zero blocks default is $DEFAULTPCTZERO\n\n";
-die $usage if !getopts("f:b:K:p:")
-    || ! defined $opt_f
-    || ! defined $opt_b
-    || $opt_b < 1
-    || (defined $opt_K && $opt_K < 1)
-    || (defined $opt_p && ($opt_p < 0 || $opt_p > 100));
+die $usage if !getopts("f:b:K:p:") || ! defined $opt_f || ! defined $opt_b ||
+    $opt_b < 1 || (defined $opt_K && $opt_K < 1) ||
+    (defined $opt_p && ($opt_p < 0 || $opt_p > 100));
 
 $opt_K = $BLOCKSIZE if ! defined $opt_K;
 $opt_p = $DEFAULTPCTZERO if ! defined $opt_p;
@@ -63,8 +48,8 @@ for (my $i = 0; $i < $opt_b; $i += $opt_K) {
 	$n = $opt_K if $n > $opt_K;
 
 	my $is_last_block = $i + $n >= $opt_b;
-	my $is_zero = $opt_p == 0 ? 0 : $opt_p == 100 ? 1
-	    : $is_last_block ? 1 : rand() * 100 <= $opt_p;
+	my $is_zero = $opt_p == 0 ? 0 : $opt_p == 100 ? 1 : $is_last_block ?
+	    1 : rand() * 100 <= $opt_p;
 	for (my $j = 0; $j < $n; ++$j) {
 		print $fh pack('C', $is_zero ? 0 : rand() >= .1 ? 1 : 0);
 	}

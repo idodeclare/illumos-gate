@@ -1741,7 +1741,8 @@ flsh2(boolean_t force)
 
 	if (obc > 0) {
 		unsigned char	*cp;
-		int		bc, sparse;
+		boolean_t	sparse;
+		int		bc;
 		unsigned int	oc, i, partialhere = 0;
 
 		if (obc >= obs) {
@@ -1767,12 +1768,12 @@ flsh2(boolean_t force)
 			term(2);
 		}
 
-		sparse = 0;
+		sparse = B_FALSE;
 		if (cflag & C_SPARSE) {
-			sparse = 1;	/* Is buffer sparse? */
+			sparse = B_TRUE;	/* Is buffer sparse? */
 			for (i = 0; i < oc; i++) {
 				if (obuf[i] != 0) {
-					sparse = 0;
+					sparse = B_FALSE;
 					break;
 				}
 			}
@@ -1845,8 +1846,8 @@ flsh2(boolean_t force)
 			/*
 			 * Because `pending' NUL bytes are certainly
 			 * written while stride_pending NUL bytes are
-			 * possibly written i.e. only if a subsequent data
-			 * write occurs, record the reached offset after
+			 * possibly written (i.e. only if a subsequent data
+			 * write occurs), record the reached offset after
 			 * seeking for `pending' (i.e., subtract any
 			 * stride_pending value). Then if no more (non-
 			 * sparse) data need to be written, the offset
