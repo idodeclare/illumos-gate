@@ -53,3 +53,6 @@ avl_insert_here.3avl	:= LINKSRC = avl_insert.3avl
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

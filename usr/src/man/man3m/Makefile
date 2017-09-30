@@ -139,3 +139,6 @@ fesetround.3m				:= LINKSRC = fegetround.3m
 include ../Makefile.man
 
 install: $(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

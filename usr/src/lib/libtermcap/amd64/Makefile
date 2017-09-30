@@ -20,3 +20,7 @@ include		$(SRC)/lib/Makefile.lib.64
 install:	$(ROOTLIBS64) $(ROOTLINKS64)
 
 include		$(SRC)/lib/Makefile.filter.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

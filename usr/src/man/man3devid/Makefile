@@ -47,3 +47,6 @@ devid_valid.3devid		:= LINKSRC = devid_get.3devid
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

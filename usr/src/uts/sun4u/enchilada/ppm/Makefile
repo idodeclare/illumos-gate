@@ -94,3 +94,6 @@ install:	$(CONF_INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/enchilada/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

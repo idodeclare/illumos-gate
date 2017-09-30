@@ -85,3 +85,6 @@ LINT_LIB_DIR	= $(SNOWBIRD_LINT_LIB_DIR)
 #	Include common targets
 #
 include $(UTSBASE)/sun4u/snowbird/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

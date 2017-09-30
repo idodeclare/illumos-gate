@@ -43,3 +43,6 @@ POST_PROCESS =
 all install:	$(PROG)
 
 catalog:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

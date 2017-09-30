@@ -45,3 +45,6 @@ lint:		lint_PROG
 _msg:		
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -106,3 +106,7 @@ rm -f libpiclfrudr.so.1; \
 rm -f libpiclfrudr.so; \
 ln -s ../../../../$(FRUDR_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrudr.so.1   libpiclfrudr.so.1; \
 ln -s ../../../../$(FRUDR_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrudr.so     libpiclfrudr.so;`
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

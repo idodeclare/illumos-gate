@@ -1137,3 +1137,6 @@ replace_panel.3curses		:= LINKSRC = panel_window.3curses
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

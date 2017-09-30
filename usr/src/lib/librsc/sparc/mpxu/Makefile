@@ -43,3 +43,7 @@ include ../Makefile.com
 
 $(USR_PSM_LIB_DIR): 
 	cd $(UTSBASE)/sun4u/mpxu; pwd; $(MAKE) $(USR_PSM_LIB_DIR)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

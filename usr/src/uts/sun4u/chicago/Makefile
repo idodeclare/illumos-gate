@@ -104,3 +104,6 @@ $(CHICAGO_CRYPTO_LINKS): $(ROOT_CHICAGO_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/chicago/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

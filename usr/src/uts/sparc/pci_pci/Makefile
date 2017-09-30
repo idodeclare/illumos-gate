@@ -113,3 +113,6 @@ install:	$(INSTALL_DEPS)
 #
 include $(UTSBASE)/sparc/Makefile.targ
 include $(UTSBASE)/sun4u/Makefile.rules
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

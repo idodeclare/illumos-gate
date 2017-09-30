@@ -68,3 +68,6 @@ check: $(CHKMANIFEST)
 lint:	lint_SRCS
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LLOBJS) $(OBJS) $(PROG)

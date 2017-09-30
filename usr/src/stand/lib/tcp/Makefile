@@ -37,3 +37,6 @@ CERRWARN += -_gcc=-Wno-unused-label
 CERRWARN += -_gcc=-Wno-uninitialized
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

@@ -87,3 +87,6 @@ libpapi-lpd:		libpapi-dynamic
 libipp-core:		libpapi-common
 libpapi-ipp:		libpapi-common libipp-core libhttp-core
 libipp-listener:	libpapi-dynamic libipp-core
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(POFILE)

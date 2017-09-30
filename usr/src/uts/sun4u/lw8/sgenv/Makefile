@@ -95,3 +95,6 @@ install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/lw8/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -44,3 +44,6 @@ lint:		$(LINTOUT64) $(SGSLINTOUT)
 
 install \
 package:	$(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

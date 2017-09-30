@@ -29,3 +29,7 @@ include ../Makefile.com
 ASFLAGS +=	-xarch=v8plus ${AS_PICFLAGS}
 
 install: all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -32,3 +32,7 @@ gcpu.eft gmem.eft sp.eft
 EFT_PLAT_FILES= $(SUN4VEFTFILES) $(SUN4EFTFILES)
 
 include ../../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EFT_COMMON_FILES) $(EFT_PLAT_FILES) \
+	    $(ROOT_COMMON_EFT_FILES) $(USR_PLAT_EFT_FILES)

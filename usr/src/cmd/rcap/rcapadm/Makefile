@@ -83,3 +83,6 @@ $(ROOTUSRSBIN):
 install: all $(ROOTUSRSBIN) $(ROOTUSRSBINPROG)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

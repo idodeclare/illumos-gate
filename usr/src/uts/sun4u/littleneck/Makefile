@@ -96,3 +96,6 @@ $(LITTLENECK_CRYPTO_LINKS): $(ROOT_LITTLENECK_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/littleneck/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -13,3 +13,7 @@
 
 include ../Makefile.com
 install: all $(ROOTONBLDLIBMACH)/libmakestate.so.1
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

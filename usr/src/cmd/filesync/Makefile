@@ -71,3 +71,6 @@ $(POFILE): messages.h
 	$(MV) $(TEXT_DOMAIN).po $@
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

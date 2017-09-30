@@ -30,3 +30,7 @@ HDRDIR = common
 PLUGINTYPE = vendor
 
 include ../Makefile.plugin
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

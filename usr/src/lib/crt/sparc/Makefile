@@ -27,3 +27,6 @@
 include ../Makefile.com
 
 install:	$(ROOTOBJECTS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS)

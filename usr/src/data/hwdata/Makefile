@@ -69,3 +69,6 @@ usb.update:
 		$(URL_FETCH) $(URL_FETCHARGS) $(USBURL)
 
 include		$(SRC)/data/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

@@ -61,3 +61,6 @@ clean:
 clobber: clean
 
 lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(SHFILES)

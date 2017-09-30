@@ -31,3 +31,6 @@ include		../Makefile.com
 ARCH =		sparc
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

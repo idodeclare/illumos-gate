@@ -34,3 +34,6 @@ OBJECTS =       gettrapent.o
 all install:	$(SYMCAP)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJECTS)

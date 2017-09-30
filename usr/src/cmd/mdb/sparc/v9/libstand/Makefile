@@ -41,3 +41,6 @@ include ../../../Makefile.libstand
 
 %.o: %.s
 	$(COMPILE.s) -o $@ $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

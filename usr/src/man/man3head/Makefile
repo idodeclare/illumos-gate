@@ -292,3 +292,6 @@ xlocale.3head		:= LINKSRC = xlocale.h.3head
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

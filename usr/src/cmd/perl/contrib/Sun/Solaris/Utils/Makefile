@@ -31,3 +31,6 @@ install: $(ROOTPERLEXT) $(ROOTPERLMOD)
 
 clean clobber:
 	$(RM) -r $(MACH)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MACH)

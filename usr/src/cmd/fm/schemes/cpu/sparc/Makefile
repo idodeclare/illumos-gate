@@ -37,3 +37,6 @@ CERRWARN += -_gcc=-Wno-parentheses
 include ../../Makefile.targ
 
 install: all $(ROOTPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

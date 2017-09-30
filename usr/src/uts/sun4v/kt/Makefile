@@ -114,3 +114,6 @@ $(SYM_MOD):	$(UNIX_O) $(CPULIB)
 #	Include common targets.
 #
 include $(UTSBASE)/$(PLATFORM)/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

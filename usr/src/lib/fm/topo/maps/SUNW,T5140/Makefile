@@ -34,3 +34,6 @@ TOPOFILE = T5140-hc-topology.xml \
 SRCDIR = ../SUNW,T5140
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

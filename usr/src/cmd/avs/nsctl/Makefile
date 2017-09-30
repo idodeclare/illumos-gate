@@ -85,3 +85,6 @@ $(ROOTSBINLINK): $(ROOTUSRSBIN) $(ROOTPROG)
 	-$(RM) $@; $(LN) $(ROOTBIN)/nscadm $@
 
 include	../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(POFILES)

@@ -113,3 +113,6 @@ $(DAKTARI_KMODS):	FRC
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/daktari/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

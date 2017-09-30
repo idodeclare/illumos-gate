@@ -36,3 +36,6 @@ TOPOFILE = Sun-Fire-T200-hc-topology.xml	\
 SRCDIR = ../SUNW,Sun-Fire-T200
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

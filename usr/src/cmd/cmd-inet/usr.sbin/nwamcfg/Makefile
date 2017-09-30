@@ -76,3 +76,6 @@ lint:
 	$(LINT.c) -c $(PROG).c $(LDLIBS)
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

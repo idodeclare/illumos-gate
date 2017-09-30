@@ -42,3 +42,5 @@ include		../../Makefile.sub.64
 install \
 package:	$(ROOTPROG64)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

@@ -29,3 +29,7 @@ include ../../Makefile.lib.64
 all: $(LIBS)
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

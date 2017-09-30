@@ -177,3 +177,6 @@ links:
 	$(SYMLINK) sendmail.cf $(ROOTETCMAILCF)/cf/subsidiary.cf
 	$(RM) $(ROOTETCMAILCF)/cf/subsidiary.mc
 	$(SYMLINK) sendmail.mc $(ROOTETCMAILCF)/cf/subsidiary.mc
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CFS) $(SUBCFS)

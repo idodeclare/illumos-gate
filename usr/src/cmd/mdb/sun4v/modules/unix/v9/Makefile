@@ -46,3 +46,7 @@ CPPFLAGS += -I$(SRC)/uts/sun4u
 CPPFLAGS += -I$(SRC)/uts/sfmmu
 CPPFLAGS += -I$(SRC)/uts/sparc/v9
 CERRWARN += -_gcc=-Wno-uninitialized
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

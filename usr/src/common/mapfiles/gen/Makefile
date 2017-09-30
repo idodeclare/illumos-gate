@@ -109,3 +109,6 @@ $(MACH64)_gcc_map.noexeglobs :=	LINK =	$(LINK64.c)
 	$(GREP) MAP-TAIL $(TEMPLATE2) | \
 	    $(SED) -e "s/	*# MAP-TAIL//"		>> $@
 	$(RM) $(SYMS1) $(SYMS2) $(MAIN1) $(MAIN2)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(FILES) $(MAIN1) $(MAIN2) $(SYMS1) $(SYMS2)

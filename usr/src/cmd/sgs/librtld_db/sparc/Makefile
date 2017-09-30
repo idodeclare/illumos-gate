@@ -41,3 +41,7 @@ install:	all $(ROOTFS_DYNLIB) $(ROOTFS_LINKS) \
 lint:		$(LINTLIB) $(LINTOUT32) $(SGSLINTOUT)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -36,3 +36,7 @@ include ../../Makefile.sparcv9
 include ../../../Makefile.module
 
 CPPFLAGS += -I../../../../../uts/common/io/ppp
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -28,3 +28,6 @@
 ARCH = sun4u
 include ../../sun4/pcibus/Makefile.pci
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -62,3 +62,6 @@ CERRWARN += -_gcc=-Wno-char-subscripts
 POST_PROCESS +=	; $(CHK4UBINARY)
 
 .KEEP_STATE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALL)

@@ -158,3 +158,6 @@ XRPRUNE	= sun4v sun4u sun4 sfmmu sparc
 
 cscope.out tags: FRC
 	$(XREF) -x $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

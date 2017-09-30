@@ -69,3 +69,6 @@ MANFILES= 	MP_AssignLogicalUnitToTPG.3mpapi		\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

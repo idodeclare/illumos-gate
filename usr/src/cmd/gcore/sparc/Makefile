@@ -62,3 +62,6 @@ lint:
 	$(LINT.c) $(SRCS) $(LDLIBS)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

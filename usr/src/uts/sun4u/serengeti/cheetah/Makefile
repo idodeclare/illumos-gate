@@ -126,3 +126,6 @@ $(ROOTSOFTLINKS): $(ROOTMODULE)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/serengeti/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

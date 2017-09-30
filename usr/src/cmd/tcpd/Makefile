@@ -208,3 +208,6 @@ TABLES	= -DHOSTS_DENY=\"/etc/hosts.deny\" -DHOSTS_ALLOW=\"/etc/hosts.allow\"
 
 ## End configuration options
 ############################
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

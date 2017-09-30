@@ -67,3 +67,6 @@ include $(SRC)/lib/Makefile.targ
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

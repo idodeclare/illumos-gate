@@ -104,3 +104,6 @@ $(EXCALIBUR_CRYPTO_LINKS): $(ROOT_EXCALIBUR_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/excalibur/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -34,3 +34,7 @@ include ../../Makefile.plugin
 
 CPPFLAGS += -I$(ROOT)/usr/platform/sun4v/include
 LDLIBS += -lumem -lmdesc -lldom
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

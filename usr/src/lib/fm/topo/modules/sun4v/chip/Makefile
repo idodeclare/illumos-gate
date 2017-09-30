@@ -49,3 +49,7 @@ LDLIBS += -lumem -lmdesc -lldom
 
 %.ln: $(PIDIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

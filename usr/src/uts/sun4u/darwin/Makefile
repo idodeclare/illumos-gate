@@ -94,3 +94,6 @@ $(DARWIN_KMODS): FRC
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/darwin/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -133,3 +133,6 @@ clean:
 lint:	lint_SRCS
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROGS) $(SADC_OBJECTS) $(SHELLS)

@@ -84,3 +84,6 @@ clean:
 
 clobber:	clean
 	$(RM)  $(PROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(COMMONOBJS) $(LOCALOBJS) $(PROG)

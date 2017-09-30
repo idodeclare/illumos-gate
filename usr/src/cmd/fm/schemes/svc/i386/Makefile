@@ -32,3 +32,6 @@ LDFLAGS += -L$(ROOT)/usr/lib/fm -R/usr/lib/fm
 LINTFLAGS += -L$(ROOT)/usr/lib/fm
 
 install: all $(ROOTPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

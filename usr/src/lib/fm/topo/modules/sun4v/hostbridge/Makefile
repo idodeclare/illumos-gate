@@ -33,3 +33,7 @@ include ../../sun4/hostbridge/Makefile.hb
 
 CPPFLAGS += -I$(ROOT)/usr/platform/sun4v/include
 LDLIBS += -lumem -lmdesc -lldom
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

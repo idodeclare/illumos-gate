@@ -67,3 +67,6 @@ $(FWTABLE): $(FWMODULES_SRC)
 	echo '};'                               >> $@
 
 .KEEP_STATE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(FWTABLE)

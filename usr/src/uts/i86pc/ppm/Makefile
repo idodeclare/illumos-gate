@@ -98,3 +98,6 @@ install:	$(INSTALL_DEPS) $(CONF_INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/i86pc/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -30,3 +30,7 @@ include ../../mech_krb5/Makefile.mech_krb5
 LDLIBS += 	-lgss -lc -lmech_krb5 -L$(ROOT_KLIBDIR) $(KRUNPATH)
 
 install: all $(ROOTLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

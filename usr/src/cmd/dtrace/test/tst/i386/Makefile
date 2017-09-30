@@ -49,3 +49,6 @@ ustack/tst.annotated.exe: ustack/tst.annotated.o ustack/annotated_helper.o
 
 ustack/annotated_helper.o: ustack/annotated_helper.d
 	$(COMPILE.d) -o ustack/annotated_helper.o -s ustack/annotated_helper.d
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

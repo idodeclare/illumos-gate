@@ -32,3 +32,7 @@ include ../../../../Makefile.cmd
 include ../../Makefile.ia32
 include ../../../Makefile.module
 include ../../../common/modules/ii/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

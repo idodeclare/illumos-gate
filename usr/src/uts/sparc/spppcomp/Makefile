@@ -118,3 +118,6 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ppp/spppcomp/%.c
 #	Include common targets.
 #
 include $(UTSBASE)/sparc/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

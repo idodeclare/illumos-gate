@@ -60,3 +60,6 @@ clean:
 lint: lint_SRCS
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(COMMON_OBJS) $(OBJS)

@@ -75,3 +75,6 @@ $(ROOTFSLIB_MPXIO)/%: %
 
 $(POFILE): $(POFILES)
 	$(RM) $@; cat $(POFILES) > $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(POFILES)

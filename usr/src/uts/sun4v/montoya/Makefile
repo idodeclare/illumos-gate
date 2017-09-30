@@ -94,3 +94,6 @@ lint.platmod:   modlintlib
 #	Include common targets.
 #
 include $(UTSBASE)/$(PLATFORM)/montoya/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

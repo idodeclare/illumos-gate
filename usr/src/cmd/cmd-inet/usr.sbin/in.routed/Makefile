@@ -93,3 +93,6 @@ clean:
 	$(RM) $(CLEAN_FILES)
 
 include		../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEAN_FILES) $(CMDCLOBBEREES)

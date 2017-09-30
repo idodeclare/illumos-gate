@@ -62,3 +62,7 @@ include ../Makefile.targ
 #
 XRDIRS = common i386 sparc sparcv9
 XRDEL = Makefile*
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

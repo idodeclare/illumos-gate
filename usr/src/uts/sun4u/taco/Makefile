@@ -104,3 +104,6 @@ $(TACO_CRYPTO_LINKS): $(ROOT_TACO_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/taco/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

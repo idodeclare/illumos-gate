@@ -31,3 +31,6 @@ include		../Makefile.com
 .KEEP_STATE:
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

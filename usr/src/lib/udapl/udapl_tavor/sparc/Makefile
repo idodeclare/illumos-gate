@@ -37,3 +37,7 @@ install: all $(ROOTLIBS)
 pics/%.o: %.s
 	$(COMPILE.s) -o $@ $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

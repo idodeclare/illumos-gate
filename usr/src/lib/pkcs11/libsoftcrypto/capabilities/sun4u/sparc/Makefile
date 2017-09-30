@@ -37,3 +37,6 @@ pics/mont_mulf_asm.o: \
 		$(BIGNUM_DIR)/sun4u/mont_mulf_v8plus.s
 		$(COMPILE.s) -o $@ $(BIGNUM_DIR)/sun4u/mont_mulf_v8plus.s
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -39,3 +39,6 @@ LDLIBS += -ldevinfo -lmdesc -lldom
 
 CPPFLAGS += -I. -I$(ROOT)/usr/platform/sun4v/include -I$(TOPODIR)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -40,3 +40,6 @@ clean:
 lint:	lint_PROG
 
 include ../Makefile.ucbtarg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

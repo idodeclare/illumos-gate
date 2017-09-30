@@ -42,3 +42,7 @@ DYNFLAGS += -R/usr/lib
 CERRWARN += -_gcc=-Wno-unused-value
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += -_gcc=-Wno-uninitialized
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

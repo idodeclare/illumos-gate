@@ -40,3 +40,6 @@ SRCS	= $(LOCOBJS:%.o=$(SRCDIR)/%.c) $(CMNOBJS:%.o=$(CMNDIR)/%.c)
 LINTFLAGS += -erroff=E_NAME_USED_NOT_DEF2
 
 include Makefile.$(MACH).targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

@@ -40,3 +40,6 @@ include ../Makefile.com
 include $(TOPDIR)/psm/Makefile.psm.64
 
 CFLAGS64	+= -xchip=ultra $(CCABS32)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBBOOT) $(LINTLIBBOOT) $(L_OBJS) $(OBJS)

@@ -43,3 +43,6 @@ clean:
 clobber: clean
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

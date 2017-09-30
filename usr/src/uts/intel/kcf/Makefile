@@ -106,3 +106,6 @@ $(OBJS_DIR)/%.o: $(COM_DIR)/modes/amd64/%.s
 
 $(OBJS_DIR)/%.ln: $(COM_DIR)/modes/amd64/%.s
 	@($(LHEAD) $(LINT.s) $(COM_DIR)/modes/amd64/${@F:.ln=.s} $(LTAIL))
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -65,3 +65,6 @@ it_tpg_free.3iscsit		:= LINKSRC = it_tpg_create.3iscsit
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

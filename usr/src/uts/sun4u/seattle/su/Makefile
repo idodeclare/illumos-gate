@@ -77,3 +77,6 @@ install:	$(INSTALL_TARGET)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/seattle/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

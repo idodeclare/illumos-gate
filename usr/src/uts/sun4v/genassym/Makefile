@@ -99,3 +99,6 @@ $(ASSYM_H): $(GENCONST) $(OFFSETS) $(PLATFORM_OFFSETS)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4v/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -104,3 +104,6 @@ $(BOSTON_CRYPTO_LINKS): $(ROOT_BOSTON_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/boston/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

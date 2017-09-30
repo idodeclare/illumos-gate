@@ -27,3 +27,6 @@
 include		../../../Makefile.lib
 include		Makefile.targ
 include		../Makefile.plugin
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(POFILE)

@@ -35,3 +35,6 @@ include ../Makefile.com
 LIBS	= $(LINTLIB)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

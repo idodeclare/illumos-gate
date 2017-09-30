@@ -101,3 +101,6 @@ $(LINTOUT):	$(SRCS)
 	$(LINT.c) $(XPG4SRCS)		2>&1 | tee -a $(LINTOUT)
 
 include		../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLOBJS) $(CLEANFILES) $(CMDCLOBBEREES)

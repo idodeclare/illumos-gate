@@ -32,3 +32,7 @@ include ../Makefile.com
 all: $(PROG) $(VARSYSLOG) $(VARAUTHLOG)
 
 install: all $(ROOTUSRSBINPROG) $(ROOTETCCONFIG) $(ROOTLIBROTATE) logfiles
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LLOBJS) $(OBJS) $(VARAUTHLOG) \
+	    $(VARSYSLOG)

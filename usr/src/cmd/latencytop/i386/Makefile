@@ -27,3 +27,6 @@ include ../Makefile.com
 WRAPOPT =
 
 install: all $(ROOTPROG32)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

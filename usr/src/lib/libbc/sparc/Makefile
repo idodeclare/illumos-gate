@@ -465,3 +465,7 @@ pics/ypupdate_prot.o s5pics/ypupdate_prot.o : ../inc/include/rpcsvc/ypupdate_pro
 
 ../inc/include/rpcsvc/ypupdate_prot.h: ../libc/yp/ypupdate_prot.h
 	cp ../libc/yp/ypupdate_prot.h $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

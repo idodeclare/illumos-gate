@@ -29,3 +29,6 @@
 include ../Makefile.com
 
 install: all $(ROOTPROG32)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

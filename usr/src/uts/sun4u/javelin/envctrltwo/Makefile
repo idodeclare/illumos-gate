@@ -95,3 +95,6 @@ LINT_LIB_DIR	= $(JAVELIN_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/javelin/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

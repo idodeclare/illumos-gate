@@ -43,3 +43,7 @@ CPPFLAGS += -I$(SRC)/uts/sun4
 CPPFLAGS += -I$(SRC)/uts/sfmmu
 CPPFLAGS += -I$(SRC)/uts/sparc/v9
 CPPFLAGS += -I$(SRC)/uts/sun4u/opl
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

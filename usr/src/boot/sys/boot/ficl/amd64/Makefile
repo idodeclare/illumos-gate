@@ -24,3 +24,6 @@ include ../Makefile.inc
 CFLAGS += -fPIC -m64 -mno-red-zone
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

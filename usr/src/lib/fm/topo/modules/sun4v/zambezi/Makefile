@@ -35,3 +35,6 @@ MODULESRCS = $(ZAMBEZISRCS)
 
 include ../../Makefile.plugin
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -105,3 +105,6 @@ $(CHERRYSTONE_KMODS):	FRC
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/cherrystone/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

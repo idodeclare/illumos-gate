@@ -117,3 +117,6 @@ $(ROOTLINK):	$(ROOT_SYS_DIR) $(ROOTMODULE)
 #	Include common targets.
 #
 include $(UTSBASE)/intel/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

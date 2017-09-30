@@ -75,3 +75,6 @@ $(JAR_DSTDIR):
 
 $(JAR_DSTDIR)/%: $(JAR_SRCDIR)/%
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(TEST_JAR)

@@ -83,3 +83,6 @@ install:        $(INSTALL_DEPS)
 #       Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -34,3 +34,6 @@ DYNFLAGS += -R /usr/platform/\$$PLATFORM/lib/rsmlib/sparcv9
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

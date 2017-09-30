@@ -37,3 +37,6 @@ include ../../Makefile.plugin
 
 LDLIBS += -ldevinfo
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

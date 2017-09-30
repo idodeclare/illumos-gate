@@ -48,3 +48,6 @@ lint:	lint_SRCS
 
 clean:     
 	$(RM) $(LIBPROG).o
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

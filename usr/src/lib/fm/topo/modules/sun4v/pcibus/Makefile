@@ -30,3 +30,7 @@ ARCH = sun4v
 include ../../sun4/pcibus/Makefile.pci
 
 LDLIBS += -ldevinfo
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -55,3 +55,6 @@ librsc:
 	cd $(SRCDIR)/../../lib/librsc ; $(MAKE) install
 
 include $(SRCDIR)/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LINT_OBJS) $(OBJS)

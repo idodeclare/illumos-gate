@@ -30,3 +30,6 @@
 .KEEP_STATE:
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJECTS) $(PROG) $(YACC_OBJS)

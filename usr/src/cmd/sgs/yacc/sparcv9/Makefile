@@ -51,3 +51,7 @@ all:	FRC
 install:	FRC
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS) $(PICS) \
+	    $(POBJS)

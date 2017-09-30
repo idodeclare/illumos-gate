@@ -31,3 +31,6 @@ LDLIBS += -L$(ROOTLIB)/fm -lfmd_agent -ltopo
 LDFLAGS += -R/usr/lib/fm
 
 install: all $(ROOTPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

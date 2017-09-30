@@ -78,3 +78,7 @@ rm -f piclfrutree.conf; \
 ln -s ../../../../$(DAK_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrutree.so.1 libpiclfrutree.so.1; \
 ln -s ../../../../$(DAK_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrutree.so libpiclfrutree.so; \
 ln -s ../../../../$(DAK_LINKTO_PLATFORM)/lib/picl/plugins/piclfrutree.conf piclfrutree.conf`
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

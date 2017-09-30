@@ -87,3 +87,6 @@ $(POFILE): $(POFILES)
 include ../../Makefile.targ
 
 install: all .WAIT $(ROOTVSCANDIR) $(ROOTVSCANFILE) $(ROOTMANIFEST)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

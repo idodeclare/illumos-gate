@@ -106,3 +106,6 @@ $(OBJS_DIR)/rdc_prot_xdr.o:	$(OBJS_DIR)/rdc_prot_xdr.c
 #	Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

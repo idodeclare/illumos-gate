@@ -95,3 +95,6 @@ LINT_LIB_DIR    = $(MONTECARLO_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/montecarlo/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

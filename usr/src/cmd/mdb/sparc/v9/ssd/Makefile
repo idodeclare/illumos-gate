@@ -38,3 +38,7 @@ include ../../../Makefile.module
 MODSRCS_DIR = ../../../common/modules/sd
 
 CPPFLAGS += -D__fibre
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -67,3 +67,6 @@ sysent.s:	syscalls.list mksysent
 	sh ./mksysent > sysent.s
 
 include ../Makefile.ucbtarg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

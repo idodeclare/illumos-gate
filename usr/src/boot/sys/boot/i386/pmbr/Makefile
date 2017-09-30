@@ -50,3 +50,6 @@ clean:
 
 $(ROOT_BOOT)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

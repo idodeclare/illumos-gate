@@ -99,3 +99,6 @@ do_install:	$(INSTALL_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/sparc/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

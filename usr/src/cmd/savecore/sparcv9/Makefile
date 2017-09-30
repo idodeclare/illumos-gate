@@ -29,3 +29,6 @@ LDLIBS += -L$(ROOT)/usr/lib/fm/sparcv9 -lfmevent -lnvpair
 LDFLAGS += -R/usr/lib/fm/sparcv9
 
 install: all $(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(BZIP2OBJS) $(CMDCLOBBEREES) $(OBJS)

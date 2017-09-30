@@ -77,3 +77,6 @@ clobber:
 	$(RM) $(CLOBBERFILES)
 
 lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

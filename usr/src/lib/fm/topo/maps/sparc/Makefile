@@ -34,3 +34,6 @@ SRCDIR = ../sparc
 TEMPTOPOFILE = xfp-hc-topology.xml
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

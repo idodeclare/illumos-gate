@@ -46,3 +46,7 @@ LDFLAGS += -R/usr/lib/fm
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-uninitialized
 CERRWARN += -_gcc=-Wno-char-subscripts
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

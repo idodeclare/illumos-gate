@@ -104,3 +104,6 @@ LINT_LIB_DIR	= $(DAKTARI_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/daktari/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

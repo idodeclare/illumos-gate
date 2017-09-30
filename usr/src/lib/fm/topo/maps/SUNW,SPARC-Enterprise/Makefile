@@ -32,3 +32,6 @@ TOPOFILE = SPARC-Enterprise-hc-topology.xml
 SRCDIR = ../SUNW,SPARC-Enterprise
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

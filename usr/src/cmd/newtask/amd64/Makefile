@@ -34,3 +34,6 @@ include ../Makefile.com
 install: all $(ROOTPROG64)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

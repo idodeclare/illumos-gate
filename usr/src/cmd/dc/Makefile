@@ -70,3 +70,6 @@ $(XD):
 include ../Makefile.targ
 
 $(XPG6) := CFLAGS += -DXPG6
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(EXOBJS) $(PROG) $(XD) $(XPG6)

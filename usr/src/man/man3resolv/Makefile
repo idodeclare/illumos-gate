@@ -71,3 +71,6 @@ res_setservers.3resolv		:= LINKSRC = resolver.3resolv
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

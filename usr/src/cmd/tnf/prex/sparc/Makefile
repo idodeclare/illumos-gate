@@ -31,3 +31,6 @@ CFLAGS += -I.. -I.
 LINTFLAGS += -I.. -I.
 
 install: all $(ROOTPROG32)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

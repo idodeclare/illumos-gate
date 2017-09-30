@@ -59,3 +59,7 @@ pics/%.o: %.c
 pics/%.o: %.s
 	$(AS) $(ASFLAGS) -o $@ $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

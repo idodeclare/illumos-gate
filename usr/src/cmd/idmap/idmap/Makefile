@@ -80,4 +80,5 @@ LINTFLAGS += -erroff=E_NAME_DEF_NOT_USED2
 
 include ../../Makefile.targ
 
-
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)
