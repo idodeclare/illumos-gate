@@ -29,7 +29,7 @@
 # Copyright 2019 Joyent, Inc.
 # Copyright 2018 OmniOS Community Edition (OmniOSce) Association.
 # Copyright 2019 Peter Trible.
-# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+# Copyright (c) 2016-2017, Chris Fraire <cfraire@me.com>.
 #
 # Based on the nightly script from the integration folks,
 # Mostly modified and owned by mike_s.
@@ -229,7 +229,7 @@ function build {
 	echo "\n==== Elapsed build time ($LABEL) ====\n" >>$mail_msg_file
 	tail -3  $SRC/${INSTALLOG}.out >>$mail_msg_file
 
-	if [ "$i_FLAG" = "n" ]; then
+	if [ "$i_FLAG" -eq 0 ]; then
 		rm -f $SRC/${NOISE}.ref
 		if [ -f $SRC/${NOISE}.out ]; then
 			mv $SRC/${NOISE}.out $SRC/${NOISE}.ref
@@ -314,7 +314,7 @@ function build {
 	#
 	#	Building Packages
 	#
-	if [ "$p_FLAG" = "y" -a "$this_build_ok" = "y" ]; then
+	if [ "$p_FLAG" -gt 0 -a "$this_build_ok" = "y" ]; then
 		if [ -d $SRC/pkg ]; then
 			echo "\n==== Creating $LABEL packages at `date` ====\n" \
 				>> $LOGFILE
@@ -464,11 +464,15 @@ if [ "$OPTHOME" = "" ]; then
 	export OPTHOME
 fi
 
-USAGE='Usage: nightly [-in] [+t] [-V VERS ] <env_file>
+USAGE='Usage: nightly [-Cin] [+pt] [-V VERS ] <env_file>
 
 Where:
-	-i	Fast incremental options (no clobber, check)
+	-C	check for cstyle/hdrchk errors
+	-i	Fast incremental options (no clobber nor check)
+		from NIGHTLY_OPTIONS [-C] unless also reiterated on this
+		nightly command line)
 	-n      Do not do a bringover
+	+p	Do not create packages (regardless of NIGHTLY_OPTIONS -p)
 	+t	Use the build tools in $ONBLD_TOOLS/bin
 	-V VERS set the build version string to VERS
 
@@ -484,23 +488,23 @@ NIGHTLY_OPTIONS variable in the <env_file> as follows:
 	-C	check for cstyle/hdrchk errors
 	-D	do a build with DEBUG on
 	-F	do _not_ do a non-DEBUG build
+	-f	find unreferenced files
 	-G	gate keeper default group of options (-au)
 	-I	integration engineer default group of options (-ampu)
-	-M	do not run pmodes (safe file permission checker)
-	-N	do not run protocmp
-	-R	default group of options for building a release (-mp)
-	-U	update proto area in the parent
-	-V VERS set the build version string to VERS
-	-f	find unreferenced files
 	-i	do an incremental build (no "make clobber")
+	-M	do not run pmodes (safe file permission checker)
 	-m	send mail to $MAILTO at end of build
+	-N	do not run protocmp
 	-n      do not do a bringover
 	-p	create packages
+	-R	default group of options for building a release (-mp)
 	-r	check ELF runtime attributes in the proto area
 	-t	build and use the tools in $SRC/tools (default setting)
 	+t	Use the build tools in $ONBLD_TOOLS/bin
+	-U	update proto area in the parent
 	-u	update proto_list_$MACH and friends in the parent workspace;
 		when used with -f, also build an unrefmaster.out in the parent
+	-V VERS set the build version string to VERS
 	-w	report on differences between previous and current proto areas
 '
 #
@@ -511,16 +515,16 @@ NIGHTLY_OPTIONS variable in the <env_file> as follows:
 
 # default values for low-level FLAGS; G I R are group FLAGS
 A_FLAG=n
-C_FLAG=n
+typeset -i C_FLAG=0	# n=0, y=1, command-line-y=2
 D_FLAG=n
 F_FLAG=n
 f_FLAG=n
-i_FLAG=n; i_CMD_LINE_FLAG=n
+typeset -i i_FLAG=0	# n=0, y=1, command-line-y=2
 M_FLAG=n
 m_FLAG=n
 N_FLAG=n
 n_FLAG=n
-p_FLAG=n
+typeset -i p_FLAG=0	# n=0, y=1, command-line-n=-1
 r_FLAG=n
 t_FLAG=y
 U_FLAG=n
@@ -537,12 +541,22 @@ build_extras_ok=y
 #
 
 OPTIND=1
-while getopts +intV:W FLAG
+while getopts +CilnptV:W FLAG
 do
 	case $FLAG in
-	  i )	i_FLAG=y; i_CMD_LINE_FLAG=y
+	  C )	C_FLAG=2
+		;;
+	  i )	i_FLAG=2
+		;;
+	  l )	l_FLAG=2
 		;;
 	  n )	n_FLAG=y
+		;;
+	  p )	p_FLAG=1
+		;;
+	 +p )	p_FLAG=-1
+		;;
+	  t )	t_FLAG=y
 		;;
 	 +t )	t_FLAG=n
 		;;
@@ -551,7 +565,7 @@ do
 		;;
 	  W )   W_FLAG=y
 		;;
-	 \? )	echo "$USAGE"
+	 \? )	>&2 echo "$USAGE"
 		exit 1
 		;;
 	esac
@@ -562,7 +576,7 @@ shift `expr $OPTIND - 1`
 
 # test that the path to the environment-setting file was given
 if [ $# -ne 1 ]; then
-	echo "$USAGE"
+	>&2 echo "$USAGE"
 	exit 1
 fi
 
@@ -714,7 +728,7 @@ do
 		;;
 	  B )	D_FLAG=y
 		;; # old version of D
-	  C )	C_FLAG=y
+	  C )	C_FLAG=1
 		;;
 	  D )	D_FLAG=y
 		;;
@@ -725,10 +739,10 @@ do
 	  G )   u_FLAG=y
 		;;
 	  I )	m_FLAG=y
-		p_FLAG=y
+		[ "$p_FLAG" -eq 0 ] && p_FLAG=1
 		u_FLAG=y
 		;;
-	  i )	i_FLAG=y
+	  i )	i_FLAG=1
 		;;
 	  M )	M_FLAG=y
 		;;
@@ -738,10 +752,10 @@ do
 		;;
 	  n )	n_FLAG=y
 		;;
-	  p )	p_FLAG=y
+	  p )	[ "$p_FLAG" -eq 0 ] && p_FLAG=1
 		;;
 	  R )	m_FLAG=y
-		p_FLAG=y
+		[ "$p_FLAG" -eq 0 ] && p_FLAG=1
 		;;
 	  r )	r_FLAG=y
 		;;
@@ -764,7 +778,7 @@ do
 		;;
 	  W )   W_FLAG=y
 		;;
-	 \? )	echo "$USAGE"
+	 \? )	>&2 echo "$USAGE"
 		exit 1
 		;;
 	esac
@@ -1176,7 +1190,7 @@ env >> $LOGFILE
 echo "\n==== Nightly argument issues ====\n" | tee -a $mail_msg_file >> $LOGFILE
 
 if [ "$N_FLAG" = "y" ]; then
-	if [ "$p_FLAG" = "y" ]; then
+	if [ "$p_FLAG" -gt 0 ]; then
 		cat <<EOF | tee -a $mail_msg_file >> $LOGFILE
 WARNING: the p option (create packages) is set, but so is the N option (do
          not run protocmp); this is dangerous; you should unset the N option
@@ -1190,12 +1204,12 @@ EOF
 fi
 
 if [ "$f_FLAG" = "y" ]; then
-	if [ "$i_FLAG" = "y" ]; then
+	if [ "$i_FLAG" -gt 0 ]; then
 		echo "WARNING: the -f flag cannot be used during incremental" \
 		    "builds; ignoring -f\n" | tee -a $mail_msg_file >> $LOGFILE
 		f_FLAG=n
 	fi
-	if [ "${p_FLAG}" != "y" ]; then
+	if [[ "$p_FLAG" -lt 1 ]]; then
 		echo "WARNING: the -f flag requires -p;" \
 		    "ignoring -f\n" | tee -a $mail_msg_file >> $LOGFILE
 		f_FLAG=n
@@ -1295,7 +1309,7 @@ SCM_TYPE=$(child_wstype)
 #
 #	Decide whether to clobber
 #
-if [ "$i_FLAG" = "n" -a -d "$SRC" ]; then
+if [ "$i_FLAG" -eq 0 -a -d "$SRC" ]; then
 	echo "\n==== Make clobber at `date` ====\n" >> $LOGFILE
 
 	cd $SRC
@@ -1616,7 +1630,9 @@ fi
 if [[ "$t_FLAG" = "y" ]]; then
 	set_non_debug_build_flags
 
-	build_tools ${TOOLS_PROTO}
+	if [[ "$i_FLAG" -lt 2 ]]; then
+		build_tools ${TOOLS_PROTO}
+	fi
 	if (( $? != 0 )); then
 		build_ok=n
 	else
@@ -1771,6 +1787,9 @@ fi
 # ELF verification: ABI (-A) and runtime (-r) checks
 #
 if [[ ($build_ok = y) && (($A_FLAG = y) || ($r_FLAG = y)) ]]; then
+	echo "\n==== ELF verification at `date` ====" \
+	    >> $LOGFILE
+
 	# Directory ELF-data.$MACH holds the files produced by these tests.
 	elf_ddir=$SRC/ELF-data.$MACH
 
@@ -1905,7 +1924,10 @@ fi
 
 # "make check" begins
 
-if [ "$i_CMD_LINE_FLAG" = "n" -a "$C_FLAG" = "y" ]; then
+if [ "$C_FLAG" -gt 0 ] && [[ "$C_FLAG" -gt 1 || "$i_FLAG" -lt 2 ]]; then
+	echo "\n==== \"make check\" begins at `date` ====" \
+	    >> $LOGFILE
+
 	# remove old check.out
 	rm -f $SRC/check.out
 
