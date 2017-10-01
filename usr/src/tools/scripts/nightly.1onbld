@@ -18,13 +18,14 @@
 .\" "
 .\" "Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 .\" "Copyright 2012 Joshua M. Clulow <josh@sysmgr.org>
+.\" "Copyright (c) 2017, Chris Fraire <cfraire@me.com>.
 .\" "
-.TH NIGHTLY 1ONBLD "Jul 2, 2017"
+.TH NIGHTLY 1ONBLD "Oct 5, 2017"
 .SH NAME
 .I nightly
 \- build an OS-Net consolidation overnight
 .SH SYNOPSIS
-\fBnightly [-in] [-V VERS] <env_file>\fP
+\fBnightly [-Ciln] [+pt] [-V VERS] <env_file>\fP
 .SH DESCRIPTION
 .LP
 .I nightly,
@@ -116,11 +117,15 @@ although it may also be used to build other consolidations.
 The environment variable NIGHTLY_OPTIONS controls the actions
 .I nightly
 will take as it proceeds.
-The -i, -n, +t and -V options may also be used from the command
+The -C, -i, -l, -n, +p, +t and -V options may also be used from the command
 line to control the actions without editing your environment file.
-The -i and -n options complete the build more quickly by bypassing
-some actions. If NIGHTLY_OPTIONS is not set, then "-Bmt" build
-options will be used.
+The -i, -n, and +p options complete the build more quickly by bypassing
+some actions.
+-i disables clobbering, cstyle/hdrchk, and linting, though -C and -l on the
+command line reenable cstyle/hdrchk and lint, resp.
+-n disables bringover.
++p disables package generation.
+If NIGHTLY_OPTIONS is not set, then "-Bmt" build options will be used.
 
 .B Basic action options
 .TP 10
@@ -136,8 +141,8 @@ Do not run pmodes (safe file permission checker)
 .B \-i
 Do an incremental build, suppressing the "make clobber" that by
 default removes all existing binaries and derived files.  From the
-command line, -i also suppresses the lint pass and the cstyle/hdrchk
-pass
+command line, -i also suppresses the cstyle/hdrchk pass and the lint
+pass unless -l or -C, resp., are specified to enable each pass.
 .TP
 .B \-n
 Suppress the bringover so that the build will start immediately with
@@ -145,6 +150,9 @@ current source code
 .TP
 .B \-p
 Create packages for regular install
+.TP
+.B +p
+Do not create packages for regular install
 .TP
 .B \-U
 Update proto area in the parent workspace
