@@ -25,6 +25,7 @@
 # Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2012 Joyent, Inc.  All rights reserved.
 # Copyright 2021 Oxide Computer Company
+# Copyright 2017 Chris Fraire <cfraire@me.com>
 #
 
 smf_present () {
@@ -155,27 +156,29 @@ smf_netstrategy () {
 }
 
 #
-# smf_kill_contract CONTRACT SIGNAL WAIT TIMEOUT
+# smf_kill_contract CONTRACT SIGNAL [WAIT [TIMEOUT]]
 #
-#   To be called from stop methods of non-transient services.
-#   Sends SIGNAL to the service contract CONTRACT.  If the
-#   WAIT argument is non-zero, smf_kill_contract will wait
-#   until the contract is empty before returning, or until
-#   TIMEOUT expires.
+#   To be called from stop methods of non-transient services. Sends SIGNAL to
+#   the service contract CONTRACT.  If the WAIT argument is non-zero,
+#   smf_kill_contract will re-send SIGNAL until the contract is empty or until
+#   TIMEOUT (seconds if non-zero) expires.
 #
 #   Example, send SIGTERM to contract 200:
 #
 #       smf_kill_contract 200 TERM
 #
-#   Since killing a contract with pkill(1) is not atomic,
-#   smf_kill_contract will continue to send SIGNAL to CONTRACT
-#   every second until the contract is empty.  This will catch
-#   races between fork(2) and pkill(1).
+#   Example, send SIGTERM to contract 200 until empty:
 #
-#   Note that time in this routine is tracked (after being input
-#   via TIMEOUT) in 10ths of a second.  This is because we want
-#   to sleep for short periods of time, and expr(1) is too dumb
-#   to do non-integer math.
+#       smf_kill_contract 200 TERM 1
+#
+#   Example, send SIGTERM to contract 200 until empty or for 10 seconds:
+#
+#       smf_kill_contract 200 TERM 1 10
+#
+#   Since killing a contract with pkill(1) is not atomic, smf_kill_contract
+#   will continue -- if WAIT is non-zero -- to send SIGNAL to CONTRACT every
+#   five seconds until the contract is empty or until TIMEOUT (seconds if
+#   non-zero) expires.  This will catch races between fork(2) and pkill(1).
 #
 #   Returns 1 if the contract is invalid.
 #   Returns 2 if WAIT is "1", TIMEOUT is > 0, and TIMEOUT expires.
@@ -183,13 +186,8 @@ smf_netstrategy () {
 #
 smf_kill_contract() {
 
-	time_waited=0
-	time_to_wait=$4
-
-	[ -z "$time_to_wait" ] && time_to_wait=0
-
-	# convert to 10ths.
-	time_to_wait=`/usr/bin/expr $time_to_wait '*' 10`
+	typeset -i do_wait="$3" ret
+	typeset -E time_waited=0 time_to_wait="$4" time_rekill=5 tt
 
 	# Verify contract id is valid using pgrep
 	/usr/bin/pgrep -c $1 > /dev/null 2>&1
@@ -210,31 +208,26 @@ smf_kill_contract() {
 	fi
 
 	# Return if WAIT is not set or is "0"
-	[ -z "$3" ] && return 0
-	[ "$3" -eq 0 ] && return 0
+	[ $do_wait -eq 0 ] && return 0
 
 	# If contract does not empty, keep killing the contract to catch
 	# any child processes missed because they were forking
 	/usr/bin/pgrep -c $1 > /dev/null 2>&1
 	while [ $? -eq 0 ] ; do
 		# Return 2 if TIMEOUT was passed, and it has expired
-		[ "$time_to_wait" -gt 0 -a $time_waited -ge $time_to_wait ] && \
-		    return 2
+		[[ $time_to_wait -gt 0 && \
+		    $time_waited -ge $time_to_wait ]] && return 2
 
-		#
-		# At five second intervals, issue the kill again.  Note that
-		# the sleep time constant (in tenths) must be a factor of 50
-		# for the remainder trick to work.  i.e. sleeping 2 tenths is
-		# fine, but 27 tenths is not.
-		#
-		remainder=`/usr/bin/expr $time_waited % 50`
-		if [ $time_waited -gt 0 -a $remainder -eq 0 ]; then
+		# At five second intervals, issue the kill again.
+		if [[ $time_waited -ge $time_rekill ]]; then
 			/usr/bin/pkill -$2 -c $1
+			time_rekill=$((5 + $time_rekill))
 		fi
 
 		# Wait two tenths, and go again.
-		/usr/bin/sleep 0.2
-		time_waited=`/usr/bin/expr $time_waited + 2`
+		tt=$SECONDS
+		sleep 0.2
+		time_waited=$(($SECONDS - $tt + $time_waited))
 		/usr/bin/pgrep -c $1 > /dev/null 2>&1
 	done
 
