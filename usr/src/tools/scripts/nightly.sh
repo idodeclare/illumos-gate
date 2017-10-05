@@ -740,6 +740,14 @@ else
 	fi
 fi
 
+#Uncomment the following to enable halt on non-dynamic PKGVERS_BRANCH
+#PKGMAKEFILE="$SRC/pkg/Makefile"
+#if [ -z "$PKGVERS_BRANCH" ] && grep 'PKGVERS_BRANCH= 0.$(ONNV_BUILDNUM)' \
+#    "$PKGMAKEFILE" >/dev/null 2>&1; then
+#	>&2 echo "PKGVERS_BRANCH is not updated"
+#	exit 1
+#fi
+
 # contents of stdenv.sh inserted after next line:
 # STDENV_START
 # STDENV_END
