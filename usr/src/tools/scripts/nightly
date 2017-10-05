@@ -685,6 +685,14 @@ else
 	fi
 fi
 
+#Uncomment the following to enable halt on non-dynamic PKGVERS_BRANCH
+#PKGMAKEFILE="$SRC/pkg/Makefile"
+#if [ -z "$PKGVERS_BRANCH" ] && grep 'PKGVERS_BRANCH= 0.$(ONNV_BUILDNUM)' \
+#    "$PKGMAKEFILE" >/dev/null 2>&1; then
+#	>&2 echo "PKGVERS_BRANCH is not updated"
+#	exit 1
+#fi
+
 # Check if we have sufficient data to continue...
 [[ -v CODEMGR_WS ]] || fatal_error "Error: Variable CODEMGR_WS not set."
 if  [[ "${NIGHTLY_OPTIONS}" == ~(F)n ]] ; then
