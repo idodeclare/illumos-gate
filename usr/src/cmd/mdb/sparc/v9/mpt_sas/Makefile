@@ -35,3 +35,7 @@ include ../../../Makefile.module
 CPPFLAGS += -I$(SRC)/uts/common
 
 CERRWARN += -_gcc=-Wno-trigraphs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

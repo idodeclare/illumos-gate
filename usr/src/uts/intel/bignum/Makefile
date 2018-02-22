@@ -92,3 +92,6 @@ include $(UTSBASE)/intel/Makefile.targ
 
 
 include Makefile.$(CLASS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

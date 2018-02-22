@@ -35,3 +35,6 @@ include		../../Makefile.mount
 CPPFLAGS += -D_LARGEFILE64_SOURCE
 
 include		../../Makefile.mount.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

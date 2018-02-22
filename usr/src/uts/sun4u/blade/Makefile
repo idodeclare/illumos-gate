@@ -107,3 +107,6 @@ $(BLADE_PLAT_LINK_1): $(ROOT_BLADE_DRV_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/blade/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

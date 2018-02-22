@@ -30,3 +30,7 @@ ARCH = sun4u
 sun4u_SRCS = hb_sun4u.c
 
 include ../../sun4/hostbridge/Makefile.hb
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

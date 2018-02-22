@@ -54,3 +54,6 @@ clean:
 	-$(RM) $(PROGS) $(POFILES) $(POFILE)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(POFILE) $(POFILES) $(PROGS)

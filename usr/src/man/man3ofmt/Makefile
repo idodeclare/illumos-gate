@@ -36,3 +36,6 @@ ofmt_update_winsize.3ofmt	:= LINKSRC = ofmt.3ofmt
 include		$(SRC)/man/Makefile.man
 
 install: 	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

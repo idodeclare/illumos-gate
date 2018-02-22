@@ -77,3 +77,7 @@ lint:	lint_PROG
 .KEEP_STATE:
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(MANIFEST) $(MANIFEST_SUN4V) \
+	    $(PROG)

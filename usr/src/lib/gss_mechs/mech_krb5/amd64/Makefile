@@ -33,3 +33,7 @@ include ../../../Makefile.lib.64
 all: $(LIBS64)
 
 install: all $(ROOTLIBDIR64) $(ROOTLIBS64) $(ROOTLINKS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

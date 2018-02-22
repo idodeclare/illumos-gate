@@ -53,3 +53,6 @@ device-nblocks.9p	:= LINKSRC = size.9p
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

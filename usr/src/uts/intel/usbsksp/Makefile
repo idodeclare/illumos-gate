@@ -81,3 +81,6 @@ install:	$(INSTALL_DEPS)
 include $(UTSBASE)/intel/Makefile.targ
 
 CERRWARN	+= -_gcc=-Wno-uninitialized
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

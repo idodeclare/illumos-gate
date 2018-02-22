@@ -39,3 +39,6 @@ include ../../../Makefile.targ
 
 .KEEP_STATE:
 .PARALLEL:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

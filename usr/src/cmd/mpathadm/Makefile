@@ -58,3 +58,6 @@ $(POFILE): $(POFILES)
 lint:	lint_SRCS
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(POFILE) $(POFILES)

@@ -108,3 +108,6 @@ $(SEATTLE_CRYPTO_LINKS): $(ROOT_SEATTLE_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/seattle/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

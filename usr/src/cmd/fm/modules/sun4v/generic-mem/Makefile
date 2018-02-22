@@ -61,3 +61,7 @@ CERRWARN += -_gcc=-Wno-parentheses
 
 %.ln: $(GENERIC_MEM)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

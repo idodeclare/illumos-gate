@@ -35,3 +35,7 @@ include ../../Makefile.sparcv9
 include ../../../Makefile.module
 
 CERRWARN += -_gcc=-Wno-parentheses
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

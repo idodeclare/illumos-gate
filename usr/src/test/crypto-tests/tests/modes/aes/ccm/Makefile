@@ -18,3 +18,6 @@ PROG = aes_ccm
 
 include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS_LOCAL) $(PROGS)

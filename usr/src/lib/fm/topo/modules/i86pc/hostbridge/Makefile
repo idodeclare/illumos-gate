@@ -52,3 +52,6 @@ CPPFLAGS += -I$(UTILDIR) -I$(HBDIR)
 %.ln: $(HBDIR)/%.c
 	$(LINT.c) -c $<
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

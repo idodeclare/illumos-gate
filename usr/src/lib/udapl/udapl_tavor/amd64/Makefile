@@ -32,3 +32,7 @@ amd64_XARCH += amd64.il
 pics/%.o: amd64.il
 
 install: all $(ROOTLIBS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

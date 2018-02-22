@@ -152,3 +152,6 @@ $(MAKAHA_KMODS): FRC
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/makaha/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

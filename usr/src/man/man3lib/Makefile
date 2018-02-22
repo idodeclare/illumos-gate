@@ -199,3 +199,6 @@ libposix4.3lib					:= LINKSRC = librt.3lib
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

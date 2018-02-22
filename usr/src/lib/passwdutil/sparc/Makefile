@@ -31,3 +31,7 @@
 include	../Makefile.com
 
 install:	all $(ROOTLIBS) $(ROOTLINT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

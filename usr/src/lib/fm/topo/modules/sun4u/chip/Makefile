@@ -31,3 +31,7 @@ sun4u_SRCS = chip_sun4u.c
 include ../../sun4/chip/Makefile.chip
 
 LDLIBS += -lkstat
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

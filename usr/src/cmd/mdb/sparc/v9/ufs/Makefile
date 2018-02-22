@@ -34,3 +34,7 @@ include ../../Makefile.sparcv9
 include ../../../Makefile.module
 
 CERRWARN += -_gcc=-Wno-trigraphs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -34,3 +34,7 @@ CFLAGS += $(INCS)
 LINTFLAGS += $(INCS)
 LDLIBS += -L$(ROOTLIB)/fm -ldiskstatus -ltopo
 LDFLAGS += -R/usr/lib/fm
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

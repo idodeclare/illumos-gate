@@ -34,3 +34,7 @@ include ../../Makefile.lib.64
 LDLIBS	+= -ldevinfo
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

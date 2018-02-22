@@ -37,3 +37,7 @@ install:	all $(ROOTDYNLIB64)
 
 include ../Makefile.targ
 include ../../Makefile.sub.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

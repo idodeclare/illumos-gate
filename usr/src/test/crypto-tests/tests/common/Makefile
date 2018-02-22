@@ -31,3 +31,6 @@ lint:
 
 clobber clean:
 	-$(RM) $(OBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS)

@@ -105,3 +105,6 @@ $(DRMACH_OFFSETS_H): $(GENCONST) $(DRMACH_OFFSETS)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/opl/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

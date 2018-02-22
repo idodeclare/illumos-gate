@@ -122,3 +122,6 @@ tnfctl_filter_state_set.3tnf		:= LINKSRC = tnfctl_trace_state_set.3tnf
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

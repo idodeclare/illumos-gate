@@ -45,3 +45,6 @@ all: $(PROG)
 install: all $(ROOTUSRSBINPROG)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

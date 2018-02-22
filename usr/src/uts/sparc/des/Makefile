@@ -119,3 +119,6 @@ $(ROOTLINK):	$(ROOT_MISC_DIR) $(ROOTMODULE)
 #	Include common targets.
 #
 include $(UTSBASE)/sparc/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

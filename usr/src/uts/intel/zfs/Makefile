@@ -121,3 +121,6 @@ $(ROOTLINK):	$(ROOT_FS_DIR) $(ROOTMODULE)
 #	Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

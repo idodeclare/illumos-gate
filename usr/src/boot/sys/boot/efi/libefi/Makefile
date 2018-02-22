@@ -83,3 +83,6 @@ x86:
 	$(SYMLINK) ../../../x86/include x86
 
 $(OBJS): machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS)

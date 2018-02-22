@@ -103,3 +103,6 @@ $(LW2PLUS_CRYPTO_LINKS): $(ROOT_LW2PLUS_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/lw2plus/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

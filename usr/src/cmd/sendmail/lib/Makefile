@@ -67,3 +67,6 @@ $(ROOTETCMAILSYMLINKS):
 	$(RM) $@; $(SYMLINK) helpfile $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

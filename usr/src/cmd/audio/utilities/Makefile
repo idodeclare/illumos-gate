@@ -102,3 +102,6 @@ lint:
 	$(LINT.c) $(LIBCSRCS) $(LDLIBS)
 
 _msg:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CCOBJS) $(COBJS) $(libaudio)

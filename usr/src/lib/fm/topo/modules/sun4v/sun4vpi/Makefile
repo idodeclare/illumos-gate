@@ -42,3 +42,7 @@ CPPFLAGS += -I. -I$(ROOT)/usr/platform/sun4v/include -I$(TOPODIR)
 %.o: ../../../../../common/mdesc/%.c
 	$(COMPILE.c) $<
 	$(CTFCONVERT_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

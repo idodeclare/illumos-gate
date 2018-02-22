@@ -32,3 +32,6 @@ LDFLAGS += -L$(ROOT)/usr/lib/fm/$(MACH64) -R/usr/lib/fm/$(MACH64)
 LINTFLAGS += -L$(ROOT)/usr/lib/fm/$(MACH64)
 
 install: all $(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

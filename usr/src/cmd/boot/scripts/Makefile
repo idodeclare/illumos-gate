@@ -25,3 +25,6 @@
 # 
 
 include Makefile.$(MACH)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(BOOTPROG) $(CMDCLOBBEREES) $(METHODPROG) $(PROG)

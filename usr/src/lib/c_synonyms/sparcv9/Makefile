@@ -33,3 +33,7 @@ include ../../Makefile.lib.64
 BUILD.SO=	$(LD) -o $@ -G -64 $(DYNFLAGS) $(PICS) $(LDLIBS)
 
 install: all $(ROOTLIBS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

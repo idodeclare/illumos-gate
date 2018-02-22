@@ -85,3 +85,6 @@ $(ROOTBIN)/%: %
 	$(INS.file)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG)

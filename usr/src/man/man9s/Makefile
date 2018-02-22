@@ -156,3 +156,6 @@ usba_pipe_handle_data_t.9s	:= LINKSRC =	usba_pipe_handle_data.9s
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

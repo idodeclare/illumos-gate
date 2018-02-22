@@ -43,3 +43,7 @@ include ../../../Makefile.module
 
 %.ln: $(MODSRCS_DIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

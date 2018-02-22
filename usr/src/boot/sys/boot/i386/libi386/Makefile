@@ -116,3 +116,6 @@ libi386.a: $(OBJS)
 
 %.o:	$(LIBZFS)/%.c
 	$(COMPILE.c) -o $@ $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS)

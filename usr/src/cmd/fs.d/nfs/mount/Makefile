@@ -123,3 +123,6 @@ lint:	webnfs.h webnfs_xdr.c webnfs_client.c lint_SRCS
 
 clean:
 	$(RM) $(OBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

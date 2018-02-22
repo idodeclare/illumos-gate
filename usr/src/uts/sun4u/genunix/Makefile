@@ -177,3 +177,6 @@ include $(UTSBASE)/sparc/Makefile.targ
 include $(UTSBASE)/sun4u/Makefile.workarounds
 
 ALL_DEFS +=	$(WORKAROUND_DEFS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

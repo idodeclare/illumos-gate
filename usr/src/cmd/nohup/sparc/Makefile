@@ -31,3 +31,6 @@
 include ../Makefile.com
 
 install: all $(ROOTXPG4PROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

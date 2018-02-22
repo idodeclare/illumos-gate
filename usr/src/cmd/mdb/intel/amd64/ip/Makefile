@@ -34,3 +34,7 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 CPPFLAGS += -I$(SRC)/uts/common/inet
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

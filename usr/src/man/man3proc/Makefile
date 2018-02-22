@@ -421,3 +421,6 @@ Plwp_setasrs.3proc		:= LINKSRC = Plwp_getasrs.3proc
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

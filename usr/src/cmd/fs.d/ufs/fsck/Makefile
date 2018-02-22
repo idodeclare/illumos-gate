@@ -87,3 +87,6 @@ cscope.out tags: FRC
 	$(XREF) -f -x $@
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(FSCKOBJS) $(UFSOBJS)

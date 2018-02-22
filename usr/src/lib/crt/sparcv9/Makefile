@@ -28,3 +28,6 @@ include ../Makefile.com
 include ../../Makefile.lib.64
 
 install:	$(ROOTOBJECTS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS)

@@ -31,3 +31,7 @@ SUN4UEFTFILES= schizo.eft psycho.eft tomatillo.eft xmits.eft oberon.eft
 EFT_PLAT_FILES= $(SUN4UEFTFILES) $(SUN4EFTFILES)
 
 include ../../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EFT_COMMON_FILES) $(EFT_PLAT_FILES) \
+	    $(ROOT_COMMON_EFT_FILES) $(USR_PLAT_EFT_FILES)

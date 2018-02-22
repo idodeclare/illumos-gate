@@ -33,3 +33,6 @@ TOPOFILE = Netra-CP3260-hc-topology.xml
 SRCDIR = ../SUNW,Netra-CP3260
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

@@ -67,3 +67,6 @@ $(DATADIR)/%:	data/%
 		$(INS.file)
 
 include		$(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

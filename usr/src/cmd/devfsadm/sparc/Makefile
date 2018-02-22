@@ -27,3 +27,6 @@
 LINK_OBJS_sparc = misc_link_sparc.o
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

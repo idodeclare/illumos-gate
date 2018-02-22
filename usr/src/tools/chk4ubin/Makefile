@@ -44,3 +44,6 @@ clean:
 	$(RM) $(PROG)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

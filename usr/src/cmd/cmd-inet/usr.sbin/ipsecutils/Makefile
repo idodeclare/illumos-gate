@@ -105,3 +105,5 @@ clean:
 
 include ../../../Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

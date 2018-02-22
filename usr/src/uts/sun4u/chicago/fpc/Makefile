@@ -167,3 +167,6 @@ $(SEATTLE_CONFFILE): $(ROOT_CONFFILE) $(ROOT_SEATTLE_DRV_DIR_32)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/chicago/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

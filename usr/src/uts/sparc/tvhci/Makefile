@@ -100,3 +100,6 @@ include $(UTSBASE)/sparc/Makefile.targ
 browser:	$(BINARY)
 
 browser		:= CFLAGS += -xsb
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

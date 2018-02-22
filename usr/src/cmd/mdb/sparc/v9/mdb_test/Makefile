@@ -41,3 +41,7 @@ include ../../../Makefile.module
 # this dmod as a proc dmod and as a kvm kmod.
 TARGETS = $(TARGETS_proc) $(TARGETS_kvm_kmdb)
 ROOTTGTS = $(ROOTTGTS_proc)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -37,3 +37,7 @@ all:    $(LIBS)
 #install:    all $(ROOTLIBDIR) .WAIT $(ROOTLIBS) .WAIT $(ROOTLINKS)
 # We don't really install. This is for debugging only.
 install: all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

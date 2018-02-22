@@ -28,3 +28,7 @@ HDRDIR = common
 PLUGINTYPE = engine
 
 include ../Makefile.plugin
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

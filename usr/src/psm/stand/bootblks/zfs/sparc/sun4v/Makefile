@@ -41,3 +41,7 @@ include $(BASEDIR)/Makefile.1275
 all:	$(PROG)
 
 include $(BASEDIR)/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EX_FCODE) $(FS_BB) $(FS_FCODE) $(MKBB) $(PROG) \
+	    $(RD_FCODE)

@@ -80,3 +80,6 @@ $(STABS_PROG): $(STABS_OBJS)
 	$(COMPILE.c) $(INC_PATH) -o $@ -c $<
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTS) $(PROG)

@@ -30,3 +30,6 @@ include ../../../../Makefile.cmd
 include ../../../../Makefile.cmd.64
 include ../../Makefile.amd64
 include ../../../Makefile.libstandctf
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

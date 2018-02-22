@@ -120,3 +120,6 @@ lint:	lintlib .WAIT modlintlib .WAIT $(LINT_DEPS)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/starfire/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -108,3 +108,6 @@ cstyle:
 
 # include library targets
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

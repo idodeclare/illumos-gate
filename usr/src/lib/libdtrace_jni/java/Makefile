@@ -253,3 +253,6 @@ doc:
 		$(JAVADOC) -protected -use -notimestamp \
 		-classpath $(APICLASSPATH) -d $(DOCAPI) \
 		$(PKGNAME)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANDIRS) $(CLEANFILES) $(CLOBBERFILES)

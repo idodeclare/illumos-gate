@@ -66,3 +66,6 @@ lint:
 
 clean:     
 	$(RM) $(OBJS) $(DOBJ)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DOBJ) $(OBJS)

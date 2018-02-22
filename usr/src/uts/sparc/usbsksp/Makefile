@@ -86,3 +86,6 @@ install:	$(INSTALL_DEPS)
 include $(UTSBASE)/sparc/Makefile.targ
 
 CERRWARN	+= -_gcc=-Wno-uninitialized
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -61,3 +61,6 @@ $(OBJDIR)/%.o:	../i386/%.c
 # DEMO DELETE START
 include		../../../../../Makefile.master.64
 # DEMO DELETE END
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS) $(PROG)

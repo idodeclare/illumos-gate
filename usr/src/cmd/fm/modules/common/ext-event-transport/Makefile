@@ -38,3 +38,7 @@ CFLAGS += $(INCS)
 LINTFLAGS += $(INCS)
 LDLIBS += -L$(ROOTLIB)/fm -lsysevent -lfmevent -ltopo -luuid -lscf -lc
 LDFLAGS += -R/usr/lib/fm
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

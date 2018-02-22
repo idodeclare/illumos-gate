@@ -180,3 +180,6 @@ include $(UTSBASE)/sparc/Makefile.targ
 include $(UTSBASE)/$(PLATFORM)/Makefile.workarounds
 
 ALL_DEFS +=	$(WORKAROUND_DEFS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

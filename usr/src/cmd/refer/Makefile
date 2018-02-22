@@ -150,3 +150,6 @@ $(ROOTDIRS) :
 FRC:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(CMDCLOBBEREES) $(OBJS) $(PROG)

@@ -27,3 +27,6 @@ MANFILES= 	FCOE_CreatePort.3fcoe	\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

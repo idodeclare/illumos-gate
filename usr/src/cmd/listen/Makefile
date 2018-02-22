@@ -95,3 +95,6 @@ lint:
 	$(LINT.c) $(NLPSSRC)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

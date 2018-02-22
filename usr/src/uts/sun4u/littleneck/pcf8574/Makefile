@@ -98,3 +98,6 @@ LINT_LIB_DIR	= $(LITTLENECK_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/littleneck/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

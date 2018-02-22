@@ -62,3 +62,6 @@ lint_SRCS:
 	$(LINT.c) $(SRCS)
 
 include ../Makefile.msg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS)

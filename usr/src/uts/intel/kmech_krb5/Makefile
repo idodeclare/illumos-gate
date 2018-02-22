@@ -116,3 +116,6 @@ INC_PATH += \
 	-I$(UTSBASE)/common/gssapi/mechs/krb5/include \
 	-I$(SRC)/lib/gss_mechs/mech_krb5/include \
 	-I$(SRC)/lib/gss_mechs/mech_krb5/krb5/krb
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

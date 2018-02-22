@@ -51,3 +51,6 @@ clean:
 
 clobber: clean
 	$(RM) $(CLOBBERFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS)

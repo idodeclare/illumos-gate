@@ -9,3 +9,7 @@
 include ../Makefile.com
 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

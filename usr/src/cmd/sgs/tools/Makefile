@@ -90,3 +90,6 @@ $(ROOTDIR)/%:	scoping/%
 FRC:
 
 execs:		$(EXECS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EXECS)

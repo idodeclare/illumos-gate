@@ -26,3 +26,6 @@
 #ident	"%Z%%M%	%I%	%E% SMI"
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINTFILES) $(OBJS) $(PROG)

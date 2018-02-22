@@ -44,3 +44,7 @@ CPPFLAGS += -I$(SRC)/cmd/svc/startd -I$(SRC)/lib/librestart/common
 
 %.ln: $(MODSRCS_DIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

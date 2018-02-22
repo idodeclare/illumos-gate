@@ -19,3 +19,7 @@ include		../Makefile.com
 install:	$(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
 
 include		$(SRC)/lib/Makefile.filter.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -32,3 +32,6 @@ touchlock.3mail		:= LINKSRC = maillock.3mail
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

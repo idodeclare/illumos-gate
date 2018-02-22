@@ -40,3 +40,7 @@ CPPFLAGS += -I$(SRC)/uts/common/sys/scsi
 CPPFLAGS += -I$(SRC)/uts/common/sys/scsi/adapters
 CPPFLAGS += -I$(MRSASBASE)
 CPPFLAGS += -D KMDB_MODULE
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

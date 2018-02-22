@@ -93,3 +93,7 @@ $(LLINTLIB):	$(SRCS)
 	$(LINT.c) -o $(LIBRARY:lib%.a=lib) $(SRCS) > $(LINTOUT) 2>&1
 
 include ../../../lib/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -38,3 +38,7 @@ EFT_COMMON_FILES=		\
 include ../../../Makefile.subdirs
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EFT_COMMON_FILES) $(EFT_PLAT_FILES) \
+	    $(ROOT_COMMON_EFT_FILES) $(USR_PLAT_EFT_FILES)

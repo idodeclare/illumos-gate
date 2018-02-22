@@ -53,3 +53,7 @@ LDLIBS += -L$(ROOTLIB)/fm -lldom -ltopo
 
 %.ln: $(CPUMEM_RETIRE_COMMON)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

@@ -86,3 +86,6 @@ putback:
 	-keywords setup.c
 	-keywords utilities.c
 	-keywords Makefile
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(FSCKOBJS) $(UDFSOBJS)

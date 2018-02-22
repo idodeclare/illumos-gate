@@ -163,3 +163,6 @@ globallint:
 lint:	modlintlib .WAIT $(LINT_DEPS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

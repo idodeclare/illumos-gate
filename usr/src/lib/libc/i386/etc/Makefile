@@ -83,3 +83,6 @@ clean:
 
 clobber: clean
 	$(RM) $(ETCFLASHPREPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ETCFLASHPREPROG) $(FLASHPREPROG)

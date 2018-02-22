@@ -262,3 +262,6 @@ sockaddr_un.3socket		:= LINKSRC = sockaddr.3socket
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

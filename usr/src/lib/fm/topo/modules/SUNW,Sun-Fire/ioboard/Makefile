@@ -29,3 +29,7 @@ CLASS = plat
 PLATFORMS = SUNW,Sun-Fire
 
 include ../../sun4/ioboard/Makefile.iob
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

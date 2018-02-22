@@ -97,3 +97,6 @@ LINT_LIB_DIR    = $(TAZMO_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/tazmo/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

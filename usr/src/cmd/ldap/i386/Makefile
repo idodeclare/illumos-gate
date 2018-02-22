@@ -34,3 +34,6 @@ include ../Makefile.com
 install: $(ALLPROG) $(ROOTPROG) $(ROOTLINKS) $(ROOTLINT)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

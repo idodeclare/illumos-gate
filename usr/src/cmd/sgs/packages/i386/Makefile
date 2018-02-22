@@ -34,3 +34,6 @@ all: $(FILES)
 install: all $(ROOTREADME) .WAIT pkg
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

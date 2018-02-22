@@ -70,3 +70,6 @@ include ../../Makefile.targ
 CLOBBERFILES += dummy_mech_token.conf
 
 clean lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)
