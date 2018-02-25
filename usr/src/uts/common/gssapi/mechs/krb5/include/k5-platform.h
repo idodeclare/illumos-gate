@@ -7,7 +7,7 @@
 /*
  * k5-platform.h
  *
- * Copyright 2003, 2004, 2005 Massachusetts Institute of Technology.
+ * Copyright 2003, 2004, 2005, 2007, 2008, 2009 Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -35,10 +35,13 @@
  *
  * Currently:
  * + make "static inline" work
+ * + [u]int{8,16,32}_t types
  * + 64-bit types and load/store code
  * + SIZE_MAX
  * + shared library init/fini hooks
  * + consistent getpwnam/getpwuid interfaces
+ * + va_copy fudged if not provided
+ * + [v]asprintf
  */
 
 #ifndef K5_PLATFORM_H
@@ -49,6 +52,13 @@
 #include <sys/types.h>
 
 #include "autoconf.h"
+#include <string.h>
+#include <stdarg.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <errno.h>
 
 /* Initialization and finalization function support for libraries.
 
@@ -220,7 +230,7 @@ typedef struct { k5_once_t once; int error, did_run; void (*fn)(void); } k5_init
 #  define MAYBE_DEFINE_CALLINIT_FUNCTION
 # else
 #  define MAYBE_DEFINE_CALLINIT_FUNCTION			\
-	static int k5_call_init_function(k5_init_t *i)	\
+	static inline int k5_call_init_function(k5_init_t *i)	\
 	{							\
 	    int err;						\
 	    err = k5_once(&i->once, i->fn);			\
@@ -391,7 +401,6 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 
 #endif /* !_KERNEL */
 
-
 /* 64-bit support: krb5_ui_8 and krb5_int64.
 
    This should move to krb5.h eventually, but without the namespace
@@ -420,13 +429,13 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 # define SIZE_MAX ((size_t)((size_t)0 - 1))
 #endif
 
+#ifndef UINT64_MAX
+# define UINT64_MAX ((UINT64_TYPE)((UINT64_TYPE)0 - 1))
+#endif
 
 /* Read and write integer values as (unaligned) octet strings in
-   specific byte orders.
-
-   Add per-platform optimizations later if needed.  (E.g., maybe x86
-   unaligned word stores and gcc/asm instructions for byte swaps,
-   etc.)  */
+   specific byte orders.  Add per-platform optimizations as
+   needed.  */
 
 /* Solaris Kerberos: To avoid problems with lint the following
    functions can be found in separate header files. */
@@ -434,34 +443,40 @@ typedef struct { int error; unsigned char did_run; } k5_init_t;
 static void
 store_16_be (unsigned int val, unsigned char *p)
 {
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(16,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+    PUTSWAPPED(16,p,val);
+#else
     p[0] = (val >>  8) & 0xff;
     p[1] = (val      ) & 0xff;
+#endif
 }
-static void
-store_16_le (unsigned int val, unsigned char *p)
+static inline void
+store_32_be (unsigned int val, void *vp)
 {
-    p[1] = (val >>  8) & 0xff;
-    p[0] = (val      ) & 0xff;
-}
-static void
-store_32_be (unsigned int val, unsigned char *p)
-{
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(32,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+    PUTSWAPPED(32,p,val);
+#else
     p[0] = (val >> 24) & 0xff;
     p[1] = (val >> 16) & 0xff;
     p[2] = (val >>  8) & 0xff;
     p[3] = (val      ) & 0xff;
+#endif
 }
-static void
-store_32_le (unsigned int val, unsigned char *p)
+static inline void
+store_64_be (UINT64_TYPE val, void *vp)
 {
-    p[3] = (val >> 24) & 0xff;
-    p[2] = (val >> 16) & 0xff;
-    p[1] = (val >>  8) & 0xff;
-    p[0] = (val      ) & 0xff;
-}
-static void
-store_64_be (UINT64_TYPE val, unsigned char *p)
-{
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_BE)
+    PUT(64,p,val);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+    PUTSWAPPED(64,p,val);
+#else
     p[0] = (unsigned char)((val >> 56) & 0xff);
     p[1] = (unsigned char)((val >> 48) & 0xff);
     p[2] = (unsigned char)((val >> 40) & 0xff);
@@ -470,10 +485,83 @@ store_64_be (UINT64_TYPE val, unsigned char *p)
     p[5] = (unsigned char)((val >> 16) & 0xff);
     p[6] = (unsigned char)((val >>  8) & 0xff);
     p[7] = (unsigned char)((val      ) & 0xff);
+#endif
 }
-static void
-store_64_le (UINT64_TYPE val, unsigned char *p)
+static inline unsigned short
+load_16_be (const void *cvp)
 {
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(16,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP16)
+    return GETSWAPPED(16,p);
+#else
+    return (p[1] | (p[0] << 8));
+#endif
+}
+static inline unsigned int
+load_32_be (const void *cvp)
+{
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(32,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP32)
+    return GETSWAPPED(32,p);
+#else
+    return (p[3] | (p[2] << 8)
+	    | ((uint32_t) p[1] << 16)
+	    | ((uint32_t) p[0] << 24));
+#endif
+}
+static inline UINT64_TYPE
+load_64_be (const void *cvp)
+{
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_BE)
+    return GET(64,p);
+#elif defined(__GNUC__) && defined(K5_LE) && defined(SWAP64)
+    return GETSWAPPED(64,p);
+#else
+    return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
+#endif
+}
+static inline void
+store_16_le (unsigned int val, void *vp)
+{
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(16,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+    PUTSWAPPED(16,p,val);
+#else
+    p[1] = (val >>  8) & 0xff;
+    p[0] = (val      ) & 0xff;
+#endif
+}
+static inline void
+store_32_le (unsigned int val, void *vp)
+{
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(32,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+    PUTSWAPPED(32,p,val);
+#else
+    p[3] = (val >> 24) & 0xff;
+    p[2] = (val >> 16) & 0xff;
+    p[1] = (val >>  8) & 0xff;
+    p[0] = (val      ) & 0xff;
+#endif
+}
+static inline void
+store_64_le (UINT64_TYPE val, void *vp)
+{
+    unsigned char *p = vp;
+#if defined(__GNUC__) && defined(K5_LE)
+    PUT(64,p,val);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+    PUTSWAPPED(64,p,val);
+#else
     p[7] = (unsigned char)((val >> 56) & 0xff);
     p[6] = (unsigned char)((val >> 48) & 0xff);
     p[5] = (unsigned char)((val >> 40) & 0xff);
@@ -482,36 +570,91 @@ store_64_le (UINT64_TYPE val, unsigned char *p)
     p[2] = (unsigned char)((val >> 16) & 0xff);
     p[1] = (unsigned char)((val >>  8) & 0xff);
     p[0] = (unsigned char)((val      ) & 0xff);
+#endif
 }
-static unsigned short
-load_16_be (unsigned char *p)
+static inline unsigned short
+load_16_le (const void *cvp)
 {
-    return (p[1] | (p[0] << 8));
-}
-static unsigned short
-load_16_le (unsigned char *p)
-{
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(16,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP16)
+    return GETSWAPPED(16,p);
+#else
     return (p[0] | (p[1] << 8));
+#endif
 }
-static  unsigned int
-load_32_be (unsigned char *p)
+static inline unsigned int
+load_32_le (const void *cvp)
 {
-    return (p[3] | (p[2] << 8) | (p[1] << 16) | (p[0] << 24));
-}
-static  unsigned int
-load_32_le (unsigned char *p)
-{
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(32,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP32)
+    return GETSWAPPED(32,p);
+#else
     return (p[0] | (p[1] << 8) | (p[2] << 16) | (p[3] << 24));
+#endif
 }
-static UINT64_TYPE
-load_64_be (unsigned char *p)
+static inline UINT64_TYPE
+load_64_le (const void *cvp)
 {
-    return ((UINT64_TYPE)load_32_be(p) << 32) | load_32_be(p+4);
-}
-static UINT64_TYPE
-load_64_le (unsigned char *p)
-{
+    const unsigned char *p = cvp;
+#if defined(__GNUC__) && defined(K5_LE)
+    return GET(64,p);
+#elif defined(__GNUC__) && defined(K5_BE) && defined(SWAP64)
+    return GETSWAPPED(64,p);
+#else
     return ((UINT64_TYPE)load_32_le(p+4) << 32) | load_32_le(p);
+#endif
+}
+
+static inline unsigned short
+load_16_n (const void *p)
+{
+#ifdef _WIN32
+    unsigned __int16 n;
+#else
+    uint16_t n;
+#endif
+    memcpy(&n, p, 2);
+    return n;
+}
+static inline unsigned int
+load_32_n (const void *p)
+{
+#ifdef _WIN32
+    unsigned __int32 n;
+#else
+    uint32_t n;
+#endif
+    memcpy(&n, p, 4);
+    return n;
+}
+static inline UINT64_TYPE
+load_64_n (const void *p)
+{
+    UINT64_TYPE n;
+    memcpy(&n, p, 8);
+    return n;
+}
+
+/* Assume for simplicity that these swaps are identical.  */
+static inline UINT64_TYPE
+k5_htonll (UINT64_TYPE val)
+{
+#ifdef K5_BE
+    return val;
+#elif defined K5_LE && defined SWAP64
+    return SWAP64 (val);
+#else
+    return load_64_be ((unsigned char *)&val);
+#endif
+}
+static inline UINT64_TYPE
+k5_ntohll (UINT64_TYPE val)
+{
+    return k5_htonll (val);
 }
 #endif
 

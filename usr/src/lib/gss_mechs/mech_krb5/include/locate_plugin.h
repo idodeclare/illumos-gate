@@ -1,4 +1,3 @@
-
 /*
  * <krb5/locate_plugin.h>
  *

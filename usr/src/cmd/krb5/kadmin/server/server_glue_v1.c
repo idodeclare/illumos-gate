@@ -1,5 +1,3 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
  *
@@ -17,7 +15,7 @@
  *
  */
 
-
+#define USE_KADM5_API_VERSION 1
 #include <kadm5/admin.h>
 #include "misc.h"
 
@@ -41,11 +39,11 @@ kadm5_ret_t kadm5_get_principal_v1(void *server_handle,
 				  krb5_principal principal, 
 				  kadm5_principal_ent_t_v1 *ent)
 {
-     return kadm5_get_principal(server_handle, principal,(kadm5_principal_ent_t) ent, 0);
+     return kadm5_get_principal(server_handle, principal, ent);
 }
 
 kadm5_ret_t kadm5_get_policy_v1(void *server_handle, kadm5_policy_t name,
 				kadm5_policy_ent_t *ent)
 {
-     return kadm5_get_policy(server_handle, name,(kadm5_policy_ent_t) ent);
+     return kadm5_get_policy(server_handle, name, ent);
 }

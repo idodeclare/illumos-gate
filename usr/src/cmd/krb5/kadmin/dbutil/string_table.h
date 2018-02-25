@@ -6,8 +6,6 @@
 #ifndef _STRING_TABLE_H
 #define	_STRING_TABLE_H
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
  *
@@ -32,8 +30,6 @@ extern "C" {
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Header: /afs/athena.mit.edu/astaff/project/krbdev/.cvsroot/src/kadmin/\
- * dbutil/string_table.h,v 1.2 1996/07/22 20:25:25 marc Exp $
  *
  */
 

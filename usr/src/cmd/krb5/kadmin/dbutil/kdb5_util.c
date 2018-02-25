@@ -24,7 +24,7 @@
 /*
  * admin/edit/kdb5_edit.c
  *
- * (C) Copyright 1990,1991, 1996 by the Massachusetts Institute of Technology.
+ * (C) Copyright 1990,1991, 1996, 2008, 2009 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -114,23 +114,32 @@ kadm5_config_params global_params;
 void usage()
 {
      fprintf(stderr, "%s: "
-	   "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
-	     "\t        [-sf stashfilename] [-P password] [-m] cmd [cmd_options]\n"
+	     "kdb5_util [-x db_args]* [-r realm] [-d dbname] [-k mkeytype] [-M mkeyname]\n"
+	     "\t        [-kv mkeyVNO] [-sf stashfilename] [-P password] [-m] cmd [cmd_options]\n"
 	     "\tcreate	[-s]\n"
 	     "\tdestroy	[-f]\n"
 	     "\tstash	[-f keyfile]\n"
-	     "\tdump	[-old] [-ov] [-b6] [-verbose] [filename	[princs...]]\n"
+	     "\tdump	[-old] [-ov] [-b6] [-verbose]\n"
 	     "\t	[-mkey_convert] [-new_mkey_file mkey_file]\n"
 	     "\t	[-rev] [-recurse] [filename [princs...]]\n"
 	     "\tload	[-old] [-ov] [-b6] [-verbose] [-update] filename\n"
 	     "\tark	[-e etype_list] principal\n"
+	     "\tadd_mkey [-e etype] [-s]\n"
+	     "\tuse_mkey kvno [time]\n"
+	     "\tlist_mkeys\n",
+             gettext("Usage"));
+     /* avoid a string length compiler warning */
+     fprintf(stderr,
+	     "\tupdate_princ_encryption [-f] [-n] [-v] [princ-pattern]\n"
+	     "\tpurge_mkeys [-f] [-n] [-v]\n"
 	     "\nwhere,\n\t[-x db_args]* - any number of database specific arguments.\n"
-	     "\t\t\tLook at each database documentation for supported arguments\n",
-		gettext("Usage"));
+	     "\t\t\tLook at each database documentation for supported arguments\n");
      exit(1);
 }
 
-krb5_keyblock master_key;
+extern krb5_keyblock master_keyblock;
+krb5_kvno   master_kvno; /* fetched */
+extern krb5_keylist_node *master_keylist;
 extern krb5_principal master_princ;
 krb5_db_entry master_entry;
 int	valid_master_key = 0;
@@ -151,11 +160,16 @@ struct _cmd_table {
      int opendb;
 } cmd_table[] = {
      {"create", kdb5_create, 0},
-     {"destroy", kdb5_destroy, 1},
+     {"destroy", kdb5_destroy, 1}, /* 1 opens the kdb */
      {"stash", kdb5_stash, 1},
      {"dump", dump_db, 1},
      {"load", load_db, 0},
      {"ark", add_random_key, 1},
+     {"add_mkey", kdb5_add_mkey, 1},
+     {"use_mkey", kdb5_use_mkey, 1},
+     {"list_mkeys", kdb5_list_mkeys, 1},
+     {"update_princ_encryption", kdb5_update_princ_encryption, 1},
+     {"purge_mkeys", kdb5_purge_mkeys, 1},
      {NULL, NULL, 0},
 };
 
@@ -228,13 +242,11 @@ int main(argc, argv)
 
 	Err_no_master_msg = gettext("Master key not entered!\n");
 	Err_no_database = gettext("Database not currently opened!\n");
-
-	/*
-	 * Solaris Kerberos:
-	 * Ensure that "progname" is set before calling com_err.
-	 */
-	progname = (strrchr(argv[0], '/') ?
-		    strrchr(argv[0], '/') + 1 : argv[0]);
+    /*
+     * Ensure that "progname" is set before calling com_err.
+     */
+    progname = (strrchr(argv[0], '/') ?
+	    strrchr(argv[0], '/') + 1 : argv[0]);
 
     retval = kadm5_init_krb5_context(&util_context);
     if (retval) {
@@ -251,7 +263,7 @@ int main(argc, argv)
     }
     memset(cmd_argv, 0, sizeof(char *)*argc);
     cmd_argc = 1;
-	 
+
     argv++; argc--;
     while (*argv) {
        if (strcmp(*argv, "-P") == 0 && ARG_VAL) {
@@ -261,15 +273,11 @@ int main(argc, argv)
 	    global_params.dbname = koptarg;
 	    global_params.mask |= KADM5_CONFIG_DBNAME;
 
-	    db_name_tmp = malloc( strlen(global_params.dbname) + sizeof("dbname="));
-	    if( db_name_tmp == NULL )
+	    if (asprintf(&db_name_tmp, "dbname=%s", global_params.dbname) < 0)
 	    {
 		com_err(progname, ENOMEM, "while parsing command arguments");
 		exit(1);
 	    }
-
-	    strcpy( db_name_tmp, "dbname=");
-	    strcat( db_name_tmp, global_params.dbname );
 
 	    if (!add_db_arg(db_name_tmp)) {
 		com_err(progname, ENOMEM, "while parsing command arguments\n");
@@ -296,10 +304,18 @@ int main(argc, argv)
        } else if (strcmp(*argv, "-k") == 0 && ARG_VAL) {
 	    if (krb5_string_to_enctype(koptarg, &global_params.enctype)) {
 		/* Solaris Kerberos */
-		 com_err(progname, 0, gettext("%s is an invalid enctype"), koptarg);
-	    }
-	    else
+		 com_err(progname, 0, gettext("%s is an invalid enctype"),
+		     koptarg);
+            } else
 		 global_params.mask |= KADM5_CONFIG_ENCTYPE;
+       } else if (strcmp(*argv, "-kv") == 0 && ARG_VAL) {
+	    global_params.kvno = (krb5_kvno) atoi(koptarg);
+            if (global_params.kvno == IGNORE_VNO) {
+                com_err(progname, EINVAL, gettext(": %s is an invalid mkeyVNO"),
+		    koptarg);
+                exit(1);
+            } else
+                global_params.mask |= KADM5_CONFIG_KVNO;
        } else if (strcmp(*argv, "-M") == 0 && ARG_VAL) {
 	    global_params.mkey_name = koptarg;
 	    global_params.mask |= KADM5_CONFIG_MKEY_NAME;
@@ -341,7 +357,6 @@ int main(argc, argv)
     retval = kadm5_get_config_params(util_context, 1,
 				     &global_params, &global_params);
     if (retval) {
-		/* Solaris Kerberos */
 		com_err(progname, retval,
 		    gettext("while retreiving configuration parameters"));
 	 exit(1);
@@ -355,11 +370,12 @@ int main(argc, argv)
 
     (void) memset(&master_key, 0, sizeof (krb5_keyblock)); 
 
-    if ((global_params.enctype != ENCTYPE_UNKNOWN) &&
-	(!krb5_c_valid_enctype(global_params.enctype))) {
+    master_keyblock.enctype = global_params.enctype;
+    if ((master_keyblock.enctype != ENCTYPE_UNKNOWN) &&
+	(!krb5_c_valid_enctype(master_keyblock.enctype))) {
 	/* Solaris Kerberos */
 	com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
-	    gettext("while setting up enctype %d"), global_params.enctype);
+	    gettext("while setting up enctype %d"), master_keyblock.enctype);
 	exit(1);
     }
 
@@ -367,10 +383,10 @@ int main(argc, argv)
     if (cmd->opendb && open_db_and_mkey())
 	 return exit_status;
 
-	if (global_params.iprop_enabled == TRUE)
-		ulog_set_role(util_context, IPROP_MASTER);
-	else
-		ulog_set_role(util_context, IPROP_NULL);
+    if (global_params.iprop_enabled == TRUE)
+	ulog_set_role(util_context, IPROP_MASTER);
+    else
+	ulog_set_role(util_context, IPROP_NULL);
 
     (*cmd->func)(cmd_argc, cmd_argv);
 
@@ -397,7 +413,6 @@ void set_dbname(argc, argv)
     krb5_error_code retval;
 
     if (argc < 3) {
-		/* Solaris Kerberos */
 		com_err(progname, 0, gettext("Too few arguments"));
 		com_err(progname, 0, gettext("Usage: %s dbpathname realmname"),
 			progname);
@@ -406,21 +421,19 @@ void set_dbname(argc, argv)
     }
     if (dbactive) {
 	if ((retval = krb5_db_fini(util_context)) && retval!= KRB5_KDB_DBNOTINITED) {
-	    /* Solaris Kerberos */
 	    com_err(progname, retval, gettext("while closing previous database"));
 	    exit_status++;
 	    return;
 	}
 	if (valid_master_key) {
-	    krb5_free_keyblock_contents(util_context, &master_key);
-	    master_key.contents = NULL;
+	    krb5_free_keyblock_contents(util_context, &master_keyblock);
+	    master_keyblock.contents = NULL;
 	    valid_master_key = 0;
 	}
 	krb5_free_principal(util_context, master_princ);
 	dbactive = FALSE;
     }
 
-    /* Solaris Kerberos */
     (void) set_dbname_help(progname, argv[1]);
     return;
 }
@@ -485,6 +498,11 @@ static int open_db_and_mkey()
 	return(1);
     }
 
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        master_kvno = global_params.kvno; /* user specified */
+    else
+        master_kvno = IGNORE_VNO;
+
     krb5_db_free_principal(util_context, &master_entry, nentries);
 
     /* the databases are now open, and the master principal exists */
@@ -497,36 +515,35 @@ static int open_db_and_mkey()
 	if (retval) {
 		com_err(progname, retval,
 		    gettext("while calculated master key salt"));
-	    /* Solaris Kerberos */
 	    exit_status++;
 	    return(1);
 	}
 
 	/* If no encryption type is set, use the default */
-	if (global_params.enctype == ENCTYPE_UNKNOWN) {
-	    global_params.enctype = DEFAULT_KDC_ENCTYPE;
-	    if (!krb5_c_valid_enctype(global_params.enctype))
-		com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
+	if (master_keyblock.enctype == ENCTYPE_UNKNOWN) {
+	    master_keyblock.enctype = DEFAULT_KDC_ENCTYPE;
+        if (!krb5_c_valid_enctype(master_keyblock.enctype))
+            com_err(progname, KRB5_PROG_KEYTYPE_NOSUPP,
 			gettext("while setting up enctype %d"),
-			global_params.enctype);
+                    master_keyblock.enctype);
 	}
 
-	retval = krb5_c_string_to_key(util_context, global_params.enctype, 
-				      &pwd, &scratch, &master_key);
+	retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
+				      &pwd, &scratch, &master_keyblock);
 	if (retval) {
 	    com_err(progname, retval,
 		gettext("while transforming master key from password"));
-	    /* Solaris Kerberos */
 	    exit_status++;
 	    return(1);
 	}
 	free(scratch.data);
 	mkey_password = 0;
     } else if ((retval = krb5_db_fetch_mkey(util_context, master_princ, 
-					    global_params.enctype,
+					    master_keyblock.enctype,
 					    manual_mkey, FALSE,
 					    global_params.stash_file,
-					    0, &master_key))) {
+					    &master_kvno,
+                                            0, &master_keyblock))) {
 	com_err(progname, retval,
 	    gettext("while reading master key"));
 	com_err(progname, 0,
@@ -538,25 +555,29 @@ static int open_db_and_mkey()
 	 */
 	if (retval != KRB5_KDB_CANTREAD_STORED)
 		exit_status++;
-	return(0);
-    }
-    if ((retval = krb5_db_verify_master_key(util_context, master_princ, 
-		&master_key))) {
-	com_err(progname, retval,
-		gettext("while verifying master key"));
-	exit_status++;
-	krb5_free_keyblock_contents(util_context, &master_key);
-	return(1);
+            return(0);
     }
 
-    seed.length = master_key.length;
-    seed.data = (char *)master_key.contents;
+    if ((retval = krb5_db_fetch_mkey_list(util_context, master_princ,
+				          &master_keyblock, master_kvno,
+                                          &master_keylist))) {
+	com_err(progname, retval, gettext("while getting master key list"));
+	com_err(progname, 0,
+	    gettext("Warning: proceeding without master key list"));
+	exit_status++;
+	return(0);
+    }
+
+    seed.length = master_keyblock.length;
+    seed.data = (char *) master_keyblock.contents;
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
 	com_err(progname, retval, 
 		gettext("while initializing random key generator"));
 	exit_status++;
-	krb5_free_keyblock_contents(util_context, &master_key);
+	memset((char *)master_keyblock.contents, 0, master_keyblock.length);
+	krb5_free_keyblock_contents(util_context, &master_keyblock);
+        krb5_db_free_mkey_list(util_context, master_keylist);
 	return(1);
     }
 
@@ -577,8 +598,9 @@ quit()
 
     if (finished)
 	return 0;
+    krb5_db_free_mkey_list(util_context, master_keylist);
     retval = krb5_db_fini(util_context);
-    krb5_free_keyblock_contents(util_context, &master_key);
+    krb5_free_keyblock_contents(util_context, &master_keyblock);
     finished = TRUE;
     krb5_free_context(util_context);
     if (retval && retval != KRB5_KDB_DBNOTINITED) {
@@ -605,10 +627,10 @@ add_random_key(argc, argv)
     krb5_int32 num_keysalts = 0;
 
     int free_keysalts;
-    /* Solaris Kerberos */
     char *me = progname;
     char *ks_str = NULL;
     char *pr_str;
+    krb5_keyblock *tmp_mkey;
 
     if (argc < 2)
 	usage();
@@ -663,7 +685,16 @@ add_random_key(argc, argv)
 	free_keysalts = 0;
     } else
 	free_keysalts = 1;
-    ret = krb5_dbe_ark(util_context, &master_key,
+
+    /* Find the mkey used to protect the existing keys */
+    ret = krb5_dbe_find_mkey(util_context, master_keylist, &dbent, &tmp_mkey);
+    if (ret) {
+	com_err(me, ret, "while finding mkey");
+	exit_status++;
+	return;
+    }
+
+    ret = krb5_dbe_ark(util_context, tmp_mkey,
 		       keysalts, num_keysalts,
 		       &dbent);
     if (free_keysalts)

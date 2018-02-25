@@ -1,4 +1,3 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
 /*
  * Copyright (C) 1989-1994 by the Massachusetts Institute of Technology,
  * Cambridge, MA, USA.  All Rights Reserved.
@@ -33,5 +32,9 @@
  * be used in advertising or publicity pertaining to distribution of the 
  * software.  Title to copyright in this software and any associated 
  * documentation shall at all times remain with M.I.T., and USER agrees to 
- * preserve same.  
+ * preserve same.
+ *
+ * Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.  
  */

@@ -1,5 +1,3 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
  *
@@ -129,7 +127,7 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
     krb5_tl_data	    tl_data;
     krb5_principal	    princ;
     krb5_db_entry	    kdb;
-    char		    *current;
+    char		    *current = NULL;
     char		    *cp;
     int			    x, one;
     krb5_boolean	    more;
@@ -152,11 +150,10 @@ int process_ov_principal(fname, kcontext, filep, verbose, linenop)
 	goto done;
     } else {
 	if(strcmp(cp, "")) {
-	    if((rec->policy = (char *) malloc(strlen(cp)+1)) == NULL)  {
+	    if((rec->policy = strdup(cp)) == NULL)  {
 		ret = ENOMEM;
 		goto done;
 	    }
-	    strcpy(rec->policy, cp);
 	} else rec->policy = NULL;
     }
     if((cp = nstrtok((char *) NULL, "\t")) == NULL) {

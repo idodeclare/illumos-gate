@@ -24,7 +24,7 @@
 /*
  * admin/destroy/kdb5_destroy.c
  *
- * Copyright 1990 by the Massachusetts Institute of Technology.
+ * Copyright 1990, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -82,23 +82,16 @@ kdb5_destroy(argc, argv)
     retval1 = kadm5_init_krb5_context(&context);
     if( retval1 )
     {
-	/* Solaris Kerberos */
-	com_err(progname, retval1, "while initializing krb5_context");
+	com_err(progname, retval1, gettext("while initializing krb5_context"));
 	exit(1);
     }
 
     if ((retval1 = krb5_set_default_realm(context,
 					  util_context->default_realm))) {
-	/* Solaris Kerberos */
-	com_err(progname, retval1, "while setting default realm name");
+	com_err(progname, retval1, gettext("while setting default realm name"));
 	exit(1);
     }
     
-/* Solaris Kerberos */
-#if 0
-    if (strrchr(argv[0], '/'))
-	argv[0] = strrchr(argv[0], '/')+1;
-#endif
     dbname = global_params.dbname;
 
     optind = 1;
@@ -156,7 +149,6 @@ kdb5_destroy(argc, argv)
 	(void)unlink(global_params.stash_file);
 
     if (retval1) {
-		/* Solaris Kerberos */
 		com_err(progname, retval1,
 			gettext("deleting database '%s'"), dbname);
 	exit_status++; return;
@@ -171,8 +163,9 @@ kdb5_destroy(argc, argv)
 		exit_status++;
 		return;
 	}
-
 	(void) unlink(ufilename);
+
+	(void) unlink(global_params.iprop_logfile);
     }
 
     dbactive = FALSE;

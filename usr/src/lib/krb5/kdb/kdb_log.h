@@ -39,8 +39,8 @@ extern "C" {
 /*
  * DB log constants
  */
-#define	KDB_UMAGIC	0x6661212
-#define	KDB_HMAGIC	0x6662323
+#define	KDB_ULOG_MAGIC		0x6661212
+#define	KDB_ULOG_HDR_MAGIC	0x6662323
 
 /*
  * DB Flags
@@ -80,13 +80,15 @@ extern krb5_error_code ulog_finish_update(krb5_context context,
 extern krb5_error_code ulog_get_entries(krb5_context context, kdb_last_t last,
 	kdb_incr_result_t *ulog_handle);
 extern krb5_error_code ulog_replay(krb5_context context,
-	kdb_incr_result_t *incr_ret);
+				   kdb_incr_result_t *incr_ret, char **db_args);
 extern krb5_error_code ulog_conv_2logentry(krb5_context context,
 	krb5_db_entry *entries, kdb_incr_update_t *updates, int nentries);
 extern krb5_error_code ulog_conv_2dbentry(krb5_context context,
 	krb5_db_entry *entries, kdb_incr_update_t *updates, int nentries);
 extern void ulog_free_entries(kdb_incr_update_t *updates, int no_of_updates);
 extern krb5_error_code ulog_set_role(krb5_context ctx, iprop_role role);
+
+extern krb5_error_code ulog_lock(krb5_context ctx, int mode);
 
 typedef struct kdb_hlog {
 	uint32_t	kdb_hmagic;	/* Log header magic # */
@@ -106,7 +108,7 @@ typedef struct kdb_ent_header {
 	kdbe_time_t	kdb_time;	/* Timestamp of update */
 	bool_t		kdb_commit;	/* Is the entry committed or not */
 	uint32_t	kdb_entry_size;	/* Size of update entry */
-	uchar_t		entry_data[4];	/* Address of kdb_incr_update_t */
+	uint8_t		entry_data[4];	/* Address of kdb_incr_update_t */
 } kdb_ent_header_t;
 
 typedef struct _kdb_log_context {

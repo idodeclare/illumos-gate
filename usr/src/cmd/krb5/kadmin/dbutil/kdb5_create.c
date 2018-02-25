@@ -22,9 +22,9 @@
 
 
 /*
- * admin/create/kdb5_create.c
+ * kadmin/dbutil/kdb5_create.c
  *
- * Copyright 1990,1991 by the Massachusetts Institute of Technology.
+ * Copyright 1990,1991,2001, 2002, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -50,6 +50,31 @@
  * Generate (from scratch) a Kerberos KDC database.
  */
 
+/*
+ * Copyright (C) 1998 by the FundsXpress, INC.
+ * 
+ * All rights reserved.
+ * 
+ * Export of this software from the United States of America may require
+ * a specific license from the United States Government.  It is the
+ * responsibility of any person or organization contemplating export to
+ * obtain such a license before exporting.
+ * 
+ * WITHIN THAT CONSTRAINT, permission to use, copy, modify, and
+ * distribute this software and its documentation for any purpose and
+ * without fee is hereby granted, provided that the above copyright
+ * notice appear in all copies and that both that copyright notice and
+ * this permission notice appear in supporting documentation, and that
+ * the name of FundsXpress. not be used in advertising or publicity pertaining
+ * to distribution of the software without specific, written prior
+ * permission.  FundsXpress makes no representations about the suitability of
+ * this software for any purpose.  It is provided "as is" without express
+ * or implied warranty.
+ * 
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ * WARRANTIES OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+ */
 /*
  *  Yes, I know this is a hack, but we need admin.h without including the
  *  rpc.h header. Additionally, our rpc.h header brings in
@@ -120,7 +145,9 @@ static krb5_error_code add_principal
  * 5) close & exit
  */
 
+extern krb5_keyblock master_keyblock;
 extern krb5_principal master_princ;
+krb5_data master_salt;
 
 krb5_data tgt_princ_entries[] = {
 	{0, KRB5_TGS_NAME_SIZE, KRB5_TGS_NAME},
@@ -167,17 +194,13 @@ void kdb5_create(argc, argv)
     int do_stash = 0;
     krb5_data pwd, seed;
     kdb_log_context *log_ctx;
+    krb5_kvno mkey_kvno;
     krb5_keyblock mkey;
-    krb5_data master_salt = { 0, NULL };
+    master_salt = { 0, NULL };
 	
     /* Solaris Kerberos */
     (void) memset(&mkey, 0, sizeof (mkey));
 
-/* Solaris Kerberos */ 
-#if 0  
-    if (strrchr(argv[0], '/'))
-	argv[0] = strrchr(argv[0], '/')+1;
-#endif
     while ((optchar = getopt(argc, argv, "s")) != -1) {
 	switch(optchar) {
 	case 's':
@@ -210,7 +233,6 @@ void kdb5_create(argc, argv)
     printf ("Loading random data\n");
     retval = krb5_c_random_os_entropy (util_context, 1, NULL);
     if (retval) {
-      /* Solaris Kerberos */
       com_err (progname, retval, "Loading random data");
       exit_status++; return;
     }
@@ -221,9 +243,7 @@ void kdb5_create(argc, argv)
 					  global_params.mkey_name,
 					  global_params.realm,  
 					  &mkey_fullname, &master_princ))) {
-	/* Solaris Kerberos */
-	com_err(progname, retval,
-			gettext("while setting up master key name"));
+	com_err(progname, retval, gettext("while setting up master key name"));
 	exit_status++; return;
     }
 
@@ -246,14 +266,16 @@ void kdb5_create(argc, argv)
 
 	pw_size = 1024;
 	pw_str = malloc(pw_size);
+	if (pw_str == NULL) {
+	    com_err(progname, ENOMEM, gettext("while creating new master key"));
+	    exit_status++; return;
+	}
 	
 	retval = krb5_read_password(util_context,
-			    gettext("Enter KDC database master key"),
-			    gettext("Re-enter KDC database "
-				    "master key to verify"),
-			    pw_str, &pw_size);
+			    gettext(KRB5_KDC_MKEY_1),
+			    gettext(KRB5_KDC_MKEY_2),
+				    pw_str, &pw_size);
 	if (retval) {
-	    /* Solaris Kerberos */
 	    com_err(progname, retval,
 		    gettext("while reading master key from keyboard"));
 	    exit_status++; return;
@@ -265,24 +287,22 @@ void kdb5_create(argc, argv)
     pwd.length = strlen(mkey_password);
     retval = krb5_principal2salt(util_context, master_princ, &master_salt);
     if (retval) {
-	/* Solaris Kerberos */
 	com_err(progname, retval,
 		gettext("while calculated master key salt"));
 	exit_status++;
 	goto cleanup;
     }
 
-    retval = krb5_c_string_to_key(util_context, global_params.enctype,
-				  &pwd, &master_salt, &mkey);
+    retval = krb5_c_string_to_key(util_context, master_keyblock.enctype, 
+				  &pwd, &master_salt, &master_keyblock);
     if (retval) {
-	/* Solaris Kerberos */
 	com_err(progname, retval,
 	    gettext("while transforming master key from password"));
 	exit_status++;
 	goto cleanup;
     }
 
-    retval = krb5_copy_keyblock(util_context, &mkey, &rblock.key);
+    retval = krb5_copy_keyblock(util_context, &master_keyblock, &rblock.key);
     if (retval) {
 	/* Solaris Kerberos */
 	com_err(progname, retval, gettext("while copying master key"));
@@ -290,11 +310,10 @@ void kdb5_create(argc, argv)
 	goto cleanup;
     }
 
-    seed.length = mkey.length;
-    seed.data = (char *)mkey.contents;
+    seed.length = master_keyblock.length;
+    seed.data = (char *)master_keyblock.contents;
 
     if ((retval = krb5_c_random_seed(util_context, &seed))) {
-	/* Solaris Kerberos */
 	com_err(progname, retval, 
 		gettext("while initializing random key generator"));
 	exit_status++; 
@@ -308,35 +327,11 @@ void kdb5_create(argc, argv)
 	exit_status++;
 	goto cleanup;
     }
-#if 0 /************** Begin IFDEF'ed OUT *******************************/
-    if (retval = krb5_db_fini(util_context)) {
-	/* Solaris Kerberos */
-	com_err(progname, retval,
-		gettext("while closing current database"));
-	exit_status++;
-	goto cleanup;
-    }
-    if ((retval = krb5_db_set_name(util_context, global_params.dbname))) {
-	/* Solaris Kerberos */
-	com_err(progname, retval,
-		gettext("while setting active database to '%s'"),
-               global_params.dbname);
-	exit_status++;
-	goto cleanup;
-    }
-    if ((retval = krb5_db_init(util_context))) {
-	com_err(progname, retval,
-		gettext("while initializing the database '%s'"),
-	global_params.dbname);
-	exit_status++;
-	goto cleanup;
-    }
-#endif /**************** END IFDEF'ed OUT *******************************/	
 
-    /* Solaris Kerberos: for iprop */
     if (log_ctx && log_ctx->iproprole) {
-	if (retval = ulog_map(util_context, &global_params, FKCOMMAND)) {
-		/* Solaris Kerberos */
+	    if ((retval = ulog_map(util_context, global_params.iprop_logfile,
+				   global_params.iprop_ulogsize, FKCOMMAND,
+				   db5util_db_args))) {
 		com_err(progname, retval,
 			gettext("while creating update log"));
 		exit_status++;
@@ -349,7 +344,7 @@ void kdb5_create(argc, argv)
 	 */
 	(void) memset(log_ctx->ulog, 0, sizeof (kdb_hlog_t));
 
-	log_ctx->ulog->kdb_hmagic = KDB_HMAGIC;        
+	log_ctx->ulog->kdb_hmagic = KDB_ULOG_HDR_MAGIC;
 	log_ctx->ulog->db_version_num = KDB_VERSION;
 	log_ctx->ulog->kdb_state = KDB_STABLE;
 	log_ctx->ulog->kdb_block = ULOG_BLOCK;
@@ -362,33 +357,42 @@ void kdb5_create(argc, argv)
 	log_ctx->iproprole = IPROP_NULL;
     }
 
-    if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock, &mkey)) ||
-	(retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock, &mkey))) {
+    if ((retval = add_principal(util_context, master_princ, MASTER_KEY, &rblock)) ||
+	(retval = add_principal(util_context, &tgt_princ, TGT_KEY, &rblock))) {
 	(void) krb5_db_fini(util_context);
-	/* Solaris Kerberos */
 	com_err(progname, retval, gettext("while adding entries to the database"));
 	exit_status++;
 	goto cleanup;
     }
+
+
+
     /*
      * Always stash the master key so kadm5_create does not prompt for
      * it; delete the file below if it was not requested.  DO NOT EXIT
      * BEFORE DELETING THE KEYFILE if do_stash is not set.
      */
+
+    /*
+     * Determine the kvno to use, it must be that used to create the master key
+     * princ.
+     */
+    if (global_params.mask & KADM5_CONFIG_KVNO)
+        mkey_kvno = global_params.kvno; /* user specified */
+    else
+        mkey_kvno = 1;  /* Default */
+
     retval = krb5_db_store_master_key(util_context,
 				      global_params.stash_file,
 				      master_princ,
-				      &mkey,
+				      mkey_kvno,
+				      &master_keyblock,
 				      mkey_password);
-
     if (retval) {
-	/* Solaris Kerberos */
 	com_err(progname, errno, gettext("while storing key"));
 	printf(gettext("Warning: couldn't stash master key.\n"));
     }
 
-    if (pw_str)
-	memset(pw_str, 0, pw_size);
 
     if (kadm5_create(&global_params)) {
 	 if (!do_stash) unlink(global_params.stash_file);
@@ -400,6 +404,7 @@ void kdb5_create(argc, argv)
 /* Solaris Kerberos: deal with master_keyblock in better way */
 cleanup:
     if (pw_str) {
+	memset(pw_str, 0, pw_size);
 	if (mkey_password == pw_str)
 		mkey_password = NULL;
 	free(pw_str);
@@ -407,7 +412,7 @@ cleanup:
     if (master_salt.data)
 	free(master_salt.data);
     krb5_free_keyblock(util_context, rblock.key);
-    krb5_free_keyblock_contents(util_context, &mkey);
+    krb5_free_keyblock_contents(util_context, &master_keyblock);
     (void) krb5_db_fini(util_context);
 
     return;
@@ -467,11 +472,11 @@ add_principal(context, princ, op, pblock, mkey)
 {
     krb5_error_code 	  retval;
     krb5_db_entry 	  entry;
-
+    krb5_kvno             mkey_kvno;
     krb5_timestamp	  now;
     struct iterate_args	  iargs;
-
     int			  nentries = 1;
+    krb5_actkvno_node     actkvno;
 
     memset((char *) &entry, 0, sizeof(entry));
 
@@ -499,11 +504,30 @@ add_principal(context, princ, op, pblock, mkey)
 	memset((char *) entry.key_data, 0, sizeof(krb5_key_data));
 	entry.n_key_data = 1;
 
+        if (global_params.mask & KADM5_CONFIG_KVNO)
+            mkey_kvno = global_params.kvno; /* user specified */
+        else
+            mkey_kvno = 1;  /* Default */
 	entry.attributes |= KRB5_KDB_DISALLOW_ALL_TIX;
 	if ((retval = krb5_dbekd_encrypt_key_data(context, pblock->key,
 						  mkey, NULL,
-						  1, entry.key_data)))
+						  mkey_kvno, entry.key_data)))
 	    goto error_out;
+        /*
+         * There should always be at least one "active" mkey so creating the
+         * KRB5_TL_ACTKVNO entry now so the initial mkey is active.
+         */
+        actkvno.next = NULL;
+        actkvno.act_kvno = mkey_kvno;
+        /* earliest possible time in case system clock is set back */
+        actkvno.act_time = 0;
+        if ((retval = krb5_dbe_update_actkvno(context, &entry, &actkvno)))
+            return retval;
+
+        /* so getprinc shows the right kvno */
+        if ((retval = krb5_dbe_update_mkvno(context, &entry, mkey_kvno)))
+            return retval;
+
 	break;
     case TGT_KEY:
 	iargs.ctx = context;

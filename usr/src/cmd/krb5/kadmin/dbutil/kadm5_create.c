@@ -6,8 +6,6 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Id: kadm5_create.c,v 1.6 1998/10/30 02:52:37 marc Exp $
- * $Source: /cvs/krbdev/krb5/src/kadmin/dbutil/kadm5_create.c,v $
  */
 
 /*
@@ -41,24 +39,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <k5-int.h>
 #include <kdb.h>
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
+
+#include "fake-addrinfo.h"
+
 
 #include <krb5.h>
 #include <krb5/kdb.h>
 #include "kdb5_util.h"
 #include <libintl.h>
 
-int
-add_admin_old_princ(void *handle, krb5_context context,
+static int add_admin_old_princ(void *handle, krb5_context context,
 		    char *name, char *realm, int attrs, int lifetime);
-int
-add_admin_sname_princ(void *handle, krb5_context context,
+
+static int add_admin_sname_princ(void *handle, krb5_context context,
     char *sname, int attrs, int lifetime);
-static int
-add_admin_princ(void *handle, krb5_context context,
+
+static int add_admin_princ(void *handle, krb5_context context,
     krb5_principal principal, int attrs, int lifetime);
 
 static int add_admin_princs(void *handle, krb5_context context, char *realm);
@@ -160,8 +161,7 @@ static char *build_name_with_realm(char *name, char *realm)
 {
      char *n;
 
-     n = (char *) malloc(strlen(name) + strlen(realm) + 2);
-     sprintf(n, "%s@%s", name, realm);
+     asprintf(&n, "%s@%s", name, realm);
      return n;
 }
 
@@ -188,6 +188,54 @@ static char *build_name_with_realm(char *name, char *realm)
 static int add_admin_princs(void *handle, krb5_context context, char *realm)
 {
   krb5_error_code ret = 0;
+  char *service_name = 0, *p;
+  char localname[MAXHOSTNAMELEN];
+  struct addrinfo *ai, ai_hints;
+  int gai_error;
+
+  if (gethostname(localname, MAXHOSTNAMELEN)) {
+      ret = errno;
+      perror("gethostname");
+      goto clean_and_exit;
+  }
+  memset(&ai_hints, 0, sizeof(ai_hints));
+  ai_hints.ai_flags = AI_CANONNAME;
+  gai_error = getaddrinfo(localname, (char *)NULL, &ai_hints, &ai);
+  if (gai_error) {
+      ret = EINVAL;
+      fprintf(stderr, "getaddrinfo(%s): %s\n", localname,
+	      gai_strerror(gai_error));
+      goto clean_and_exit;
+  }
+  if (ai->ai_canonname == NULL) {
+      ret = EINVAL;
+      fprintf(stderr,
+	      "getaddrinfo(%s): Cannot determine canonical hostname.\n",
+	      localname);
+      freeaddrinfo(ai);
+      goto clean_and_exit;
+  }
+  for (p = ai->ai_canonname; *p; p++) {
+#ifdef isascii
+      if (!isascii(*p))
+	  continue;
+#else
+      if (*p < ' ')
+	  continue;
+      if (*p > '~')
+	  continue;
+#endif
+      if (!isupper(*p))
+	  continue;
+      *p = tolower(*p);
+  }
+  if (asprintf(&service_name, "kadmin/%s", ai->ai_canonname) < 0) {
+      ret = ENOMEM;
+      fprintf(stderr, "Out of memory\n");
+      freeaddrinfo(ai);
+      goto clean_and_exit;
+  }
+  freeaddrinfo(ai);
 
 /*
  * Solaris Kerberos:
@@ -198,11 +246,16 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
  */ 
 
 #if 0
-  if ((ret = add_admin_old_princ(handle, context,
-  		     KADM5_ADMIN_SERVICE, realm,
-  		     KRB5_KDB_DISALLOW_TGT_BASED,
-  		     ADMIN_LIFETIME)))
-     goto clean_and_exit;
+  if ((ret = add_admin_princ(handle, context,
+			     service_name, realm,
+			     KRB5_KDB_DISALLOW_TGT_BASED,
+			     ADMIN_LIFETIME)))
+      goto clean_and_exit;
+  if ((ret = add_admin_princ(handle, context,
+			     KADM5_ADMIN_SERVICE, realm,
+			     KRB5_KDB_DISALLOW_TGT_BASED,
+			     ADMIN_LIFETIME)))
+       goto clean_and_exit;
 #endif 
 
 	if ((ret = add_admin_old_princ(handle, context,
@@ -232,6 +285,7 @@ static int add_admin_princs(void *handle, krb5_context context, char *realm)
 		goto clean_and_exit;
 
 clean_and_exit:
+  free(service_name);
 
   return ret;
 }
@@ -243,7 +297,8 @@ clean_and_exit:
  *
  * 	creator		(r) principal to use as "mod_by"
  * 	rseed		(r) seed for random key generator
- *	principal	(r) kerberos principal to add
+ * 	name		(r) principal name
+ * 	realm		(r) realm name for principal
  * 	attrs		(r) principal's attributes
  * 	lifetime	(r) principal's max life, or 0
  * 	not_unique	(r) error message for multiple entries, never used
@@ -265,7 +320,7 @@ clean_and_exit:
  */
 
 static int add_admin_princ(void *handle, krb5_context context,
-    krb5_principal principal, int attrs, int lifetime)
+    char *name, char *realm, int attrs, int lifetime)
 {
      char *fullname;
      krb5_error_code ret;
@@ -273,10 +328,12 @@ static int add_admin_princ(void *handle, krb5_context context,
 
      memset(&ent, 0, sizeof(ent));
 
-	if (krb5_unparse_name(context, principal, &fullname))
-		return ERR;
-
-     ent.principal = principal;
+     fullname = build_name_with_realm(name, realm);
+     ret = krb5_parse_name(context, fullname, &ent.principal);
+     if (ret) {
+	  com_err(progname, ret, str_PARSE_NAME);
+	  return(ERR);
+     }
      ent.max_life = lifetime;
      ent.attributes = attrs | KRB5_KDB_DISALLOW_ALL_TIX;
      
@@ -350,7 +407,6 @@ static int add_admin_princ(void *handle, krb5_context context,
 	  free(keysalt);
           krb5_free_ktypes (context, enctype);
 
-
 	  if (ret) {
 	       com_err(progname, ret,
 			gettext(str_RANDOM_KEY), fullname);
@@ -409,6 +465,3 @@ add_admin_sname_princ(void *handle, krb5_context context,
 	}
 	return (add_admin_princ(handle, context, principal, attrs, lifetime));
 }
-
-
-		

@@ -3,8 +3,6 @@
  * Use is subject to license terms.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
  *
@@ -26,7 +24,7 @@
 /*
  * kadmin/ktutil/ktutil.c
  *
- * Copyright 1995, 1996 by the Massachusetts Institute of Technology.
+ * Copyright 1995, 1996, 2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -54,6 +52,7 @@
 #include "k5-int.h"
 #include "ktutil.h"
 #include <com_err.h>
+#include "adm_proto.h"
 #include <ss/ss.h>
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
@@ -92,7 +91,7 @@ int main(argc, argv)
 		    gettext("while localizing command description messages"));
 		exit(1);
 	}
-    sci_idx = ss_create_invocation("ktutil", "5.0", (char *) NULL,
+    sci_idx = ss_create_invocation("ktutil", "5.0", (char *)NULL,
 				   &ktutil_cmds, &retval);
     if (retval) {
 	ss_perror(sci_idx, retval, gettext("creating invocation"));
@@ -140,21 +139,7 @@ void ktutil_read_v4(argc, argv)
     int argc;
     char *argv[];
 {
-#ifdef KRB5_KRB4_COMPAT
-    krb5_error_code retval;
-
-    if (argc != 2) {
-		fprintf(stderr,
-		    gettext("%s: must specify the srvtab to read\n"), argv[0]);
-	return;
-    }
-    retval = ktutil_read_srvtab(kcontext, argv[1], &ktlist);
-    if (retval)
-		com_err(argv[0], retval,
-		    gettext("while reading srvtab \"%s\""), argv[1]);
-#else
 	fprintf(stderr, gettext("%s: krb4 support not configured\n"), argv[0]);
-#endif
 }
 
 void ktutil_write_v5(argc, argv)
@@ -178,21 +163,7 @@ void ktutil_write_v4(argc, argv)
     int argc;
     char *argv[];
 {
-#ifdef KRB5_KRB4_COMPAT
-    krb5_error_code retval;
-
-    if (argc != 2) {
-		fprintf(stderr,
-		    gettext("%s: must specify srvtab to write\n"), argv[0]);
-	return;
-    }
-    retval = ktutil_write_srvtab(kcontext, ktlist, argv[1]);
-    if (retval)
-		com_err(argv[0], retval,
-		    gettext("while writing srvtab \"%s\""), argv[1]);
-#else
 	fprintf(stderr, gettext("%s: krb4 support not configured\n"), argv[0]);
-#endif
 }
 
 void ktutil_add_entry(argc, argv)
@@ -303,6 +274,7 @@ void ktutil_list(argc, argv)
 	    char fill;
 	    time_t tstamp;
 
+	    tstamp = lp->entry->timestamp;
 	    (void) localtime(&tstamp);
 	    lp->entry->timestamp = tstamp;
 	    fill = ' ';
@@ -338,7 +310,7 @@ void ktutil_list(argc, argv)
 	    printf(")");
 	}
 	printf("\n");
-	krb5_xfree(pname);
+	free(pname);
     }
 }
 

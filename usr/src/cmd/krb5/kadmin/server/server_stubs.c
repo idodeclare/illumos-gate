@@ -2203,3 +2203,13 @@ generic_ret *init_2_svc(krb5_ui_4 *arg, struct svc_req *rqstp)
 
 	return (&ret);
 }
+
+gss_name_t
+rqst2name(struct svc_req *rqstp)
+{
+
+     if (rqstp->rq_cred.oa_flavor == RPCSEC_GSS)
+	  return rqstp->rq_clntname;
+     else
+	  return rqstp->rq_clntcred;
+}

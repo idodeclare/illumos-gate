@@ -30,8 +30,6 @@
  *
  */
 
-static char rcsid[] = "$Id: kpasswd.c 17258 2005-06-21 01:36:03Z raeburn $";
-
 #include <kadm5/admin.h>
 #include <krb5.h>
 
@@ -112,8 +110,8 @@ kpasswd(context, argc, argv)
   unsigned int pwsize;
   char password[255];  /* I don't really like 255 but that's what kinit uses */
   char msg_ret[1024], admin_realm[1024];
-  kadm5_principal_ent_rec principal_entry;
-  kadm5_policy_ent_rec policy_entry;
+  kadm5_principal_ent_rec principal_entry = NULL;
+  kadm5_policy_ent_rec policy_entry = NULL;
   void *server_handle;
   kadm5_config_params params;
   char *cpw_service;

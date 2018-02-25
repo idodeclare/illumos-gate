@@ -5,7 +5,7 @@
 /*
  * include/k5-thread.h
  *
- * Copyright 2004,2005,2006 by the Massachusetts Institute of Technology.
+ * Copyright 2004,2005,2006,2007,2008 by the Massachusetts Institute of Technology.
  * All Rights Reserved.
  *
  * Export of this software from the United States of America may
@@ -59,7 +59,6 @@ k5_mutex_unlock(k5_mutex_t *m)
   return(0);
 }
 
-
 #else /* _KERNEL */
 
 #include "autoconf.h"
@@ -103,11 +102,10 @@ k5_mutex_unlock(k5_mutex_t *m)
 
    A second function or macro called at various possible "first" entry
    points which either calls pthread_once on the first function
-   (POSIX), or checks some flag set by the first function (Windows,
-   debug support), and possibly returns an error.  (In the
-   non-threaded case, a simple flag can be used to avoid multiple
-   invocations, and the mutexes don't need run-time initialization
-   anyways.)
+   (POSIX), or checks some flag set by the first function (Windows),
+   and possibly returns an error.  (In the non-threaded case, a simple
+   flag can be used to avoid multiple invocations, and the mutexes
+   don't need run-time initialization anyways.)
 
    A third function for library termination calls mutex_destroy on
    each mutex for the library.  This function would be called
@@ -164,7 +162,6 @@ k5_mutex_unlock(k5_mutex_t *m)
 
    Debug support: Not much.  Might check if k5_key_register has been
    called and abort if not.
-
 
    Any actual external symbols will use the krb5int_ prefix.  The k5_
    names will be simple macros or inline functions to rename the
@@ -306,6 +303,25 @@ void KRB5_CALLCONV krb5int_mutex_report_stats(/* k5_mutex_t *m */);
 
 
 
+/* The mutex structure we use, k5_mutex_t, is defined to some
+   OS-specific bits.  The use of multiple layers of typedefs are an
+   artifact resulting from debugging code we once used, implemented as
+   wrappers around the OS mutex scheme.
+
+   The OS specific bits, in k5_os_mutex, break down into three primary
+   implementations, POSIX threads, Windows threads, and no thread
+   support.  However, the POSIX thread version is further subdivided:
+   In one case, we can determine at run time whether the thread
+   library is linked into the application, and use it only if it is
+   present; in the other case, we cannot, and the thread library must
+   be linked in always, but can be used unconditionally.  In the
+   former case, the k5_os_mutex structure needs to hold both the POSIX
+   and the non-threaded versions.
+
+   The various k5_os_mutex_* operations are the OS-specific versions,
+   applied to the OS-specific data, and k5_mutex_* uses k5_os_mutex_*
+   to do the OS-specific parts of the work.  */
+
 /* Define the OS mutex bit.  */
 
 /* First, if we're not actually doing multiple threads, do we
@@ -410,6 +426,7 @@ typedef unsigned char k5_os_nothread_once_t;
 
 
 #ifndef ENABLE_THREADS
+
 typedef k5_os_nothread_mutex k5_os_mutex;
 # define K5_OS_MUTEX_PARTIAL_INITIALIZER	\
 		K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER
@@ -433,13 +450,19 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 
    Linux: Stub mutex routines exist, but pthread_once does not.
 
-   Solaris: In libc there's a pthread_once that doesn't seem to do
+   Solaris <10: In libc there's a pthread_once that doesn't seem to do
    anything.  Bleah.  But pthread_mutexattr_setrobust_np is defined
    only in libpthread.  However, some version of GNU libc (Red Hat's
    Fedora Core 5, reportedly) seems to have that function, but no
    declaration, so we'd have to declare it in order to test for its
    address.  We now have tests to see if pthread_once actually works,
    so stick with that for now.
+
+   Solaris 10: The real thread support now lives in libc, and
+   libpthread is just a filter object.  So we might as well use the
+   real functions unconditionally.  Since we haven't got a test for
+   this property yet, we use NO_WEAK_PTHREADS defined in aclocal.m4
+   depending on the OS type.
 
    IRIX 6.5 stub pthread support in libc is really annoying.  The
    pthread_mutex_lock function returns ENOSYS for a program not linked
@@ -455,7 +478,13 @@ typedef k5_os_nothread_mutex k5_os_mutex;
    If we find a platform with non-functional stubs and no weak
    references, we may have to resort to some hack like dlsym on the
    symbol tables of the current process.  */
-#ifdef HAVE_PRAGMA_WEAK_REF
+extern int krb5int_pthread_loaded(void)
+#ifdef __GNUC__
+     /* We should always get the same answer for the life of the process.  */
+     __attribute__((const))
+#endif
+     ;
+#if defined(HAVE_PRAGMA_WEAK_REF) && !defined(NO_WEAK_PTHREADS)
 # pragma weak pthread_once
 # pragma weak pthread_mutex_lock
 # pragma weak pthread_mutex_unlock
@@ -463,45 +492,9 @@ typedef k5_os_nothread_mutex k5_os_mutex;
 # pragma weak pthread_mutex_init
 # pragma weak pthread_self
 # pragma weak pthread_equal
-# ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
-#  pragma weak pthread_mutexattr_setrobust_np
-# endif
-# if !defined HAVE_PTHREAD_ONCE
-#  define K5_PTHREADS_LOADED	(&pthread_once != 0)
-# elif !defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP \
-	&& defined HAVE_PTHREAD_MUTEXATTR_SETROBUST_NP_IN_THREAD_LIB
-#  define K5_PTHREADS_LOADED	(&pthread_mutexattr_setrobust_np != 0)
-# else
-#  define K5_PTHREADS_LOADED	(1)
-# endif
-#else
-/* no pragma weak support */
-# define K5_PTHREADS_LOADED	(1)
-#endif
-
-#if defined(__mips) && defined(__sgi) && (defined(_SYSTYPE_SVR4) || defined(__SYSTYPE_SVR4__))
-/* IRIX 6.5 stub pthread support in libc is really annoying.  The
-   pthread_mutex_lock function returns ENOSYS for a program not linked
-   against -lpthread.  No link-time failure, no weak reference tests,
-   etc.
-
-   The C library doesn't provide pthread_once; we can use weak
-   reference support for that.  */
-# ifndef HAVE_PRAGMA_WEAK_REF
-#  if defined(__GNUC__) && __GNUC__ < 3
-#   error "Please update to a newer gcc with weak symbol support, or switch to native cc, reconfigure and recompile."
-#  else
-#   error "Weak reference support is required"
-#  endif
-# endif
+# define K5_PTHREADS_LOADED	(krb5int_pthread_loaded())
 # define USE_PTHREAD_LOCK_ONLY_IF_LOADED
-#endif
 
-#if !defined(HAVE_PTHREAD_MUTEX_LOCK) && !defined(USE_PTHREAD_LOCK_ONLY_IF_LOADED)
-# define USE_PTHREAD_LOCK_ONLY_IF_LOADED
-#endif
-
-#ifdef HAVE_PRAGMA_WEAK_REF
 /* Can't rely on useful stubs -- see above regarding Solaris.  */
 typedef struct {
     pthread_once_t o;
@@ -511,12 +504,17 @@ typedef struct {
 # define k5_once(O,F)	(K5_PTHREADS_LOADED			\
 			 ? pthread_once(&(O)->o,F)		\
 			 : k5_os_nothread_once(&(O)->n,F))
+
 #else
+
+/* no pragma weak support */
+# define K5_PTHREADS_LOADED	(1)
+
 typedef pthread_once_t k5_once_t;
 # define K5_ONCE_INIT	PTHREAD_ONCE_INIT
 # define k5_once	pthread_once
-#endif
 
+#endif
 typedef struct {
     pthread_mutex_t p;
 #ifdef DEBUG_THREADS
@@ -527,163 +525,40 @@ typedef struct {
 #endif
 } k5_os_mutex;
 
-#ifdef DEBUG_THREADS
-# ifdef __GNUC__
-#  define k5_pthread_mutex_lock(M)			\
-	({						\
-	    k5_os_mutex *_m2 = (M);			\
-	    int _r2 = pthread_mutex_lock(&_m2->p);	\
-	    if (_r2 == 0) _m2->owner = pthread_self();	\
-	    _r2;					\
-	})
-# else
-static int
-k5_pthread_mutex_lock(k5_os_mutex *m)
-{
-    int r = pthread_mutex_lock(&m->p);
-    if (r)
-	return r;
-    m->owner = pthread_self();
-    return 0;
-}
+#if defined(__mips) && defined(__sgi) && (defined(_SYSTYPE_SVR4) || defined(__SYSTYPE_SVR4__))
+# ifndef HAVE_PRAGMA_WEAK_REF
+#  if defined(__GNUC__) && __GNUC__ < 3
+#   error "Please update to a newer gcc with weak symbol support, or switch to native cc, reconfigure and recompile."
+#  else
+#   error "Weak reference support is required"
+#  endif
 # endif
-# define k5_pthread_assert_locked(M)				\
-	(K5_PTHREADS_LOADED					\
-	 ? ASSERT(pthread_equal((M)->owner, pthread_self()))	\
-	 : (void)0)
-# define k5_pthread_mutex_unlock(M)	\
-	(k5_pthread_assert_locked(M),	\
-	 (M)->owner = (pthread_t) 0,	\
-	 pthread_mutex_unlock(&(M)->p))
-#else
-# define k5_pthread_mutex_lock(M) pthread_mutex_lock(&(M)->p)
-/* LINTED */
-static void k5_pthread_assert_locked(k5_os_mutex *m) { }
-# define k5_pthread_mutex_unlock(M) pthread_mutex_unlock(&(M)->p)
 #endif
 
-/* Define as functions to:
-   (1) eliminate "statement with no effect" warnings for "0"
-   (2) encourage type-checking in calling code  */
-
-/* LINTED */
-static void k5_pthread_assert_unlocked(pthread_mutex_t *m) { }
-
-#if defined(DEBUG_THREADS_SLOW) && HAVE_SCHED_H && (HAVE_SCHED_YIELD || HAVE_PRAGMA_WEAK_REF)
-# include <sched.h>
-# if !HAVE_SCHED_YIELD
-#  pragma weak sched_yield
-#  define MAYBE_SCHED_YIELD()	((void)((&sched_yield != NULL) ? sched_yield() : 0))
-# else
-#  define MAYBE_SCHED_YIELD()	((void)sched_yield())
-# endif
-#else
-# define MAYBE_SCHED_YIELD()	((void)0)
-#endif
-
-/* It may not be obvious why this function is desirable.
-
-   I want to call pthread_mutex_lock, then sched_yield, then look at
-   the return code from pthread_mutex_lock.  That can't be implemented
-   in a macro without a temporary variable, or GNU C extensions.
-
-   There used to be an inline function which did it, with both
-   functions called from the inline function.  But that messes with
-   the debug information on a lot of configurations, and you can't
-   tell where the inline function was called from.  (Typically, gdb
-   gives you the name of the function from which the inline function
-   was called, and a line number within the inline function itself.)
-
-   With this auxiliary function, pthread_mutex_lock can be called at
-   the invoking site via a macro; once it returns, the inline function
-   is called (with messed-up line-number info for gdb hopefully
-   localized to just that call).  */
-#ifdef __GNUC__
-#define return_after_yield(R)			\
-	__extension__ ({			\
-	    int _r = (R);			\
-	    MAYBE_SCHED_YIELD();		\
-	    _r;					\
-	})
-#else
-static int return_after_yield(int r)
-{
-    MAYBE_SCHED_YIELD();
-    return r;
-}
-#endif
+typedef pthread_mutex_t k5_os_mutex;
+# define K5_OS_MUTEX_PARTIAL_INITIALIZER \
+	PTHREAD_MUTEX_INITIALIZER
 
 #ifdef USE_PTHREAD_LOCK_ONLY_IF_LOADED
 
-# if defined(PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP) && defined(DEBUG_THREADS)
-#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP, (pthread_t) 0, \
-	  K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
-# elif defined(DEBUG_THREADS)
-#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_MUTEX_INITIALIZER, (pthread_t) 0, \
-	  K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
-# else
-#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_MUTEX_INITIALIZER, K5_OS_NOTHREAD_MUTEX_PARTIAL_INITIALIZER }
-# endif
-asdfsdf
-# define k5_os_mutex_finish_init(M)		\
-	k5_os_nothread_mutex_finish_init(&(M)->n)
+# define k5_os_mutex_finish_init(M)		(0)
 # define k5_os_mutex_init(M)			\
-	(k5_os_nothread_mutex_init(&(M)->n),	\
-	 (K5_PTHREADS_LOADED			\
-	  ? pthread_mutex_init(&(M)->p, 0)	\
-	  : 0))
+	(K5_PTHREADS_LOADED ? pthread_mutex_init((M), 0) : 0)
 # define k5_os_mutex_destroy(M)			\
-	(k5_os_nothread_mutex_destroy(&(M)->n),	\
-	 (K5_PTHREADS_LOADED			\
-	  ? pthread_mutex_destroy(&(M)->p)	\
-	  : 0))
-
-# define k5_os_mutex_lock(M)						\
-	return_after_yield(K5_PTHREADS_LOADED				\
-			   ? k5_pthread_mutex_lock(M)			\
-			   : k5_os_nothread_mutex_lock(&(M)->n))
-# define k5_os_mutex_unlock(M)				\
-	(MAYBE_SCHED_YIELD(),				\
-	 (K5_PTHREADS_LOADED				\
-	  ? k5_pthread_mutex_unlock(M)			\
-	  : k5_os_nothread_mutex_unlock(&(M)->n)))
-
-# define k5_os_mutex_assert_unlocked(M)			\
-	(K5_PTHREADS_LOADED				\
-	 ? k5_pthread_assert_unlocked(&(M)->p)		\
-	 : k5_os_nothread_mutex_assert_unlocked(&(M)->n))
-# define k5_os_mutex_assert_locked(M)			\
-	(K5_PTHREADS_LOADED				\
-	 ? k5_pthread_assert_locked(M)			\
-	 : k5_os_nothread_mutex_assert_locked(&(M)->n))
+	(K5_PTHREADS_LOADED ? pthread_mutex_destroy((M)) : 0)
+# define k5_os_mutex_lock(M)			\
+	(K5_PTHREADS_LOADED ? pthread_mutex_lock(M) : 0)
+# define k5_os_mutex_unlock(M)			\
+	(K5_PTHREADS_LOADED ? pthread_mutex_unlock(M) : 0)
 
 #else
 
-# ifdef DEBUG_THREADS
-#  ifdef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
-#   define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP, (pthread_t) 0 }
-#  else
-#   define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_MUTEX_INITIALIZER, (pthread_t) 0 }
-#  endif
-# else
-#  define K5_OS_MUTEX_PARTIAL_INITIALIZER \
-	{ PTHREAD_MUTEX_INITIALIZER }
-# endif
-
 /* LINTED */
-static  int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
-# define k5_os_mutex_init(M)		pthread_mutex_init(&(M)->p, 0)
-# define k5_os_mutex_destroy(M)		pthread_mutex_destroy(&(M)->p)
-# define k5_os_mutex_lock(M)	return_after_yield(k5_pthread_mutex_lock(M))
-# define k5_os_mutex_unlock(M)		(MAYBE_SCHED_YIELD(),k5_pthread_mutex_unlock(M))
-
-# define k5_os_mutex_assert_unlocked(M)	k5_pthread_assert_unlocked(&(M)->p)
-# define k5_os_mutex_assert_locked(M)	k5_pthread_assert_locked(M)
+static inline int k5_os_mutex_finish_init(k5_os_mutex *m) { return 0; }
+# define k5_os_mutex_init(M)		pthread_mutex_init((M), 0)
+# define k5_os_mutex_destroy(M)		pthread_mutex_destroy((M))
+# define k5_os_mutex_lock(M)		pthread_mutex_lock(M)
+# define k5_os_mutex_unlock(M)		pthread_mutex_unlock(M)
 
 #endif /* is pthreads always available? */
 
@@ -705,7 +580,7 @@ typedef struct {
 # define k5_os_mutex_destroy(M)		\
 	(CloseHandle((M)->h) ? ((M)->h = 0, 0) : GetLastError())
 
-static int k5_os_mutex_lock(k5_os_mutex *m)
+static inline int k5_os_mutex_lock(k5_os_mutex *m)
 {
     DWORD res;
     res = WaitForSingleObject(m->h, INFINITE);
@@ -800,9 +675,8 @@ static  int k5_mutex_lock_1(k5_mutex_t *m, k5_debug_loc l)
 	 (M)->loc_last = K5_DEBUG_LOC,			\
 	 k5_os_mutex_unlock(&(M)->os))
 
-#define k5_mutex_assert_locked(M)	k5_os_mutex_assert_locked(&(M)->os)
-#define k5_mutex_assert_unlocked(M)	k5_os_mutex_assert_unlocked(&(M)->os)
-
+#define k5_mutex_assert_locked(M)	((void)(M))
+#define k5_mutex_assert_unlocked(M)	((void)(M))
 #define k5_assert_locked	k5_mutex_assert_locked
 #define k5_assert_unlocked	k5_mutex_assert_unlocked
 
@@ -832,7 +706,11 @@ extern int k5_key_delete(k5_key_t);
 
 extern int  KRB5_CALLCONV krb5int_mutex_alloc  (k5_mutex_t **);
 extern void KRB5_CALLCONV krb5int_mutex_free   (k5_mutex_t *);
-extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *);
+extern int  KRB5_CALLCONV krb5int_mutex_lock   (k5_mutex_t *)
+#if __GNUC__ >= 4
+    __attribute__((warn_unused_result))
+#endif
+    ;
 extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
 
 /* In time, many of the definitions above should move into the support
@@ -844,7 +722,7 @@ extern int  KRB5_CALLCONV krb5int_mutex_unlock (k5_mutex_t *);
 
    For now, plugins should use the exported functions, and not the
    above macros, and use krb5int_mutex_alloc for allocations.  */
-#ifdef PLUGIN
+#if defined(PLUGIN) || (defined(CONFIG_SMALL) && !defined(THREAD_SUPPORT_IMPL))
 #undef k5_mutex_lock
 #define k5_mutex_lock krb5int_mutex_lock
 #undef k5_mutex_unlock

@@ -1,4 +1,3 @@
-
 #ifndef _PORT_SOCKET_H
 #define _PORT_SOCKET_H
 #if defined(_WIN32)

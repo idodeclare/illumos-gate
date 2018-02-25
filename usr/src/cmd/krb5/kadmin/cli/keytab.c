@@ -7,8 +7,6 @@
 /*
  * Copyright 1993 OpenVision Technologies, Inc., All Rights Reserved.
  *
- * $Id: keytab.c,v 1.28 2004/05/31 12:39:16 epeisach Exp $
- * $Source: /cvs/krbdev/krb5/src/kadmin/cli/keytab.c,v $
  */
 
 /*
@@ -38,14 +36,16 @@
  */
 
 #if !defined(lint) && !defined(__CODECENTER__)
-static char *rcsid = "$Header: /cvs/krbdev/krb5/src/kadmin/cli/keytab.c,v 1.28 2004/05/31 12:39:16 epeisach Exp $";
+static char *rcsid = "$Header$";
 #endif
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <libintl.h>
 
+#include "k5-int.h"
 #include <kadm5/admin.h>
 #include <krb5/adm_proto.h>
 #include "kadmin.h"
@@ -62,11 +62,21 @@ static char *etype_istring(krb5_enctype enctype);
 
 static int quiet;
 
+#ifdef KADMIN_LOCAL
+static int norandkey;
+#endif
+
 static void add_usage()
 {
+#ifdef KADMIN_LOCAL
+     fprintf(stderr, "%s: %s\n", gettext("Usage"),
+	"ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] [-norandkey] "
+	"[principal | -glob princ-exp] [...]\n");
+#else
      fprintf(stderr, "%s: %s\n", gettext("Usage"),
 	"ktadd [-k[eytab] keytab] [-q] [-e keysaltlist] "
 	"[principal | -glob princ-exp] [...]\n");
+#endif
 }
      
 static void rem_usage()
@@ -94,8 +104,14 @@ static int process_keytab(krb5_context my_context, char **keytab_str,
 	}
 	if (!(*keytab_str = strdup(buf))) {
 		com_err(whoami, ENOMEM, gettext("while creating keytab name"));
-		return 1;
-	}
+	       return 1;
+	  }
+	  code = krb5_kt_default(my_context, keytab);
+	  if (code != 0) {
+	       com_err(whoami, code, "while opening default keytab");
+	       free(*keytab_str);
+	       return 1;
+	  }
      } else {
 	  if (strchr(*keytab_str, ':') != NULL) {
 	       *keytab_str = strdup(*keytab_str);
@@ -105,16 +121,12 @@ static int process_keytab(krb5_context my_context, char **keytab_str,
 		    return 1;
 	       }
 	  } else {
-	       char *tmp = *keytab_str;
-
-	       *keytab_str = (char *)
-		    malloc(strlen("WRFILE:")+strlen(tmp)+1);
-	       if (*keytab_str == NULL) {
+	       if (asprintf(keytab_str, "WRFILE:%s", *keytab_str) < 0) {
+		   *keytab_str = NULL;
 				com_err(whoami, ENOMEM,
 				    gettext("while creating keytab name"));
-		    return 1;
+		   return 1;
 	       }
-	       sprintf(*keytab_str, "WRFILE:%s", tmp);
 	  }
 	  
 	  code = krb5_kt_resolve(my_context, *keytab_str, keytab);
@@ -142,6 +154,9 @@ void kadmin_keytab_add(int argc, char **argv)
 
      argc--; argv++;
      quiet = 0;
+#ifdef KADMIN_LOCAL
+     norandkey = 0;
+#endif
      while (argc) {
 	  if (strncmp(*argv, "-k", 2) == 0) {
 	       argc--; argv++;
@@ -152,6 +167,10 @@ void kadmin_keytab_add(int argc, char **argv)
 	       keytab_str = *argv;
 	  } else if (strcmp(*argv, "-q") == 0) {
 	       quiet++;
+#ifdef KADMIN_LOCAL
+        } else if (strcmp(*argv, "-norandkey") == 0) {
+             norandkey++;
+#endif
 	  } else if (strcmp(*argv, "-e") == 0) {
 	       argc--;
 	       if (argc < 1) {
@@ -176,6 +195,13 @@ void kadmin_keytab_add(int argc, char **argv)
 	  add_usage();
 	  return;
      }
+
+#ifdef KADMIN_LOCAL
+     if (norandkey && ks_tuple) {
+       fprintf(stderr, "cannot specify keysaltlist when not changing key\n");
+       return;
+     }
+#endif
 
      if (process_keytab(context, &keytab_str, &keytab))
 	  return;
@@ -325,9 +351,18 @@ int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
 	nktypes = n_ks_tuple;
      }
 
+#ifdef KADMIN_LOCAL
+     if (norandkey)
+       code = kadm5_get_principal_keys(handle, princ, &keys, &nkeys);
+     else
+#endif
+     if (keepold || ks_tuple != NULL) {
 	 code = kadm5_randkey_principal_3(lhandle, princ,
 					  keepold, nktypes, permitted_etypes,
 					  &keys, &nkeys);
+     } else {
+	 code = kadm5_randkey_principal(lhandle, princ, &keys, &nkeys);
+     }
 
 #ifndef _KADMIN_LOCAL_
 	/* this block is not needed in the kadmin.local client */
@@ -367,7 +402,7 @@ int add_principal(void *lhandle, char *keytab_str, krb5_keytab keytab,
 	  } else {
 			com_err(whoami, code,
 				gettext("while changing %s's key"),
-				princ_str);
+		       princ_str);
 	  }
 	  goto cleanup;
      }
@@ -571,7 +606,7 @@ static char *etype_string(enctype)
     krb5_error_code ret;
 
     if ((ret = krb5_enctype_to_string(enctype, buf, sizeof(buf))))
-	sprintf(buf, "etype %d", enctype);
+	snprintf(buf, sizeof(buf), "etype %d", enctype);
 
     return buf;
 }
@@ -586,4 +621,3 @@ static char *etype_istring(krb5_enctype enctype) {
 
     return (buf);
 }
-

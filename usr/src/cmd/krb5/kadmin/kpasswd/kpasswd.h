@@ -27,9 +27,6 @@
  * Prototypes for the kpasswd program callback functions.
  */
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
-
 #ifndef __KPASSWD_H__
 #define __KPASSWD_H__
 

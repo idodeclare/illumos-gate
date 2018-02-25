@@ -1,5 +1,3 @@
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 /*
  * WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
  *
@@ -68,15 +66,6 @@ krb5_error_code ktutil_read_keytab (krb5_context,
 krb5_error_code ktutil_write_keytab (krb5_context,
 				     krb5_kt_list,
 				     char *);
-
-#ifdef KRB5_KRB4_COMPAT
-krb5_error_code ktutil_read_srvtab (krb5_context,
-				    char *,
-				    krb5_kt_list *);
-krb5_error_code ktutil_write_srvtab (krb5_context,
-				     krb5_kt_list,
-				     char *);
-#endif
 
 void ktutil_add_entry (int, char *[]);
 

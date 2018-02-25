@@ -45,10 +45,8 @@
 
    So, no krb5 types.  */
 
-#ifndef _K5_PLUGIN_H_
-#define _K5_PLUGIN_H_
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
+#ifndef K5_PLUGIN_H
+#define K5_PLUGIN_H
 
 #if defined(_MSDOS) || defined(_WIN32)
 #include "win-mac.h"
@@ -108,4 +106,4 @@ krb5int_get_plugin_dir_func (struct plugin_dir_handle *, const char *,
 void KRB5_CALLCONV 
 krb5int_free_plugin_dir_func (void (**)(void));
 
-#endif /* _K5_PLUGIN_H_ */
+#endif /* K5_PLUGIN_H */
