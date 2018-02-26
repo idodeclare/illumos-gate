@@ -29,7 +29,6 @@
 #include "mechglueP.h" /* SUNW17PACresync */
 
 /*
- * $Id: get_tkt_flags.c 21778 2009-01-22 23:21:11Z tlyu $
  */
 
 OM_uint32 KRB5_CALLCONV

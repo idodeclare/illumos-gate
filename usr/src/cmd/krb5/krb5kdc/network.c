@@ -4,7 +4,7 @@
  */
 
 /*
- * kadmin/server/network.c
+ * kdc/network.c
  *
  * Copyright 1990,2000,2007,2008,2009 by the Massachusetts Institute of Technology.
  *
@@ -28,7 +28,7 @@
  * or implied warranty.
  * 
  *
- * Network code for Kerberos v5 kadmin server (based on KDC code).
+ * Network code for Kerberos v5 KDC.
  */
 
 #include "k5-int.h"
@@ -190,7 +190,7 @@ static const char *paddr (struct sockaddr *sa)
     return buf;
 }
 
-/* kadmin data.  */
+/* KDC data.  */
 
 enum kdc_conn_type { CONN_UDP, CONN_TCP_LISTENER, CONN_TCP };
 
@@ -571,7 +571,6 @@ setup_tcp_listener_ports(struct socksetup *data)
     return 0;
 }
 
-
 #if defined(CMSG_SPACE) && defined(HAVE_STRUCT_CMSGHDR) && (defined(IP_PKTINFO) || defined(IPV6_PKTINFO))
 union pktinfo {
 #ifdef HAVE_STRUCT_IN6_PKTINFO
@@ -640,7 +639,7 @@ setup_udp_port_1(struct socksetup *data, struct sockaddr *addr,
 	if (sock == -1) {
 	    data->retval = errno;
 	    com_err(data->prog, data->retval,
-		    "Cannot create server socket for port %d address %s",
+		    gettext("Cannot create server socket for port %d address %s"),
 		    port, haddrbuf);
 	    return 1;
 	}
@@ -989,6 +988,9 @@ setup_network(void *handle, const char *prog)
     setup_data.prog = prog;
     setup_data.retval = 0;
     krb5_klog_syslog (LOG_INFO, "setting up network...");
+#ifdef HAVE_STRUCT_RT_MSGHDR
+    setup_routing_socket(&setup_data);
+#endif
     /* To do: Use RFC 2292 interface (or follow-on) and IPV6_PKTINFO,
        so we might need only one UDP socket; fall back to binding
        sockets on each address only if IPV6_PKTINFO isn't
@@ -1056,7 +1058,6 @@ recv_from_to(int s, void *buf, size_t len, int flags,
 	memset(to, 0x40, *tolen);
 	*tolen = 0;
     }
-
     return recvfrom(s, buf, len, flags, from, fromlen);
 #else
     int r;
@@ -1203,6 +1204,39 @@ send_to_from(int s, void *buf, size_t len, int flags,
 #endif
 }
 
+static krb5_error_code
+make_too_big_error (krb5_data **out)
+{
+    krb5_error errpkt;
+    krb5_error_code retval;
+    krb5_data *scratch;
+
+    *out = NULL;
+    memset(&errpkt, 0, sizeof(errpkt));
+
+    retval = krb5_us_timeofday(kdc_context, &errpkt.stime, &errpkt.susec);
+    if (retval)
+	return retval;  
+    errpkt.error = KRB_ERR_RESPONSE_TOO_BIG;
+    errpkt.server = tgs_server;
+    errpkt.client = NULL;
+    errpkt.text.length = 0;
+    errpkt.text.data = 0;
+    errpkt.e_data.length = 0;
+    errpkt.e_data.data = 0;
+    scratch = malloc(sizeof(*scratch));
+    if (scratch == NULL)
+	return ENOMEM;
+    retval = krb5_mk_error(kdc_context, &errpkt, scratch);
+    if (retval) {
+	free(scratch);
+	return retval;
+    }
+
+    *out = scratch;
+    return 0;
+}
+
 /* Dispatch routine for set/change password */
 static krb5_error_code
 dispatch(void *handle,
@@ -1295,7 +1329,6 @@ static void process_packet(void *handle,
     if (!cc)
 	return;		/* zero-length packet? */
 
-
     if (daddr_len == 0 && conn->type == CONN_UDP) {
 	/* If the PKTINFO option isn't set, this socket should be
 	   bound to a specific local address.  This info probably
@@ -1306,6 +1339,15 @@ static void process_packet(void *handle,
 	    daddr_len = 0;
 	/* On failure, keep going anyways.  */
     }
+#if 0
+    if (daddr_len > 0) {
+	char addrbuf[100];
+	if (getnameinfo(ss2sa(&daddr), daddr_len, addrbuf, sizeof(addrbuf),
+			0, 0, NI_NUMERICHOST))
+	    strlcpy(addrbuf, "?", sizeof(addrbuf));
+	kdc_err(NULL, 0, "pktinfo says local addr is %s", addrbuf);
+    }
+#endif
 
     request.length = cc;
     request.data = pktbuf;
@@ -1318,6 +1360,16 @@ static void process_packet(void *handle,
     }
     if (response == NULL)
 	return;
+    if (response->length > max_dgram_reply_size) {
+	krb5_free_data(kdc_context, response);
+	retval = make_too_big_error(&response);
+	if (retval) {
+	    krb5_klog_syslog(LOG_ERR,
+			     "error constructing KRB_ERR_RESPONSE_TOO_BIG error: %s",
+			     error_message(retval));
+	    return;
+	}
+    }
     cc = send_to_from(port_fd, response->data, (socklen_t) response->length, 0,
 		      (struct sockaddr *)&saddr, saddr_len,
 		      (struct sockaddr *)&daddr, daddr_len);
@@ -1333,10 +1385,8 @@ static void process_packet(void *handle,
 	return;
     }
     if (cc != response->length) {
-        krb5_free_data(server_handle->context, response);
 	com_err(prog, 0, gettext("short reply write %d vs %d\n"),
 		response->length, cc);
-	return;
     }
     krb5_free_data(server_handle->context, response);
     return;
@@ -1680,6 +1730,7 @@ static void service_conn(void *handle,
     conn->service(handle, conn, prog, selflags);
 }
 
+/* from sendto_kdc.c */
 static int getcurtime(struct timeval *tvp)
 {
     return gettimeofday(tvp, 0) ? errno : 0;
@@ -1700,11 +1751,11 @@ listen_and_process(void *handle, const char *prog)
     if (conns == (struct connection **) NULL)
 	return KDC5_NONET;
     
-    while (!signal_request_exit) {
-	if (signal_request_hup) {
+    while (!signal_requests_exit) {
+	if (signal_requests_hup) {
 	    krb5_klog_reopen(server_handle->context);
 	    reset_db();
-	    signal_request_hup = 0;
+	    signal_requests_hup = 0;
 	}
 #ifdef PURIFY
 	if (signal_pure_report) {
@@ -1723,7 +1774,7 @@ listen_and_process(void *handle, const char *prog)
 	       big deal.  */
 	    err = getcurtime(&sstate.end_time);
 	    if (err) {
-		com_err(prog, err, "while getting the time");
+		com_err(prog, err, gettext("while getting the time"));
 		continue;
 	    }
 	    sstate.end_time.tv_sec += 3;
@@ -1743,7 +1794,7 @@ listen_and_process(void *handle, const char *prog)
 	    closedown_network(handle, prog);
 	    err = setup_network(handle, prog);
 	    if (err) {
-		com_err(prog, err, "while reinitializing network");
+		com_err(prog, err, gettext("while reinitializing network"));
 		return err;
 	    }
 	    netchanged = 0;

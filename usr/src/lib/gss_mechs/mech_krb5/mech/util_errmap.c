@@ -250,7 +250,6 @@ OM_uint32 gssint_mecherrmap_map(OM_uint32 minor, const gss_OID_desc * oid)
     fprintf(f, "\n");
     if (f != stderr) fclose(f);
 #endif
-
     if (err)
         return 0;
     else

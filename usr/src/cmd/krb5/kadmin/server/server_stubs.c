@@ -29,6 +29,7 @@
 #include <kadm5/admin.h>
 #include <gssapi/gssapi.h>
 #include <gssapi_krb5.h>   /* for gss_nt_krb5_name */
+#include <krb5.h>
 #include <kadm5/kadm_rpc.h>
 #include <kadm5/server_internal.h>
 #include <kadm5/srv/server_acl.h>
@@ -38,8 +39,8 @@
 #include <arpa/inet.h>  /* inet_ntoa */
 #include <krb5/adm_proto.h>  /* krb5_klog_syslog */
 #include <libintl.h>
-#include <krb5.h>
 #include "misc.h"
+#include <string.h>
 
 #define LOG_UNAUTH  gettext("Unauthorized request: %s, %s, " \
 			    "client=%s, service=%s, addr=%s")
@@ -66,6 +67,8 @@ static int gss_to_krb5_name(kadm5_server_handle_t handle,
 static int gss_name_to_string(gss_name_t gss_name, gss_buffer_desc *str);
 
 static gss_name_t acceptor_name(struct svc_req * rqstp);
+
+gss_name_t rqst2name(struct svc_req *rqstp);
 
 kadm5_ret_t
 kadm5_get_priv(void *server_handle,
@@ -189,6 +192,7 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
 					  *out_handle)
 {
      kadm5_server_handle_t handle;
+     *out_handle = NULL;
 	gss_name_t name;
 	OM_uint32 min_stat;
 
@@ -203,11 +207,12 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
 	  free(handle);
 	  return KADM5_FAILURE;
      }
-    if (! gss_to_krb5_name(handle, name, &handle->current_caller)) {
+     if (! gss_to_krb5_name(handle, rqst2name(rqstp),
+			    &handle->current_caller)) {
 	  free(handle);
 		gss_release_name(&min_stat, &name);
 	  return KADM5_FAILURE;
-	}
+     }
 	gss_release_name(&min_stat, &name);
 
      *out_handle = handle;
@@ -224,6 +229,8 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
  */
 static void free_server_handle(kadm5_server_handle_t handle)
 {
+     if (!handle)
+	  return;
      krb5_free_principal(handle->context, handle->current_caller);
      free(handle);
 }
@@ -236,8 +243,8 @@ static void free_server_handle(kadm5_server_handle_t handle)
  *
  * Arguments:
  * 	rqstp		(r) the RPC request
- * 	client_name	(w) pointer to client_name string
- * 	server_name	(w) pointer to server_name string
+ * 	client_name	(w) the gss_buffer_t for the client name
+ * 	server_name	(w) the gss_buffer_t for the server name
  *
  * Effects:
  *
@@ -446,27 +453,28 @@ static int
 log_unauth(
     char *op,
     char *target,
-    char *client,
-    char *server,
-    char *addr)
+    gss_buffer_t client,
+    gss_buffer_t server,
+    struct svc_req *rqstp)
 {
     size_t tlen, clen, slen;
     char *tdots, *cdots, *sdots;
 
     tlen = strlen(target);
     trunc_name(&tlen, &tdots);
-    clen = strlen(client);
+    clen = client->length;
     trunc_name(&clen, &cdots);
-    slen = strlen(server);
+    slen = server->length;
     trunc_name(&slen, &sdots);
 
+    /* okay to cast lengths to int because trunc_name limits max value */
     return krb5_klog_syslog(LOG_NOTICE,
 			    "Unauthorized request: %s, %.*s%s, "
 			    "client=%.*s%s, service=%.*s%s, addr=%s",
-			    op, tlen, target, tdots,
-			    clen, client, cdots,
-			    slen, server, sdots,
-			    addr);
+			    op, (int)tlen, target, tdots,
+			    (int)clen, (char *)client->value, cdots,
+			    (int)slen, (char *)server->value, sdots,
+			    inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
 }
 
 static int
@@ -474,27 +482,28 @@ log_done(
     char *op,
     char *target,
     const char *errmsg,
-    char *client,
-    char *server,
-    char *addr)
+    gss_buffer_t client,
+    gss_buffer_t server,
+    struct svc_req *rqstp)
 {
     size_t tlen, clen, slen;
     char *tdots, *cdots, *sdots;
 
     tlen = strlen(target);
     trunc_name(&tlen, &tdots);
-    clen = strlen(client);
+    clen = client->length;
     trunc_name(&clen, &cdots);
-    slen = strlen(server);
+    slen = server->length;
     trunc_name(&slen, &sdots);
 
+    /* okay to cast lengths to int because trunc_name limits max value */
     return krb5_klog_syslog(LOG_NOTICE,
 			    "Request: %s, %.*s%s, %s, "
 			    "client=%.*s%s, service=%.*s%s, addr=%s",
-			    op, tlen, target, tdots, errmsg,
-			    clen, client, cdots,
-			    slen, server, sdots,
-			    addr);
+			    op, (int)tlen, target, tdots, errmsg,
+			    (int)clen, (char *)client->value, cdots,
+			    (int)slen, (char *)server->value, sdots,
+			    inet_ntoa(rqstp->rq_xprt->xp_raddr.sin_addr));
 }
 
 generic_ret *
@@ -515,34 +524,35 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
     xdr_free(xdr_generic_ret, (char *) &ret);
 
     if ((ret.code = new_server_handle(arg->api_version, rqstp, &handle)))
-	 return &ret;
+	goto exit_func;
 
     if ((ret.code = check_handle((void *)handle)))
-		goto error;
+	 goto exit_func;
+
     ret.api_version = handle->api_version;
 
     if (setup_gss_names(rqstp, &client_name, &service_name) < 0) {
 	 ret.code = KADM5_FAILURE;
-	goto error;
+	 goto exit_func;
     }
     if (krb5_unparse_name(handle->context, arg->rec.principal, &prime_arg)) {
 	 ret.code = KADM5_BAD_PRINCIPAL;
-	 goto error;
+	 goto exit_func;
     }
 	if (!(name = get_clnt_name(rqstp))) {
 		ret.code = KADM5_FAILURE;
-		goto error;
+		goto exit_func;
 	}
 
 	if (kadm5int_acl_check(handle->context, name, ACL_MIGRATE,
 	    arg->rec.principal, &rp) &&
 	    verify_pam_pw(prime_arg, arg->passwd)) {
 		policy_migrate = 1;
-	}
+    }
 
     if (CHANGEPW_SERVICE(rqstp)
 	|| (!kadm5int_acl_check(handle->context, name, ACL_ADD,
-			arg->rec.principal, &rp) &&
+		      arg->rec.principal, &rp) &&
 		!(policy_migrate))
 	|| kadm5int_acl_impose_restrictions(handle->context,
 				   &arg->rec, &arg->mask, rp)) {
@@ -554,18 +564,19 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
 	 log_unauth("kadm5_create_principal", prime_arg,
 		client_name, service_name, client_addr(rqstp, buf));
     } else {
-	ret.code = kadm5_create_principal((void *)handle,
+	 ret.code = kadm5_create_principal((void *)handle,
 						&arg->rec, arg->mask,
 						arg->passwd);
 	/* Solaris Kerberos */
 	if( ret.code != 0 )
-	     errmsg = krb5_get_error_message(handle ? handle->context : NULL, ret.code);
+	     errmsg = krb5_get_error_message(handle ? handle->context : NULL,
+	         ret.code);
 
 	audit_kadmind_auth(rqstp->rq_xprt, l_port,
 				"kadm5_create_principal",
 				prime_arg, client_name, ret.code);
-	log_done("kadm5_create_principal", prime_arg,
-	    errmsg ? errmsg : "success",
+	 log_done("kadm5_create_principal", prime_arg,
+		  errmsg ? errmsg : "success",
 	    client_name, service_name, client_addr(rqstp, buf));
 
 	if (errmsg != NULL)
@@ -591,7 +602,7 @@ create_principal_2_svc(cprinc_arg *arg, struct svc_req *rqstp)
 	}
     }
 
-error:
+ exit_func:
     if (name)
     	gss_release_name(&minor_stat, &name);
     free_server_handle(handle);

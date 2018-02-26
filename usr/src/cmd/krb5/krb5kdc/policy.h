@@ -6,8 +6,6 @@
 #ifndef __KRB5_KDC_POLICY__
 #define	__KRB5_KDC_POLICY__
 
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #ifdef	__cplusplus
 extern "C" {
 #endif

@@ -26,11 +26,8 @@
  * allocations of extern stuff
  */
 
-
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
 #include "k5-int.h"
+#include "kdb.h"
 #include "extern.h"
 
 /* real declarations of KDC's externs */
@@ -41,6 +38,7 @@ krb5_data empty_string = {0, 0, ""};
 krb5_timestamp kdc_infinity = KRB5_KDB_EXPIRATION;
 krb5_rcache	kdc_rcache = (krb5_rcache) NULL;
 krb5_keyblock	psr_key;
+krb5_int32	max_dgram_reply_size = MAX_DGRAM_SIZE;
 
 volatile int signal_requests_exit = 0;	/* gets set when signal hits */
 volatile int signal_requests_hup = 0;   /* ditto */

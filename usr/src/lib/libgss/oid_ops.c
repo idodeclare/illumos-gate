@@ -21,7 +21,10 @@
  * this permission notice appear in supporting documentation, and that
  * the name of M.I.T. not be used in advertising or publicity pertaining
  * to distribution of the software without specific, written prior
- * permission.  M.I.T. makes no representations about the suitability of
+ * permission.  Furthermore if you modify this software you must label
+ * your software as modified software and not distribute it in such a
+ * fashion that it might be confused with the original M.I.T. software.
+ * M.I.T. makes no representations about the suitability of
  * this software for any purpose.  It is provided "as is" without express
  * or implied warranty.
  *
@@ -31,13 +34,14 @@
  * oid_ops.c - GSS-API V2 interfaces to manipulate OIDs
  */
 
-#include <mechglueP.h>
+#include "gssapiP_generic.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <gssapi_generic.h>
 #include <errno.h>
 #include <ctype.h>
 
@@ -50,56 +54,55 @@ extern const gss_OID_desc * const gss_nt_service_name;
 
 OM_uint32
 generic_gss_release_oid(minor_status, oid)
-OM_uint32	*minor_status;
-gss_OID	*oid;
+    OM_uint32	*minor_status;
+    gss_OID	*oid;
 {
-	if (minor_status)
-		*minor_status = 0;
+    if (minor_status)
+	*minor_status = 0;
 
-	if (oid == NULL || *oid == GSS_C_NO_OID)
-		return (GSS_S_COMPLETE);
+    if (oid == NULL || *oid == GSS_C_NO_OID)
+	return(GSS_S_COMPLETE);
 
-	/*
-	 * The V2 API says the following!
-	 *
-	 * gss_release_oid[()] will recognize any of the GSSAPI's own OID
-	 * values, and will silently ignore attempts to free these OIDs;
-	 * for other OIDs it will call the C free() routine for both the OID
-	 * data and the descriptor.  This allows applications to freely mix
-	 * their own heap allocated OID values with OIDs returned by GSS-API.
-	 */
+    /*
+     * The V2 API says the following!
+     *
+     * gss_release_oid[()] will recognize any of the GSSAPI's own OID values,
+     * and will silently ignore attempts to free these OIDs; for other OIDs
+     * it will call the C free() routine for both the OID data and the
+     * descriptor.  This allows applications to freely mix their own heap-
+     * allocated OID values with OIDs returned by GSS-API.
+     */
 
-	/*
-	 * We use the official OID definitions instead of the unofficial OID
-	 * defintions. But we continue to support the unofficial OID
-	 * gss_nt_service_name just in case if some gss applications use
-	 * the old OID.
-	 */
+    /*
+     * We use the official OID definitions instead of the unofficial OID
+     * defintions. But we continue to support the unofficial OID
+     * gss_nt_service_name just in case if some gss applications use
+     * the old OID.
+     */
 
-	if ((*oid != GSS_C_NT_USER_NAME) &&
-		(*oid != GSS_C_NT_MACHINE_UID_NAME) &&
-		(*oid != GSS_C_NT_STRING_UID_NAME) &&
-		(*oid != GSS_C_NT_HOSTBASED_SERVICE) &&
-		(*oid != GSS_C_NT_ANONYMOUS) &&
-		(*oid != GSS_C_NT_EXPORT_NAME) &&
-		(*oid != gss_nt_service_name)) {
-		free((*oid)->elements);
-		free(*oid);
-	}
-	*oid = GSS_C_NO_OID;
-	return (GSS_S_COMPLETE);
+    if ((*oid != GSS_C_NT_USER_NAME) &&
+	(*oid != GSS_C_NT_MACHINE_UID_NAME) &&
+	(*oid != GSS_C_NT_STRING_UID_NAME) &&
+	(*oid != GSS_C_NT_HOSTBASED_SERVICE) &&
+	(*oid != GSS_C_NT_ANONYMOUS) &&
+	(*oid != GSS_C_NT_EXPORT_NAME) &&
+	(*oid != gss_nt_service_name)) {
+	free((*oid)->elements);
+	free(*oid);
+    }
+    *oid = GSS_C_NO_OID;
+    return(GSS_S_COMPLETE);
 }
 
 OM_uint32
 generic_gss_copy_oid(minor_status, oid, new_oid)
 	OM_uint32	*minor_status;
-	const gss_OID	oid;
+	const gss_OID_desc * const oid;
 	gss_OID		*new_oid;
 {
-	gss_OID p;
+	gss_OID		p;
 
-	if (minor_status)
-		*minor_status = 0;
+	if (minor_status) *minor_status = 0;
 
 	if (new_oid == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
@@ -107,8 +110,9 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 	if (oid == GSS_C_NO_OID)
 		return (GSS_S_CALL_INACCESSIBLE_READ);
 
-	p = (gss_OID) malloc(sizeof (gss_OID_desc));
+	p = (gss_OID) malloc(sizeof(gss_OID_desc));
 	if (!p) {
+		if (minor_status) *minor_status = ENOMEM;
 		return (GSS_S_FAILURE);
 	}
 	p->length = oid->length;
@@ -125,8 +129,8 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 
 OM_uint32
 generic_gss_create_empty_oid_set(minor_status, oid_set)
-OM_uint32 *minor_status;
-gss_OID_set *oid_set;
+    OM_uint32	*minor_status;
+    gss_OID_set	*oid_set;
 {
 	if (minor_status)
 		*minor_status = 0;

@@ -2,12 +2,10 @@
  * Copyright 2007 Sun Microsystems, Inc.  All rights reserved.
  * Use is subject to license terms.
  */
-
-#pragma ident	"%Z%%M%	%I%	%E% SMI"
-
+/* -*- mode: c; indent-tabs-mode: nil -*- */
 /*
  * Copyright 1993 by OpenVision Technologies, Inc.
- * 
+ *
  * Permission to use, copy, modify, distribute, and sell this software
  * and its documentation for any purpose is hereby granted without fee,
  * provided that the above copyright notice appears in all copies and
@@ -17,7 +15,7 @@
  * without specific, written prior permission. OpenVision makes no
  * representations about the suitability of this software for any
  * purpose.  It is provided "as is" without express or implied warranty.
- * 
+ *
  * OPENVISION DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
  * INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
  * EVENT SHALL OPENVISION BE LIABLE FOR ANY SPECIAL, INDIRECT OR
@@ -28,7 +26,6 @@
  */
 
 /*
- * $Id: util_localhost.c 7797 1996-04-12 00:40:24Z marc $
  */
 
 /* This file could be OS specific */
@@ -43,17 +40,15 @@
 #define MAXHOSTNAMELEN 64
 #endif
 
-char *g_local_host_name()
+char *
+g_local_host_name(void)
 {
-     char buf[MAXHOSTNAMELEN+1], *ptr;
+    char buf[MAXHOSTNAMELEN+1], *ptr;
 
-     if (gethostname(buf, sizeof(buf)) < 0)
-	  return 0;
+    if (gethostname(buf, sizeof(buf)) < 0)
+        return 0;
 
-     buf[sizeof(buf)-1] = '\0';
+    buf[sizeof(buf)-1] = '\0';
 
-     if (! (ptr = xmalloc(strlen(buf) + 1)))
-	  return 0;
-
-     return strcpy(ptr, buf);
+    return strdup(buf);
 }

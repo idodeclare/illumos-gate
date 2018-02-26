@@ -28,8 +28,6 @@
  *
  */
 
-
-
 #include "k5-int.h"
 #include "kdc_util.h"
 #include "extern.h"

@@ -29,7 +29,7 @@
  * oid_ops.c - GSS-API V2 interfaces to manipulate OIDs
  */
 
-#include "mglueP.h"
+#include "gssapiP_generic.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -85,7 +85,7 @@ generic_gss_release_oid(minor_status, oid)
 OM_uint32
 generic_gss_copy_oid(minor_status, oid, new_oid)
 	OM_uint32	*minor_status;
-	gss_OID_desc * const oid;
+	const gss_OID_desc * const oid;
 	gss_OID		*new_oid;
 {
 	gss_OID		p;
@@ -94,8 +94,8 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 
 	p = (gss_OID) malloc(sizeof(gss_OID_desc));
 	if (!p) {
-		*minor_status = ENOMEM;
-		return GSS_S_FAILURE;
+	    *minor_status = ENOMEM;
+	    return GSS_S_FAILURE;
 	}
 	p->length = oid->length;
 	p->elements = malloc(p->length);
@@ -129,7 +129,7 @@ generic_gss_create_empty_oid_set(minor_status, oid_set)
 OM_uint32
 generic_gss_add_oid_set_member(minor_status, member_oid, oid_set)
     OM_uint32	*minor_status;
-    gss_OID_desc * const member_oid;
+    const gss_OID_desc * const member_oid;
     gss_OID_set	*oid_set;
 {
     gss_OID	elist;
@@ -180,7 +180,7 @@ generic_gss_add_oid_set_member(minor_status, member_oid, oid_set)
 OM_uint32
 generic_gss_test_oid_set_member(minor_status, member, set, present)
     OM_uint32	*minor_status;
-    gss_OID_desc * const member;
+    const gss_OID_desc * const member;
     gss_OID_set	set;
     int		*present;
 {
@@ -215,7 +215,7 @@ generic_gss_test_oid_set_member(minor_status, member, set, present)
 OM_uint32
 generic_gss_oid_to_str(minor_status, oid, oid_str)
     OM_uint32		*minor_status;
-    gss_OID_desc * const oid;
+    const gss_OID_desc * const oid;
     gss_buffer_t	oid_str;
 {
     char		numstr[128];
@@ -225,6 +225,7 @@ generic_gss_oid_to_str(minor_status, oid, oid_str)
     OM_uint32 i;
     unsigned char	*cp;
     char		*bp;
+    struct k5buf	buf;
 
     if (minor_status != NULL)
 	*minor_status = 0;
@@ -348,7 +349,7 @@ generic_gss_str_to_oid(minor_status, oid_str, oid)
     }
     while ((bp < &cp[oid_str->length]) && isdigit(*bp))
 	bp++;
-    while ((bp < &cp[oid_str->length]) && isspace(*bp))
+    while ((bp < &cp[oid_str->length]) && (isspace(*bp) || *bp == '.'))
 	bp++;
     if (sscanf((char *)bp, "%ld", &numbuf) != 1) {
 	*minor_status = EINVAL;

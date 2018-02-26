@@ -53,7 +53,6 @@ char *get_error_message(OM_uint32 minor_code)
 {
     gsserrmap *p = k5_getspecific(K5_KEY_GSS_KRB5_ERROR_MESSAGE);
     char *msg = NULL;
-
 #ifdef DEBUG
     fprintf(stderr, "%s(%lu, p=%p)", __func__, (unsigned long) minor_code,
             (void *) p);
@@ -72,7 +71,6 @@ char *get_error_message(OM_uint32 minor_code)
 #ifdef DEBUG
     fprintf(stderr, " -> %p/%s\n", (void *) msg, msg);
 #endif
-
     return msg;
 }
 #define save_error_string_nocopy gss_krb5_save_error_string_nocopy

@@ -777,26 +777,33 @@ egress:
     }
     if (s_nprincs)
 	krb5_db_free_principal(kdc_context, &server, s_nprincs);
-    if (session_key.contents)
+    if (session_key.contents != NULL)
 	krb5_free_keyblock_contents(kdc_context, &session_key);
-    if (ticket_reply.enc_part.ciphertext.data) {
+    if (ticket_reply.enc_part.ciphertext.data != NULL) {
 	memset(ticket_reply.enc_part.ciphertext.data , 0,
 	       ticket_reply.enc_part.ciphertext.length);
 	free(ticket_reply.enc_part.ciphertext.data);
     }
 
     krb5_free_data_contents(kdc_context, &e_data);
-    
+    kdc_free_rstate(state);
+    request->kdc_state = NULL;
+    krb5_free_kdc_req(kdc_context, request);
+    assert(did_log != 0);
     return errcode;
 }
 
 static krb5_error_code
-prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
-		  krb5_data **response, const char *status)
+prepare_error_as (struct kdc_request_state *rstate, krb5_kdc_req *request, int error, krb5_data *e_data,
+		  krb5_principal canon_client, krb5_data **response,
+		  const char *status)
 {
     krb5_error errpkt;
     krb5_error_code retval;
     krb5_data *scratch;
+    krb5_pa_data **pa = NULL;
+    krb5_typed_data **td = NULL;
+    size_t size;
     
     errpkt.ctime = request->nonce;
     errpkt.cusec = 0;
@@ -806,29 +813,57 @@ prepare_error_as (krb5_kdc_req *request, int error, krb5_data *e_data,
 	return(retval);
     errpkt.error = error;
     errpkt.server = request->server;
-    errpkt.client = request->client;
-    errpkt.text.length = strlen(status)+1;
-    if (!(errpkt.text.data = malloc(errpkt.text.length)))
+
+    if (error == KRB5KDC_ERR_WRONG_REALM)
+	errpkt.client = canon_client;
+    else
+	errpkt.client = request->client;
+    errpkt.text.length = strlen(status) + 1;
+    if (!(errpkt.text.data = strdup(status)))
 	return ENOMEM;
-    (void) strcpy(errpkt.text.data, status);
 
     if (!(scratch = (krb5_data *)malloc(sizeof(*scratch)))) {
 	free(errpkt.text.data);
 	return ENOMEM;
     }
-    if (e_data && e_data->data) {
+    if (e_data != NULL && e_data->data != NULL) {
 	errpkt.e_data = *e_data;
     } else {
 	errpkt.e_data.length = 0;
-	errpkt.e_data.data = 0;
+	errpkt.e_data.data = NULL;
     }
-
+    /*We need to try and produce a padata sequence for FAST*/
+    retval = decode_krb5_padata_sequence(e_data, &pa);
+    if (retval != 0) {
+	retval = decode_krb5_typed_data(e_data, &td);
+	if (retval == 0) {
+	    for (size =0; td[size]; size++);
+	    pa = calloc(size+1, sizeof(*pa));
+	    if (pa == NULL)
+		retval = ENOMEM;
+	    else 		for (size = 0; td[size]; size++) {
+		krb5_pa_data *pad = malloc(sizeof(krb5_pa_data ));
+		if (pad == NULL) {
+		    retval = ENOMEM;
+		    break;
+		}
+		pad->pa_type = td[size]->type;
+		pad->contents = td[size]->data;
+		pad->length = td[size]->length;
+		pa[size] = pad;
+	    }
+	    krb5_free_typed_data(kdc_context, td);
+	}
+    }
+    retval = kdc_fast_handle_error(kdc_context, rstate,
+				   request, pa, &errpkt);
+    if (retval == 0)
     retval = krb5_mk_error(kdc_context, &errpkt, scratch);
     free(errpkt.text.data);
     if (retval)
 	free(scratch);
     else 
 	*response = scratch;
-
+    krb5_free_pa_data(kdc_context, pa);
     return retval;
 }
