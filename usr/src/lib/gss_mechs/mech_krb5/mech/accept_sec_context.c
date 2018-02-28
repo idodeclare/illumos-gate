@@ -133,15 +133,15 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     krb5_ccache ccache = NULL;
     krb5_gss_cred_id_t cred = NULL;
     krb5_auth_context new_auth_ctx = NULL;
-	krb5_int32 flags_org;
+    krb5_int32 flags_org;
 
     /* Solaris Kerberos */
     KRB5_LOG0(KRB5_INFO, "rd_and_store_for_creds() start");
 
-	if ((retval = krb5_auth_con_getflags(context, auth_context, &flags_org)))
-		return retval;
-	krb5_auth_con_setflags(context, auth_context,
-			       0);
+    if ((retval = krb5_auth_con_getflags(context, auth_context, &flags_org)))
+        return retval;
+    krb5_auth_con_setflags(context, auth_context,
+                           0);
 
 	/*
 	 * By the time krb5_rd_cred is called here (after krb5_rd_req has been
@@ -200,7 +200,7 @@ rd_and_store_for_creds(context, auth_context, inbuf, out_cred)
     }
 
     if ((retval = krb5_cc_new_unique(context, "MEMORY", NULL, &ccache))) {
-	ccache = NULL;
+        ccache = NULL;
         goto cleanup;
     }
 

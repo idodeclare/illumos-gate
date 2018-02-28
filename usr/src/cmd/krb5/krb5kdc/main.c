@@ -631,6 +631,16 @@ initialize_realms(krb5_context kcontext, int argc, char **argv)
 	} else if (max_tcp_data_connections < MIN_KDC_TCP_CONNECTIONS) {
 	    max_tcp_data_connections = DEFAULT_KDC_TCP_CONNECTIONS;
         }
+	if (krb5_aprof_get_int32(aprof, hierarchy, TRUE, &max_dgram_reply_size))
+	    max_dgram_reply_size = MAX_DGRAM_SIZE;
+        hierarchy[1] = KRB5_CONF_NO_HOST_REFERRAL;
+        if (krb5_aprof_get_string_all(aprof, hierarchy, &no_refrls)) 
+            no_refrls = 0;
+        if (!no_refrls || krb5_match_config_pattern(no_refrls, KRB5_CONF_ASTERISK) == FALSE) {
+            hierarchy[1] = KRB5_CONF_HOST_BASED_SERVICES;
+            if (krb5_aprof_get_string_all(aprof, hierarchy, &host_based_srvcs))
+                host_based_srvcs = 0;
+        }
 
 	/* aprof_init can return 0 with aprof == NULL */
 	if (aprof)

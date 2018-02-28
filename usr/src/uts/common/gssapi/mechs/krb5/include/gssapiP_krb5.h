@@ -975,7 +975,6 @@ OM_uint32
 gss_krb5int_free_lucid_sec_context(OM_uint32 *, const gss_OID,
                                    const gss_OID, gss_buffer_t);
 
-
 extern k5_mutex_t kg_kdc_flag_mutex;
 krb5_error_code krb5_gss_init_context (krb5_context *ctxp);
 
@@ -1024,7 +1023,13 @@ gss_krb5int_extract_authtime_from_sec_context(OM_uint32 *,
                                               const gss_ctx_id_t,
                                               const gss_OID,
                                               gss_buffer_set_t *);
+
 #endif /* _KERNEL */
+
+#ifdef _GSS_STATIC_LINK
+int gss_krb5int_lib_init(void);
+void gss_krb5int_lib_fini(void);
+#endif /* _GSS_STATIC_LINK */
 
 OM_uint32 gss_krb5int_initialize_library(void);
 void gss_krb5int_cleanup_library(void);

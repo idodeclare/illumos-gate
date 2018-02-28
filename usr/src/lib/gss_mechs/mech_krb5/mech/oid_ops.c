@@ -1,4 +1,9 @@
 /*
+ * Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
+ * Use is subject to license terms.
+ */
+
+/*
  * lib/gssapi/generic/oid_ops.c
  *
  * Copyright 1995 by the Massachusetts Institute of Technology.
@@ -39,6 +44,13 @@
 #include <gssapi_generic.h>
 #include <errno.h>
 #include <ctype.h>
+
+/*
+ * this oid is defined in the oid structure but not exported to
+ * external callers; we must still ensure that we do not delete it.
+ */
+extern const gss_OID_desc * const gss_nt_service_name;
+
 
 OM_uint32
 generic_gss_release_oid(minor_status, oid)
@@ -90,22 +102,29 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 {
 	gss_OID		p;
 
+	if (minor_status)
 	*minor_status = 0;
+
+	if (new_oid == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_WRITE);
+
+	if (oid == GSS_C_NO_OID)
+		return (GSS_S_CALL_INACCESSIBLE_READ);
 
 	p = (gss_OID) malloc(sizeof(gss_OID_desc));
 	if (!p) {
-	    *minor_status = ENOMEM;
-	    return GSS_S_FAILURE;
+		if (minor_status) *minor_status = ENOMEM;
+		return (GSS_S_FAILURE);
 	}
 	p->length = oid->length;
 	p->elements = malloc(p->length);
 	if (!p->elements) {
 		free(p);
-		return GSS_S_FAILURE;
+		return (GSS_S_FAILURE);
 	}
-	memcpy(p->elements, oid->elements, p->length);
+	(void) memcpy(p->elements, oid->elements, p->length);
 	*new_oid = p;
-	return(GSS_S_COMPLETE);
+	return (GSS_S_COMPLETE);
 }
 
 
@@ -114,14 +133,17 @@ generic_gss_create_empty_oid_set(minor_status, oid_set)
     OM_uint32	*minor_status;
     gss_OID_set	*oid_set;
 {
-    *minor_status = 0;
+	if (minor_status)
+		*minor_status = 0;
+
+	if (oid_set == NULL)
+		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
     if ((*oid_set = (gss_OID_set) malloc(sizeof(gss_OID_set_desc)))) {
-	memset(*oid_set, 0, sizeof(gss_OID_set_desc));
-	return(GSS_S_COMPLETE);
-    }
-    else {
-	*minor_status = ENOMEM;
+		(void) memset(*oid_set, 0, sizeof (gss_OID_set_desc));
+	return (GSS_S_COMPLETE);
+    } else {
+	if (minor_status) *minor_status = ENOMEM;
 	return(GSS_S_FAILURE);
     }
 }
@@ -135,7 +157,8 @@ generic_gss_add_oid_set_member(minor_status, member_oid, oid_set)
     gss_OID	elist;
     gss_OID	lastel;
 
-    *minor_status = 0;
+	if (minor_status)
+		*minor_status = 0;
 
     if (member_oid == NULL || member_oid->length == 0 ||
 	member_oid->elements == NULL)

@@ -207,7 +207,7 @@ static kadm5_ret_t new_server_handle(krb5_ui_4 api_version,
 	  free(handle);
 	  return KADM5_FAILURE;
      }
-     if (! gss_to_krb5_name(handle, rqst2name(rqstp),
+     if (! gss_to_krb5_name(handle, name,
 			    &handle->current_caller)) {
 	  free(handle);
 		gss_release_name(&min_stat, &name);

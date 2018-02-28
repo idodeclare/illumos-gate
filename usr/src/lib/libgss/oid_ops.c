@@ -102,7 +102,8 @@ generic_gss_copy_oid(minor_status, oid, new_oid)
 {
 	gss_OID		p;
 
-	if (minor_status) *minor_status = 0;
+	if (minor_status)
+	*minor_status = 0;
 
 	if (new_oid == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
@@ -138,22 +139,23 @@ generic_gss_create_empty_oid_set(minor_status, oid_set)
 	if (oid_set == NULL)
 		return (GSS_S_CALL_INACCESSIBLE_WRITE);
 
-	if ((*oid_set = (gss_OID_set) malloc(sizeof (gss_OID_set_desc)))) {
+    if ((*oid_set = (gss_OID_set) malloc(sizeof(gss_OID_set_desc)))) {
 		(void) memset(*oid_set, 0, sizeof (gss_OID_set_desc));
-		return (GSS_S_COMPLETE);
-	} else {
-		return (GSS_S_FAILURE);
-	}
+	return (GSS_S_COMPLETE);
+    } else {
+	if (minor_status) *minor_status = ENOMEM;
+	return(GSS_S_FAILURE);
+    }
 }
 
 OM_uint32
 generic_gss_add_oid_set_member(minor_status, member_oid, oid_set)
-OM_uint32 *minor_status;
-const gss_OID member_oid;
-gss_OID_set *oid_set;
+    OM_uint32	*minor_status;
+    const gss_OID_desc * const member_oid;
+    gss_OID_set	*oid_set;
 {
-	gss_OID elist;
-	gss_OID lastel;
+    gss_OID	elist;
+    gss_OID	lastel;
 
 	if (minor_status)
 		*minor_status = 0;
