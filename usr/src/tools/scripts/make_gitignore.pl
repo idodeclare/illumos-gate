@@ -16,8 +16,8 @@
 
 # Assemble contents of a .gitignore from relative path-files in @ARGV, and
 # write the contents if the .gitignore does not exist in the cwd or if the
-# contents differ. The relative paths are ensured to be anchored to ./ so that
-# the .gitignore rules are not inherited in sub-directories.
+# contents differ. The relative paths are ensured to be anchored to ./ so
+# that the .gitignore rules are not inherited in sub-directories.
 #
 # Some illumos Makefiles clobber macros that actually contain committed files
 # (e.g., usr/src/cmd/cmd-inet/usr.lib/wanboot/bootlog-cgi/Makefile clobbering
@@ -31,15 +31,17 @@
 # workaround, for @lines which go up a limited number of levels, write a
 # translation of those lines to an intermediate file, ".gitignore-<subdir>",
 # in the parent directory (e.g., ../.gitignore-i386 or ../../.gitignore-a-b),
-# to be incorporated by this script when called in that parent directory.
+# to be incorporated by this script as addenda when called in that parent
+# directory.
 #
 # A rare few illumos Makefiles execute multiple times in the same working
 # directory for iterating CURTYPE values (e.g., "library" and "standalone"
 # for libumem). Since normally an execution of this script would clobber
 # previous executions' .gitignore contents, support a -d <discriminator>
-# switch to write ".gitignore,<discriminator>," files in the current directory
-# which will be accumulated into a final .gitignore in the same "addendum"
-# method used for ".gitignore-<subdir>" translations.
+# switch to write ".gitignore,<discriminator>," files in the current
+# directory to be incorporated by this script when called in that parent
+# directory in the same "addenda" method used for ".gitignore-<subdir>"
+# intermediates.
 
 use strict;
 use warnings;
