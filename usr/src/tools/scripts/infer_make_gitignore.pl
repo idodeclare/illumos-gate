@@ -14,14 +14,14 @@
 # Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
 #
 
-# Examine files specified in @ARGV, and possibly add or append a command to run
-# $(MAKE_GITIGNORE) in any Makefile's .DONE target.
+# Examine files specified in @ARGV, and possibly add or append a command to
+# run $(MAKE_GITIGNORE) in any Makefile's .DONE target.
 #
 # This script is limited to processing files named "Makefile" plus a small
 # set of exceptions found empirically (e.g., Makefile.solaris for grub). The
-# @ARGV values can be in any relative directory from cwd, but cwd must be
-# the root of the illumos-gate checkout so that a value for the SRC macro can
-# be assumed.
+# @ARGV values can be in any relative directory from cwd, but cwd must be the
+# root of the illumos-gate checkout so that a value for the SRC macro can be
+# assumed.
 #
 # The macros to pass to the execution of $(MAKE_GITIGNORE) are inferred from
 # a search of the text resulting from a Perl-only preprocessing of the
@@ -36,8 +36,8 @@
 #
 # Complex references in clean/clobber targets should be refactored to
 # distinct, simple macros for use by this script and also to encourage
-# reusability between the clean/clobber targets and the .DONE target used
-# for MAKE_GITIGNORE.
+# reusability between the clean/clobber targets and the .DONE target used for
+# MAKE_GITIGNORE.
 #
 # A rare few illumos Makefiles execute multiple times in the same working
 # directory for iterating CURTYPE values (e.g., "library" and "standalone"
