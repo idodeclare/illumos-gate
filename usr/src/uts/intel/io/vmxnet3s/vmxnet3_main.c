@@ -1046,6 +1046,8 @@ static void
 vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
     mac_prop_info_handle_t prop_handle)
 {
+	vmxnet3_softc_t *dp = data;
+
 	switch (prop_id) {
 	case MAC_PROP_MTU:
 		mac_prop_info_set_range_uint32(prop_handle, VMXNET3_MIN_MTU,
