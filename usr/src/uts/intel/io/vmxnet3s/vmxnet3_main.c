@@ -20,10 +20,10 @@
 #include <vmxnet3.h>
 
 /*
- * This driver is based on VMware's version 3227872, and contains additional
+ * This driver is based on VMware's version 8931395, and contains additional
  * enhancements (see README.txt).
  */
-#define	BUILD_NUMBER_NUMERIC	3227872
+#define	BUILD_NUMBER_NUMERIC	8931395
 
 /*
  * If we run out of rxPool buffers, only allocate if the MTU is <= PAGESIZE
@@ -66,11 +66,11 @@ static mac_callbacks_t vmxnet3_mac_callbacks = {
 	.mc_multicst =	vmxnet3_multicst,
 	.mc_unicst =	vmxnet3_unicst,
 	.mc_tx =	vmxnet3_tx,
-	.mc_ioctl =	vmxnet3_ioctl,
-	.mc_getcapab =	vmxnet3_getcapab,
 	.mc_getprop =	vmxnet3_get_prop,
 	.mc_setprop =	vmxnet3_set_prop,
-	.mc_propinfo =	vmxnet3_prop_info
+	.mc_propinfo =	vmxnet3_prop_info,
+	.mc_ioctl =	vmxnet3_ioctl,
+	.mc_getcapab =	vmxnet3_getcapab,
 };
 
 /* Tx DMA engine description */
@@ -175,20 +175,20 @@ vmxnet3_getstat(void *data, uint_t stat, uint64_t *val)
 		*val = 0;
 		break;
 	case MAC_STAT_RBYTES:
-		*val = rxStats->ucastBytesRxOK + rxStats->mcastBytesRxOK +
-		    rxStats->bcastBytesRxOK;
+		*val = rxStats->LROBytesRxOK + rxStats->ucastBytesRxOK +
+		    rxStats->mcastBytesRxOK + rxStats->bcastBytesRxOK;
 		break;
 	case MAC_STAT_IPACKETS:
-		*val = rxStats->ucastPktsRxOK + rxStats->mcastPktsRxOK +
-		    rxStats->bcastPktsRxOK;
+		*val = rxStats->LROPktsRxOK + rxStats->ucastPktsRxOK +
+		    rxStats->mcastPktsRxOK + rxStats->bcastPktsRxOK;
 		break;
 	case MAC_STAT_OBYTES:
-		*val = txStats->ucastBytesTxOK + txStats->mcastBytesTxOK +
-		    txStats->bcastBytesTxOK;
+		*val = txStats->TSOBytesTxOK + txStats->ucastBytesTxOK +
+		    txStats->mcastBytesTxOK + txStats->bcastBytesTxOK;
 		break;
 	case MAC_STAT_OPACKETS:
-		*val = txStats->ucastPktsTxOK + txStats->mcastPktsTxOK +
-		    txStats->bcastPktsTxOK;
+		*val = txStats->TSOPktsTxOK + txStats->ucastPktsTxOK +
+		    txStats->mcastPktsTxOK + txStats->bcastPktsTxOK;
 		break;
 	case ETHER_STAT_LINK_DUPLEX:
 		*val = LINK_DUPLEX_FULL;
@@ -385,7 +385,7 @@ vmxnet3_prepare_rxqueue(vmxnet3_softc_t *dp)
 {
 	Vmxnet3_RxQueueDesc *rqdesc = VMXNET3_RQDESC(dp);
 	vmxnet3_rxqueue_t *rxq = &dp->rxQueue;
-	int err = 0;
+	int err;
 
 	ASSERT(!(rxq->cmdRing.size & VMXNET3_RING_SIZE_MASK));
 	ASSERT(!(rxq->compRing.size & VMXNET3_RING_SIZE_MASK));
@@ -516,7 +516,7 @@ vmxnet3_start(void *data)
 	 * Allocate vmxnet3's shared data and advertise its PA
 	 */
 	if ((err = vmxnet3_prepare_drivershared(dp)) != 0) {
-		VMXNET3_WARN(dp, "vmxnet3_prepare_drivershared() failed: %d",
+		VMXNET3_WARN(dp, "vmxnet3_prepare_drivershared() failed: %d\n",
 		    err);
 		goto error;
 	}
@@ -533,8 +533,8 @@ vmxnet3_start(void *data)
 		dp->txQueue.compRing.size = txQueueSize;
 		dp->txQueue.sharedCtrl = &tqdesc->ctrl;
 		if ((err = vmxnet3_prepare_txqueue(dp)) != 0) {
-			VMXNET3_WARN(dp, "vmxnet3_prepare_txqueue() failed: %d",
-			    err);
+			VMXNET3_WARN(dp, "vmxnet3_prepare_txqueue() failed: "
+			    "%d\n", err);
 			goto error_shared_data;
 		}
 	} else {
@@ -553,8 +553,8 @@ vmxnet3_start(void *data)
 		dp->rxQueue.compRing.size = rxQueueSize;
 		dp->rxQueue.sharedCtrl = &rqdesc->ctrl;
 		if ((err = vmxnet3_prepare_rxqueue(dp)) != 0) {
-			VMXNET3_WARN(dp, "vmxnet3_prepare_rxqueue() failed: %d",
-			    err);
+			VMXNET3_WARN(dp, "vmxnet3_prepare_rxqueue() failed: "
+			    "%d\n", err);
 			goto error_tx_queue;
 		}
 	} else {
@@ -568,7 +568,8 @@ vmxnet3_start(void *data)
 	 */
 	if ((dmaerr = ddi_dma_alloc_handle(dp->dip, &vmxnet3_dma_attrs_tx,
 	    DDI_DMA_SLEEP, NULL, &dp->txDmaHandle)) != DDI_SUCCESS) {
-		VMXNET3_WARN(dp, "ddi_dma_alloc_handle() failed: %d", dmaerr);
+		VMXNET3_WARN(dp, "ddi_dma_alloc_handle() failed: %d\n",
+		    dmaerr);
 		err = vmxnet3_dmaerr2errno(dmaerr);
 		goto error_rx_queue;
 	}
@@ -826,7 +827,9 @@ vmxnet3_change_mtu(vmxnet3_softc_t *dp, uint32_t new_mtu)
 		VMXNET3_WARN(dp, "New MTU not in valid range [%d, %d].\n",
 		    VMXNET3_MIN_MTU, VMXNET3_MAX_MTU);
 		return (EINVAL);
-	} else if (new_mtu > ETHERMTU && !dp->allow_jumbo) {
+	}
+
+	if (new_mtu > ETHERMTU && !dp->allow_jumbo) {
 		VMXNET3_WARN(dp, "MTU cannot be greater than %d because "
 		    "accept-jumbo is not enabled.\n", ETHERMTU);
 		return (EINVAL);
@@ -841,66 +844,6 @@ vmxnet3_change_mtu(vmxnet3_softc_t *dp, uint32_t new_mtu)
 
 	return (ret);
 }
-
-/* ARGSUSED */
-static int
-vmxnet3_get_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    uint_t prop_val_size, void *prop_val)
-{
-	vmxnet3_softc_t *dp = data;
-	int ret = 0;
-
-	switch (prop_id) {
-	case MAC_PROP_MTU:
-		ASSERT(prop_val_size >= sizeof (uint32_t));
-		bcopy(&dp->cur_mtu, prop_val, sizeof (uint32_t));
-		break;
-	default:
-		ret = ENOTSUP;
-		break;
-	}
-	return (ret);
-}
-
-/* ARGSUSED */
-static int
-vmxnet3_set_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    uint_t prop_val_size, const void *prop_val)
-{
-	vmxnet3_softc_t *dp = data;
-	int ret;
-
-	switch (prop_id) {
-	case MAC_PROP_MTU: {
-		uint32_t new_mtu;
-		ASSERT(prop_val_size >= sizeof (uint32_t));
-		bcopy(prop_val, &new_mtu, sizeof (new_mtu));
-		ret = vmxnet3_change_mtu(dp, new_mtu);
-		break;
-	}
-	default:
-		ret = ENOTSUP;
-		break;
-	}
-
-	return (ret);
-}
-
-/* ARGSUSED */
-static void
-vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    mac_prop_info_handle_t prop_handle)
-{
-	switch (prop_id) {
-	case MAC_PROP_MTU:
-		mac_prop_info_set_range_uint32(prop_handle, VMXNET3_MIN_MTU,
-		    VMXNET3_MAX_MTU);
-		break;
-	default:
-		break;
-	}
-}
-
 /*
  * DDI/DDK callback to handle IOCTL in driver. Currently it only handles
  * ND_SET ioctl. Rest all are ignored. The ND_SET is used to set/reset
@@ -1047,6 +990,72 @@ vmxnet3_getcapab(void *data, mac_capab_t capab, void *arg)
 	    ret ? "yes" : "no");
 
 	return (ret);
+}
+
+
+/* ARGSUSED */
+static int
+vmxnet3_get_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    uint_t prop_val_size, void *prop_val)
+{
+	vmxnet3_softc_t *dp = data;
+	int ret = 0;
+
+	switch (prop_id) {
+	case MAC_PROP_MTU:
+		ASSERT(prop_val_size >= sizeof (uint32_t));
+		bcopy(&dp->cur_mtu, prop_val, sizeof (uint32_t));
+		break;
+	default:
+		VMXNET3_WARN(dp, "vmxnet3_get_prop property %d not supported",
+		    prop_id);
+		ret = ENOTSUP;
+		break;
+	}
+	return (ret);
+}
+
+/* ARGSUSED */
+static int
+vmxnet3_set_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    uint_t prop_val_size, const void *prop_val)
+{
+	vmxnet3_softc_t *dp = data;
+	int ret;
+
+	switch (prop_id) {
+	case MAC_PROP_MTU: {
+		uint32_t new_mtu;
+		ASSERT(prop_val_size >= sizeof (uint32_t));
+		bcopy(prop_val, &new_mtu, sizeof (new_mtu));
+		ret = vmxnet3_change_mtu(dp, new_mtu);
+		break;
+	}
+	default:
+		VMXNET3_WARN(dp, "vmxnet3_set_prop property %d not supported",
+		    prop_id);
+		ret = ENOTSUP;
+		break;
+	}
+
+	return (ret);
+}
+
+/* ARGSUSED */
+static void
+vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    mac_prop_info_handle_t prop_handle)
+{
+	switch (prop_id) {
+	case MAC_PROP_MTU:
+		mac_prop_info_set_range_uint32(prop_handle, VMXNET3_MIN_MTU,
+		    VMXNET3_MAX_MTU);
+		break;
+	default:
+		VMXNET3_WARN(dp, "vmxnet3_prop_info: property %d not "
+		    "supported", prop_id);
+		break;
+	}
 }
 
 /*
@@ -1352,7 +1361,7 @@ vmxnet3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	macr->m_src_addr = dp->macaddr;
 	macr->m_dst_addr = NULL;
 	macr->m_callbacks = &vmxnet3_mac_callbacks;
-	macr->m_min_sdu = 0;
+	macr->m_min_sdu = VMXNET3_MIN_MTU;
 	macr->m_max_sdu = ETHERMTU;
 	macr->m_margin = VLAN_TAGSZ;
 	macr->m_pdata = NULL;

@@ -148,10 +148,11 @@ typedef struct vmxnet3_softc_t {
 	vmxnet3_rxqueue_t rxQueue;
 	kmutex_t	rxPoolLock;
 	vmxnet3_rxpool_t rxPool;
+	volatile uint32_t	rxNumBufs;
 	uint32_t	rxMode;
-	boolean_t	alloc_ok;
 
-	vmxnet3_dmabuf_t mfTable;
+	vmxnet3_dmabuf_t	mfTable;
+	boolean_t	alloc_ok;
 	kstat_t		*devKstats;
 	uint32_t	reset_count;
 	uint32_t	tx_pullup_needed;
@@ -202,8 +203,12 @@ extern int vmxnet3s_debug;
 #define	VMXNET3_DRIVER_VERSION_STRING	"1.1.0.0"
 
 /* Logging stuff */
-#define	VMXNET3_WARN(Device, ...) \
-	dev_err((Device)->dip, CE_WARN, "!" __VA_ARGS__)
+#define	VMXNET3_LOG(Level, Device, Format, Args...)	\
+    cmn_err(Level, VMXNET3_MODNAME ":%d: " Format,	\
+    Device->instance, ##Args);
+
+#define	VMXNET3_WARN(Device, ...)	\
+    dev_err((Device)->dip, CE_WARN, "!" __VA_ARGS__)
 
 #ifdef	DEBUG
 #define	VMXNET3_DEBUG(Device, Level, ...) {				\
@@ -216,7 +221,7 @@ extern int vmxnet3s_debug;
 #endif
 
 #define	MACADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define	MACADDR_FMT_ARGS(mac) mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
+#define	MACADDR_FMT_ARGS(mac)	mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
 
 /* Default ring size */
 #define	VMXNET3_DEF_TX_RING_SIZE	256
@@ -249,21 +254,23 @@ extern int vmxnet3s_debug;
 	(((Vmxnet3_GenericDesc *) (Ring)->dma.buf) + Idx)
 
 /* Rings handling */
-#define	VMXNET3_INC_RING_IDX(Ring, Idx) {	\
+#define	VMXNET3_INC_RING_IDX(Ring, Idx)	\
+    do {	\
 	(Idx)++;				\
 	if ((Idx) == (Ring)->size) {		\
 		(Idx) = 0;			\
 		(Ring)->gen ^= 1;		\
 	}					\
-}
+    } while (0)
 
-#define	VMXNET3_DEC_RING_IDX(Ring, Idx) {	\
+#define	VMXNET3_DEC_RING_IDX(Ring, Idx)	\
+    do {	\
 	if ((Idx) == 0) {			\
 		(Idx) = (Ring)->size;		\
 		(Ring)->gen ^= 1;		\
 	}					\
 	(Idx)--;				\
-}
+    } while (0)
 
 #define	PCI_VENDOR_ID_VMWARE		0x15AD
 #define	PCI_DEVICE_ID_VMWARE_VMXNET3	0x07B0
