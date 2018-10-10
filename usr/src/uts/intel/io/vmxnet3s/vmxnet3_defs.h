@@ -827,12 +827,12 @@ Vmxnet3_DriverShared;
 
 /* only use this if moving the idx won't affect the gen bit */
 #define	VMXNET3_INC_RING_IDX_ONLY(idx, ring_size)	\
-do {	\
+    do {	\
 	(idx)++;					\
 	if (UNLIKELY((idx) == (ring_size))) {		\
 		(idx) = 0;				\
 	}						\
-} while (0)
+    } while (0)
 
 #define	VMXNET3_SET_VFTABLE_ENTRY(vfTable, vid)	\
     (vfTable)[(vid) >> 5] |= (1 << ((vid) & 31))

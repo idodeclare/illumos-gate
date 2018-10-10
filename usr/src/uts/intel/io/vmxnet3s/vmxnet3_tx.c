@@ -36,7 +36,7 @@ typedef struct vmxnet3_offload_t {
  * Initialize a TxQueue. Currently nothing needs to be done.
  *
  * Returns:
- *    0 on success, non-zero on failure.
+ *	0 on success, non-zero on failure.
  */
 /* ARGSUSED */
 int
@@ -49,7 +49,7 @@ vmxnet3_txqueue_init(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
  * Finish a TxQueue by freeing all pending Tx.
  *
  * Returns:
- *    0 on success, non-zero on failure.
+ *	0 on success, non-zero on failure.
  */
 void
 vmxnet3_txqueue_fini(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
@@ -218,9 +218,8 @@ vmxnet3_tx_one(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq,
 						VMXNET3_DEBUG(dp, 2,
 						    "overfragmented, "
 						    "frags=%u ring=%u "
-						    "om=%u\n",
-						    frags, cmdRing->size,
-						    ol->om);
+						    "om=%u\n", frags,
+						    cmdRing->size, ol->om);
 					}
 					(void) ddi_dma_unbind_handle(
 					    dp->txDmaHandle);
