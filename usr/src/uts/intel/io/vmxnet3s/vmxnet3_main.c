@@ -15,15 +15,16 @@
 
 /*
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  */
 
 #include <vmxnet3.h>
 
 /*
- * This driver is based on VMware's version 3227872, and contains additional
+ * This driver is based on VMware's version 8931395, and contains additional
  * enhancements (see README.txt).
  */
-#define	BUILD_NUMBER_NUMERIC	3227872
+#define	BUILD_NUMBER_NUMERIC	8931395
 
 /*
  * If we run out of rxPool buffers, only allocate if the MTU is <= PAGESIZE
@@ -36,9 +37,13 @@
  * TODO:
  *    - Tx data ring
  *    - MAC_CAPAB_POLL support
+ *    - JF support
  *    - Dynamic RX pool
  */
 
+/*
+ * Forward declarations
+ */
 static int vmxnet3_getstat(void *, uint_t, uint64_t *);
 static int vmxnet3_start(void *);
 static void vmxnet3_stop(void *);
@@ -66,11 +71,11 @@ static mac_callbacks_t vmxnet3_mac_callbacks = {
 	.mc_multicst =	vmxnet3_multicst,
 	.mc_unicst =	vmxnet3_unicst,
 	.mc_tx =	vmxnet3_tx,
-	.mc_ioctl =	vmxnet3_ioctl,
-	.mc_getcapab =	vmxnet3_getcapab,
 	.mc_getprop =	vmxnet3_get_prop,
 	.mc_setprop =	vmxnet3_set_prop,
-	.mc_propinfo =	vmxnet3_prop_info
+	.mc_propinfo =	vmxnet3_prop_info,
+	.mc_ioctl =	vmxnet3_ioctl,
+	.mc_getcapab =	vmxnet3_getcapab
 };
 
 /* Tx DMA engine description */
@@ -96,13 +101,16 @@ static ddi_dma_attr_t vmxnet3_dma_attrs_tx = {
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_getstat(void *data, uint_t stat, uint64_t *val)
 {
-	vmxnet3_softc_t *dp = data;
-	UPT1_TxStats *txStats;
-	UPT1_RxStats *rxStats;
+	vmxnet3_softc_t	*dp = data;
+	UPT1_TxStats	*txStats;
+	UPT1_RxStats	*rxStats;
 
 	VMXNET3_DEBUG(dp, 3, "getstat(%u)\n", stat);
 
@@ -175,20 +183,20 @@ vmxnet3_getstat(void *data, uint_t stat, uint64_t *val)
 		*val = 0;
 		break;
 	case MAC_STAT_RBYTES:
-		*val = rxStats->ucastBytesRxOK + rxStats->mcastBytesRxOK +
-		    rxStats->bcastBytesRxOK;
+		*val = rxStats->LROBytesRxOK + rxStats->ucastBytesRxOK +
+		    rxStats->mcastBytesRxOK + rxStats->bcastBytesRxOK;
 		break;
 	case MAC_STAT_IPACKETS:
-		*val = rxStats->ucastPktsRxOK + rxStats->mcastPktsRxOK +
-		    rxStats->bcastPktsRxOK;
+		*val = rxStats->LROPktsRxOK + rxStats->ucastPktsRxOK +
+		    rxStats->mcastPktsRxOK + rxStats->bcastPktsRxOK;
 		break;
 	case MAC_STAT_OBYTES:
-		*val = txStats->ucastBytesTxOK + txStats->mcastBytesTxOK +
-		    txStats->bcastBytesTxOK;
+		*val = txStats->TSOBytesTxOK + txStats->ucastBytesTxOK +
+		    txStats->mcastBytesTxOK + txStats->bcastBytesTxOK;
 		break;
 	case MAC_STAT_OPACKETS:
-		*val = txStats->ucastPktsTxOK + txStats->mcastPktsTxOK +
-		    txStats->bcastPktsTxOK;
+		*val = txStats->TSOPktsTxOK + txStats->ucastPktsTxOK +
+		    txStats->mcastPktsTxOK + txStats->bcastPktsTxOK;
 		break;
 	case ETHER_STAT_LINK_DUPLEX:
 		*val = LINK_DUPLEX_FULL;
@@ -205,6 +213,9 @@ vmxnet3_getstat(void *data, uint_t stat, uint64_t *val)
  *
  * Returns:
  *	0 on sucess, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_prepare_drivershared(vmxnet3_softc_t *dp)
@@ -252,6 +263,7 @@ vmxnet3_prepare_drivershared(vmxnet3_softc_t *dp)
 	ds->devRead.misc.queueDescLen = allocSize;
 
 	/* TxQueue and RxQueue information is filled in other functions */
+
 	ds->devRead.intrConf.autoMask = (dp->intrMaskMode == VMXNET3_IMM_AUTO);
 	ds->devRead.intrConf.numIntrs = 1;
 	/* XXX: ds->intr.modLevels */
@@ -267,6 +279,9 @@ vmxnet3_prepare_drivershared(vmxnet3_softc_t *dp)
 
 /*
  * Destroy the shared data structures of a vmxnet3 device.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_destroy_drivershared(vmxnet3_softc_t *dp)
@@ -283,11 +298,14 @@ vmxnet3_destroy_drivershared(vmxnet3_softc_t *dp)
  *
  * Returns:
  *	0 on success, non-zero on error.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_alloc_cmdring(vmxnet3_softc_t *dp, vmxnet3_cmdring_t *cmdRing)
 {
-	size_t ringSize = cmdRing->size * sizeof (Vmxnet3_TxDesc);
+	size_t	ringSize = cmdRing->size * sizeof (Vmxnet3_TxDesc);
 	int err;
 
 	if ((err = vmxnet3_alloc_dma_mem_512(dp, &cmdRing->dma, ringSize,
@@ -307,11 +325,14 @@ vmxnet3_alloc_cmdring(vmxnet3_softc_t *dp, vmxnet3_cmdring_t *cmdRing)
  *
  * Returns:
  *    DDI_SUCCESS or DDI_FAILURE.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_alloc_compring(vmxnet3_softc_t *dp, vmxnet3_compring_t *compRing)
 {
-	size_t ringSize = compRing->size * sizeof (Vmxnet3_TxCompDesc);
+	size_t	ringSize = compRing->size * sizeof (Vmxnet3_TxCompDesc);
 
 	if (vmxnet3_alloc_dma_mem_512(dp, &compRing->dma, ringSize,
 	    B_TRUE) != DDI_SUCCESS) {
@@ -329,13 +350,16 @@ vmxnet3_alloc_compring(vmxnet3_softc_t *dp, vmxnet3_compring_t *compRing)
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_prepare_txqueue(vmxnet3_softc_t *dp)
 {
-	Vmxnet3_TxQueueDesc *tqdesc = VMXNET3_TQDESC(dp);
-	vmxnet3_txqueue_t *txq = &dp->txQueue;
-	int err;
+	Vmxnet3_TxQueueDesc	*tqdesc = VMXNET3_TQDESC(dp);
+	vmxnet3_txqueue_t	*txq = &dp->txQueue;
+	int	err;
 
 	ASSERT(!(txq->cmdRing.size & VMXNET3_RING_SIZE_MASK));
 	ASSERT(!(txq->compRing.size & VMXNET3_RING_SIZE_MASK));
@@ -379,13 +403,16 @@ error:
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_prepare_rxqueue(vmxnet3_softc_t *dp)
 {
-	Vmxnet3_RxQueueDesc *rqdesc = VMXNET3_RQDESC(dp);
-	vmxnet3_rxqueue_t *rxq = &dp->rxQueue;
-	int err = 0;
+	Vmxnet3_RxQueueDesc	*rqdesc = VMXNET3_RQDESC(dp);
+	vmxnet3_rxqueue_t	*rxq = &dp->rxQueue;
+	int	err;
 
 	ASSERT(!(rxq->cmdRing.size & VMXNET3_RING_SIZE_MASK));
 	ASSERT(!(rxq->compRing.size & VMXNET3_RING_SIZE_MASK));
@@ -426,6 +453,9 @@ error:
 
 /*
  * Destroy the tx queue of a vmxnet3 device.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_destroy_txqueue(vmxnet3_softc_t *dp)
@@ -445,6 +475,9 @@ vmxnet3_destroy_txqueue(vmxnet3_softc_t *dp)
 
 /*
  * Destroy the rx queue of a vmxnet3 device.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_destroy_rxqueue(vmxnet3_softc_t *dp)
@@ -464,6 +497,9 @@ vmxnet3_destroy_rxqueue(vmxnet3_softc_t *dp)
 
 /*
  * Apply new RX filters settings to a vmxnet3 device.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_refresh_rxfilter(vmxnet3_softc_t *dp)
@@ -476,6 +512,9 @@ vmxnet3_refresh_rxfilter(vmxnet3_softc_t *dp)
 
 /*
  * Fetch the link state of a vmxnet3 device.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_refresh_linkstate(vmxnet3_softc_t *dp)
@@ -499,6 +538,9 @@ vmxnet3_refresh_linkstate(vmxnet3_softc_t *dp)
  *
  * Returns:
  *	0 on success, non-zero error on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_start(void *data)
@@ -622,6 +664,9 @@ error:
 /*
  * Stop a vmxnet3 device: send a stop command to the device and
  * de-allocate the shared data structures.
+ *
+ * Side effects:
+ *    None.
  */
 static void
 vmxnet3_stop(void *data)
@@ -652,6 +697,12 @@ vmxnet3_stop(void *data)
 
 /*
  * Set or unset promiscuous mode on a vmxnet3 device.
+ *
+ * Results:
+ *    0.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_setpromisc(void *data, boolean_t promisc)
@@ -676,6 +727,9 @@ vmxnet3_setpromisc(void *data, boolean_t promisc)
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_multicst(void *data, boolean_t add, const uint8_t *macaddr)
@@ -780,6 +834,9 @@ done:
  *
  * Returns:
  *	0
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_unicst(void *data, const uint8_t *macaddr)
@@ -808,6 +865,9 @@ vmxnet3_unicst(void *data, const uint8_t *macaddr)
  *	EBUSY if the device is enabled.
  *	EINVAL for invalid MTU values.
  *	0 on success.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_change_mtu(vmxnet3_softc_t *dp, uint32_t new_mtu)
@@ -826,7 +886,9 @@ vmxnet3_change_mtu(vmxnet3_softc_t *dp, uint32_t new_mtu)
 		VMXNET3_WARN(dp, "New MTU not in valid range [%d, %d].\n",
 		    VMXNET3_MIN_MTU, VMXNET3_MAX_MTU);
 		return (EINVAL);
-	} else if (new_mtu > ETHERMTU && !dp->allow_jumbo) {
+	}
+
+	if (new_mtu > ETHERMTU && !dp->allow_jumbo) {
 		VMXNET3_WARN(dp, "MTU cannot be greater than %d because "
 		    "accept-jumbo is not enabled.\n", ETHERMTU);
 		return (EINVAL);
@@ -842,65 +904,6 @@ vmxnet3_change_mtu(vmxnet3_softc_t *dp, uint32_t new_mtu)
 	return (ret);
 }
 
-/* ARGSUSED */
-static int
-vmxnet3_get_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    uint_t prop_val_size, void *prop_val)
-{
-	vmxnet3_softc_t *dp = data;
-	int ret = 0;
-
-	switch (prop_id) {
-	case MAC_PROP_MTU:
-		ASSERT(prop_val_size >= sizeof (uint32_t));
-		bcopy(&dp->cur_mtu, prop_val, sizeof (uint32_t));
-		break;
-	default:
-		ret = ENOTSUP;
-		break;
-	}
-	return (ret);
-}
-
-/* ARGSUSED */
-static int
-vmxnet3_set_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    uint_t prop_val_size, const void *prop_val)
-{
-	vmxnet3_softc_t *dp = data;
-	int ret;
-
-	switch (prop_id) {
-	case MAC_PROP_MTU: {
-		uint32_t new_mtu;
-		ASSERT(prop_val_size >= sizeof (uint32_t));
-		bcopy(prop_val, &new_mtu, sizeof (new_mtu));
-		ret = vmxnet3_change_mtu(dp, new_mtu);
-		break;
-	}
-	default:
-		ret = ENOTSUP;
-		break;
-	}
-
-	return (ret);
-}
-
-/* ARGSUSED */
-static void
-vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
-    mac_prop_info_handle_t prop_handle)
-{
-	switch (prop_id) {
-	case MAC_PROP_MTU:
-		mac_prop_info_set_range_uint32(prop_handle, VMXNET3_MIN_MTU,
-		    VMXNET3_MAX_MTU);
-		break;
-	default:
-		break;
-	}
-}
-
 /*
  * DDI/DDK callback to handle IOCTL in driver. Currently it only handles
  * ND_SET ioctl. Rest all are ignored. The ND_SET is used to set/reset
@@ -914,12 +917,12 @@ vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
 static void
 vmxnet3_ioctl(void *arg, queue_t *wq, mblk_t *mp)
 {
-	vmxnet3_softc_t *dp = arg;
-	int ret = EINVAL;
-	IOCP iocp;
-	mblk_t *mp1;
-	char *valp, *param;
-	int data;
+	vmxnet3_softc_t	*dp = arg;
+	int		ret = EINVAL;
+	IOCP	iocp;
+	mblk_t	*mp1;
+	char	*valp, *param;
+	int	data;
 
 	iocp = (void *)mp->b_rptr;
 	iocp->ioc_error = 0;
@@ -1018,12 +1021,15 @@ vmxnet3_ioctl(void *arg, queue_t *wq, mblk_t *mp)
  *
  * Returns:
  *	B_TRUE if the capability is supported, B_FALSE otherwise.
+ *
+ * Side effects:
+ *    None.
  */
 static boolean_t
 vmxnet3_getcapab(void *data, mac_capab_t capab, void *arg)
 {
-	vmxnet3_softc_t *dp = data;
-	boolean_t ret;
+	vmxnet3_softc_t	*dp = data;
+	boolean_t	ret;
 
 	switch (capab) {
 	case MAC_CAPAB_HCKSUM: {
@@ -1049,6 +1055,68 @@ vmxnet3_getcapab(void *data, mac_capab_t capab, void *arg)
 	return (ret);
 }
 
+/* ARGSUSED */
+static int
+vmxnet3_get_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    uint_t prop_val_size, void *prop_val)
+{
+	vmxnet3_softc_t	*dp = data;
+	int	ret = 0;
+
+	switch (prop_id) {
+	case MAC_PROP_MTU:
+		ASSERT(prop_val_size >= sizeof (uint32_t));
+		bcopy(&dp->cur_mtu, prop_val, sizeof (uint32_t));
+		break;
+	default:
+		/* Illumos does not DEBUG log here */
+		ret = ENOTSUP;
+		break;
+	}
+	return (ret);
+}
+
+/* ARGSUSED */
+static int
+vmxnet3_set_prop(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    uint_t prop_val_size, const void *prop_val)
+{
+	vmxnet3_softc_t	*dp = data;
+	int	ret;
+
+	switch (prop_id) {
+	case MAC_PROP_MTU: {
+		uint32_t new_mtu;
+		ASSERT(prop_val_size >= sizeof (uint32_t));
+		bcopy(prop_val, &new_mtu, sizeof (new_mtu));
+		ret = vmxnet3_change_mtu(dp, new_mtu);
+		break;
+	}
+	default:
+		/* Illumos does not DEBUG log here */
+		ret = ENOTSUP;
+		break;
+	}
+
+	return (ret);
+}
+
+/* ARGSUSED */
+static void
+vmxnet3_prop_info(void *data, const char *prop_name, mac_prop_id_t prop_id,
+    mac_prop_info_handle_t prop_handle)
+{
+	switch (prop_id) {
+	case MAC_PROP_MTU:
+		mac_prop_info_set_range_uint32(prop_handle, VMXNET3_MIN_MTU,
+		    VMXNET3_MAX_MTU);
+		break;
+	default:
+		/* Illumos does not DEBUG log here */
+		break;
+	}
+}
+
 /*
  * Reset a vmxnet3 device. Only to be used when the device is wedged.
  *
@@ -1058,9 +1126,8 @@ vmxnet3_getcapab(void *data, mac_capab_t capab, void *arg)
 static void
 vmxnet3_reset(void *data)
 {
-	int ret;
-
-	vmxnet3_softc_t *dp = data;
+	int	ret;
+	vmxnet3_softc_t	*dp = data;
 
 	VMXNET3_DEBUG(dp, 1, "vmxnet3_reset()\n");
 
@@ -1076,13 +1143,16 @@ vmxnet3_reset(void *data)
  *
  * Returns:
  *	B_TRUE if the link state changed, B_FALSE otherwise.
+ *
+ * Side effects:
+ *	None.
  */
 static boolean_t
 vmxnet3_intr_events(vmxnet3_softc_t *dp)
 {
-	Vmxnet3_DriverShared *ds = VMXNET3_DS(dp);
-	boolean_t linkStateChanged = B_FALSE;
-	uint32_t events = ds->ecr;
+	Vmxnet3_DriverShared	*ds = VMXNET3_DS(dp);
+	boolean_t	linkStateChanged = B_FALSE;
+	uint32_t	events = ds->ecr;
 
 	if (events) {
 		VMXNET3_DEBUG(dp, 2, "events(0x%x)\n", events);
@@ -1127,12 +1197,14 @@ vmxnet3_intr_events(vmxnet3_softc_t *dp)
  *
  * Returns:
  *	DDI_INTR_CLAIMED or DDI_INTR_UNCLAIMED.
+ * Side effects:
+ *	None.
  */
 /* ARGSUSED1 */
 static uint_t
 vmxnet3_intr(caddr_t data1, caddr_t data2)
 {
-	vmxnet3_softc_t *dp = (void *) data1;
+	vmxnet3_softc_t	*dp = (void *) data1;
 
 	VMXNET3_DEBUG(dp, 3, "intr()\n");
 
@@ -1234,16 +1306,19 @@ vmxnet3_kstat_init(vmxnet3_softc_t *dp)
  *
  * Returns:
  *	DDI_SUCCESS or DDI_FAILURE.
+ *
+ * Side effects:
+ *	None.
  */
 static int
 vmxnet3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 {
-	vmxnet3_softc_t *dp;
-	mac_register_t *macr;
-	uint16_t vendorId, devId, ret16;
-	uint32_t ret32;
-	int ret, err;
-	uint_t uret;
+	vmxnet3_softc_t	*dp;
+	mac_register_t	*macr;
+	uint16_t	vendorId, devId, ret16;
+	uint32_t	ret32;
+	int	ret, err;
+	uint_t	uret;
 
 	if (cmd != DDI_ATTACH) {
 		goto error;
@@ -1352,7 +1427,7 @@ vmxnet3_attach(dev_info_t *dip, ddi_attach_cmd_t cmd)
 	macr->m_src_addr = dp->macaddr;
 	macr->m_dst_addr = NULL;
 	macr->m_callbacks = &vmxnet3_mac_callbacks;
-	macr->m_min_sdu = 0;
+	macr->m_min_sdu = VMXNET3_MIN_MTU;
 	macr->m_max_sdu = ETHERMTU;
 	macr->m_margin = VLAN_TAGSZ;
 	macr->m_pdata = NULL;
@@ -1493,13 +1568,16 @@ error:
  *
  * Returns:
  *	DDI_SUCCESS or DDI_FAILURE.
+ *
+ * Side effects:
+ *	None.
  */
 static int
 vmxnet3_detach(dev_info_t *dip, ddi_detach_cmd_t cmd)
 {
-	vmxnet3_softc_t *dp = ddi_get_driver_private(dip);
-	unsigned int retries = 0;
-	int ret;
+	vmxnet3_softc_t	*dp = ddi_get_driver_private(dip);
+	unsigned int	retries = 0;
+	int	ret;
 
 	VMXNET3_DEBUG(dp, 1, "detach()\n");
 
@@ -1588,7 +1666,7 @@ static struct modlinkage vmxnet3_modlinkage = {
 int
 _init(void)
 {
-	int ret;
+	int	ret;
 
 	mac_init_ops(&vmxnet3_dev_ops, VMXNET3_MODNAME);
 	ret = mod_install(&vmxnet3_modlinkage);
@@ -1603,7 +1681,7 @@ _init(void)
 int
 _fini(void)
 {
-	int ret;
+	int	ret;
 
 	ret = mod_remove(&vmxnet3_modlinkage);
 	if (ret == DDI_SUCCESS) {

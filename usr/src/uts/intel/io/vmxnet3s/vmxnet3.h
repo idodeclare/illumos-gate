@@ -15,6 +15,7 @@
 
 /*
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  */
 
 #ifndef	_VMXNET3_H_
@@ -58,12 +59,12 @@ typedef struct vmxnet3_dmabuf_t {
 	caddr_t		buf;
 	uint64_t	bufPA;
 	size_t		bufLen;
-	ddi_dma_handle_t dmaHandle;
-	ddi_acc_handle_t dataHandle;
+	ddi_dma_handle_t	dmaHandle;
+	ddi_acc_handle_t	dataHandle;
 } vmxnet3_dmabuf_t;
 
 typedef struct vmxnet3_cmdring_t {
-	vmxnet3_dmabuf_t dma;
+	vmxnet3_dmabuf_t	dma;
 	uint16_t	size;
 	uint16_t	next2fill;
 	uint16_t	avail;
@@ -71,7 +72,7 @@ typedef struct vmxnet3_cmdring_t {
 } vmxnet3_cmdring_t;
 
 typedef struct vmxnet3_compring_t {
-	vmxnet3_dmabuf_t dma;
+	vmxnet3_dmabuf_t	dma;
 	uint16_t	size;
 	uint16_t	next2comp;
 	uint8_t		gen;
@@ -84,18 +85,18 @@ typedef struct vmxnet3_metatx_t {
 } vmxnet3_metatx_t;
 
 typedef struct vmxnet3_txqueue_t {
-	vmxnet3_cmdring_t cmdRing;
-	vmxnet3_compring_t compRing;
-	vmxnet3_metatx_t *metaRing;
-	Vmxnet3_TxQueueCtrl *sharedCtrl;
+	vmxnet3_cmdring_t	cmdRing;
+	vmxnet3_compring_t	compRing;
+	vmxnet3_metatx_t	*metaRing;
+	Vmxnet3_TxQueueCtrl	*sharedCtrl;
 } vmxnet3_txqueue_t;
 
 typedef struct vmxnet3_rxbuf_t {
-	vmxnet3_dmabuf_t dma;
+	vmxnet3_dmabuf_t	dma;
 	mblk_t		*mblk;
 	frtn_t		freeCB;
-	struct vmxnet3_softc_t *dp;
-	struct vmxnet3_rxbuf_t *next;
+	struct vmxnet3_softc_t	*dp;
+	struct vmxnet3_rxbuf_t	*next;
 } vmxnet3_rxbuf_t;
 
 typedef struct vmxnet3_bufdesc_t {
@@ -109,10 +110,10 @@ typedef struct vmxnet3_rxpool_t {
 } vmxnet3_rxpool_t;
 
 typedef struct vmxnet3_rxqueue_t {
-	vmxnet3_cmdring_t cmdRing;
-	vmxnet3_compring_t compRing;
-	vmxnet3_bufdesc_t *bufRing;
-	Vmxnet3_RxQueueCtrl *sharedCtrl;
+	vmxnet3_cmdring_t	cmdRing;
+	vmxnet3_compring_t	compRing;
+	vmxnet3_bufdesc_t	*bufRing;
+	Vmxnet3_RxQueueCtrl	*sharedCtrl;
 } vmxnet3_rxqueue_t;
 
 typedef struct vmxnet3_softc_t {
@@ -120,8 +121,8 @@ typedef struct vmxnet3_softc_t {
 	int		instance;
 	mac_handle_t	mac;
 
-	ddi_acc_handle_t pciHandle;
-	ddi_acc_handle_t bar0Handle, bar1Handle;
+	ddi_acc_handle_t	pciHandle;
+	ddi_acc_handle_t	bar0Handle, bar1Handle;
 	caddr_t		bar0, bar1;
 
 	boolean_t	devEnabled;
@@ -130,24 +131,24 @@ typedef struct vmxnet3_softc_t {
 	boolean_t	allow_jumbo;
 	link_state_t	linkState;
 	uint64_t	linkSpeed;
-	vmxnet3_dmabuf_t sharedData;
-	vmxnet3_dmabuf_t queueDescs;
+	vmxnet3_dmabuf_t	sharedData;
+	vmxnet3_dmabuf_t	queueDescs;
 
 	kmutex_t	intrLock;
 	int		intrType;
 	int		intrMaskMode;
 	int		intrCap;
-	ddi_intr_handle_t intrHandle;
+	ddi_intr_handle_t	intrHandle;
 	ddi_taskq_t	*resetTask;
 
 	kmutex_t	txLock;
-	vmxnet3_txqueue_t txQueue;
-	ddi_dma_handle_t txDmaHandle;
+	vmxnet3_txqueue_t	txQueue;
+	ddi_dma_handle_t	txDmaHandle;
 	boolean_t	txMustResched;
 
-	vmxnet3_rxqueue_t rxQueue;
+	vmxnet3_rxqueue_t	rxQueue;
 	kmutex_t	rxPoolLock;
-	vmxnet3_rxpool_t rxPool;
+	vmxnet3_rxpool_t	rxPool;
 	uint32_t	rxMode;
 	boolean_t	alloc_ok;
 
@@ -202,68 +203,76 @@ extern int vmxnet3s_debug;
 #define	VMXNET3_DRIVER_VERSION_STRING	"1.1.0.0"
 
 /* Logging stuff */
-#define	VMXNET3_WARN(Device, ...) \
-	dev_err((Device)->dip, CE_WARN, "!" __VA_ARGS__)
+#define	VMXNET3_LOG(Level, Device, Format, ...)	\
+    cmn_err(Level, VMXNET3_MODNAME ":%d: " Format, Device->instance, \
+        __VA_ARGS__);
+
+#define	VMXNET3_WARN(Device, ...)	\
+    dev_err((Device)->dip, CE_WARN, "!" __VA_ARGS__)
 
 #ifdef	DEBUG
-#define	VMXNET3_DEBUG(Device, Level, ...) {				\
+#define	VMXNET3_DEBUG(Device, Level, ...)	\
+    do {				\
 	if (Level <= vmxnet3s_debug) {					\
 		dev_err((Device)->dip, CE_CONT, "?" __VA_ARGS__);	\
 	}								\
-}
+    } while (0)
 #else
 #define	VMXNET3_DEBUG(Device, Level, ...)
 #endif
 
-#define	MACADDR_FMT "%02x:%02x:%02x:%02x:%02x:%02x"
-#define	MACADDR_FMT_ARGS(mac) mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
+#define	MACADDR_FMT	"%02x:%02x:%02x:%02x:%02x:%02x"
+#define	MACADDR_FMT_ARGS(mac)	mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]
 
 /* Default ring size */
 #define	VMXNET3_DEF_TX_RING_SIZE	256
 #define	VMXNET3_DEF_RX_RING_SIZE	256
 
 /* Register access helpers */
-#define	VMXNET3_BAR0_GET32(Device, Reg) \
-	ddi_get32((Device)->bar0Handle, (uint32_t *)((Device)->bar0 + (Reg)))
-#define	VMXNET3_BAR0_PUT32(Device, Reg, Value) \
-	ddi_put32((Device)->bar0Handle, (uint32_t *)((Device)->bar0 + (Reg)), \
-	    (Value))
-#define	VMXNET3_BAR1_GET32(Device, Reg) \
-	ddi_get32((Device)->bar1Handle, (uint32_t *)((Device)->bar1 + (Reg)))
-#define	VMXNET3_BAR1_PUT32(Device, Reg, Value) \
-	ddi_put32((Device)->bar1Handle, (uint32_t *)((Device)->bar1 + (Reg)), \
-	    (Value))
+#define	VMXNET3_BAR0_GET32(Device, Reg)	\
+    ddi_get32((Device)->bar0Handle, (uint32_t *)((Device)->bar0 + (Reg)))
+#define	VMXNET3_BAR0_PUT32(Device, Reg, Value)	\
+    ddi_put32((Device)->bar0Handle, (uint32_t *)((Device)->bar0 + (Reg)), \
+        (Value))
+#define	VMXNET3_BAR1_GET32(Device, Reg)	\
+    ddi_get32((Device)->bar1Handle, (uint32_t *)((Device)->bar1 + (Reg)))
+#define	VMXNET3_BAR1_PUT32(Device, Reg, Value)	\
+    ddi_put32((Device)->bar1Handle, (uint32_t *)((Device)->bar1 + (Reg)), \
+        (Value))
 
 /* Misc helpers */
-#define	VMXNET3_DS(Device) ((Vmxnet3_DriverShared *) (Device)->sharedData.buf)
-#define	VMXNET3_TQDESC(Device) \
-	((Vmxnet3_TxQueueDesc *) (Device)->queueDescs.buf)
-#define	VMXNET3_RQDESC(Device) \
-	((Vmxnet3_RxQueueDesc *) ((Device)->queueDescs.buf + \
-	    sizeof (Vmxnet3_TxQueueDesc)))
+#define	VMXNET3_DS(Device)	\
+    ((Vmxnet3_DriverShared *) (Device)->sharedData.buf)
+#define	VMXNET3_TQDESC(Device)	\
+    ((Vmxnet3_TxQueueDesc *) (Device)->queueDescs.buf)
+#define	VMXNET3_RQDESC(Device)	\
+    ((Vmxnet3_RxQueueDesc *) ((Device)->queueDescs.buf + \
+        sizeof (Vmxnet3_TxQueueDesc)))
 
-#define	VMXNET3_ADDR_LO(addr) ((uint32_t)(addr))
-#define	VMXNET3_ADDR_HI(addr) ((uint32_t)(((uint64_t)(addr)) >> 32))
+#define	VMXNET3_ADDR_LO(addr)	((uint32_t)(addr))
+#define	VMXNET3_ADDR_HI(addr)	((uint32_t)(((uint64_t)(addr)) >> 32))
 
-#define	VMXNET3_GET_DESC(Ring, Idx) \
-	(((Vmxnet3_GenericDesc *) (Ring)->dma.buf) + Idx)
+#define	VMXNET3_GET_DESC(Ring, Idx)	\
+    (((Vmxnet3_GenericDesc *) (Ring)->dma.buf) + Idx)
 
 /* Rings handling */
-#define	VMXNET3_INC_RING_IDX(Ring, Idx) {	\
+#define	VMXNET3_INC_RING_IDX(Ring, Idx)	\
+    do {	\
 	(Idx)++;				\
 	if ((Idx) == (Ring)->size) {		\
 		(Idx) = 0;			\
 		(Ring)->gen ^= 1;		\
 	}					\
-}
+    } while (0)
 
-#define	VMXNET3_DEC_RING_IDX(Ring, Idx) {	\
+#define	VMXNET3_DEC_RING_IDX(Ring, Idx)	\
+    do {	\
 	if ((Idx) == 0) {			\
 		(Idx) = (Ring)->size;		\
 		(Ring)->gen ^= 1;		\
 	}					\
 	(Idx)--;				\
-}
+    } while (0)
 
 #define	PCI_VENDOR_ID_VMWARE		0x15AD
 #define	PCI_DEVICE_ID_VMWARE_VMXNET3	0x07B0

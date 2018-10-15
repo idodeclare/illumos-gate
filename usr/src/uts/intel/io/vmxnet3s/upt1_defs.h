@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2007 VMware, Inc. All rights reserved.
+ * Copyright (C) 2007-2018 VMware, Inc. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  *
  * The contents of this file are subject to the terms of the Common
  * Development and Distribution License (the "License") version 1.0
@@ -29,10 +30,11 @@
 #define	UPT1_MAX_TX_QUEUES	64
 #define	UPT1_MAX_RX_QUEUES	64
 
-#define	UPT1_MAX_INTRS (UPT1_MAX_TX_QUEUES + UPT1_MAX_RX_QUEUES)
+#define	UPT1_MAX_INTRS	(UPT1_MAX_TX_QUEUES + UPT1_MAX_RX_QUEUES)
 
 #pragma pack(1)
-typedef struct UPT1_TxStats {
+typedef
+struct UPT1_TxStats {
 	uint64_t	TSOPktsTxOK;  /* TSO pkts post-segmentation */
 	uint64_t	TSOBytesTxOK;
 	uint64_t	ucastPktsTxOK;
@@ -43,11 +45,13 @@ typedef struct UPT1_TxStats {
 	uint64_t	bcastBytesTxOK;
 	uint64_t	pktsTxError;
 	uint64_t	pktsTxDiscard;
-} UPT1_TxStats;
+}
+UPT1_TxStats;
 #pragma pack()
 
 #pragma pack(1)
-typedef struct UPT1_RxStats {
+typedef
+struct UPT1_RxStats {
 	uint64_t	LROPktsRxOK;	/* LRO pkts */
 	uint64_t	LROBytesRxOK;	/* bytes from LRO pkts */
 	/* the following counters are for pkts from the wire, i.e., pre-LRO */
@@ -59,7 +63,8 @@ typedef struct UPT1_RxStats {
 	uint64_t	bcastBytesRxOK;
 	uint64_t	pktsRxOutOfBuf;
 	uint64_t	pktsRxError;
-} UPT1_RxStats;
+}
+UPT1_RxStats;
 #pragma pack()
 
 /* interrupt moderation level */
@@ -81,14 +86,16 @@ typedef struct UPT1_RxStats {
 #define	UPT1_RSS_MAX_IND_TABLE_SIZE	128
 
 #pragma pack(1)
-typedef struct UPT1_RSSConf {
+typedef
+struct UPT1_RSSConf {
 	uint16_t	hashType;
 	uint16_t	hashFunc;
 	uint16_t	hashKeySize;
 	uint16_t	indTableSize;
 	uint8_t		hashKey[UPT1_RSS_MAX_KEY_SIZE];
 	uint8_t		indTable[UPT1_RSS_MAX_IND_TABLE_SIZE];
-} UPT1_RSSConf;
+}
+UPT1_RSSConf;
 #pragma pack()
 
 /* features */
@@ -96,5 +103,7 @@ typedef struct UPT1_RSSConf {
 #define	UPT1_F_RSS	0x0002
 #define	UPT1_F_RXVLAN	0x0004	/* VLAN tag stripping */
 #define	UPT1_F_LRO	0x0008
+#define	UPT1_F_INNER_LRO	0x0010	/* LRO for Geneve/VXLAN encap */
+					/* packets */
 
 #endif	/* _UPT1_DEFS_H_ */

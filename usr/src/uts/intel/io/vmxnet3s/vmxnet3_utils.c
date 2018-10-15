@@ -14,6 +14,7 @@
  */
 /*
  * Copyright (c) 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  */
 
 #include <vmxnet3.h>
@@ -76,7 +77,7 @@ static ddi_dma_attr_t vmxnet3_dma_attrs_512 = {
 int
 vmxnet3_dmaerr2errno(int dmaerr)
 {
-	int err;
+	int	err;
 
 	switch (dmaerr) {
 	case DDI_DMA_NORESOURCES:
@@ -100,15 +101,19 @@ vmxnet3_dmaerr2errno(int dmaerr)
  *
  * Returns:
  *    0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_alloc_dma_mem(vmxnet3_softc_t *dp, vmxnet3_dmabuf_t *dma, size_t size,
     boolean_t canSleep, ddi_dma_attr_t *dma_attrs)
 {
-	ddi_dma_cookie_t cookie;
-	uint_t cookieCount;
-	int dmaerr, err = 0;
-	int (*cb) (caddr_t) = canSleep ? DDI_DMA_SLEEP : DDI_DMA_DONTWAIT;
+	ddi_dma_cookie_t	cookie;
+	uint_t	cookieCount;
+	int	dmaerr, err = 0;
+	int (*cb)	(caddr_t) = canSleep ? DDI_DMA_SLEEP :
+	    DDI_DMA_DONTWAIT;
 
 	ASSERT(size != 0);
 
@@ -187,6 +192,9 @@ vmxnet3_alloc_dma_mem_128(vmxnet3_softc_t *dp, vmxnet3_dmabuf_t *dma,
 
 /*
  * Free DMA-ble memory.
+ *
+ * Side effects:
+ *    None.
  */
 void
 vmxnet3_free_dma_mem(vmxnet3_dmabuf_t *dma)
@@ -208,13 +216,16 @@ vmxnet3_free_dma_mem(vmxnet3_dmabuf_t *dma)
  *
  * Returns:
  *	The value of the property or "def".
+ *
+ * Side effects:
+ *    None.
  */
 int
 vmxnet3_getprop(vmxnet3_softc_t *dp, char *name, int min, int max, int def)
 {
-	int ret = def;
-	int *props;
-	uint_t nprops;
+	int	ret = def;
+	int	*props;
+	uint_t	nprops;
 
 	if (ddi_prop_lookup_int_array(DDI_DEV_T_ANY, dp->dip, DDI_PROP_DONTPASS,
 	    name, &props, &nprops) == DDI_PROP_SUCCESS) {

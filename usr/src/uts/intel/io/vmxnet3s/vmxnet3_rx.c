@@ -14,6 +14,7 @@
  */
 /*
  * Copyright (c) 2013, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  */
 
 #include <vmxnet3.h>
@@ -26,13 +27,16 @@ static void vmxnet3_put_rxbuf(vmxnet3_rxbuf_t *);
  *
  * Returns:
  *	A new rxBuf or NULL.
+ *
+ * Side effects:
+ *	None.
  */
 static vmxnet3_rxbuf_t *
 vmxnet3_alloc_rxbuf(vmxnet3_softc_t *dp, boolean_t canSleep)
 {
-	vmxnet3_rxbuf_t *rxBuf;
-	int flag = canSleep ? KM_SLEEP : KM_NOSLEEP;
-	int err;
+	vmxnet3_rxbuf_t	*rxBuf;
+	int	flag = canSleep ? KM_SLEEP : KM_NOSLEEP;
+	int	err;
 
 	rxBuf = kmem_zalloc(sizeof (vmxnet3_rxbuf_t), flag);
 	if (!rxBuf) {
@@ -88,8 +92,8 @@ static boolean_t
 vmxnet3_put_rxpool_buf(vmxnet3_softc_t *dp, vmxnet3_rxbuf_t *rxBuf,
     boolean_t init)
 {
-	vmxnet3_rxpool_t *rxPool = &dp->rxPool;
-	boolean_t returned = B_FALSE;
+	vmxnet3_rxpool_t	*rxPool = &dp->rxPool;
+	boolean_t	returned = B_FALSE;
 
 	mutex_enter(&dp->rxPoolLock);
 	ASSERT(rxPool->nBufs <= rxPool->nBufsLimit);
@@ -180,6 +184,9 @@ vmxnet3_rxpool_init(vmxnet3_softc_t *dp)
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *	None.
  */
 static int
 vmxnet3_rx_populate(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq, uint16_t idx,
@@ -234,6 +241,9 @@ vmxnet3_rx_populate(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq, uint16_t idx,
  *
  * Returns:
  *	0 on success, non-zero on failure.
+ *
+ * Side effects:
+ *	None.
  */
 int
 vmxnet3_rxqueue_init(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq)
@@ -274,18 +284,22 @@ error:
 
 /*
  * Finish a RxQueue by freeing all the related rxBufs.
+ *
+ * Side effects:
+ *    None.
  */
 void
 vmxnet3_rxqueue_fini(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq)
 {
-	vmxnet3_rxbuf_t *rxBuf;
-	unsigned int i;
+	vmxnet3_rxbuf_t	*rxBuf;
+	unsigned int	i;
 
 	ASSERT(!dp->devEnabled);
 
 	/* First the rxPool */
-	while ((rxBuf = vmxnet3_get_rxpool_buf(dp)))
+	while ((rxBuf = vmxnet3_get_rxpool_buf(dp))) {
 		vmxnet3_free_rxbuf(dp, rxBuf);
+	}
 
 	/* Then the ring */
 	for (i = 0; i < rxq->cmdRing.size; i++) {
@@ -304,12 +318,15 @@ vmxnet3_rxqueue_fini(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq)
 /*
  * Determine if a received packet was checksummed by the Vmxnet3
  * device and tag the mp appropriately.
+ *
+ * Side effects:
+ *    The mp may get tagged.
  */
 static void
 vmxnet3_rx_hwcksum(vmxnet3_softc_t *dp, mblk_t *mp,
     Vmxnet3_GenericDesc *compDesc)
 {
-	uint32_t flags = 0;
+	uint32_t	flags = 0;
 
 	if (!compDesc->rcd.cnc) {
 		if (compDesc->rcd.v4 && compDesc->rcd.ipc) {
@@ -332,15 +349,18 @@ vmxnet3_rx_hwcksum(vmxnet3_softc_t *dp, mblk_t *mp,
  *
  * Returns:
  *	A list of messages to pass to the MAC subystem.
+ *
+ * Side effects:
+ *    None.
  */
 mblk_t *
 vmxnet3_rx_intr(vmxnet3_softc_t *dp, vmxnet3_rxqueue_t *rxq)
 {
-	vmxnet3_compring_t *compRing = &rxq->compRing;
-	vmxnet3_cmdring_t *cmdRing = &rxq->cmdRing;
-	Vmxnet3_RxQueueCtrl *rxqCtrl = rxq->sharedCtrl;
-	Vmxnet3_GenericDesc *compDesc;
-	mblk_t *mplist = NULL, **mplistTail = &mplist;
+	vmxnet3_compring_t	*compRing = &rxq->compRing;
+	vmxnet3_cmdring_t	*cmdRing = &rxq->cmdRing;
+	Vmxnet3_RxQueueCtrl	*rxqCtrl = rxq->sharedCtrl;
+	Vmxnet3_GenericDesc	*compDesc;
+	mblk_t	*mplist = NULL, **mplistTail = &mplist;
 
 	ASSERT(mutex_owned(&dp->intrLock));
 

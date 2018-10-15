@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 VMware, Inc. All rights reserved.
+ * Copyright (C) 2007,2017 VMware, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of the Common
  * Development and Distribution License (the "License") version 1.0
@@ -15,6 +15,7 @@
 
 /*
  * Copyright (c) 2012, 2016 by Delphix. All rights reserved.
+ * Copyright (c) 2018, Chris Fraire <cfraire@me.com>.
  */
 
 #include <vmxnet3.h>
@@ -34,6 +35,12 @@ typedef struct vmxnet3_offload_t {
 
 /*
  * Initialize a TxQueue. Currently nothing needs to be done.
+ *
+ * Results:
+ *    0.
+ *
+ * Side effects:
+ *    None.
  */
 /* ARGSUSED */
 int
@@ -44,11 +51,14 @@ vmxnet3_txqueue_init(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
 
 /*
  * Finish a TxQueue by freeing all pending Tx.
+ *
+ * Side effects:
+ *    None.
  */
 void
 vmxnet3_txqueue_fini(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
 {
-	unsigned int i;
+	unsigned int	i;
 
 	ASSERT(!dp->devEnabled);
 
@@ -67,13 +77,16 @@ vmxnet3_txqueue_fini(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
  *	0 if everything went well.
  *	+n if n bytes need to be pulled up.
  *	-1 in case of error (not used).
+ *
+ * Side effects:
+ *    None.
  */
 static int
 vmxnet3_tx_prepare_offload(vmxnet3_softc_t *dp, vmxnet3_offload_t *ol,
     mblk_t *mp)
 {
-	int ret = 0;
-	uint32_t start, stuff, value, flags, lso_flag, mss;
+	int	ret = 0;
+	uint32_t	start, stuff, value, flags, lso_flag, mss;
 
 	ol->om = VMXNET3_OM_NONE;
 	ol->hlen = 0;
@@ -155,16 +168,16 @@ vmxnet3_tx_prepare_offload(vmxnet3_softc_t *dp, vmxnet3_offload_t *ol,
  */
 static vmxnet3_txstatus
 vmxnet3_tx_one(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq,
-    vmxnet3_offload_t *ol, mblk_t *mp)
+    vmxnet3_offload_t *ol, mblk_t *mp, boolean_t retry)
 {
-	int ret = VMXNET3_TX_OK;
-	unsigned int frags = 0, totLen = 0;
-	vmxnet3_cmdring_t *cmdRing = &txq->cmdRing;
-	Vmxnet3_TxQueueCtrl *txqCtrl = txq->sharedCtrl;
-	Vmxnet3_GenericDesc *txDesc;
-	uint16_t sopIdx, eopIdx;
-	uint8_t sopGen, curGen;
-	mblk_t *mblk;
+	int	ret = VMXNET3_TX_OK;
+	unsigned int	frags = 0, totLen = 0;
+	vmxnet3_cmdring_t	*cmdRing = &txq->cmdRing;
+	Vmxnet3_TxQueueCtrl	*txqCtrl = txq->sharedCtrl;
+	Vmxnet3_GenericDesc	*txDesc;
+	uint16_t	sopIdx, eopIdx;
+	uint8_t	sopGen, curGen;
+	mblk_t	*mblk;
 
 	mutex_enter(&dp->txLock);
 
@@ -208,8 +221,12 @@ vmxnet3_tx_one(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq,
 				if (frags >= cmdRing->size - 1 ||
 				    (ol->om != VMXNET3_OM_TSO &&
 				    frags >= VMXNET3_MAX_TXD_PER_PKT)) {
-					VMXNET3_DEBUG(dp, 2,
-					    "overfragmented mp (%u)\n", frags);
+					if (retry) {
+						VMXNET3_DEBUG(dp, 2,
+						    "overfragmented, frags=%u "
+						    "ring=%hu om=%hu\n", frags,
+						    cmdRing->size, ol->om);
+					}
 					(void) ddi_dma_unbind_handle(
 					    dp->txDmaHandle);
 					ret = VMXNET3_TX_PULLUP;
@@ -318,16 +335,19 @@ done:
  * Returns:
  *	NULL in case of success or failure.
  *	The mps to be retransmitted later if the ring is full.
+ *
+ * Side effects:
+ *    None.
  */
 mblk_t *
 vmxnet3_tx(void *data, mblk_t *mps)
 {
-	vmxnet3_softc_t *dp = data;
-	vmxnet3_txqueue_t *txq = &dp->txQueue;
-	vmxnet3_cmdring_t *cmdRing = &txq->cmdRing;
-	Vmxnet3_TxQueueCtrl *txqCtrl = txq->sharedCtrl;
-	vmxnet3_txstatus status = VMXNET3_TX_OK;
-	mblk_t *mp;
+	vmxnet3_softc_t	*dp = data;
+	vmxnet3_txqueue_t	*txq = &dp->txQueue;
+	vmxnet3_cmdring_t	*cmdRing = &txq->cmdRing;
+	Vmxnet3_TxQueueCtrl	*txqCtrl = txq->sharedCtrl;
+	vmxnet3_txstatus	status = VMXNET3_TX_OK;
+	mblk_t	*mp;
 
 	ASSERT(mps != NULL);
 
@@ -372,7 +392,7 @@ vmxnet3_tx(void *data, mblk_t *mps)
 		 * Try to map the message in the Tx ring.
 		 * This call might fail for non-fatal reasons.
 		 */
-		status = vmxnet3_tx_one(dp, txq, &ol, mp);
+		status = vmxnet3_tx_one(dp, txq, &ol, mp, B_FALSE);
 		if (status == VMXNET3_TX_PULLUP) {
 			/*
 			 * Try one more time after flattening
@@ -385,7 +405,7 @@ vmxnet3_tx(void *data, mblk_t *mps)
 				if (new_mp) {
 					mp = new_mp;
 					status = vmxnet3_tx_one(dp, txq, &ol,
-					    mp);
+					    mp, B_TRUE);
 				} else {
 					atomic_inc_32(&dp->tx_pullup_failed);
 					continue;
@@ -423,15 +443,18 @@ vmxnet3_tx(void *data, mblk_t *mps)
  *
  * Returns:
  *	B_TRUE if Tx must be updated or B_FALSE if no action is required.
+ *
+ * Side effects:
+ *    None.
  */
 boolean_t
 vmxnet3_tx_complete(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq)
 {
-	vmxnet3_cmdring_t *cmdRing = &txq->cmdRing;
-	vmxnet3_compring_t *compRing = &txq->compRing;
-	Vmxnet3_GenericDesc *compDesc;
-	boolean_t completedTx = B_FALSE;
-	boolean_t ret = B_FALSE;
+	vmxnet3_cmdring_t	*cmdRing = &txq->cmdRing;
+	vmxnet3_compring_t	*compRing = &txq->compRing;
+	Vmxnet3_GenericDesc	*compDesc;
+	boolean_t	completedTx = B_FALSE;
+	boolean_t	ret = B_FALSE;
 
 	mutex_enter(&dp->txLock);
 
