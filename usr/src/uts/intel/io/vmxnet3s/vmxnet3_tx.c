@@ -224,7 +224,7 @@ vmxnet3_tx_one(vmxnet3_softc_t *dp, vmxnet3_txqueue_t *txq,
 					if (retry) {
 						VMXNET3_DEBUG(dp, 2,
 						    "overfragmented, frags=%u "
-						    "ring=%hu om=%hu\n", frags,
+						    "ring=%u om=%u\n", frags,
 						    cmdRing->size, ol->om);
 					}
 					(void) ddi_dma_unbind_handle(
