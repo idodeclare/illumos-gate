@@ -43,7 +43,7 @@ The following synopsis of the \fBzonecfg\fR command is for interactive usage:
 .sp
 .in +2
 .nf
-zonecfg \fB-z\fR \fIzonename subcommand\fR
+\fBzonecfg -z\fR \fIzonename subcommand\fR
 .fi
 .in -2
 .sp
@@ -697,7 +697,8 @@ default router properties cannot be set.
 An exclusive-IP zone is responsible for managing its own network configuration.
 If the allowed-address property is set, the zone administrator will only be
 permitted to configure the interface with the specified address. To allow
-multiple addresses (for example, an IPv4 and IPv6 address), use add net
+multiple addresses (for example, an IPv4 and IPv6 address), use
+.B add net
 multiple times.
 .RE
 
@@ -942,11 +943,12 @@ a new zone using this zone as a clone source.
 .ad
 .sp .6
 .RS 4n
-A comma-separated list of additional filesystems that may be mounted within
-the zone; for example "ufs,pcfs". By default, only hsfs(7fs) and network
-filesystems can be mounted. If the first entry in the list is "-" then
-that disables all of the default filesystems. If any filesystems are listed
-after "-" then only those filesystems can be mounted.
+A comma-separated list of additional filesystems that may be mounted within the
+zone; for example "ufs,pcfs". By default, only
+.BR hsfs (7fs)
+and network filesystems can be mounted. If the first entry in the list is "-"
+then that disables all of the default filesystems. If any filesystems are
+listed after "-" then only those filesystems can be mounted.
 
 This property does not apply to filesystems mounted into the zone via "add fs"
 or "add dataset".
@@ -1290,8 +1292,11 @@ correct to be committed, this operation automatically does a verify.
 .sp
 .ne 2
 .na
-\fB\fBcreate [\fR\fB-F\fR\fB] [\fR \fB-a\fR \fIpath\fR |\fB-b\fR \fB|\fR
-\fB-t\fR \fItemplate\fR\fB]\fR\fR
+.B create [-F] [ -a
+.I path
+.B | -b | -t
+.I template
+.B ]
 .ad
 .sp .6
 .RS 4n
@@ -1392,8 +1397,10 @@ which is currently being added or modified.
 .sp
 .ne 2
 .na
-\fB\fBremove\fR \fIresource-type\fR\fB{\fR\fIproperty-name\fR\fB=\fR\fIproperty
--value\fR\fB}\fR(global scope)\fR
+.B remove
+.I resource-type
+.BI [ property-name = property-value ]
+(global scope)
 .ad
 .sp .6
 .RS 4n
@@ -1415,17 +1422,21 @@ option.
 .sp .6
 .RS 4n
 Select the resource of the given type which matches the given
-\fIproperty-name\fR \fIproperty-value\fR pair criteria, for modification. This
-subcommand is applicable only in the global scope. The scope is changed to that
-resource type. The \fB{}\fR syntax means 1 or more of whatever is inside the
-curly braces. You must specify enough \fIproperty -name property-value\fR pairs
-for the resource to be uniquely identified.
+.I property-name property-value
+pair criteria, for modification. This subcommand is applicable only in the
+global scope. The scope is changed to that resource type. The
+.B {}
+syntax means 1 or more of whatever is inside the curly braces. You must specify
+enough
+.I property-name property-value
+pairs for the resource to be uniquely identified.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBset\fR \fIproperty-name\fR\fB=\fR\fIproperty\fR\fB-\fR\fIvalue\fR\fR
+.B set
+.IB property-name = property-value
 .ad
 .sp .6
 .RS 4n
