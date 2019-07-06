@@ -148,8 +148,11 @@ compression algorithm uses the same compression as the open-source
 command.
 You can specify the
 .Sy gzip
-level by using the value gzip-\fR\fIN\fR where \fIN\fR is 6 (fast) or 9
-(best compression ratio).
+level by using the value
+.No gzip- Ns Em N
+where
+.Em N
+is 6 (fast) or 9 (best compression ratio).
 Currently,
 .Sy gzip ,
 without a number, is equivalent to
@@ -554,7 +557,7 @@ lost+found/  moms_secret_meatloaf_recipe  moms_secret_waffle_recipe
 Subsequent attempts to map the filesystem with the wrong key or the wrong
 encryption algorithm will fail:
 .Bd -literal
-# lofiadm -c blowfish-cbc -a /export/home/secrets\fR
+# lofiadm -c blowfish-cbc -a /export/home/secrets
 Enter passphrase: mommy                                (not echoed)
 Re-enter passphrase: mommy                             (not echoed)
 lofiadm: could not map file /root/lofi: Invalid argument
