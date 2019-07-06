@@ -85,8 +85,10 @@ files is open for reading or writing.
 .Pp
 In general, more than one process can open the same
 .Pa /proc
-file at the same time. \fIExclusive\fR \fIopen\fR is an advisory mechanism provided to
-allow controlling processes to avoid collisions with each other.
+file at the same time.
+.Em Exclusive open
+is an advisory mechanism provided to allow controlling processes to avoid
+collisions with each other.
 A process can obtain exclusive control of a target process, with respect to
 other cooperating processes, if it successfully opens any
 .Pa /proc

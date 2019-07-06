@@ -647,7 +647,7 @@ walk_symbols(uint16_t *objtoff, Elf_Data *symdata, Elf_Data *strdata,
 		if (strcmp(name, "_START_") == 0 || strcmp(name, "_END_") == 0)
 			continue;
 
-		(void) printf("Symbol %d has type %d\n", i, *objtoff);
+		(void) printf("Symbol %d has type %d\en", i, *objtoff);
 	}
 
 	return (0);

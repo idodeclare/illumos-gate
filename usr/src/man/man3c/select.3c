@@ -421,8 +421,9 @@ Sets the bit for the file descriptor
 in the file descriptor set
 .Fa fdset
 .It Fn FD_ZERO "&fdset"
-Initializes the file descriptor set \fIfdset\fR to have zero bits for all file
-descriptors.
+Initializes the file descriptor set
+.Fa fdset
+to have zero bits for all file descriptors.
 .El
 .Pp
 The behavior of these macros is undefined if the
