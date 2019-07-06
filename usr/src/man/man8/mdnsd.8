@@ -99,10 +99,14 @@ For the source code to
 The
 .Nm
 service is managed by the service management facility,
-\fBsmf\fR(7), under the service identifier:
+.Xr smf 7 ,
+under the service identifier:
 .sp
 .Dl svc:/network/dns/multicast:default
 .sp
 Administrative actions on this service, such as enabling, disabling, or
-requesting restart, can be performed using \fBsvcadm\fR(8). The service's
-status can be queried using the \fBsvcs\fR(1) command.
+requesting restart, can be performed using
+.Xr svcadm 8 .
+The service's status can be queried using the
+.Xr svcs 1
+command.

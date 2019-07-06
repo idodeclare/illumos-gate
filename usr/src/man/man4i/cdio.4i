@@ -479,7 +479,7 @@ data only
 .Sy "CD-ROM XA"
 all sector data
 .It Dv CDROM_XA_DATA_W_ERROR
-.Sy CD-ROM \fBXA\fR
+.Sy "CD-ROM XA"
 data with error flags data
 .El
 .Pp

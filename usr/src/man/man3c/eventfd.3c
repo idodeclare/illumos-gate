@@ -67,7 +67,7 @@ fact that the underlying counter is 64-bit
 .Pp
 The
 .Fa flags
-argument specifies additional parameters for the instance, and can have any of
+argument specifies additional parameters for the instance and can have any of
 the following values:
 .Bl -tag -width Ds
 .It Dv EFD_CLOEXEC
