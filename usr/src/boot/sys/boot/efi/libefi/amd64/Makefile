@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 MACHINE=	$(MACH64)
@@ -23,6 +24,6 @@ include ../Makefile.com
 
 CFLAGS +=	-m64 $(CFLAGS64)
 
-CLEANFILES +=	machine x86
+CLEANFILES +=	machine x86 libefi.a
 
 $(OBJS): machine x86

@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/boot/sys/boot/Makefile.inc
@@ -35,6 +36,8 @@ HEADERS= $(FICLDIR)/ficl.h $(FICLDIR)/ficlplatform/unix.h ../ficllocal.h
 
 # disable inner loop variable 'fw' check
 vm.o := SMOFF += check_check_deref
+
+CLEANFILES +=	libficl.a ficl machine x86
 
 .PARALLEL:
 
@@ -68,4 +71,4 @@ x86:
 #       generic cleanup code
 #
 clobber clean:	FRC
-	$(RM) *.o *.a libficl.* ficl machine x86
+	$(RM) *.o *.a libficl.* $(CLEANFILES)

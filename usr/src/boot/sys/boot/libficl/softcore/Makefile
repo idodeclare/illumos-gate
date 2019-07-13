@@ -11,6 +11,7 @@
 
 #
 # Copyright 2018 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 include $(SRC)/Makefile.master
@@ -19,6 +20,7 @@ install all: softcore.c
 
 SOFTCORE=	$(SRC)/common/ficl/softcore
 PROG=		$(ONBLD_TOOLS)/bin/$(MACH)/makesoftcore
+CLEANFILES +=	softcore.c
 
 #
 # not needed: file access
@@ -31,4 +33,4 @@ softcore.c: $(SOURCES)
 	$(PROG) $(SOURCES)
 
 clobber clean:
-	$(RM) softcore.c
+	$(RM) $(CLEANFILES)

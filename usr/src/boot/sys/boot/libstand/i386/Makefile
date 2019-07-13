@@ -12,6 +12,7 @@
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
 # Copyright 2016 RackTop Systems.
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 MACHINE=	$(MACH)
@@ -24,7 +25,7 @@ include ../Makefile.com
 CFLAGS +=	-m32
 ASFLAGS +=	-m32
 
-CLEANFILES += x86
+CLEANFILES +=	machine x86
 
 # _setjmp/_longjmp
 SRCS += $(SASRC)/i386/_setjmp.S

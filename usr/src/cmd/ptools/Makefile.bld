@@ -22,7 +22,7 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-# Copyright (c) 2016, Chris Fraire <cfraire@me.com>.
+# Copyright (c) 2016, 2019, Chris Fraire <cfraire@me.com>.
 #
 # Copyright (c) 2018, Joyent, Inc.
 
@@ -34,7 +34,7 @@ SRCS = ../$(PROG).c
 
 # PROG would normally be clobbered not cleaned but ptools targets are hairy--
 # so *shrug*
-CLEANFILES +=	$(OBJS) $(PROG)
+CLEANFILES +=	$(OBJS) $(PROG) $(LN_$(PROG))
 
 FILEMODE = 0555
 

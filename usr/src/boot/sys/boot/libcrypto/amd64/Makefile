@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 COMDIR=		$(SRC)/common/crypto
@@ -26,6 +27,6 @@ include ../Makefile.com
 ASFLAGS =	$(amd64_AS_XARCH) -I$(SRC)/uts/common -D_ASM
 
 CFLAGS +=	-m64 $(CFLAGS64)
-CLEANFILES +=	machine x86 sha1-x86_64.s
+CLEANFILES +=	machine x86 sha1-x86_64.s libcrypto.a
 
 $(OBJS): machine x86

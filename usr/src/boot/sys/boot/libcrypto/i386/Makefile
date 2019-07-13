@@ -11,6 +11,7 @@
 
 #
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Copyright (c) 2019, Chris Fraire <cfraire@me.com>.
 #
 
 MACHINE=	$(MACH)
@@ -21,6 +22,6 @@ include ../Makefile.com
 
 CFLAGS +=	-m32
 
-CLEANFILES +=	machine x86
+CLEANFILES +=	machine x86 libcrypto.a
 
 $(OBJS): machine x86
