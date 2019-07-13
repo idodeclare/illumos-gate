@@ -83,3 +83,6 @@ install:	$(INSTALL_DEPS)
 $(BINARY):	$(ASSYM_H)
 
 include $(UTSBASE)/intel/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

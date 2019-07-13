@@ -98,3 +98,6 @@ $(ROOTLINK):	$(ROOT_PSM_MISC_DIR) $(ROOTMODULE)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

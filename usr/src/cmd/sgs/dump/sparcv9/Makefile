@@ -42,3 +42,6 @@ include		../../Makefile.sub.64
 
 install \
 package:	$(VAR_SGSBINPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

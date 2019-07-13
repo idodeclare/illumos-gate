@@ -78,3 +78,6 @@ clobber: clean
 
 $(ROOTSYMLINKS):
 		$(RM) $@; $(SYMLINK) ../sbin/$(@F) $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(POFILE)

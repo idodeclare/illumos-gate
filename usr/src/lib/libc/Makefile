@@ -237,3 +237,6 @@ cscope.out tags: FRC
 FRC:
 # include MACH-specific library targets
 include ../Makefile.mach
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

@@ -37,3 +37,6 @@ install:	all $(ROOTONLDBINPROG)
 # DEMO DELETE END
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS) $(PROG)

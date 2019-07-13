@@ -81,3 +81,7 @@ install: all install_h $(USR_PSM_LIBS) $(PLATLIBS)/libtsalarm.so \
 	$(LINKED_INCL_DIRS)
 
 install_h: $(USR_PSM_INCL_DIR)/tsalarm.h
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

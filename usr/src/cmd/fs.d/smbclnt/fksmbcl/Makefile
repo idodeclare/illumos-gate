@@ -106,3 +106,6 @@ install: all $(ROOTSMBDFILE)
 
 $(ROOTSMBDDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

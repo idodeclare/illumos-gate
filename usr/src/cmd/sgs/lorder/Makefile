@@ -41,3 +41,6 @@ install:	all $(VAR_SGSBINPROG) $(VAR_SGSCCSLINK)
 clean:
 
 include		../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

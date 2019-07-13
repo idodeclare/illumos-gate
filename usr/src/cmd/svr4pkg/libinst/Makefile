@@ -96,3 +96,6 @@ clobber: clean
 	$(RM) $(PROG) $(POFILE)
 
 include	$(SRC)/Makefile.msg.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MSGFILES) $(OBJS) $(POFILE) $(PROG)

@@ -31,3 +31,6 @@ include ../../../../Makefile.cmd.64
 include ../../Makefile.sparcv9
 include ../../Makefile.kmdb.64
 include ../../../Makefile.libstandctf
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

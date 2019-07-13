@@ -32,3 +32,7 @@ ROOTLIBDIR 	= $(ROOTFS_LIBDIR)/cpu/sparcv9+vis2
 install: 	all $(ROOTLIBDIR) $(ROOTLIBS)
 
 include $(SRC)/lib/libm/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

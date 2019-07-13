@@ -100,3 +100,6 @@ include $(UTSBASE)/intel/Makefile.targ
 #	Makefile rules don't serve for you, just do
 #	it yourself.
 #
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

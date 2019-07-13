@@ -32,3 +32,6 @@ include ../../Makefile.cmd.64
 
 # doesn't install ROOTXPG4PROG64 yet, no such place
 install : all $(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

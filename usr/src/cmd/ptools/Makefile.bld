@@ -157,3 +157,6 @@ clean:
 
 lint:
 	$(LINT.c) $(SRCS) $(LDLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

@@ -64,3 +64,6 @@ clean:
 lint: lint_PROG
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

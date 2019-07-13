@@ -35,3 +35,7 @@ all:		$(DYNLIB) $(LIBLINKS)
 install:	all $(ROOTFS_DYNLIB)
 
 include		$(SRC)/cmd/sgs/librtld/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

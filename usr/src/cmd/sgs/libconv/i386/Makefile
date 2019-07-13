@@ -34,3 +34,6 @@ include 	../Makefile.com
 install all:	$(LIBRARY) .WAIT
 
 include 	../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBRARY) $(PICS)

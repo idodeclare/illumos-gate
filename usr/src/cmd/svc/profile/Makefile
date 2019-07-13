@@ -99,3 +99,6 @@ lint _msg:
 
 clobber clean:
 	$(RM) $(CHECK_OPEN)* $(CHECK_LMTD)*
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CHECK_LMTD)* $(CHECK_OPEN)*

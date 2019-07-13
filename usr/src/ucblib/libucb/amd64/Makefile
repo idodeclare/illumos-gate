@@ -39,3 +39,7 @@ pics/%.o: ../$(MACH)/sys/%.c
 .KEEP_STATE:
 
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

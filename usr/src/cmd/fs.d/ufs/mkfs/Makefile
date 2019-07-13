@@ -71,3 +71,5 @@ lint:		lint_SRCS
 clean:
 	$(RM) $(MKFSOBJS)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(MKFSOBJS)

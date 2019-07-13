@@ -103,3 +103,6 @@ $(TESTROOT)/pkcs/%: %_pkcs
 
 $(TESTROOT)/kcf/%: %_kcf
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

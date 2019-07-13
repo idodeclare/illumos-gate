@@ -38,3 +38,7 @@ CPPFLAGS += -I$(SRC)/uts/common/inet
 
 # needs work
 SMOFF += shift_to_zero
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

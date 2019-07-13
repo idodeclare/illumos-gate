@@ -110,3 +110,6 @@ sha512-x86_64.s: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 
 sha256-x86_64.s: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 	$(PERL) $? $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -169,3 +169,6 @@ lint:
 	$(LINT.c) $(STTYDEFSSRC)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

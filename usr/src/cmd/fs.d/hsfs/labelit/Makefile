@@ -40,3 +40,6 @@ SMATCH=off
 lint := PROG = $(LIBPROG)
 
 lint:	lint_PROG
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

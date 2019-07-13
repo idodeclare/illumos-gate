@@ -229,3 +229,6 @@ nvpair_value_uint8_array.3nvpair	:= LINKSRC = nvpair_value_byte.3nvpair
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

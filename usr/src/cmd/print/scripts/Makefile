@@ -147,3 +147,6 @@ clean:
 clobber: clean
 
 strip lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(POFILE)

@@ -31,3 +31,6 @@ TOPOFILE = Netra-T5440-hc-topology.xml
 SRCDIR = ../SUNW,Netra-T5440
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

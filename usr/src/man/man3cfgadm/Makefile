@@ -45,3 +45,6 @@ config_unload_libs.3cfgadm	:= LINKSRC = config_admin.3cfgadm
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -116,3 +116,6 @@ lint: lint_SRCS
 include ../Makefile.targ
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

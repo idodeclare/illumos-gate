@@ -82,3 +82,6 @@ clean:
 
 include		../../../Makefile.targ
 include		../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS) $(XPG4OBJS)

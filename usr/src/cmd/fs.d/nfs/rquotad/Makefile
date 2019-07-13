@@ -56,3 +56,6 @@ clean:
 
 rquota_xdr.c:	$(XFILE)
 		$(RPCGEN) -c $(XFILE) -o $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

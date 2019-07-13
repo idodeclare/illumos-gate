@@ -37,3 +37,6 @@ tgtmap.9	:= LINKSRC = iport.9
 include		$(SRC)/man/Makefile.man
 
 install: 	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

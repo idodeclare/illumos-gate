@@ -74,3 +74,6 @@ putback:
 	-keywords mkfs.c
 	-keywords udfslib.c
 	-keywords Makefile
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

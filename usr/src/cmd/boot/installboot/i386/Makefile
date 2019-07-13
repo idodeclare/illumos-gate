@@ -33,3 +33,6 @@ $(PROG): $(OBJS)
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 
 include $(SRC)/cmd/boot/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

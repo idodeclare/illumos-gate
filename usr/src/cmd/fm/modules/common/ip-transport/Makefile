@@ -37,3 +37,7 @@ CERRWARN += -_gcc=-Wno-uninitialized
 
 # not linted
 SMATCH=off
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

@@ -283,3 +283,6 @@ XRPRUNE = i86pc
 
 cscope.out tags: FRC
 	$(XREF) -x $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

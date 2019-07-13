@@ -37,3 +37,6 @@ clobber: clean
 all: $(PROG)
 
 install: all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS) $(PROG)

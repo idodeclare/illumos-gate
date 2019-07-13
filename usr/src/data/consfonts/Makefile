@@ -103,3 +103,6 @@ $(16x32_FNT): $(16x32_SRC)
 	$(VTFONTCVT) -o $@ $(16x32_SRC)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(FONTS)

@@ -208,3 +208,5 @@ lintlib:	$(LINT_DEPS)
 #
 include $(UTSBASE)/sun4u/Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

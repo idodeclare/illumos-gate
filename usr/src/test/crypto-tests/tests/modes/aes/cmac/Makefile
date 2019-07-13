@@ -18,3 +18,6 @@ PROG = aes_cmac
 
 include $(SRC)/cmd/Makefile.cmd
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS_LOCAL) $(PROGS)

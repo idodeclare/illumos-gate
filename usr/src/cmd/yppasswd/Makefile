@@ -55,3 +55,6 @@ lint: lint_PROG
 install: all $(ROOTPROG)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -113,3 +113,6 @@ $(SYM_MOD):	$(UNIX_O) $(PLATLIB)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4v/montoya/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -69,3 +69,6 @@ rquota_xdr.c:	$(XFILE)
 
 replica.o:	../../nfs/lib/replica.c
 		$(COMPILE.c) ../../nfs/lib/replica.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

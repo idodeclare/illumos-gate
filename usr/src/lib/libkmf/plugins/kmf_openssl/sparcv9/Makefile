@@ -29,3 +29,7 @@ include ../../../../Makefile.lib.64
 
 LDLIBS	+=	$(OPENSSLLIBS64)
 install: $(ROOTLIBS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

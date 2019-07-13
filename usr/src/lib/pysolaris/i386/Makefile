@@ -30,3 +30,7 @@ include ../Makefile.com
 
 all: $(PYOBJS) $(LIBS)
 install: all $(ROOTPYSOLFILES) $(ROOTLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

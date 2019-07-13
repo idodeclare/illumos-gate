@@ -101,3 +101,6 @@ lint.platmod:   modlintlib
 #	Include common targets.
 #
 include $(UTSBASE)/$(PLATFORM)/ontario/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -101,3 +101,6 @@ $(CLOSED_TAZMO_KMODS): FRC
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/tazmo/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

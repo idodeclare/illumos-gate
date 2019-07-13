@@ -31,3 +31,6 @@ CCASFLAGS +=	-m64
 CLEANFILES +=	machine x86 $(EFIPROG)
 
 $(OBJS):	machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)

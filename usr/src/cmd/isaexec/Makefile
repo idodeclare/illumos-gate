@@ -44,3 +44,6 @@ lint:
 	$(LINT.c) $(PROG).c $(LDLIBS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

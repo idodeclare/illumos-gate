@@ -97,3 +97,6 @@ awk3.c: awk.c y.tab.h
 awk4.c: awk.c y.tab.h
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS) $(XPG4)

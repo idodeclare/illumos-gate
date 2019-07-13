@@ -28,3 +28,7 @@ ASFLAGS=	$(AS_PICFLAGS) -P -D__STDC__ -D_ASM $(sparc_AS_XARCH)
 include ../Makefile.com
 
 install: all $(ROOTLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

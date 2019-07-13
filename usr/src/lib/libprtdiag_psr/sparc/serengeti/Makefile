@@ -76,3 +76,7 @@ $(POFILES):
 	$(XGETTEXT) $(XGETFLAGS) `$(GREP) -l gettext common/serengeti.c`
 	$(SED) -e '/^# msg/d' -e '/^domain/d' messages.po > $@
 	$(RM) messages.po
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -48,3 +48,6 @@ $(MACH)/%.o:	%.c
 lint:	lint_SRCS
 
 clean:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

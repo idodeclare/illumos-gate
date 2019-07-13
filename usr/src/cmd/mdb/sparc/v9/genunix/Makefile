@@ -74,3 +74,7 @@ CERRWARN += -_gcc=-Wno-type-limits
 LINTFLAGS64 += -erroff=E_EMPTY_TRANSLATION_UNIT
 
 MODSRCS_DIR = ../../../sparc/modules/genunix
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

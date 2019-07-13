@@ -41,3 +41,7 @@ include ../../Makefile.plugin
 LDLIBS += -ldevinfo -lsmbios -lpcidb
 
 CPPFLAGS += -I$(UTILDIR) -I$(HBDIR) -I$(NICDIR) -I$(USBDIR)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -49,3 +49,6 @@ ASFLAGS += -I$(SRC)/uts/sun4 -I$(SRC)/uts/sun4u $(TRAPCOUNT)
 install: all
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLLINTFILES) $(CLEANFILES) $(PROG)

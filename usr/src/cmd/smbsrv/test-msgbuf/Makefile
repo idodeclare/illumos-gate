@@ -122,3 +122,6 @@ test_misc.o : test_misc.c
 
 $(ROOTSMBDDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

@@ -59,3 +59,7 @@ LDLIBS64 += -lcustr
 $(SYMTESTS:%=$(TESTDIR)/%): $(TESTDIR)/setup
 	-$(RM) $@
 	$(LN) $(TESTDIR)/setup $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ARCHPROG) $(KSHPROG) $(OBJS32) $(OBJS64) \
+	    $(PROG32) $(PROG64)

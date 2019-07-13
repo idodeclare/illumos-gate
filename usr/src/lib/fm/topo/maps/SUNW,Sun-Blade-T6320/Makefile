@@ -32,3 +32,6 @@ TOPOFILE = Sun-Blade-T6320-hc-topology.xml
 SRCDIR = ../SUNW,Sun-Blade-T6320
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

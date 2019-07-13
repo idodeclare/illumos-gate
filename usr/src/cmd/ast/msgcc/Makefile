@@ -80,3 +80,6 @@ install: all $(ROOTCMD)
 clean lint:
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

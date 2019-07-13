@@ -181,3 +181,5 @@ check:
 
 include ../Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(PROG)

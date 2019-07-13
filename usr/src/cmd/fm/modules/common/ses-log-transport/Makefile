@@ -36,3 +36,7 @@ LDFLAGS += -R/usr/lib/fm
 
 # not linted
 SMATCH=off
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

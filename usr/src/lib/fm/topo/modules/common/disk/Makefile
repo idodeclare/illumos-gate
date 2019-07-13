@@ -36,3 +36,6 @@ CPPFLAGS += -I$(SRC)/uts/common
 
 LDLIBS += -ldevinfo -ldevid -lcfgadm -ldiskstatus -ldiskmgt
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

@@ -30,3 +30,7 @@ include ../Makefile.com
 
 all: $(PBOJECT) $(LIBS)
 install: all $(ROOTPYZFSFILES) $(ROOTLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

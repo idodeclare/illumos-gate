@@ -48,3 +48,7 @@ pics/plt32_resolution.o: ../sparc/plt32_resolution.c
 
 include		../Makefile.targ
 include		../../Makefile.sub.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

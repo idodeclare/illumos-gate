@@ -32,3 +32,7 @@ ASFLAGS +=	-xarch=v8plus -I$(LIBCBASE)/$(MACH)
 all install:	$(SYMCAP)
 
 include		../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

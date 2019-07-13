@@ -34,3 +34,6 @@ LINTFLAGS64 += -I.. -I.
 prexgram.o prexlex.o := CCVERBOSE=
 
 install: all $(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

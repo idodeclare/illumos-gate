@@ -32,3 +32,7 @@ include ../../Makefile.com
 all:    $(LIBS) $(TXTS)
 
 install: all $(PLUGINDIR) .WAIT $(PLUGINS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

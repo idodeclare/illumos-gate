@@ -29,3 +29,6 @@ include ../Makefile.com
 include ../../../Makefile.cmd.64
 
 install: all $(ROOTPROG64) $(ROOTLINK64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(PROG)

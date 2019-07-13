@@ -53,3 +53,7 @@ CPPFLAGS += -I$(UTILDIR) -I$(BRDIR) -I$(USBDIR)
 
 %.ln: $(UTILDIR)/%.c
 	$(LINT.c) -c $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

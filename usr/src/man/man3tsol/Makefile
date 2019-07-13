@@ -116,3 +116,6 @@ stobsl.3tsol			:= LINKSRC = stobl.3tsol
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -77,3 +77,6 @@ install_h check:	FRC
 #	Include common targets.
 #
 include $(UTSBASE)/$(PLATFORM)/i86hvm/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

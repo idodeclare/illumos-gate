@@ -48,3 +48,6 @@ clean:
 	$(RM) $(PROGS) $(CLEANFILES)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(PROGS)

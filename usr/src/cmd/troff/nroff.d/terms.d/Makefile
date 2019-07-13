@@ -54,3 +54,6 @@ clean lint strip :
 
 clobber:
 	$(RM) $(FILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(FILES)

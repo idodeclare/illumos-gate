@@ -48,3 +48,7 @@ FRC:
 
 include $(SRC)/lib/Makefile.targ
 include ../Makefile.ipf
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

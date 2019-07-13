@@ -181,3 +181,6 @@ usba_hcdi_pipe_stop_isoc_polling.9e	:= LINKSRC = usba_hcdi_pipe_stop_intr_pollin
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

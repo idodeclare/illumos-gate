@@ -40,3 +40,7 @@ all:		$(DYNLIB)
 install:	all $(ROOTFS_DYNLIB) $(ROOTFS_LINKS)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -34,3 +34,6 @@ SRCDIR = ../i386
 TEMPTOPOFILE = xfp-hc-topology.xml
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

@@ -25,3 +25,6 @@ CFLAGS +=	-m32
 CLEANFILES +=	machine x86 libcrypto.a
 
 $(OBJS): machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)

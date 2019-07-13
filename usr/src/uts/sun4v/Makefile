@@ -305,3 +305,6 @@ XRPRUNE = i86pc sun4u intel
 
 cscope.out tags: FRC
 	$(XREF) -x $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

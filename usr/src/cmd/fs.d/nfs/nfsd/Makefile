@@ -65,3 +65,6 @@ clean:
 		$(RM) $(OBJS)
 
 lint:		$(SRCS) lint_SRCS
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

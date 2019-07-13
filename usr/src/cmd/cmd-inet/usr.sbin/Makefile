@@ -278,3 +278,6 @@ lint: $(LINTSUBDIRS)
 	    -lsocket -lnsl
 	$(LINT.c) in.tftpd.c ../usr.bin/tftp/tftpsubs.c $(LDLIBS) \
 	    -lsocket -lnsl
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

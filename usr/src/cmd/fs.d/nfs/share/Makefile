@@ -41,3 +41,5 @@ clean:
 $(ROOTETC)/dfs/%: %
 	$(INS.file)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(SHARETAB)

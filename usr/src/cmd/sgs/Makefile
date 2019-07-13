@@ -206,3 +206,6 @@ XRDIRS=		. \
 xref:		FRC
 		@ $(RM) cscope.*
 		xref -p -x cscope
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROTODIR)

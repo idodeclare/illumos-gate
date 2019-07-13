@@ -40,3 +40,6 @@ MANFILES =	vatan2_.3mvec \
 include ../Makefile.man
 
 install: $(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -66,3 +66,6 @@ $(TESTDIR)/%: %
 	$(INS.file)
 
 .KEEP_STATE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

@@ -71,3 +71,6 @@ sdp_free_session.3commputil		:= LINKSRC = sdp_new_session.3commputil
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

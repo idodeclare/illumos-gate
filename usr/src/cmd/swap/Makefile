@@ -58,3 +58,5 @@ FRC:
 
 include ../Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

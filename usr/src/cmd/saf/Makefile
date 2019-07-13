@@ -116,3 +116,6 @@ lint:
 	$(LINT.c) $(PMADMSRCS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

@@ -59,3 +59,6 @@ mp_xtom.3mp	:= LINKSRC = mp.3mp
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

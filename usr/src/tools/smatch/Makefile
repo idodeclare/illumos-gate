@@ -167,3 +167,6 @@ src/version.h:
 	echo '#define SPARSE_VERSION "$(SPARSE_VERSION)"' > src/version.h
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(BUILT_HEADERS) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -34,3 +34,7 @@ XPORTLIBS = -lsocket -lnsl -ldscp
 include ../../common/event-transport/Makefile.etm
 
 CERRWARN += -_gcc=-Wno-parentheses
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINKOBJS) $(LINTFILES) $(OBJS) $(PROG)

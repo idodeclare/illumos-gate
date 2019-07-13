@@ -32,3 +32,6 @@ TOPOFILE = sun4u-hc-topology.xml
 SRCDIR = ../sun4u
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

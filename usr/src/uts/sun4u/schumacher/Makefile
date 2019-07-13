@@ -99,3 +99,6 @@ $(SCHUMACHER_CRYPTO_LINKS): $(ROOT_SCHUMACHER_CRYPTO_DIR_64)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/schumacher/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

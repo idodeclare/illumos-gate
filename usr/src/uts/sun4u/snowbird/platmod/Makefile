@@ -106,3 +106,6 @@ $(SYM_MOD):	$(UNIX_O) $(PLATLIB)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/snowbird/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

@@ -25,3 +25,6 @@
 #
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(LINTFILES) $(OBJS) $(PROG)

@@ -20,3 +20,6 @@ include $(SRC)/cmd/Makefile.cmd
 LINTFLAGS += -erroff=E_FUNC_SET_NOT_USED
 
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

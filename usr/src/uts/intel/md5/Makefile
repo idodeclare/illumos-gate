@@ -104,3 +104,6 @@ $(OBJS_DIR)/md5_amd64.o: md5_amd64.s
 
 $(OBJS_DIR)/md5_amd64.ln: md5_amd64.s
 	@($(LHEAD) $(LINT.c) md5_amd64.s $(LTAIL))
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

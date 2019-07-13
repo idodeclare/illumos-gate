@@ -33,3 +33,6 @@ include		$(SRC)/cmd/sgs/0@0/Makefile.targ
 
 install:	all $(ROOTDYNLIB)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

@@ -37,3 +37,6 @@ $(OBJS): machine x86
 
 %.o: $(SASRC)/amd64/%.S
 	$(COMPILE.S) $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(LIBRARY) $(OBJS)

@@ -30,3 +30,6 @@ CFLAGS +=	-m64 $(CFLAGS64)
 CLEANFILES +=	machine x86 sha1-x86_64.s libcrypto.a
 
 $(OBJS): machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)

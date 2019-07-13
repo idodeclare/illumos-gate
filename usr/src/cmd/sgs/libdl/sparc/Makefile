@@ -45,3 +45,7 @@ $(ROOT4LINKS):	$(ROOTFS_DYNLIB)
 		$(INS.liblink)
 
 include		$(SRC)/lib/Makefile.filter.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

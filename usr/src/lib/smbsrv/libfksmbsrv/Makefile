@@ -32,3 +32,7 @@ all: install_h
 install_h: common/fksmb_dt.h
 common/fksmb_dt.h : common/fksmb_dt.d
 	$(DTRACE) -xnolibs -h -o $@ -s common/fksmb_dt.d
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

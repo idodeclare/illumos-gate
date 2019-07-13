@@ -38,3 +38,7 @@ all:    $(LIBS)
 # 
 # We don't actually install. This lib is for debugging only.
 install:     all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

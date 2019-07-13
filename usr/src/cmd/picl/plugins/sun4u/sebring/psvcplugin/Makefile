@@ -76,3 +76,7 @@ rm -f libpsvcplugin_psr.so.1; \
 rm -f libpsvcplugin_psr.so; \
 ln -s ../../../../$(CHERRY_LINKTO_PLATFORM)/lib/picl/plugins/libpsvcplugin_psr.so.1 libpsvcplugin_psr.so.1; \
 ln -s ../../../../$(CHERRY_LINKTO_PLATFORM)/lib/picl/plugins/libpsvcplugin_psr.so libpsvcplugin_psr.so;`
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

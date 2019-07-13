@@ -30,3 +30,7 @@ include ../Makefile.com
 install: all $(ROOTPROG)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODLINTFILES) $(DMODPROG) \
+	    $(DMOD_OBJS) $(LINTFILES) $(OBJS) $(PROG)

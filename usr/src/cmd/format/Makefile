@@ -95,3 +95,6 @@ sb: $(SRCS)
 	$(COMPILE.c) -xsbfast $(SRCS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

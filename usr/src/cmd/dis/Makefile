@@ -51,3 +51,6 @@ lint: lint_SRCS
 
 include ../Makefile.targ
 include ../Makefile.ctf
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(PROG)

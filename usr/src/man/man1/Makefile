@@ -732,3 +732,6 @@ vedit.1		:= LINKSRC = ../../../has/man/man1has/vi.1has
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -46,3 +46,7 @@ CSTD=	$(CSTD_GNU99)
 # we need to create this directory.
 $(ROOTKMOD):
 	$(INS.dir)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

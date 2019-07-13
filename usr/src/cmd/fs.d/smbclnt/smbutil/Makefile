@@ -91,3 +91,6 @@ srvsvc1_ndr.c : srvsvc1.ndl
 	$(NDRGEN) -Y $(ANSI_CPP) $(CPPFLAGS) srvsvc1.ndl
 
 .KEEP_STATE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

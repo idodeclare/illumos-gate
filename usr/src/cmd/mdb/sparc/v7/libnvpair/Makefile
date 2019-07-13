@@ -34,3 +34,7 @@ MODSRCS = libnvpair.c \
 include ../../../../Makefile.cmd
 include ../../Makefile.sparcv7
 include ../../../Makefile.module
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

@@ -68,3 +68,6 @@ clean:
 
 replica.o: ../lib/replica.c 
 	$(COMPILE.c) ../lib/replica.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

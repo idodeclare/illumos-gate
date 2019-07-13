@@ -26,3 +26,7 @@ $(OBJS_M9XSSE)	:= CFLAGS += -xarch=sse2
 install: 	all $(ROOTLIBS) $(ROOTLINKS) $(ROOTLINT)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

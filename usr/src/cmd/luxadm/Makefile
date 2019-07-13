@@ -112,3 +112,7 @@ clean:
 lint:	lint_SRCS
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(GENCAT_PROG) $(GENMSG_LUX) \
+	    $(OBJS) $(PROG)

@@ -25,3 +25,7 @@ MODSRCS_DIR = ../../../common/modules/disk_label
 CPPFLAGS += -I$(SRC)/uts/common -I$(SRC)/cmd/boot/installboot/i386
 
 LDLIBS += -luuid
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(LINTFILES) $(MODFILE) $(MODOBJS)

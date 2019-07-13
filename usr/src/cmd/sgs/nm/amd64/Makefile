@@ -69,3 +69,6 @@ clean:
 include		../../Makefile.targ
 include		../../../Makefile.targ
 include		../../Makefile.sub.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

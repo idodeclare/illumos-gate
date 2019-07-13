@@ -35,3 +35,6 @@ all:		$(PROG)
 install:	all $(ROOTPROG) $(ROOTCCSBINLINK)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

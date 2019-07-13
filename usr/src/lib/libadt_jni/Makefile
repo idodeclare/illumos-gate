@@ -66,3 +66,5 @@ include $(SRC)/Makefile.msg.targ
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

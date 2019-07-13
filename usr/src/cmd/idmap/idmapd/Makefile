@@ -166,3 +166,6 @@ rpc_svc.c : $(RPCSVC)/idmap_prot.x
 	$(RPCGEN) $(RPCGENFLAGS) -m $(RPCSVC)/idmap_prot.x > $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(GENSRCS) $(OBJS)

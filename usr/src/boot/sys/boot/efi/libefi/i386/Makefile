@@ -27,3 +27,6 @@ CFLAGS +=	-m32
 CLEANFILES +=	machine x86 libefi.a
 
 $(OBJS): machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(OBJS)

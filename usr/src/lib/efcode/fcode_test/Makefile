@@ -54,3 +54,6 @@ clean:
 clobber: clean
 
 install_h:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

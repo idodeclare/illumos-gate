@@ -32,3 +32,7 @@ include $(SRC)/lib/Makefile.lib.64
 DYNFLAGS += $(FCODE64) $(FCPACKAGE64)
 
 install: all $(ROOTLIBS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

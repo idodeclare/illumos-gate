@@ -37,3 +37,6 @@ ASFLAGS +=	-D__sparcv9 $(sparcv9_XARCH)
 install:	all $(ROOTLIB64)/$(PROG)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

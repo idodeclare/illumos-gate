@@ -27,3 +27,6 @@ CFLAGS += -m32
 $(OBJECTS): machine x86
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

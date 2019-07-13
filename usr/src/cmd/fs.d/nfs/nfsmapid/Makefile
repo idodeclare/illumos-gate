@@ -81,3 +81,7 @@ clean:
 		$(RM) $(OBJS) $(TESTPROG) $(TESTOBJS) $(DOBJ) $(POFILE)
 
 lint:		$(SRCS) lint_SRCS
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DOBJ) $(OBJS) $(POFILE) \
+	    $(TESTOBJS) $(TESTPROG)

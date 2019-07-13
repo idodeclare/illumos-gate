@@ -107,3 +107,6 @@ LINT_LIB_DIR    = $(EXCALIBUR_LINT_LIB_DIR)
 #	Include common targets.
 #
 include $(UTSBASE)/sun4u/excalibur/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLEANLINTFILES) $(CLOBBERFILES)

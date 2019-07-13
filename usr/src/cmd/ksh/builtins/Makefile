@@ -150,3 +150,6 @@ clean clobber:
 	rm -f $(PROG) $(OBJECTS)
 
 lint _msg:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS) $(PROG)

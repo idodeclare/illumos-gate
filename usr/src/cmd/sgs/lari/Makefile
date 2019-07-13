@@ -63,3 +63,6 @@ $(POFILE):	$(PSRC)
 		@ $(RM) messages.po
 
 include		$(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROG)

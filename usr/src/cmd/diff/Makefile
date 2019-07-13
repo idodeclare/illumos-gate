@@ -74,3 +74,6 @@ lint:
 	$(LINT.c) diffh.c $(LDLIBS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

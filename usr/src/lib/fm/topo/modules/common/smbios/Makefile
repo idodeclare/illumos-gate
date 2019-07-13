@@ -20,3 +20,7 @@ MODULESRCS = smbios_enum.c
 include ../../Makefile.plugin
 
 LDLIBS += -lsmbios
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LINTFILES) $(OBJS) \
+	    $(PROG)

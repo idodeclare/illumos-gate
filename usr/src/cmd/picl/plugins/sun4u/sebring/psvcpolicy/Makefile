@@ -76,3 +76,7 @@ rm -f libpsvcpolicy_psr.so.1; \
 rm -f libpsvcpolicy_psr.so; \
 ln -s ../../$(CHERRY_LINKTO_PLATFORM)/lib/libpsvcpolicy_psr.so.1 libpsvcpolicy_psr.so.1; \
 ln -s ../../$(CHERRY_LINKTO_PLATFORM)/lib/libpsvcpolicy_psr.so libpsvcpolicy_psr.so;`
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(LINTLIB) $(LINTOUT) $(OBJS) $(PICS)

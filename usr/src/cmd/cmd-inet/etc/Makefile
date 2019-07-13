@@ -100,3 +100,6 @@ clobber:
 	$(RM) $(CLOBBERFILES)
 
 lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(UNIGNOREFILES:%=-x %) $(CLOBBERFILES)
