@@ -334,9 +334,10 @@ kt_add_entry(krb5_context ctx, krb5_keytab kt, const krb5_principal princ,
 	krb5_data password, salt;
 	krb5_keyblock key;
 	krb5_error_code code;
-	char buf[100];
+	char enctype_name[100];
 
-	if ((code = krb5_enctype_to_string(enctype, buf, sizeof (buf)))) {
+	if ((code = krb5_enctype_to_string(enctype, enctype_name,
+	    sizeof (enctype_name)))) {
 		com_err(whoami, code, gettext("Enctype %d has no name!"),
 		    enctype);
 		return;
@@ -353,15 +354,15 @@ kt_add_entry(krb5_context ctx, krb5_keytab kt, const krb5_principal princ,
 
 	if ((code = krb5_principal2salt(ctx, sprinc, &salt)) != 0) {
 		com_err(whoami, code,
-		    gettext("Could not compute salt for %s"), enctype);
+		    gettext("Could not compute salt for %s"), enctype_name);
 		return;
 	}
 
 	code = krb5_c_string_to_key(ctx, enctype, &password, &salt, &key);
 
 	if (code != 0) {
-		com_err(whoami, code, gettext("Could not compute salt for %s"),
-		    enctype);
+		com_err(whoami, code,
+		    gettext("Could not convert to key for %s"), enctype_name);
 		krb5_xfree(salt.data);
 		return;
 	}
