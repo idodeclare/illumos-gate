@@ -22,25 +22,31 @@
 # Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2016 Toomas Soome <tsoome@me.com>
+# Portions Copyright 2021, Chris Fraire <cfraire@me.com>.
 #
-# This script is used to setup the Kerberos client by
-# supplying information about the Kerberos realm and kdc.
+# This script is used to set up the Kerberos client by supplying information
+# about the Kerberos realm and kdc.
 #
-# The kerberos configuration file (/etc/krb5/krb5.conf) would
-# be generated and local host's keytab file setup. The script
-# can also optionally setup the system to do kerberized nfs and
-# bringover a master krb5.conf copy from a specified location.
+# The kerberos configuration file (/etc/krb5/krb5.conf) would be generated and
+# local host's keytab file set up. The script can also optionally set up the
+# system to do kerberized NFS and bringover a master krb5.conf copy from a
+# specified location.
 #
+
+typeset -r KRB5_KCLIENT_TMPDIR="/var/run/kclient"
 
 function cleanup {
 
-	kdestroy -q > $TMP_FILE 2>&1
-	rm -r $TMPDIR > /dev/null 2>&1
+	if [[ -e "$KRB5_KCLIENT_TMPDIR" ]]; then
+		kdestroy -q > $TMP_FILE 2>&1
+		rm -r "$KRB5_KCLIENT_TMPDIR" > /dev/null 2>&1
+	fi
 
 	exit $1
 }
+
 function exiting {
-	
+
         printf "\n$(gettext "Exiting setup, nothing changed").\n\n"
 
 	cleanup $1
@@ -69,7 +75,7 @@ function cannot_create {
 	typeset stat="$2"
 
 	if [[ $stat -ne 0 ]]; then
-		printf "\n$(gettext "Can not create/edit %s, exiting").\n" $filename >&2
+		printf "\n$(gettext "Cannot create/edit %s, exiting").\n" $filename >&2
 		error_message
 	fi
 }
@@ -81,7 +87,7 @@ function update_pam_conf {
 
 	TPAM=$(mktemp -q -t kclient-pamconf.XXXXXX)
 	if [[ -z $TPAM ]]; then
-		printf "\n$(gettext "Can not create temporary file, exiting").\n" >&2
+		printf "\n$(gettext "Cannot create temporary file, exiting").\n" >&2
 		error_message
 	fi
 
@@ -196,7 +202,7 @@ function writeup_krb5_conf {
 
 	exec 3>$KRB5_CONFIG
 	if [[ $? -ne 0 ]]; then
-		printf "\n$(gettext "Can not write to %s, exiting").\n" $KRB5_CONFIG >&2
+		printf "\n$(gettext "Cannot write to %s, exiting").\n" $KRB5_CONFIG >&2
 		error_message
 	fi
 
@@ -658,24 +664,50 @@ function setup_lhn {
 	ping_check $client_machine $(gettext "System")
 }
 
+# Formats a line for usage() with hang indentation. 68 is 80 minus 8 for a tab
+# and 4 for the hang indent.
+function u_ {
+	echo "$1" | /usr/bin/fmt -w 68 | /usr/bin/awk \
+	    '{printf "\t"; if (NR > 1) printf "    "; print $0;}'
+}
+
 function usage {
-	printf "\n$(gettext "Usage: kclient [ options ]")\n" >&2
-	printf "\t$(gettext "where options are any of the following")\n\n" >&2
-	printf "\t$(gettext "[ -D domain_list ]  configure a client that has mul
-tiple mappings of doamin and/or hosts to the default realm")\n" >&2
-	printf "\t$(gettext "[ -K ]  configure a client that does not have host/service keys")\n" >&2
-	printf "\t$(gettext "[ -R realm ]  specifies the realm to use")\n" >&2
-	printf "\t$(gettext "[ -T kdc_vendor ]  specifies which KDC vendor is the server")\n" >&2
-	printf "\t$(gettext "[ -a adminuser ]  specifies the Kerberos administrator")\n" >&2
-	printf "\t$(gettext "[ -c filepath ]  specifies the krb5.conf path used to configure this client")\n" >&2
-	printf "\t$(gettext "[ -d dnsarg ]  specifies which information should be looked up in DNS (dns_lookup_kdc, dns_lookup_realm, and dns_fallback)")\n" >&2
-	printf "\t$(gettext "[ -f fqdn_list ]  specifies which domains to configure host keys for this client")\n" >&2
-	printf "\t$(gettext "[ -h logicalhostname ]  configure the logical host name for a client that is in a cluster")\n" >&2
-	printf "\t$(gettext "[ -k kdc_list ]  specify multiple KDCs, if -m is not used the first KDC in the list is assumed to be the master.  KDC host names are used verbatim.")\n" >&2
-	printf "\t$(gettext "[ -m master ]  master KDC server host name")\n" >&2
-	printf "\t$(gettext "[ -n ]  configure client to be an NFS client")\n" >&2
-	printf "\t$(gettext "[ -p profile ]  specifies which profile file to use to configure this client")\n" >&2
-	printf "\t$(gettext "[ -s pam_list ]  update the service for Kerberos authentication")\n" >&2
+	printf "\n" >&2
+	u_ "$(gettext "Usage"): kclient [ $(gettext "options") ]" >&2
+	printf "\n" >&2
+	u_ "$(gettext "where options can be left empty to start interactive \
+mode or where options are any of the following:")" >&2
+	printf "\n" >&2
+	u_ "[ -n ]  $(gettext "configure client to be a kerberized NFS \
+client")" >&2
+	u_ "[ -K ]  $(gettext "configure a client that does not have \
+host/service keys")" >&2
+	u_ "[ -D $(gettext "domain_list") ]  $(gettext "configure a client \
+that has multiple mappings of domain and/or hosts to the default realm")" >&2
+	u_ "[ -R $(gettext "realm") ]  $(gettext "specifies the realm to \
+use")" >&2
+	u_ "[ -a $(gettext "adminuser") ]  $(gettext "specifies the Kerberos \
+administrator")" >&2
+	u_ "[ -c $(gettext "filepath") ]  $(gettext "specifies the krb5.conf \
+path used to configure this client")" >&2
+	u_ "[ -d $(gettext "dnsarg") ]  $(gettext "specifies which information \
+should be looked up in DNS (none, dns_lookup_kdc, dns_lookup_realm, and \
+dns_fallback)")" >&2
+	u_ "[ -f $(gettext "fqdn_list") ]  $(gettext "specifies which domains \
+to configure host keys for this client")" >&2
+	u_ "[ -h $(gettext "logical_host_name") ]  $(gettext "configure the \
+logical host name for a client that is in a cluster")" >&2
+	u_ "[ -k $(gettext "kdc_list") ]  $(gettext "specifies multiple KDCs; \
+if -m is not used the first KDC in the list is assumed to be the master. KDC \
+host names are used verbatim.")" >&2
+	u_ "[ -m $(gettext "master_kdc") ]  $(gettext "master KDC server host \
+name")" >&2
+	u_ "[ -p $(gettext "profile") ]  $(gettext "specifies which profile \
+file to use to configure this client")" >&2
+	u_ "[ -s $(gettext "pam_service") ]  $(gettext "specifies the service \
+names for Kerberos authentication")" >&2
+	u_ "[ -T $(gettext "kdc_vendor") ]  $(gettext "specifies which vendor \
+is the KDC server (ms_ad, mit, heimdal, and shishi)")" >&2
 	error_message
 }
 
@@ -880,7 +912,7 @@ function write_ads_krb5conf {
 	$KCONF -f $KRB5_CONFIG -r $realm -k $kdcs -m $KDC -p SET_CHANGE -d .$dom
 
 	if [[ $? -ne 0 ]]; then
-		printf "\n$(gettext "Can not update %s, exiting").\n" $KRB5_CONFIG >&2
+		printf "\n$(gettext "Cannot update %s, exiting").\n" $KRB5_CONFIG >&2
 		error_message
 	fi
 }
@@ -1186,7 +1218,7 @@ function join_domain {
 	fi
 
 	if ! discover_domain; then
-		printf "$(gettext "Can not find realm") '%s'.\n" $realm >&2
+		printf "$(gettext "Cannot find realm") '%s'.\n" $realm >&2
 		error_message
 	fi
 
@@ -1208,7 +1240,7 @@ function join_domain {
 
 	object=$(mktemp -q -t kclient-computer-object.XXXXXX)
 	if [[ -z $object ]]; then
-		printf "\n$(gettext "Can not create temporary file, exiting").\n
+		printf "\n$(gettext "Cannot create temporary file, exiting").\n
 " >&2
 		error_message
         fi
@@ -1567,6 +1599,20 @@ EOF
 ###########################
 #	Main section	  #
 ###########################
+
+typeset -r KCLIENT_OPTS=":nD:Kp:R:k:a:c:d:f:h:m:s:T:"
+
+#
+# Process -? early
+#
+while getopts "$KCLIENT_OPTS" OPTIONS
+do
+	case $OPTIONS in
+	    \?) usage
+	       ;;
+	esac
+done
+
 #
 # Set the Kerberos config file and some default strings/files
 #
@@ -1589,11 +1635,11 @@ profile=""
 typeset -u realm
 typeset -l hostname KDC
 
-export TMPDIR="/var/run/kclient"
+export TMPDIR="$KRB5_KCLIENT_TMPDIR"
 
 mkdir $TMPDIR > /dev/null 2>&1
 if [[ $? -ne 0 ]]; then
-	printf "\n$(gettext "Can not create directory: %s")\n\n" $TMPDIR >&2
+	printf "\n$(gettext "Cannot create directory: %s")\n\n" $TMPDIR >&2
 	exit 1
 fi
 
@@ -1603,7 +1649,7 @@ export KRB5CCNAME=$(mktemp -q -t kclient-krb5ccache.XXXXXX)
 new_keytab=$(mktemp -q -t kclient-krb5keytab.XXXXXX) 
 if [[ -z $TMP_FILE || -z $KRB5_CONFIG || -z $KRB5CCNAME || -z $new_keytab ]]
 then
-	printf "\n$(gettext "Can not create temporary files, exiting").\n\n" >&2
+	printf "\n$(gettext "Cannot create temporary files, exiting").\n\n" >&2
 	exit 1
 fi
 
@@ -1653,7 +1699,7 @@ hostname=${uname%%.*}
 # Process the command-line arguments (if any)
 #
 OPTIND=1
-while getopts nD:Kp:R:k:a:c:d:f:h:m:s:T: OPTIONS
+while getopts "$KCLIENT_OPTS" OPTIONS
 do
 	case $OPTIONS in
 	    D) options="$options -D"
@@ -1712,8 +1758,6 @@ do
 	       svc_list="$OPTARG"
 	       SVCs=${svc_list//,/ }
  	       ;;
-	    \?) usage
-	       ;;
 	    *) usage
 	       ;;
 	esac
@@ -1892,14 +1936,14 @@ writeup_krb5_conf
 # uncomment the krb5* sec flavors in nfssec.conf.
 #
 if [[ -z $options ]]; then
-	query "$(gettext "Do you plan on doing Kerberized nfs") ?"
+	query "$(gettext "Do you plan on doing kerberized NFS") ?"
 	add_nfs=$answer
 fi
 
 if [[ $add_nfs == yes ]]; then
 	modify_nfssec_conf
 
-	#	
+	#
 	# We also want to enable gss as we now live in a SBD world
 	#
 	svcadm enable svc:/network/rpc/gss:default
