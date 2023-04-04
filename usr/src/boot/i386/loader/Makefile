@@ -130,7 +130,7 @@ FILES=	$(LOADER) loader.help
 DPADD=	$(DPLIBFICL) $(DPLIBI386) $(DPLIBSA)
 LDADD=	$(LIBFICL) $(LIBI386) $(LIBSA)
 
-CLEANFILES +=	machine x86
+CLOBBERFILES +=	machine x86
 
 machine:
 	$(RM) machine
@@ -147,9 +147,11 @@ $(OBJS): machine x86
 $(PROG): $(OBJS) $(DPADD)
 	$(GLD) $(LDFLAGS) -o $@ $(BTXCRT) $(OBJS) $(LDADD)
 
-clean: clobber
-clobber:
+clean:
 	$(RM) $(CLEANFILES) $(OBJS)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 install: all $(ROOTBOOTFILES)
 

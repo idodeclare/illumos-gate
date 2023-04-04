@@ -39,7 +39,7 @@ OBJECTS += sha1-x86_64.o
 SRCS += $(SASRC)/x86/hypervisor.c
 OBJECTS += hypervisor.o
 
-CLEANFILES += sha1-x86_64.S sha1-x86_64.s
+CLOBBERFILES +=	sha1-x86_64.S sha1-x86_64.s
 
 pics/%.o: $(SASRC)/amd64/%.S
 	$(COMPILE.S) -o $@ $<

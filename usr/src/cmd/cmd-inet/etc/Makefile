@@ -38,10 +38,10 @@ include ../../Makefile.cmd
 # but almost all elements of PROG here are committed. Redefine therefore the
 # cmd clobber macro to exclude $(PROG), and define UNIGNOREFILES as an explicit
 # accounting of the committed state.
-CMDCLOBBEREES=  $(CLOBBERFILES)
-CLOBBERFILES= datemsk.ndpd
-UNIGNOREFILES=  ipsecinit.sample ipqosconf.1.sample ipqosconf.2.sample \
-    ipqosconf.3.sample wanboot.conf.sample
+CMDCLOBBEREES=	$(CLOBBERFILES)
+CLOBBERFILES=	datemsk.ndpd
+UNIGNOREFILES=	ipsecinit.sample ipqosconf.1.sample ipqosconf.2.sample \
+    ipqosconf.3.sample
 
 all:=		TARGET= all
 install:=	TARGET= install

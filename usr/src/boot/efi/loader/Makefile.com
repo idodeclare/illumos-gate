@@ -134,6 +134,7 @@ LDFLAGS +=	-T$(LDSCRIPT) -Bsymbolic
 
 CLEANFILES=	$(EFIPROG) loader.sym loader.bin
 CLEANFILES +=	$(FONT).c vers.c
+CLEANFILES +=	$(OBJS)
 
 NEWVERSWHAT=	"EFI loader" $(MACHINE)
 
@@ -165,6 +166,8 @@ LDADD=		$(LIBFICL) $(LIBEFI) $(LIBSA)
 loader.sym:	$(OBJS) $(DPADD)
 	$(GLD) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)
 
+CLOBBERFILES +=	machine x86
+
 machine:
 	$(RM) machine
 	$(SYMLINK) ../../../sys/$(MACHINE)/include machine
@@ -173,8 +176,11 @@ x86:
 	$(RM) x86
 	$(SYMLINK) ../../../sys/x86/include x86
 
-clean clobber:
-	$(RM) $(CLEANFILES) $(OBJS) machine x86
+clean:
+	$(RM) $(CLEANFILES)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 %.o:	../%.c
 	$(COMPILE.c) $<

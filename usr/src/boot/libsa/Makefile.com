@@ -32,6 +32,8 @@ SMOFF += uninitialized
 objs/printf.o := SMOFF += 64bit_shift
 pics/printf.o := SMOFF += 64bit_shift
 
+CLOBBERFILES +=	machine x86
+
 machine:
 	$(RM) machine
 	$(SYMLINK) ../../sys/$(MACHINE)/include machine
@@ -61,6 +63,8 @@ pics/%.o objs/%.o:	$(LZ4)/%.c
 pics/%.o objs/%.o:	$(SRC)/common/util/%.c
 	$(COMPILE.c) -o $@ $<
 
-clean: clobber
-clobber:
-	$(RM) $(CLEANFILES) machine x86
+clean:
+	$(RM) $(CLEANFILES)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)

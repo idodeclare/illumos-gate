@@ -59,12 +59,17 @@ include ../../Makefile.inc
 # For multiboot2.h, must be last, to avoid conflicts
 CPPFLAGS +=	-I$(SRC)/uts/common
 
+CLEANFILES +=	$(OBJS)
+CLOBBERFILES +=	libefi.a
+
 libefi.a: $(OBJS)
 	$(AR) $(ARFLAGS) $@ $(OBJS)
 
-clean: clobber
-clobber:
-	$(RM) $(CLEANFILES) $(OBJS) libefi.a
+clean:
+	$(RM) $(CLEANFILES)
+
+clobber: clean
+	$(RM) $(CLOBBERFILES)
 
 machine:
 	$(RM) machine

@@ -24,6 +24,6 @@ include ../Makefile.com
 
 CFLAGS +=	-m64 $(CFLAGS64)
 
-CLEANFILES +=	machine x86 libefi.a
+CLOBBERFILES +=	machine x86 libefi.a
 
 $(OBJS): machine x86
