@@ -60,7 +60,7 @@ use Cwd;
 use File::Basename;
 use Getopt::Std;
 our ($archdir, $cwd, $didname, %macros, $fullpath, $fullname, $inclpathadj,
-    @includes, @oktoskip, $usrsrc, $worktext, $opt_v, $opt_n);
+    @includes, @oktoskip, $usrsrc, $worktext, $opt_v, $opt_n, $opt_V);
 
 BEGIN { undef $/ }
 
@@ -73,7 +73,27 @@ INIT {
 	# $(SRC) is common macro used in makefile include statements
 	$usrsrc = "$cwd/usr/src";
 
-	die "Usage: $0 [-n] [-v] [makefile-path ...]\n" if !getopts('vn');
+	die "Usage: $0 [-n] [-v] [makefile-path ...]
+
+	or
+
+	$0 -V" if !getopts('vnV');
+
+	# Validate that @oktoskip refers to extant files.
+	if ($opt_V) {
+		if (! -d "usr/src") {
+			die "Error: missing expected usr/src/\n";
+		}
+
+		for my $f (@oktoskip) {
+			if (! -f $f) {
+				warn "Warn: missing file $f\n";
+			} else {
+				print $f, "\n";
+			}
+		}
+		exit;
+	}
 }
 
 my ($mname, $mpath) = fileparse($ARGV);
@@ -241,7 +261,8 @@ if ($force_make || @macros > 0) {
 
 		# Append to the .DONE target. Match multi-line .DONE section,
 		# and append a new command.
-		s/^\.DONE\s*: .*\n (?:\t[\t\x20]*\S.*\n)* \K/$make_gitignore_cmd/emx;
+		s/^\.DONE\s*: .*\n (?:\t[\t\x20]*\S.*\n)* \K
+		    /$make_gitignore_cmd/emx;
 	}
 }
 
@@ -379,8 +400,6 @@ sub is_makefile_ok_to_skip {
 
 BEGIN {
 	my $oklist = <<'END_LIST';
-usr/src/cmd/cvcd/sparc/sun4u/Makefile
-usr/src/cmd/cvcd/sparc/Makefile
 usr/src/cmd/dcs/Makefile
 usr/src/cmd/dcs/sparc/Makefile
 usr/src/cmd/boot/installboot/Makefile
@@ -400,19 +419,6 @@ usr/src/cmd/fm/fmadm/Makefile
 usr/src/cmd/fm/modules/Makefile
 usr/src/cmd/fm/modules/common/sw-diag-response/Makefile
 usr/src/cmd/fm/modules/common/Makefile
-usr/src/cmd/fm/modules/SUNW,Sun-Blade-T6320/Makefile
-usr/src/cmd/fm/modules/SUNW,Netra-T5220/Makefile
-usr/src/cmd/fm/modules/SUNW,USBRDT-5240/Makefile
-usr/src/cmd/fm/modules/SUNW,Netra-CP3060/Makefile
-usr/src/cmd/fm/modules/SUNW,Netra-T5440/Makefile
-usr/src/cmd/fm/modules/sun4v/Makefile
-usr/src/cmd/fm/modules/SUNW,SPARC-Enterprise/Makefile
-usr/src/cmd/fm/modules/SUNW,Netra-CP3260/Makefile
-usr/src/cmd/fm/modules/SUNW,SPARC-Enterprise-T5120/Makefile
-usr/src/cmd/fm/modules/SUNW,Sun-Fire-T200/Makefile
-usr/src/cmd/fm/modules/SUNW,T5140/Makefile
-usr/src/cmd/fm/modules/sun4u/Makefile
-usr/src/cmd/fm/modules/SUNW,Sun-Blade-T6300/Makefile
 usr/src/cmd/fm/Makefile
 usr/src/cmd/fm/fmdump/Makefile
 usr/src/cmd/fm/eversholt/esc/Makefile
@@ -424,27 +430,11 @@ usr/src/cmd/prtdiag/sparc/Makefile
 usr/src/cmd/make/Makefile
 usr/src/cmd/make/lib/Makefile
 usr/src/cmd/scadm/sparc/Makefile
-usr/src/cmd/mdb/sparc/Makefile
 usr/src/cmd/mdb/i86xpv/Makefile
 usr/src/cmd/mdb/i86xpv/modules/Makefile
 usr/src/cmd/mdb/intel/modules/Makefile
-usr/src/cmd/mdb/sun4u/Makefile
-usr/src/cmd/mdb/sun4u/modules/unix/Makefile
-usr/src/cmd/mdb/sun4u/modules/opl/oplhwd/Makefile
-usr/src/cmd/mdb/sun4u/modules/opl/Makefile
-usr/src/cmd/mdb/sun4u/modules/lw8/Makefile
-usr/src/cmd/mdb/sun4u/modules/lw8/sgenv/Makefile
-usr/src/cmd/mdb/sun4u/modules/serengeti/sgsbbc/Makefile
-usr/src/cmd/mdb/sun4u/modules/serengeti/Makefile
 usr/src/cmd/mdb/i86pc/Makefile
 usr/src/cmd/mdb/i86pc/modules/Makefile
-usr/src/cmd/mdb/sun4v/modules/mdesc/Makefile
-usr/src/cmd/mdb/sun4v/modules/vdsk/Makefile
-usr/src/cmd/mdb/sun4v/modules/Makefile
-usr/src/cmd/mdb/sun4v/modules/errh/Makefile
-usr/src/cmd/mdb/sun4v/modules/unix/Makefile
-usr/src/cmd/mdb/sun4v/modules/ldc/Makefile
-usr/src/cmd/mdb/sun4v/Makefile
 usr/src/cmd/sgs/libelf/demo/Makefile
 usr/src/cmd/picl/plugins/common/Makefile
 usr/src/cmd/picl/plugins/sun4v/Makefile
@@ -454,7 +444,6 @@ usr/src/cmd/picl/plugins/sun4u/lib/Makefile
 usr/src/cmd/picl/plugins/sun4u/cherrystone/Makefile
 usr/src/cmd/picl/plugins/sun4u/silverstone/Makefile
 usr/src/cmd/picl/plugins/sun4u/daktari/Makefile
-usr/src/cmd/picl/plugins/sun4u/blade/Makefile
 usr/src/cmd/picl/plugins/sun4u/chicago/Makefile
 usr/src/cmd/picl/plugins/sun4u/lw2plus/Makefile
 usr/src/cmd/picl/plugins/sun4u/excalibur/Makefile
@@ -469,7 +458,6 @@ usr/src/cmd/picl/plugins/sun4u/mpxu/Makefile
 usr/src/cmd/picl/plugins/sun4u/chalupa/Makefile
 usr/src/cmd/picl/plugins/sun4u/taco/Makefile
 usr/src/cmd/picl/plugins/sun4u/boston/Makefile
-usr/src/cmd/picl/plugins/sun4u/snowbird/lib/Makefile
 usr/src/cmd/picl/plugins/sun4u/sebring/Makefile
 usr/src/cmd/picl/plugins/sun4u/ents/Makefile
 usr/src/cmd/picl/plugins/Makefile
@@ -485,7 +473,6 @@ usr/src/cmd/fs.d/pcfs/Makefile
 usr/src/cmd/fs.d/lofs/Makefile
 usr/src/cmd/fs.d/hsfs/Makefile
 usr/src/cmd/fs.d/zfs/Makefile
-usr/src/cmd/tnf/Makefile
 usr/src/cmd/abi/spectrans/Makefile
 usr/src/cmd/abi/Makefile
 usr/src/cmd/idmap/Makefile
@@ -493,12 +480,6 @@ usr/src/cmd/syseventd/daemons/Makefile
 usr/src/cmd/syseventd/modules/Makefile
 usr/src/cmd/krb5/Makefile
 usr/src/cmd/rcap/Makefile
-usr/src/boot/sys/boot/sparc64/zfsloader/Makefile
-usr/src/boot/sys/boot/sparc64/boot1/Makefile
-usr/src/boot/sys/boot/usb/tools/Makefile
-usr/src/boot/sys/boot/usb/Makefile
-usr/src/boot/sys/boot/userboot/ficl/Makefile
-usr/src/boot/sys/boot/userboot/test/Makefile
 usr/src/data/Makefile
 usr/src/man/Makefile
 usr/src/ucblib/Makefile
@@ -511,12 +492,7 @@ usr/src/lib/fm/topo/Makefile
 usr/src/lib/fm/topo/maps/Makefile
 usr/src/lib/fm/topo/modules/Makefile
 usr/src/lib/fm/topo/modules/i86pc/Makefile
-usr/src/lib/fm/topo/modules/SUNW,SPARC-Enterprise/Makefile
-usr/src/lib/fm/topo/modules/sun4u/Makefile
 usr/src/lib/fm/topo/modules/common/Makefile
-usr/src/lib/fm/topo/modules/SUNW,Sun-Fire/Makefile
-usr/src/lib/fm/topo/modules/sun4v/Makefile
-usr/src/lib/fm/topo/modules/SUNW,Sun-Fire-15000/Makefile
 usr/src/lib/mpapi/Makefile
 usr/src/lib/brand/ipkg/Makefile
 usr/src/lib/brand/labeled/Makefile
@@ -532,7 +508,6 @@ usr/src/lib/scsi/plugins/scsi/Makefile
 usr/src/lib/scsi/plugins/scsi/engines/Makefile
 usr/src/lib/libpcp/Makefile
 usr/src/lib/crypt_modules/Makefile
-usr/src/lib/lvm/libpreen/Makefile
 usr/src/lib/librsc/Makefile
 usr/src/lib/librsc/sparc/Makefile
 usr/src/lib/libsecdb/help/Makefile
