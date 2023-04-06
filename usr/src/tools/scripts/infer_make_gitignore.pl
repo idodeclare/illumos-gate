@@ -14,35 +14,36 @@
 # Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
-# Examine files specified in @ARGV, and possibly add or append a command to
-# run $(MAKE_GITIGNORE) in any Makefile's .DONE target.
+# Examine files specified in @ARGV, and possibly add or append a command to run
+# $(MAKE_GITIGNORE) in any Makefile's .DONE target.
 #
-# This script is limited to processing files named "Makefile" plus a small
-# set of exceptions found empirically (e.g., Makefile.solaris for grub). The
-# @ARGV values can be in any relative directory from cwd, but cwd must be the
-# root of the illumos-gate checkout so that a value for the SRC macro can be
-# assumed.
+# This script is limited to processing files named "Makefile" plus a small set
+# of exceptions found empirically (e.g., Makefile.solaris for grub) and minus a
+# small set of exceptions found empirically. Running with -V as the sole
+# argument will validate that the "minus" set of files still exist. The @ARGV
+# values can be in any relative directory from cwd, but cwd must be the root of
+# the illumos-gate checkout so that a value for the SRC macro can be assumed.
 #
-# The macros to pass to the execution of $(MAKE_GITIGNORE) are inferred from
-# a search of the text resulting from a Perl-only preprocessing of the
-# Makefile to retrieve its full content by recursively loading the text of
-# any "include"-d files. "clean"- and "clobber"-style targets are then
-# searched for simple references to macros (e.g., $(FOO) or $(FOO)* but not
+# The macros to pass to the execution of $(MAKE_GITIGNORE) are inferred from a
+# search of the text resulting from a Perl-only preprocessing of the Makefile
+# to retrieve its full content by recursively loading the text of any
+# "include"-d files. "clean"- and "clobber"-style targets are then searched for
+# simple references to macros (e.g., $(FOO) or $(FOO)* but not
 # $(FOO:%.x=bar/%.y).
 #
 # "make -D" was considered, but while that command "displays the text of the
 # makefiles read in", it actually displays the text after round-1 of macro
 # expansion. This script, however, needs the raw text.
 #
-# Complex references in clean/clobber targets should be refactored to
-# distinct, simple macros for use by this script and also to encourage
-# reusability between the clean/clobber targets and the .DONE target used for
+# Complex references in clean/clobber targets should be refactored to distinct,
+# simple macros for use by this script and also to encourage reusability
+# between the clean/clobber targets and the .DONE target used for
 # MAKE_GITIGNORE.
 #
 # A rare few illumos Makefiles execute multiple times in the same working
-# directory for iterating CURTYPE values (e.g., "library" and "standalone"
-# for libumem). This script detects CURTYPE in order to call MAKE_GITIGNORE
-# with the -d <discriminator> switch.
+# directory for iterating CURTYPE values (e.g., "library" and "standalone" for
+# libumem). This script detects CURTYPE in order to call MAKE_GITIGNORE with
+# the -d <discriminator> switch.
 #
 # Also, another rare few illumos Makefiles include in their clean/clobber
 # recipes (though not executed) some committed files (e.g.,
