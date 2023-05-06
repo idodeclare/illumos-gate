@@ -685,7 +685,7 @@ void
 sigbp_help(void)
 {
 	mdb_printf(_evset_help);
-	mdb_printf("SIG      signal name (see signal(3HEAD)) or number\n");
+	mdb_printf("SIG      signal name (see signal.h(3HEAD)) or number\n");
 }
 
 void

@@ -66,7 +66,7 @@
  * in the ip_ioctl_ftbl callout table to pass the routing socket data into IP.
  * Upstream messages are generated for listeners of the routing socket as well
  * as the message sender (unless they have turned off their end using
- * SO_USELOOPBACK or shutdown(3n)).  Upstream messages may also be generated
+ * SO_USELOOPBACK or shutdown(3socket)).  Upstream messages may also be generated
  * asynchronously when:
  *
  *	Interfaces are brought up or down.
