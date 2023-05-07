@@ -28,7 +28,7 @@
  * zmalloc	- use mmap(2) to allocate memory from /dev/zero.
  * zfree	- use munmap(2) to unmap (free) memory.
  *
- * These functions should be better than malloc(3) for large memory allocation.
+ * These functions should be better than malloc(3C) for large memory allocation.
  */
 
 #include <stdio.h>

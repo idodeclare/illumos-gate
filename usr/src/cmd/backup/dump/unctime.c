@@ -17,7 +17,7 @@
 #include <string.h>
 #include <stdlib.h>
 /*
- * Convert a ctime(3) format string into a system format date.
+ * Convert a ctime(3C) format string into a system format date.
  * Return the date thus calculated.
  *
  * Return -1 if the string is not in ctime format.
@@ -49,7 +49,7 @@ unctime(str)
 	struct tm then;
 	char dbuf[30];
 
-	/* Definition of ctime(3) is 24 characters + newline + NUL */
+	/* Definition of ctime(3C) is 24 characters + newline + NUL */
 	(void) strncpy(dbuf, str, 24);
 	dbuf[24] = '\0';
 	dbuf[E_MONTH+3] = '\0';
@@ -81,7 +81,7 @@ lookup(str)
 	return (-1);
 }
 /*
- * Routine to convert a localtime(3) format date back into
+ * Routine to convert a localtime(3C) format date back into
  * a system format date.
  */
 static time_t

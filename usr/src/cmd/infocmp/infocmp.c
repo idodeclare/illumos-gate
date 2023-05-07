@@ -239,7 +239,7 @@ allocvariables(int argc, int firstoptind)
 }
 
 /*
-	Routines to be passed to qsort(3) for comparison of the structures.
+	Routines to be passed to qsort(3C) for comparison of the structures.
 */
 int
 boolcompare(const void *x, const void *y)
