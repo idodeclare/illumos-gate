@@ -307,7 +307,8 @@ sub inline_includes {
 				$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
 				$incl =~ s`\$\{MACH(?:INE)?\}`$mach`gx;
 				my $fullincl = pathjoin($fullpath, $incl);
-				$repl .= read_include($fullincl, $file);
+				$repl .= read_include($fullincl, $file) if
+				    -f $fullincl;
 			}
 		} else {
 			my $fullincl = pathjoin($fullpath, $incl);
