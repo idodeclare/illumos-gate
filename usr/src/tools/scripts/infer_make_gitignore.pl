@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2023 Chris Fraire <cfraire@me.com>
 #
 
 # Examine files specified in @ARGV, and possibly add or append a command to run
@@ -276,11 +276,10 @@ sub inline_includes {
 	my ($content, $file) = @_;
 
 	my $macro_match = qr/
-	  (BASEDIR|BOOTSRCDIR|BRAND_SHARED|BUILD_TYPE
-	  |CLASS(?:_(?:OBJ|DBG)(?:32|64))?
-	  |CMDDIR|CONF_SRCDIR|LIB_BASE|LIBCDIR|LIBMDIR|LIBSTAND_SRC
-	  |METASSIST_TOPLEVEL|NDMP_DIR|PLATFORM|PROMIF|PSMBASE|SENDMAIL
-	  |SRCDIR|TOPDIR|UTSBASE)
+	  (BASEDIR|BOOTSRC(?:DIR)?|BRAND_SHARED|BUILD_TYPE|
+	  CLASS(?:_(?:OBJ|DBG)(?:32|64))?|CMDDIR|CONF_SRCDIR|CRYPTOSRC|LIB_BASE|
+	  LIBCDIR|LIBMDIR|LIBSTAND_SRC|METASSIST_TOPLEVEL|NDMP_DIR|PLATFORM|
+	  PROMIF|PSMBASE|SASRC|SENDMAIL|SRCDIR|TOPDIR|UTSBASE|ZFSSRC)
 	  /x;
 	my $rmacro = qr/\$ ( \($macro_match\) | \{$macro_match\} )/x;
 	$content =~ s/^include \s+ (\S+)/
@@ -300,12 +299,13 @@ sub inline_includes {
 		$incl =~ s`$inclpathadj`` if defined $inclpathadj;
 
 		my $repl = "";
-		if ($incl =~ m`\$\(MACH\)`x || $incl =~ m`\$\{MACHINE\}`x) {
+		if ($incl =~ m`\$\(MACH(?:INE)?\)`x ||
+		    $incl =~ m`\$\{MACH(?:INE)?\}`x) {
 			my $incl0 = $incl;
-			foreach my $mach ("i386", "sparc") {
+			foreach my $mach ("amd64", "i386", "sparc", "sparcv9") {
 				$incl = $incl0;
-				$incl =~ s`\$\(MACH\)`$mach`gx;
-				$incl =~ s`\$\{MACHINE\}`$mach`gx;
+				$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
+				$incl =~ s`\$\{MACH(?:INE)?\}`$mach`gx;
 				my $fullincl = pathjoin($fullpath, $incl);
 				$repl .= read_include($fullincl, $file);
 			}
