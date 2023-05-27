@@ -302,14 +302,18 @@ sub inline_includes {
 		if ($incl =~ m`\$\(MACH(?:INE)?\)`x ||
 		    $incl =~ m`\$\{MACH(?:INE)?\}`x) {
 			my $incl0 = $incl;
+			my $found_arch = 0;
 			foreach my $mach ("amd64", "i386", "sparc", "sparcv9") {
 				$incl = $incl0;
 				$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
 				$incl =~ s`\$\{MACH(?:INE)?\}`$mach`gx;
 				my $fullincl = pathjoin($fullpath, $incl);
-				$repl .= read_include($fullincl, $file) if
-				    -f $fullincl;
+				if (-f $fullincl) {
+					$repl .= read_include($fullincl, $file);
+					$found_arch = 1;
+				}
 			}
+			mywarn("\tNo MACH(INE) for $incl0\n") if ! $found_arch;
 		} else {
 			my $fullincl = pathjoin($fullpath, $incl);
 			$repl .= read_include($fullincl, $file);
@@ -345,7 +349,7 @@ sub try_get_def {
 sub read_include {
 	my ($file, $from) = @_;
 
-	mywarn( "\tAbout to get contents of $file\n") if $opt_v;
+	mywarn("\tAbout to get contents of $file\n") if $opt_v;
 	push @includes, $file if -f $file;
 
 	local $/;
