@@ -216,10 +216,12 @@ sub normalize_gitignore_entry {
 
 			if ($entry =~ m`^/`x) {
 				my $rel = abs2rel($entry, $cwd);
-				# the double-# prevents pattern-matching for @addenda
+				# the double-# prevents pattern-matching for
+				# @addenda
 				return "##$entry" if !defined $rel;
 				$entry = $rel;
-				# this value is only used if the realpath is up and out of cwd
+				# this value is only used if the realpath is up
+				# and out of cwd
 			}
 			return "#$entry" if $realentry !~ m`^\Q$cwd/`x;
 			$entry = $realentry;
