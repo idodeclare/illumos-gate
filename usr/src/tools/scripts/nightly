@@ -1242,7 +1242,7 @@ if [ "$f_FLAG" = "y" ]; then
 		    "builds; ignoring -f\n" | tee -a $mail_msg_file >> $LOGFILE
 		f_FLAG=n
 	fi
-	if [[ "$p_FLAG" -lt 1 ]]; then
+	if [ "$p_FLAG" -lt 1 ]; then
 		echo "WARNING: the -f flag requires -p;" \
 		    "ignoring -f\n" | tee -a $mail_msg_file >> $LOGFILE
 		f_FLAG=n
