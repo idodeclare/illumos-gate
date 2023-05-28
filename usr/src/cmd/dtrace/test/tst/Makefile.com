@@ -73,7 +73,7 @@ SMATCH=off
 
 CLOBBERFILES += \
     $(CSRCS:%.c=%.exe) $(CSRCS:%.c=%.o) \
-    $(SSRCS:%.s=%.exe) $(SSRCS:%.s=%.o) \
+    $(SSRCS:%.S=%.exe) $(SSRCS:%.S=%.o) \
     $(DSRCS:%.d=%.o)
 
 all: $(EXES)
