@@ -256,9 +256,9 @@ sub condense_link {
 	return "$lroot/$link";
 }
 
-# Confirm that cwd or above is a Git repo (-d .git) or else short-circuit
-# any generation of .gitignore* i.e., if a build is run from an archive of
-# or a Mercurial repo of illumos-gate.
+# Confirm that cwd or above is a Git repo (-d .git), or else short-circuit any
+# generation of .gitignore*. E.g. if a build is run from an archive of or a
+# Mercurial repo of illumos-gate.
 sub affirm_in_git_repo {
 	my ($p) = @_;
 
