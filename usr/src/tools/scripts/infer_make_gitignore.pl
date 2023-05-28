@@ -104,6 +104,10 @@ undef $inclpathadj;
 # exceptions found empirically
 if ($mname eq "Makefile") {
 	# ok, no path adjustment necessary
+} elsif ($mname eq "Makefile.digest") {
+	# usr/src/test/crypto-tests/tests/digest/Makefile directive:
+	#     $(MAKE) -f Makefile.digest
+	# ok, no path adjustment necessary
 } elsif ($mname eq "Makefile.solaris") {
 	# usr/src/grub/... directive: $(MAKE) -f Makefile.solaris
 	# ok, no path adjustment necessary
