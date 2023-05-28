@@ -58,10 +58,12 @@
 use strict;
 use warnings;
 use Cwd;
+use English;
 use File::Basename;
 use Getopt::Std;
 our ($archdir, $cwd, $didname, %macros, $fullpath, $fullname, $inclpathadj,
-    @includes, @oktoskip, $usrsrc, $worktext, $opt_v, $opt_n, $opt_V);
+    @includes, $macro_match_syn, @oktoskip, $usrsrc, $worktext,
+    $opt_n, $opt_v, $opt_V);
 
 BEGIN { undef $/ }
 
@@ -78,7 +80,12 @@ INIT {
 
 	or
 
-	$0 -V" if !getopts('vnV');
+	$0 -V
+
+	-n : dryrun
+	-v : verbose
+	-V : validate the script's hardcoded exception list of files\n" if
+	!getopts('nvV') || @ARGV < 1;
 
 	# Validate that @oktoskip refers to extant files.
 	if ($opt_V) {
@@ -170,17 +177,23 @@ s/^\.DONE\s*:.*\n\K((?:\t[\t\x20]*\S.*\n)+)/	# match multi-line .DONE section
 
 my @macros = ();
 
-# CURTYPE indicates that -d <discriminator> is needed
+# CURTYPE= indicates that -d <discriminator> is needed
 if ($alltext =~ /^(CURTYPE)\s*=/mx) {
 	$optdisc = "-d \$($1) ";
-} elsif ($alltext =~ m`^include\s.*/Makefile.crypto \b`mx) {
-	# Makefile.crypto indicates that -d <discriminator> is needed
+	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
+}
+
+# include ... /Makefile.crypto indicates that -d <discriminator> is needed. NB,
+# the match from the global $_.
+if (m`^include\s.*/Makefile.crypto \b`mx) {
 	$optdisc = "-d \$(BASEPROG) ";
+	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
 }
 
 # UNIGNOREFILES indicates that -x <filepath> is needed
 if ($alltext =~ /^(UNIGNOREFILES)\s*=/mx) {
 	$optexcl = "\$($1:%=-x %) ";
+	mywarn("\t-x ${optexcl}determined from $MATCH\n") if $opt_v;
 }
 
 # The following macros conventionally indicate some derived files that are
@@ -224,7 +237,7 @@ if ($force_make || @macros > 0) {
 	# but explicitly let ptools/Makefile.bld go to "else"
 	if ($alltext !~ /^MAKE_GITIGNORE\b/mx &&
 	    $ARGV !~ m`/ptools/Makefile.bld$`x) {
-		if (!is_makefile_ok_to_skip($ARGV)) {
+		if ($opt_v || !is_makefile_ok_to_skip($ARGV)) {
 			mywarn("\t\$(MAKE_GITIGNORE) is not defined in" .
 			    " preprocessed $ARGV\n");
 		}
@@ -284,52 +297,66 @@ if ($force_make || @macros > 0) {
 sub inline_includes {
 	my ($content, $file) = @_;
 
-	my $macro_match = qr/
-	  (BASEDIR|BOOTSRC(?:DIR)?|BRAND_SHARED|BUILD_TYPE|
-	  CLASS(?:_(?:OBJ|DBG)(?:32|64))?|CMDDIR|CONF_SRCDIR|CRYPTOSRC|LIB_BASE|
-	  LIBCDIR|LIBMDIR|LIBSTAND_SRC|METASSIST_TOPLEVEL|NDMP_DIR|PLATFORM|
-	  PROMIF|PSMBASE|SASRC|SENDMAIL|SGSHOME|SRCDIR|TOPDIR|UTSBASE|ZFSSRC)
-	  /x;
-	my $rmacro = qr/\$ ( \($macro_match\) | \{$macro_match\} )/x;
 	$content =~ s/^include \s+ (\S+)/
-		my $incl = $1;
-		# iteratively substitute any of the known macros above by
-		# searching for their definitionsn in $alltext
-		while ($incl =~ s`$rmacro`
-			mywarn("\tBefore transformation: $incl\n") if $opt_v;
-			my $macro = substr($1, 1, length($1) - 2);
-			try_get_def($macro)`ex) {
-		}
-
-		# substitute the values of a few known, external definitions
-		$incl =~ s`\$\(ARCHDIR\)`$archdir`gx;
-		$incl =~ s`\$\(REL_PATH\)`..\/`gx;
-		$incl =~ s`\$\(SRC\)`$usrsrc`gx;
-		$incl =~ s`$inclpathadj`` if defined $inclpathadj;
-
-		my $repl = "";
-		if ($incl =~ m`\$\(MACH(?:INE)?\)`x ||
-		    $incl =~ m`\$\{MACH(?:INE)?\}`x) {
-			my $incl0 = $incl;
-			my $found_arch = 0;
-			foreach my $mach ("amd64", "i386", "sparc", "sparcv9") {
-				$incl = $incl0;
-				$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
-				$incl =~ s`\$\{MACH(?:INE)?\}`$mach`gx;
-				my $fullincl = pathjoin($fullpath, $incl);
-				if (-f $fullincl) {
-					$repl .= read_include($fullincl, $file);
-					$found_arch = 1;
-				}
-			}
-			mywarn("\tNo MACH(INE) for $incl0\n") if ! $found_arch;
-		} else {
-			my $fullincl = pathjoin($fullpath, $incl);
-			$repl .= read_include($fullincl, $file);
-		}
-		$repl
-	    /egmx;
+		mywarn("\t$MATCH\n") if $opt_v;
+		expand_and_read($1, $file)/egmx;
 	return $content;
+}
+
+# Attempt to transform a limited set of (empirically-determined) illumos macros
+# within the specified $incl filename macro, and try to read the resulting
+# expanded filename to append $worktext.
+sub expand_and_read {
+	my ($incl, $from) = @_;
+
+	# global $macro_match_syn for caching regex
+	if (! defined $macro_match_syn) {
+		my $macro_match = qr/
+		  (BASEDIR|BOOTSRC(?:DIR)?|BRAND_SHARED|BUILD_TYPE|
+		  CLASS(?:_(?:OBJ|DBG)(?:32|64))?|CMDDIR|CONF_SRCDIR|CRYPTOSRC|
+		  LIB_BASE|LIBCDIR|LIBMDIR|LIBSTAND_SRC|METASSIST_TOPLEVEL|
+		  NDMP_DIR|PLATFORM|PROMIF|PSMBASE|SASRC|SENDMAIL|SGSHOME|
+		  SRCDIR|TOPDIR|UTSBASE|ZFSSRC)
+		  /x;
+		$macro_match_syn = qr/\$(\($macro_match\) | \{$macro_match\})/x;
+	}
+
+	# iteratively substitute any of the known macros above by
+	# searching for their definitionsn in $alltext
+	while ($incl =~ s`$macro_match_syn`
+		mywarn("\tBefore transformation: $incl\n") if $opt_v;
+		my $macro = substr($1, 1, length($1) - 2);
+		try_get_def($macro)`ex) {
+	}
+
+	# substitute the values of a few known, external definitions
+	$incl =~ s`\$\(ARCHDIR\)`$archdir`gx;
+	$incl =~ s`\$\(REL_PATH\)`..\/`gx;
+	$incl =~ s`\$\(SRC\)`$usrsrc`gx;
+	$incl =~ s`$inclpathadj`` if defined $inclpathadj;
+
+	my $repl = "";
+	if ($incl =~ m`\$\(MACH(?:INE)?\)`x ||
+	    $incl =~ m`\$\{MACH(?:INE)?\}`x) {
+		my $incl0 = $incl;
+		my $found_arch = 0;
+		mywarn("\tBefore transformation: $incl\n") if $opt_v;
+		foreach my $mach ("amd64", "i386", "sparc", "sparcv9") {
+			$incl = $incl0;
+			$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
+			$incl =~ s`\$\{MACH(?:INE)?\}`$mach`gx;
+			my $fullincl = pathjoin($fullpath, $incl);
+			if (-f $fullincl) {
+				$repl .= read_include($fullincl, $from);
+				$found_arch = 1;
+			}
+		}
+		mywarn("\tNo MACH(INE) for $incl0\n") if !$found_arch;
+	} else {
+		my $fullincl = pathjoin($fullpath, $incl);
+		$repl .= read_include($fullincl, $from);
+	}
+	return $repl;
 }
 
 # search for the value of a macro definition--e.g., FOO=(.+)--or else return
@@ -358,7 +385,7 @@ sub try_get_def {
 sub read_include {
 	my ($file, $from) = @_;
 
-	mywarn("\tAbout to get contents of $file\n") if $opt_v;
+	mywarn("\tTry to read $file\n") if $opt_v;
 	push @includes, $file if -f $file;
 
 	local $/;
