@@ -173,6 +173,8 @@ my @macros = ();
 # CURTYPE indicates that -d <discriminator> is needed
 if ($alltext =~ /^(CURTYPE)\s*=/mx) {
 	$optdisc = "-d \$($1) ";
+} elsif ($alltext =~ /^(?:ALGS)\s*=/mx) {
+	$optdisc = "-d \$(BASEPROG) ";
 }
 
 # UNIGNOREFILES indicates that -x <filepath> is needed
