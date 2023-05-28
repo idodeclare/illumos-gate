@@ -22,6 +22,7 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2019, Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 LIB	= geniconvtbl.so
@@ -32,7 +33,8 @@ SRCDIR  = $(SRC)/cmd/geniconvtbl
 MAPFILE	= $(SRCDIR)/mapfile
 
 OBJS    = itmcomp.o assemble.o disassemble.o itm_util.o y.tab.o lex.yy.o
-MSGFILES = itmcomp.i assemble.i disassemble.i itm_util.i y.tab.i lex.yy.i geniconvtbl.i
+MSGFILES =	itmcomp.i assemble.i disassemble.i itm_util.i y.tab.i lex.yy.i \
+		geniconvtbl.i
 
 include $(SRC)/cmd/Makefile.cmd
 
@@ -44,8 +46,7 @@ ROOTLIB32 =	$(ROOTDIRS32)/$(LIB)
 ROOTLIB64 =	$(ROOTDIRS64)/$(LIB)
 
 CLOBBERFILES=	$(LIB)
-CLEANFILES =	$(OBJS) y.tab.c y.tab.h lex.yy.c \
-		$(POFILE)
+CLEANFILES =	$(MSGFILES) $(OBJS) $(POFILE) y.tab.c y.tab.h lex.yy.c
 
 CPPFLAGS	+= -I. -I$(SRCDIR)
 CERRWARN	+= $(CNOWARN_UNINIT)

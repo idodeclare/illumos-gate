@@ -12,11 +12,13 @@
 #
 # Copyright (c) 2012, 2016 by Delphix. All rights reserved.
 # Copyright 2022 Tintri by DDN, Inc. All rights reserved.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
 PROG = large_sids_lib large_sids_kern
+KERN_SRCS = smb_sid.c
 KERN_OBJS = smb_sid.o
 
 large_sids_lib := LDLIBS += -L$(ROOT)/usr/lib/smbsrv -lsmb
@@ -61,6 +63,6 @@ clobber: clean
 	-$(RM) $(PROG)
 
 clean:
-	-$(RM) $(KERN_OBJS)
+	-$(RM) $(KERN_OBJS) $(KERN_SRCS)
 
 $(CMDS): $(TESTDIR) $(PROG)
