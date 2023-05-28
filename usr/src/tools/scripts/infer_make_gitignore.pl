@@ -62,13 +62,14 @@ use English;
 use File::Basename;
 use Getopt::Std;
 our ($archdir, $cwd, $didname, %macros, $fullpath, $fullname, $inclpathadj,
-    @includes, $macro_match_syn, @oktoskip, $usrsrc, $worktext,
+    @includes, $macro_match_syn, $num_written, @oktoskip, $usrsrc, $worktext,
     $opt_n, $opt_v, $opt_V);
 
 BEGIN { undef $/ }
 
 INIT {
 	local $/ = "\n";
+	$num_written = 0;
 
 	die "Error: need to be in illumos-gate root\n" if ! -d ".git";
 	$cwd = getcwd;
@@ -286,7 +287,12 @@ if ($force_make || @macros > 0) {
 		# and append a new command.
 		s/^\.DONE\s*: .*\n (?:\t[\t\x20]*\S.*\n)* \K
 		    /$make_gitignore_cmd/emx;
+		++$num_written;
 	}
+}
+
+END {
+	warn sprintf("%d file(s) written.\n", $num_written);
 }
 
 #------------------------------------------------------------------------------
