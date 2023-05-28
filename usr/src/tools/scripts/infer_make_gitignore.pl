@@ -173,7 +173,8 @@ my @macros = ();
 # CURTYPE indicates that -d <discriminator> is needed
 if ($alltext =~ /^(CURTYPE)\s*=/mx) {
 	$optdisc = "-d \$($1) ";
-} elsif ($alltext =~ /^(?:ALGS)\s*=/mx) {
+} elsif ($alltext =~ m`^include\s.*/Makefile.crypto \b`mx) {
+	# Makefile.crypto indicates that -d <discriminator> is needed
 	$optdisc = "-d \$(BASEPROG) ";
 }
 
