@@ -19,12 +19,12 @@
 # contents differ. The relative paths are ensured to be anchored to ./ so
 # that the .gitignore rules are not inherited in sub-directories.
 #
-# Some illumos Makefiles clobber macros that actually contain committed files
-# (e.g., usr/src/cmd/cmd-inet/usr.lib/wanboot/bootlog-cgi/Makefile clobbering
-# $(PROG) which contains committed bootlog-cgi). Support, therefore, an -x
-# switch to specify files that should be excluded if they appear otherwise in
-# @ARGV. E.g, for the previous example, the .DONE recipe might be:
-# $(MAKE_GITIGNORE) -x bootlog-cgi $(PROG) .
+# Some illumos Makefiles' clobber macros actually contain committed files
+# (e.g., usr/src/cmd/cmd-inet/etc/init.d/Makefile seeming to clobber $(PROG)
+# that contains committed pppd). Support, therefore, an -x switch to specify
+# files that should be excluded if they appear otherwise in @ARGV. E.g, for the
+# previous example, the .DONE recipe might be:
+# $(MAKE_GITIGNORE) -x pppd $(PROG)
 #
 # Some illumos Makefiles copy objects up and out of the current directory
 # using ../, which .gitignore cannot handle as it is descendant-only. As a
