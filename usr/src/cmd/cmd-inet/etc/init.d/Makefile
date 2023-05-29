@@ -20,20 +20,19 @@
 #
 # Copyright 2009 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
-# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # Copyright 2022 Garrett D'Amore
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 # cmd/cmd-inet/etc/init.d/Makefile
 
 PPPD=	pppd
 PROG=	$(PPPD)
 
-# $(SRC)/cmd/Makefile.targ clobbers $(PROG), but every element of PROG here is
-# committed. Redefine therefore the cmd clobber macro to exclude $(PROG), and
-# define UNIGNOREFILES as an explicit accounting of the committed state.
-CMDCLOBBEREES=	$(CLOBBERFILES)
-UNIGNOREFILES=	$(PROG4) $(PROG5) $(PPPD)
+# $(SRC)/cmd/Makefile.targ seemingly sets up to clobber $(PROG), but every
+# element of PROG here is committed. Define UNIGNOREFILES as an explicit
+# accounting of the committed state.
+UNIGNOREFILES=	$(PPPD)
 
 include ../../../Makefile.cmd
 
