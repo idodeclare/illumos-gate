@@ -128,7 +128,7 @@ if ($opt_d) {
 # incorporate addenda created from related runs of script including, if
 # applicable, for -d <discriminator> above
 foreach my $addendum (glob "$cwd/.gitignore-* $cwd/.gitignore,*") {
-	$contents .= "# addendum\n";
+	$contents .= "# addendum from $addendum\n";
 	$contents .= `/bin/cat "$addendum"`;
 }
 
