@@ -41,7 +41,7 @@ $(ROOTSVCBIN) :=	FILEMODE= 544
 # Makefiles that actually have committed elements of $(PROG) which should not
 # be deleted to override the definition of CMDCLOBBEREES
 #
-CMDCLOBBEREES =	$(PROG) $(CLOBBERFILES) $(CLOBBERDIRS)
+CMDCLOBBEREES =	$(PROG) $(XPG4PROG) $(CLOBBERFILES) $(CLOBBERDIRS)
 
 clobber: clean
 	-$(RM) -r $(CMDCLOBBEREES)
