@@ -45,7 +45,7 @@ $(ROOTOPTPROGS): all
 install: all $(ROOTOPTPROGS)
 
 clobber: clean
-	-$(RM) $(PROGS32) $(PGROGS64)
+	-$(RM) $(PROGS32) $(PROGS64)
 
 clean:
 
