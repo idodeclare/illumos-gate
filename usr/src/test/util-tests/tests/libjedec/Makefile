@@ -60,7 +60,7 @@ $(ROOTOPTPROGS): all
 install: all $(ROOTOPTPROGS) $(SUBDIRS)
 
 clobber: clean $(SUBDIRS)
-	-$(RM) $(PROGS32) $(PGROGS64)
+	-$(RM) $(PROGS32) $(PROGS64)
 
 clean: $(SUBDIRS)
 
