@@ -3,8 +3,9 @@
 # Use is subject to license terms.
 #
 # Copyright 2011 Nexenta Systems, Inc. All rights reserved.
-#
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
+#
 
 PROG=		safe_finger tcpd tcpdchk tcpdmatch try-from
 
@@ -41,6 +42,8 @@ tcpdchk :=	LDFLAGS +=$(MAPFILE.INT.D:%=-Wl,-M%)
 tcpdmatch :=	LDFLAGS +=$(MAPFILE.INT.M:%=-Wl,-M%)
 try-from :=	LDFLAGS +=$(MAPFILE.INT.F:%=-Wl,-M%)
 
+CLEANFILES +=	*.o
+
 .KEEP_STATE:
 
 all:		$(PROG)
@@ -48,7 +51,7 @@ all:		$(PROG)
 install:	all $(ROOTUSRSBINPROG)
 
 clean:
-		$(RM) *.o
+		$(RM) $(CLEANFILES)
 
 TCPDMATCH_OBJ=	tcpdmatch.o fakelog.o inetcf.o scaffold.o
 

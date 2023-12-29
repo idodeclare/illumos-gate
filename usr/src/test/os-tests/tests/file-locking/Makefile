@@ -11,12 +11,14 @@
 
 #
 # Copyright 2016 Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/cmd/Makefile.cmd
 include $(SRC)/test/Makefile.com
 
-OBJECTS=util.o runtests.32.o runtests.64.o acquire-lock.32.o acquire-lock.64.o
+OBJECTS = util.32.o util.64.o runtests.32.o runtests.64.o acquire-lock.32.o \
+    acquire-lock.64.o
 
 PROGS = \
 	runtests \
@@ -39,7 +41,7 @@ install: $(ROOTOPTPROGS)
 all: $(PROGS32) $(PROGS64)
 
 clean:
-	-rm $(PROGS32) $(PROGS64)
+	-$(RM) $(PROGS32) $(PROGS64) $(OBJECTS)
 
 $(ROOTOPTPROGS): $(PROGS32) $(PROGS64) $(ROOTOPTDIR)
 
@@ -66,7 +68,6 @@ $(ROOTOPTDIR)/%: %.ksh
 	$(LINK.c) -o $@ $< util.32.o $(LDLIBS)
 	$(POST_PROCESS)
 
-clobber:
-	$(RM) $(PROGS32) $(PROGS64)
+clobber: clean
 
 FRC:

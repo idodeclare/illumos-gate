@@ -11,6 +11,7 @@
 
 #
 # Copyright (c) 2015 Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -47,6 +48,8 @@ include $(SRC)/test/Makefile.com
 CMDS = $(PROGS:%=$(TESTDIR)/%) $(SCRIPTS:%=$(TESTDIR)/%)
 $(CMDS) := FILEMODE = 0555
 
+CLEANFILES +=	*.o
+
 all: $(PROGS)
 
 install: all $(CMDS)
@@ -57,7 +60,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
-	-$(RM) *.o
+	-$(RM) $(CLEANFILES)
 
 $(CMDS): $(TESTDIR) $(PROGS)
 
