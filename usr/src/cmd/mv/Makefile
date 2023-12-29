@@ -97,6 +97,8 @@ $(ROOTXPG4LINKS):	$(ROOTXPG4PROG)
 	$(RM) $@
 	$(LN) $(ROOTXPG4PROG) $@
 
+clean:
+
 lint:	lint_SRCS
 
 include ../Makefile.targ

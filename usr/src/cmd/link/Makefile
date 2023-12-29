@@ -56,6 +56,8 @@ install: all $(ROOTUSRSBINPROG) $(ROOTXPG4PROG)
 values-xpg4.o: ../../lib/crt/common/values-xpg4.c
 	$(COMPILE.c) -o $@ ../../lib/crt/common/values-xpg4.c
 
+clean:
+
 lint:	lint_PROG
 
 include ../Makefile.targ
