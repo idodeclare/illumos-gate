@@ -20,6 +20,7 @@
 #
 # Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 PROG=		mv
@@ -36,9 +37,9 @@ ROOTXPG4LINKS= $(ROOTXPG4BIN)/$(CPFILE) $(ROOTXPG4BIN)/$(LNFILE)
 
 include ../Makefile.cmd
 
-clean $(XPG4)	:= OBJS += values-xpg4.o
+$(XPG4)	:= OBJS += values-xpg4.o
 
-CLOBBERFILES += $(CPFILE) $(LNFILE)
+CLOBBERFILES += $(CPFILE) $(LNFILE) $(OBJS) $(XPG4OBJS) values-xpg4.o
 CFLAGS	+=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable
@@ -94,9 +95,6 @@ $(ROOTLINKS):	$(ROOTPROG)
 $(ROOTXPG4LINKS):	$(ROOTXPG4PROG)
 	$(RM) $@
 	$(LN) $(ROOTXPG4PROG) $@
-
-clean:
-	$(RM) $(OBJS) $(XPG4OBJS)
 
 lint:	lint_SRCS
 
