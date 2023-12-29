@@ -11,6 +11,7 @@
 
 #
 # Copyright 2023 Oxide Computer Company
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 ROOTOPTPKG = $(ROOT)/opt/os-tests
@@ -63,7 +64,7 @@ clobber: clean
 	-$(RM) $(PROG)
 
 clean:
-	-$(RM) *.o
+	-$(RM) $(OBJS)
 
 $(CMDS): $(TESTDIR) $(PROG)
 

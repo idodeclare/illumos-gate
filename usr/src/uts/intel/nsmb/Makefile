@@ -25,6 +25,8 @@
 # Use is subject to license terms.
 #
 # Copyright (c) 2018, Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
+#
 
 #
 #	intel architecture dependent
@@ -64,6 +66,7 @@ INSTALL_TARGET	= $(INSTALL_TARGET_$(OBJS_DIR))
 #	but only build 64-bit binaries.
 #
 
+CLEANFILES	+= debug32/ioc_check.h
 # Build 32-bit also...
 DEF_BUILDS	= $(DEF_BUILDS64) $(DEF_BUILDS32)
 ALL_BUILDS	= $(ALL_BUILDS64) $(ALL_BUILDS32)
