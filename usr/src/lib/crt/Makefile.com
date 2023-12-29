@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2019 Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 CRTI = crti.o
@@ -93,13 +94,14 @@ $(ROOT)/usr/ccs/lib/$(MACH64)/values-xpg4.o:= \
 $(ROOT)/usr/ccs/lib/$(MACH64)/values-xpg6.o:= \
 	COMPATLINKTARGET=../../../lib/$(MACH64)/values-xpg6.o
 
+CLOBBERFILES +=	$(OBJECTS) $(COMMON_CRT) $(MACH_CRT)
+
 .KEEP_STATE:
 
 all:	$(OBJECTS)
 
 clean clobber:
-	$(RM) $(OBJECTS)
-
+	$(RM) $(CLOBBERFILES)
 
 $(CRT1): $(COMMON_CRT) $(MACH_CRT)
 	$(LD) -r $(MACH_CRT) $(COMMON_CRT) -o $(CRT1)

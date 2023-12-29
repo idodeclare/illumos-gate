@@ -12,6 +12,7 @@
 #
 # Copyright 2019, Joyent, Inc.
 # Copyright 2024 Oxide Computer Company
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master
@@ -37,6 +38,8 @@ PROGS =		\
 	yk-poll		\
 	yk-readonly
 
+OBJS =	$(PROGS:%=%.o)
+
 COMMON_OBJS = \
 	atr.o		\
 	$(HEXDUMP_OBJS)
@@ -60,7 +63,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
-	-$(RM) *.o
+	-$(RM) $(COMMON_OBJS) $(OBJS)
 
 $(PROGS): $(COMMON_OBJS)
 
