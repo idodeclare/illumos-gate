@@ -38,7 +38,7 @@ LIBSMTPSMPROG= mailq
 
 # $(PROG) by default
 CLOBBERFILES=	$(LIBPROG) $(USRSBINPROG) $(LIBSMTPSMPROG) \
-    convtime.o editmap.o mail.local.o makemap.o rfc2047 smrsh.o
+    convtime.o editmap.o mail.local.o makemap.o rfc2047.o smrsh.o
 
 OBJS=		$(PROG:%=%.o)
 

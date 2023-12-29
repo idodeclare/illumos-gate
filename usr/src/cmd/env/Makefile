@@ -33,7 +33,7 @@ include ../Makefile.cmd
 
 $(XPG4) := OBJS += values-xpg4.o
 
-CLOBBERFILES +=	values-xpg4.o
+CLOBBERFILES +=	$(OBJS) values-xpg4.o
 
 .KEEP_STATE:
 
