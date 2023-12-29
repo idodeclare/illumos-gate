@@ -22,6 +22,7 @@
 #
 # Copyright (c) 2004, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright 2020 Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 MYPROG =	svccfg
@@ -85,6 +86,7 @@ SMATCH=off
 LFLAGS = -t
 YFLAGS = -d
 
+CLEANFILES +=	$(MYOBJS) $(MYOBJS:%.o=%-native.o)
 CLOBBERFILES += svccfg_lex.c svccfg_grammar.c svccfg_grammar.h \
     $(MYPROG:%=%-native)
 
@@ -154,7 +156,7 @@ svccfg_grammar.h svccfg_grammar.c: svccfg.y
 	@$(MV) y.tab.c svccfg_grammar.c
 
 clean: FRC
-	$(RM) $(MYOBJS) $(MYOBJS:%.o=%-native.o)
+	$(RM) $(CLEANFILES)
 
 %-native.o: %.c
 	$(COMPILE.c) -o $@ $<

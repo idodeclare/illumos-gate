@@ -23,8 +23,8 @@
 # Use is subject to license terms.
 #
 # Copyright 2015 RackTop Systems.
-#
 # Copyright 2020 Joyent, Inc.
+# Copyright 2023 Chris Fraire <cfraire@me.com>
 #
 
 MYPROG = svc.configd
@@ -67,6 +67,7 @@ SMOFF += free
 MYLDLIBS = -lumem -luutil
 LDLIBS	+= -lsecdb -lbsm $(MYLDLIBS)
 
+CLEANFILES +=	$(MYOBJS) $(MYOBJS:%.o=%-native.o)
 CLOBBERFILES +=	$(MYPROG:%=%-native)
 
 LIBUUTIL	= $(SRC)/lib/libuutil
@@ -125,7 +126,7 @@ $(ROOTLIBSVCBIN)/%: %.sh
 install: all $(ROOTLIBSVCBINPROG) $(ROOTVARSADMFILE) $(ROOTSCRIPTFILE)
 
 clean: FRC
-	$(RM) $(MYOBJS) $(MYOBJS:%.o=%-native.o)
+	$(RM) $(CLEANFILES)
 
 clobber:
 
