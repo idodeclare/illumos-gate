@@ -52,6 +52,8 @@ install: all $(ROOTPROG) $(ROOTXPG4PROG)
 values-xpg4.o: ../../lib/crt/common/values-xpg4.c
 	$(COMPILE.c) -o $@ ../../lib/crt/common/values-xpg4.c
 
+clean:
+
 # do not lint date.xpg4
 lint:	lint_PROG
 
