@@ -42,6 +42,10 @@ cscope.po.out
 /usr/src/noise-*.ref
 /usr/src/tools/proto/
 
+# GRUB has a non-illumos-standard build which is not worth plumbing to support
+# make_gitignore.pl, so just ignore all objects therein.
+/usr/src/grub/**/*.o
+
 # Eclipse stuff
 /.cproject
 /.project
