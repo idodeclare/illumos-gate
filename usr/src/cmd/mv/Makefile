@@ -39,7 +39,8 @@ include ../Makefile.cmd
 
 $(XPG4)	:= OBJS += values-xpg4.o
 
-CLOBBERFILES += $(CPFILE) $(LNFILE) $(OBJS) $(XPG4OBJS) values-xpg4.o
+CLOBBERFILES += $(CPFILE) $(LNFILE) $(OBJS) $(XPG4OBJS) values-xpg4.o \
+    xpg4_values-xpg4.o
 CFLAGS	+=	$(CCVERBOSE)
 CERRWARN +=	-_gcc=-Wno-parentheses
 CERRWARN +=	-_gcc=-Wno-unused-variable
