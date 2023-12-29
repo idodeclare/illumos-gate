@@ -145,7 +145,7 @@ sub is_already_ignored {
 	my ($file) = @_;
 	return $file eq "lint.out"
 	    || ($file =~ m`^\.([^/]*)\z`x && length($1) < 5) # .po not .bashrc
-	    || $file =~ /\.(?:tmp)\z/x;
+	    || $file =~ /\.(?:pyc|tmp)\z/x;
 }
 
 # return true if the arg matches an -x <file-path> switch
