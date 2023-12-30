@@ -144,9 +144,8 @@ write_if_different($gitignore, $contents);
 sub is_already_ignored {
 	my ($file) = @_;
 	return $file eq "lint.out"
-	    || $file =~ m`^debug(?:32|64)/`x
 	    || ($file =~ m`^\.([^/]*)\z`x && length($1) < 5) # .po not .bashrc
-	    || $file =~ /\.(?:class|exec|jar|ln|o|tmp)\z/x;
+	    || $file =~ /\.(?:tmp)\z/x;
 }
 
 # return true if the arg matches an -x <file-path> switch
