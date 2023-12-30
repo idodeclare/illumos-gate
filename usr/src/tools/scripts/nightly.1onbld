@@ -123,12 +123,12 @@ although it may also be used to build other consolidations.
 The environment variable NIGHTLY_OPTIONS controls the actions
 .I nightly
 will take as it proceeds.
-The -C, -i, -l, -n, +p, +t and -V options may also be used from the command
+The -C, -i, -n, +p, +t and -V options may also be used from the command
 line to control the actions without editing your environment file.
 The -i, -n, and +p options complete the build more quickly by bypassing
 some actions.
--i disables clobbering, cstyle/hdrchk, and linting, though -C and -l on the
-command line reenable cstyle/hdrchk and lint, resp.
+-i disables clobbering and cstyle/hdrchk, though -C on the command line
+re-enables cstyle/hdrchk.
 -n disables bringover.
 +p disables package generation.
 If NIGHTLY_OPTIONS is not set,
