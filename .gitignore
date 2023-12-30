@@ -51,13 +51,13 @@ cscope.po.out
 /.project
 /.settings/
 
-# From OpenZFS, moved to top-level
+# From OpenZFS .gitignore, moved to top-level
 /usr/src/test/zfs-tests/cmd/libzfs_input_check/libzfs_input_check
 
-# Moved from smatch to top-level
+# Moved from smatch .gitignore to top-level
 /usr/src/tools/smatch/src/Documentation/**/build
 /usr/src/tools/smatch/src/Documentation/**/dev-options.1
-# smatch test-suite
+# smatch test-suite .gitignore
 /usr/src/tools/smatch/src/validation/**/*.diff
 /usr/src/tools/smatch/src/validation/**/*.got
 /usr/src/tools/smatch/src/validation/**/*.expected
