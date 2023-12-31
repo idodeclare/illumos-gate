@@ -89,8 +89,9 @@ for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 	my $gitignore_sub = "$cwd/$dotdot.gitignore$disc-$subdir";
 
 	# "addenda" are any files which are located ../ up and out of cwd
-	my @addenda = map { s`^\#\Q$dotdot`/`rx }
-	  grep { m`^\#\Q$dotdot\E[^\.]`x } @lines;
+	my @addenda = grep { !is_addendum_already_ignored($_) }
+	    map { s`^\#\Q$dotdot`/`rx }
+	    grep { m`^\#\Q$dotdot\E[^\.]`x } @lines;
 	if (@addenda > 0) {
 		my $addendum = join("", map { s/\z/\n/rx } @addenda);
 		write_if_different($gitignore_sub, $addendum);
@@ -146,6 +147,14 @@ sub is_already_ignored {
 	return $file eq "lint.out"
 	    || ($file =~ m`^\.([^/]*)\z`x && length($1) < 5) # .po not .bashrc
 	    || $file =~ /\.(?:pyc|tmp)\z/x;
+}
+
+# Filter out some commonly appearing addenda which are already ignored in
+# illumos-gate/.gitignore. This is not comprehensive, but it reduces the
+# redundancy.
+sub is_addendum_already_ignored {
+	my ($file) = @_;
+	return $file =~ m`^/tools/proto/`x;
 }
 
 # return true if the arg matches an -x <file-path> switch
