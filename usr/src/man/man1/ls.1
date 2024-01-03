@@ -44,32 +44,33 @@
 .\" Portions Copyright (c) 1992, X/Open Company Limited All Rights Reserved
 .\" Copyright (c) 2009, Sun Microsystems, Inc. All Rights Reserved
 .\" Copyright 2016 Nexenta Systems, Inc.  All Rights Reserved.
+.\" Copyright 2024 Chris Fraire <cfraire@me.com>
 .\"
-.TH LS 1 "Apr 25, 2020"
+.TH LS 1 "Jan 1, 2024"
 .SH NAME
 ls \- list contents of directory
 .SH SYNOPSIS
 .nf
 \fB/usr/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
-     [\fB-/ c\fR | \fBv\fR] [\fB-% atime | crtime | ctime | mtime | all\fR]
-     [--block-size size] [--color[=\fIwhen\fR]] [--file-type]
-     [--si] [--time-style \fIstyle\fR] [\fIfile\fR]...
+     [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
+     [\fB--block-size\fB \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .LP
 .nf
 \fB/usr/xpg4/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
-     [\fB-/ c\fR | \fBv\fR] [\fB-% atime | crtime | ctime | mtime | all\fR]
-     [--block-size size] [--color[=\fIwhen\fR]] [--file-type]
-     [--si] [--time-style \fIstyle\fR] [\fIfile\fR]...
+     [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
+     [\fB--block-size\fR \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .LP
 .nf
 \fB/usr/xpg6/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
-     [\fB-/ c\fR | \fBv\fR] [\fB-% atime | crtime | ctime | mtime | all\fR]
-     [--block-size size] [--color[=\fIwhen\fR]] [--file-type]
-     [--si] [--time-style \fIstyle\fR] [\fIfile\fR]...
+     [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
+     [\fB--block-size\fR \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .SH DESCRIPTION
@@ -194,6 +195,7 @@ in the user-group of the file; and the last to all others. Within each set, the
 three characters indicate permission to read, to write, and to execute the file
 as a program, respectively. For a directory, \fBexecute\fR permission is
 interpreted to mean permission to search the directory for a specified file.
+
 The character after permissions is an ACL or extended attributes indicator.
 This character is an \fB@\fR if extended attributes are associated with the
 file and the \fB-@\fR option is in effect. Otherwise, this character is a plus
@@ -202,23 +204,23 @@ space character if not.
 .sp
 .LP
 If \fB-/\fR and/or \fB-%\fR are in effect, then the extended system attributes
-are printed when filesystem supports extended system attributes. The display
+are printed when a filesystem supports extended system attributes. The display
 looks as follows:
 .sp
 .in +2
 .nf
-$ls -/ c  file
+$ ls -/ c  file
 -rw-r--r--   1 root     root           0 May 10 14:17 file
                 {AHRSadim-u--}
 
-$ls -/ v file
+$ ls -/ v file
 -rw-r--r--   1 root     root           0 May 10 14:17 file
                 {archive,hidden,readonly,system,\e
                  appendonly,nodump,immutable,av_modified,\e
                  noav_quarantined,nounlink,nooffline,\e
                  nosparse}
 
-$ls -l -% all file
+$ ls -l -% all file
 -rw-r--r--   1 root     root           0 May 10 14:17 file
                 timestamp: atime    Jun 25 12:56:44 2007
                 timestamp: ctime    May 10 14:20:23 2007
@@ -251,9 +253,9 @@ named \fBpart2\fR. Next, the last time that file's contents were modified was
 The owner of the file, or the user, belongs to the group \fBdev\fR (perhaps
 indicating \fBdevelopment\fR), and his or her login name is \fBsmith\fR. The
 number, in this case \fB1\fR, indicates the number of links to file \fBpart2\fR
-(see \fBcp\fR(1)). The plus sign indicates that there is an \fBACL\fR
+(see \fBcp\fR(1)). The plus sign (\fB+\fR) indicates that there is an ACL
 associated with the file. If the \fB-@\fR option has been specified, the
-presence of extended attributes supersede the presence of an \fBACL\fR and the
+presence of extended attributes supersede the presence of an ACL and the
 plus sign is replaced with an 'at' sign (\fB@\fR). Finally, the dash and
 letters tell you that user, group, and others have permissions to read, write,
 and execute \fBpart2\fR.
@@ -261,7 +263,7 @@ and execute \fBpart2\fR.
 .LP
 The execute (\fBx\fR) symbol occupies the third position of the three-character
 sequence. A \fB\(mi\fR in the third position would have indicated a denial of
-execution permissions.
+execute permission.
 .sp
 .LP
 The permissions are indicated as follows:
@@ -313,7 +315,7 @@ The indicated permission is \fInot\fR granted.
 .sp .6
 .RS 4n
 The \fBs\fRet-user-ID or \fBs\fRet-group-ID bit is on, and the corresponding
-user or group execution bit is also on.
+user or group execute bit is also on.
 .RE
 
 .sp
@@ -324,7 +326,7 @@ user or group execution bit is also on.
 .sp .6
 .RS 4n
 Undefined bit-state (the set-user-ID or set-group-id bit is on and the user or
-group execution bit is off). For group permissions, this applies only to
+group execute bit is off). For group permissions, this applies only to
 non-regular files.
 .RE
 
@@ -335,7 +337,7 @@ non-regular files.
 .ad
 .sp .6
 .RS 4n
-The 1000 (octal) bit, or sticky bit, is on (see \fBchmod\fR(1)), and execution
+The 1000 (octal) bit, or sticky bit, is on (see \fBchmod\fR(1)), and execute bit
 is on.
 .RE
 
@@ -346,7 +348,7 @@ is on.
 .ad
 .sp .6
 .RS 4n
-The 1000 bit is turned on, and execution is off (undefined bit-state).
+The 1000 bit is turned on, and execute bit is off (undefined bit-state).
 .RE
 
 .SS "/usr/bin/ls"
@@ -357,7 +359,7 @@ The 1000 bit is turned on, and execution is off (undefined bit-state).
 .sp .6
 .RS 4n
 Mandatory locking occurs during access (on a regular file, the set-group-ID bit
-is on and the group execution bit is off).
+is on and the group execute bit is off).
 .RE
 
 .SS "/usr/xpg4/bin/ls and /usr/xpg6/bin/ls"
@@ -368,7 +370,7 @@ is on and the group execution bit is off).
 .sp .6
 .RS 4n
 Mandatory locking occurs during access (on a regular file, the set-group-ID bit
-is on and the group execution bit is off).
+is on and the group execute bit is off).
 .RE
 
 .sp
@@ -388,7 +390,7 @@ permissions during access.
 .sp
 .LP
 For others permissions, the third position can be occupied by \fBt\fR or
-\fBT\fR. These refer to the state of the sticky bit and execution permissions.
+\fBT\fR. These refer to the state of the sticky bit and execute permission.
 .SS "Color Output"
 If color output is enabled, the environment variable LS_COLORS is checked.  If
 it exists, its contents are used to control the colors used to display
@@ -398,7 +400,7 @@ specification is of the format
 .sp
 .in +2
 .nf
-\fIfilespec\fR=\fIattr\fR[;\fIattr\fR..]
+\fIfilespec\fR=\fIattr\fR{;\fIattr\fR}...
 .fi
 .in -2
 .sp
@@ -704,8 +706,6 @@ Set foreground to \fBblue\fR.
 .sp .6
 .RS 4n
 Set foreground to \fBmagenta\fR (\fBpurple\fR).
-.sp
-Set foreground to \fB\fR.
 .RE
 
 .sp
@@ -1082,7 +1082,8 @@ The same as \fB-l\fR, except that the owner is not printed.
 .RS 4n
 All sizes are scaled to a human readable format, for example, \fB14K\fR,
 \fB234M\fR, \fB2.7G\fR, or \fB3.0T\fR. Scaling is done by repetitively dividing
-by \fB1024\fR. The last --si or -h option determines the divisor used.
+by \fB1024\fR. The last \fB--si\fR or \fB-h\fR option determines the divisor
+used.
 .RE
 
 .sp
@@ -1123,7 +1124,7 @@ For each file, prints the i-node number in the first column of the report.
 .ad
 .sp .6
 .RS 4n
-All sizes are printed in kbytes. Equivalent to --block-size=1024.
+All sizes are printed in kbytes. Equivalent to \fB--block-size=1024\fR.
 .RE
 
 .sp
@@ -1133,7 +1134,7 @@ All sizes are printed in kbytes. Equivalent to --block-size=1024.
 .ad
 .sp .6
 .RS 4n
-Lists in long format, giving mode, \fBACL\fR indication, number of links,
+Lists in long format, giving mode, ACL indication, number of links,
 owner, group, size in bytes, and time of last modification for each file (see
 above). If the file is a special file, the size field instead contains the
 major and minor device numbers. If the time of last modification is greater
@@ -1141,7 +1142,7 @@ than six months ago, it is shown in the format `month date year' for the POSIX
 locale. When the \fBLC_TIME\fR locale category is not set to the POSIX locale,
 a different format of the time field can be used. Files modified within six
 months show `month date time'. If the file is a symbolic link, the filename is
-printed followed by "\fB\(->\fR" and the path name of the referenced file.
+printed followed by "\fB\->\fR" and the path name of the referenced file.
 .RE
 
 .sp
@@ -1340,13 +1341,13 @@ The same as \fB-l\fR, except that compact ACL information is displayed after
 the \fB-l\fR output.
 .sp
 The \fB-V\fR option is only applicable to file systems that support NFSv4 ACLs,
-such as the Solaris ZFS file system.
+such as the illumos ZFS file system.
 .sp
 The format of the displayed ACL is as follows:
 .sp
 .in +2
 .nf
-\fIentry_type\fR : \fIpermissions\fR : \fIinheritance_flags\fR : \fIaccess_type\fR
+\fIentry_type\fR:\fIpermissions\fR:\fIinheritance-flags\fR:\fIaccess_type\fR
 .fi
 .in -2
 .sp
@@ -1408,7 +1409,7 @@ using the \fB-v\fR or \fB-V\fR options:
 .sp
 .ne 2
 .na
-\fBread_data (\fBr\fR)\fR
+.BR "read_data " ( r )
 .ad
 .sp .6
 .RS 4n
@@ -1418,7 +1419,7 @@ Permission to read the data of a file.
 .sp
 .ne 2
 .na
-\fBlist_directory (\fBr\fR)\fR
+.BR "list_directory " ( r )
 .ad
 .sp .6
 .RS 4n
@@ -1428,7 +1429,7 @@ Permission to list the contents of a directory.
 .sp
 .ne 2
 .na
-\fBwrite_data (\fBw\fR)\fR
+.BR "write_data " ( w )
 .ad
 .sp .6
 .RS 4n
@@ -1438,7 +1439,7 @@ Permission to modify a file's data. anywhere in the file's offset range.
 .sp
 .ne 2
 .na
-\fBadd_file (\fBw\fR)\fR
+.BR "add_file " ( w )
 .ad
 .sp .6
 .RS 4n
@@ -1448,7 +1449,7 @@ Permission to add a new file to a directory.
 .sp
 .ne 2
 .na
-\fBappend_data (\fBp\fR)\fR
+.BR "append_data " ( p )
 .ad
 .sp .6
 .RS 4n
@@ -1458,7 +1459,7 @@ The ability to modify a file's data, but only starting at EOF.
 .sp
 .ne 2
 .na
-\fBadd_subdirectory (\fBp\fR)\fR
+.BR "add_subdirectory " ( p )
 .ad
 .sp .6
 .RS 4n
@@ -1468,7 +1469,7 @@ Permission to create a subdirectory to a directory.
 .sp
 .ne 2
 .na
-\fBread_xattr (\fBR\fR)\fR
+.BR "read_xattr " ( R )
 .ad
 .sp .6
 .RS 4n
@@ -1478,7 +1479,7 @@ Ability to read the extended attributes of a file.
 .sp
 .ne 2
 .na
-\fBwrite_xattr (\fBW\fR)\fR
+.BR "write_xattr " ( W )
 .ad
 .sp .6
 .RS 4n
@@ -1489,7 +1490,7 @@ directory.
 .sp
 .ne 2
 .na
-\fBexecute (\fBx\fR)\fR
+.BR "execute " ( x )
 .ad
 .sp .6
 .RS 4n
@@ -1499,7 +1500,7 @@ Permission to execute a file.
 .sp
 .ne 2
 .na
-\fBread_attributes (\fBa\fR)\fR
+.BR "read_attributes " ( a )
 .ad
 .sp .6
 .RS 4n
@@ -1509,7 +1510,7 @@ The ability to read basic attributes (non-ACLs) of a file.
 .sp
 .ne 2
 .na
-\fBwrite_attributes (\fBA\fR)\fR
+.BR "write_attributes " ( A )
 .ad
 .sp .6
 .RS 4n
@@ -1520,7 +1521,7 @@ arbitrary value.
 .sp
 .ne 2
 .na
-\fBdelete (\fBd\fR)\fR
+.BR "delete " ( d )
 .ad
 .sp .6
 .RS 4n
@@ -1530,7 +1531,7 @@ Permission to delete a file.
 .sp
 .ne 2
 .na
-\fBdelete_child (\fBD\fR)\fR
+.BR "delete_child " ( D )
 .ad
 .sp .6
 .RS 4n
@@ -1540,7 +1541,7 @@ Permission to delete a file within a directory.
 .sp
 .ne 2
 .na
-\fBread_acl (\fBc\fR)\fR
+.BR "read_acl " ( c )
 .ad
 .sp .6
 .RS 4n
@@ -1550,7 +1551,7 @@ Permission to read the ACL of a file.
 .sp
 .ne 2
 .na
-\fBwrite_acl (\fBC\fR)\fR
+.BR "write_acl (C" )
 .ad
 .sp .6
 .RS 4n
@@ -1560,7 +1561,7 @@ Permission to write the ACL of a file.
 .sp
 .ne 2
 .na
-\fBwrite_owner (\fBo\fR)\fR
+.BR "write_owner " ( o )
 .ad
 .sp .6
 .RS 4n
@@ -1570,7 +1571,7 @@ Permission to change the owner of a file.
 .sp
 .ne 2
 .na
-\fBsynchronize (\fBs\fR)\fR
+.BR "synchronize " ( s )
 .ad
 .sp .6
 .RS 4n
@@ -1587,12 +1588,12 @@ Permission to access file locally at server with synchronize reads and writes.
 No permission granted
 .RE
 
-The following inheritance flags, supported by the NFSv4 ACL model, are
+The following \fIinheritance-flags\fR, supported by the NFSv4 ACL model, are
 displayed by using the \fB-v\fR or \fB-V\fR options:
 .sp
 .ne 2
 .na
-\fBfile_inherit (\fBf\fR)\fR
+.BR "file_inherit " ( f )
 .ad
 .sp .6
 .RS 4n
@@ -1602,7 +1603,7 @@ Inherit to all newly created files.
 .sp
 .ne 2
 .na
-\fBdir_inherit (\fBd\fR)\fR
+.BR "dir_inherit " ( d )
 .ad
 .sp .6
 .RS 4n
@@ -1612,31 +1613,31 @@ Inherit to all newly created directories.
 .sp
 .ne 2
 .na
-\fBinherit_only (\fBi\fR)\fR
+.BR "inherit_only " ( i )
 .ad
 .sp .6
 .RS 4n
 When placed on a directory, do not apply to the directory, only to newly
 created files and directories. This flag requires that either
-\fBfile_inherit\fR and or \fBdir_inherit\fR is also specified.
+\fBfile_inherit\fR and/or \fBdir_inherit\fR are also specified.
 .RE
 
 .sp
 .ne 2
 .na
-\fBno_propagate (\fBn\fR)\fR
+.BR "no_propagate " ( n )
 .ad
 .sp .6
 .RS 4n
 Indicates that ACL entries should be inherited to objects in a directory, but
 inheritance should stop after descending one level. This flag is dependent upon
-either \fBfile_inherit\fR and or \fBdir_inherit\fR also being specified.
+\fBfile_inherit\fR and/or \fBdir_inherit\fR also being specified.
 .RE
 
 .sp
 .ne 2
 .na
-\fBsuccessful_access (\fBS\fR)\fR
+.BR "successful_access " ( S )
 .ad
 .sp .6
 .RS 4n
@@ -1647,7 +1648,7 @@ accesses. Used with audit/alarm ACE types.
 .sp
 .ne 2
 .na
-\fBfailed_access (\fBF\fR)\fR
+.BR "failed_access " ( F )
 .ad
 .sp .6
 .RS 4n
@@ -1658,7 +1659,7 @@ fails. Used with audit/alarm ACE types.
 .sp
 .ne 2
 .na
-\fBinherited (\fBI\fR)\fR
+.BR "inherited " ( I )
 .ad
 .sp .6
 .RS 4n
@@ -1796,7 +1797,7 @@ Prints one entry per line of output.
 .sp .6
 .RS 4n
 The same as \fB-l\fR, except that extended attribute information overrides
-\fBACL\fR information. An \fB@\fR is displayed after the file permission bits
+ACL information. An \fB@\fR is displayed after the file permission bits
 for files that have extended attributes.
 .RE
 
@@ -1898,7 +1899,7 @@ fails with \fBEPERM\fR.
 .ad
 .sp .6
 .RS 4n
-Solaris systems have no special semantics for this attribute.
+illumos systems have no special semantics for this attribute.
 .RE
 
 .sp
@@ -1922,7 +1923,7 @@ when attempting to unlink or rename files and directories that are marked as
 .ad
 .sp .6
 .RS 4n
-Indicate that a file is offline.  Solaris systems have no special semantics for
+Indicate that a file is offline.  illumos systems have no special semantics for
 this attribute.
 .RE
 
@@ -1947,7 +1948,7 @@ still be modified.
 .RS 4n
 Indicate that a file can be interpreted as sparse.  It does not indicate that
 the file is actually sparse or not.  The sparse attribute is cleared when the
-file is truncated to zero length.  Solaris systems have no other special
+file is truncated to zero length.  illumos systems have no other special
 semantics for this attribute.
 .RE
 
@@ -1958,7 +1959,7 @@ semantics for this attribute.
 .ad
 .sp .6
 .RS 4n
-Solaris systems have no special semantics for this attribute.
+illumos systems have no special semantics for this attribute.
 .RE
 
 .RE
@@ -2092,14 +2093,14 @@ format and does not affect sorting.
 Display sizes in multiples of size. Size can be scaled by suffixing one of
 \fBYyZzEePpTtGgMmKk\fR. Additionally, a \fBB\fR can be placed at the end to
 indicate powers of 10 instead of 2. For example, . \fB10mB\fR means blocks of
-\fB10000000\fR bytes while \fB10m\fR means blocks of \fB10*2^20 -- 10485760
---\fR bytes. This is mutually exclusive with the \fB-h\fR option.
+\fB10000000\fR bytes while \fB10m\fR means blocks of \fB10*2^20\fR --
+\fB10485760\fR -- bytes. This is mutually exclusive with the \fB-h\fR option.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fB--color\fR \fB[=\fR\fIwhen\fR\fB]\fR\fR
+\fB\fB--color\fR\fB[=\fR\fIwhen\fR\fB]\fR\fR
 .ad
 .br
 .na
@@ -2182,11 +2183,7 @@ option, except \fB*\fR is not appended to executable files.
 .sp
 .ne 2
 .na
-\fB\fB-si\fR\fR
-.ad
-.br
-.na
-\fB\fB--\fR\fR
+\fB\fB--si\fR\fR
 .ad
 .sp .6
 .RS 4n
@@ -2198,7 +2195,7 @@ repeatedly divided by 1000 instead of 1024. The last option \fB--si\fR or
 .sp
 .ne 2
 .na
-\fB\fB--time-style\fR style\fR
+\fB--time-style\fR \fIstyle\fR
 .ad
 .sp .6
 .RS 4n
@@ -2291,8 +2288,8 @@ Executable files are not marked. Follows symlinks named as operands.
 .sp
 .LP
 Specifying more than one of the options in the following mutually exclusive
-pairs is not considered an error: \fB-C\fR and \fB-l\fR (ell), \fB-m\fR and
-\fB-l\fR (ell), \fB-x\fR and \fB-l\fR (ell), \fB-@\fR and \fB-l\fR (ell). The
+pairs is not considered an error: \fB-C\fR and \fB-l\fR\~(ell), \fB-m\fR and
+\fB-l\fR\~(ell), \fB-x\fR and \fB-l\fR\~(ell), \fB-@\fR and \fB-l\fR\~(ell). The
 \fB-l\fR option overrides the other option specified in each pair.
 .sp
 .LP
@@ -2300,7 +2297,7 @@ Specifying more than one of the options in the following mutually exclusive
 groups is not considered an error: \fB-C\fR and \fB-1\fR (one), \fB-H\fR and
 \fB-L\fR, \fB-c\fR and \fB-u\fR, and \fB-e\fR and \fB-E\fR, and \fB-t\fR and
 \fB-S\fR. The last option specifying a specific timestamp (\fB-c\fR, \fB-u\fR,
-\fB-% atime\fR , \fB-% crtime\fR, \fB-% ctime\fR, and \fB-% mtime\fR)
+\fB-%\~atime\fR, \fB-%\~crtime\fR, \fB-% ctime\fR, and \fB-%\~mtime\fR)
 determines the timestamps used for sorting or in long format listings. The last
 option \fB-t\fR, \fB-S\fR, or \fB-U\fR determines the sorting behavior.
 .SS "/usr/xpg4/bin/ls"
@@ -2331,14 +2328,14 @@ Executable files are not marked. Follows symlinks named as operands.
 .sp
 .LP
 Specifying more than one of the options in the following groups of mutually
-exclusive options is not considered an error: \fB-C\fR and \fB-l\fR (ell),
-\fB-m\fR and \fB-l\fR (ell), \fB-x\fR and \fB-l\fR (ell), \fB-@\fR and \fB-l\fR
-(ell), \fB-C\fR and \fB-1\fR (one), \fB-H\fR and \fB-L\fR, \fB-c\fR and
-\fB-u\fR, \fB-e\fR and \fB-E\fR, \fB-t\fR and \fB-S\fR and \fB-U\fR. The last
-option specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-% atime\fR ,
-\fB-% crtime\fR, \fB-% ctime\fR, and \fB-% mtime\fR) determines the timestamps
-used for sorting or in long format listings. The last \fB-t\fR, \fB-S\fR, or
-\fB-U\fR option determines the sorting behavior.
+exclusive options is not considered an error: \fB-C\fR and \fB-l\fR\~(ell),
+\fB-m\fR and \fB-l\fR\~(ell), \fB-x\fR and \fB-l\fR\~(ell), \fB-@\fR and
+\fB-l\fR\~(ell), \fB-C\fR and \fB-1\fR\~(one), \fB-H\fR and \fB-L\fR, \fB-c\fR
+and \fB-u\fR, \fB-e\fR and \fB-E\fR, \fB-t\fR and \fB-S\fR and \fB-U\fR. The last
+option specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-%\~atime\fR,
+\fB-%\~crtime\fR, \fB-%\~ctime\fR, and \fB-%\~mtime\fR) determines the
+timestamps used for sorting or in long format listings. The last \fB-t\fR,
+\fB-S\fR, or \fB-U\fR option determines the sorting behavior.
 .SS "/usr/xpg6/bin/ls"
 .ne 2
 .na
@@ -2369,14 +2366,14 @@ unless the \fB-H\fR or \fB-L\fR option is specified.
 .sp
 .LP
 Specifying more than one of the options in the following mutually exclusive
-pairs is not considered an error: \fB-C\fR and \fB-l\fR (ell), m and
-\fB-l\fR(ell), \fB-x\fR and \fB-l\fR (ell), \fB-@\fR and \fB-l\fR (ell),
-\fB-C\fR and \fB-1\fR (one), \fB-H\fR and -\fB-L\fR, \fB-c\fR and \fB-u\fR,
+pairs is not considered an error: \fB-C\fR and \fB-l\fR\~(ell), \fB-m\fR and
+\fB-l\fR\~(ell), \fB-x\fR and \fB-l\fR\~(ell), \fB-@\fR and \fB-l\fR\~(ell),
+\fB-C\fR and \fB-1\fR\~(one), \fB-H\fR and \fB-L\fR, \fB-c\fR and \fB-u\fR,
 \fB-e\fR and \fB-E\fR, \fB-t\fR and \fB-S\fR and \fB-U\fR. The last option
-specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-% atime\fR , \fB-%
-crtime\fR, \fB-% ctime\fR, and \fB-% mtime\fR) determines the timestamps used
-for sorting or in long format listings. The last \fB-t\fR, \fB-S\fR, or
-\fB-U\fR option determines the sorting behavior.
+specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-%\~atime\fR,
+\fB-%\~crtime\fR, \fB-%\~ctime\fR, and \fB-%\~mtime\fR) determines the
+timestamps used for sorting or in long format listings. The last \fB-t\fR,
+\fB-S\fR, or \fB-U\fR option determines the sorting behavior.
 .SH OPERANDS
 The following operand is supported:
 .sp
@@ -2526,7 +2523,7 @@ including those that begin with a dot (\fB\&.\fR), which normally do not print:
 .sp
 .in +2
 .nf
-example% \fBls -a\fR
+example% ls -a
 .fi
 .in -2
 .sp
@@ -2548,12 +2545,12 @@ example% ls -aisn
 .sp
 .LP
 This command provides information on \fBa\fRll files, including those that
-begin with a dot (\fBa\fR), the \fBi\fR-number, the memory address of the
-i-node associated with the file\(emprinted in the left-hand column (\fBi\fR);
+begin with a dot (\fBa\fR), the \fBi\fR-node number, the memory address of the
+i-node associated with the file, printed in the left-hand column (\fBi\fR);
 the \fBs\fRize (in blocks) of the files, printed in the column to the right of
-the i-numbers (\fBs\fR); finally, the report is displayed in the \fBn\fRumeric
-version of the long list, printing the \fBUID\fR (instead of user name) and
-\fBGID\fR (instead of group name) numbers associated with the files.
+the i-node numbers (\fBs\fR); finally, the report is displayed in the
+\fBn\fRumeric version of the long list, printing the \fBUID\fR (instead of user
+name) and \fBGID\fR (instead of group name) numbers associated with the files.
 
 .sp
 .LP
@@ -2680,7 +2677,7 @@ color output is used.
 .sp .6
 .RS 4n
 Determine the terminal type. If this variable is unset or NULL, no color output
-is generated regardless of the value of the --color option.
+is generated regardless of the value of the \fB--color\fR option.
 .RE
 
 .SH EXIT STATUS
@@ -2751,13 +2748,14 @@ Standard	See below.
 .sp
 .LP
 For all options except \fB-A\fR, \fB-b\fR, \fB-e\fR, \fB-E,\fR \fB-h\fR,
-\fB-S\fR, U \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR, \fB--all\fR,
-\fB--almost-all\fR, \fB--block-size\fR, \fB--classify\fR, \fB--color\fR,
-\fB--colour\fR, \fB--dereference\fR, \fB--dereference-command-line\fR,
-\fB--escape\fR, \fB--file-type\fR, \fB--full-time\fR, \fB--human-readable\fR,
-\fB--ignore-backups\fR, \fB--inode\fR, \fB--no-group\fR,
-\fB--numeric-uid-gid\fR, \fB--reverse\fR, \fB--recursive\fR, \fB--si\fR,
-\fB--size\fR, and \fB--time-style\fR, see \fBstandards\fR(7).
+\fB-S\fR, \fB-U\fR, \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR,
+\fB--all\fR, \fB--almost\-all\fR, \fB--block\-size\fR, \fB--classify\fR,
+\fB--color\fR, \fB--colour\fR, \fB--dereference\fR,
+\fB--dereference\-command\-line\fR, \fB--escape\fR, \fB--file\-type\fR,
+\fB--full\-time\fR, \fB--human\-readable\fR, \fB--ignore\-backups\fR,
+\fB--inode\fR, \fB--no\-group\fR, \fB--numeric\-uid\-gid\fR, \fB--reverse\fR,
+\fB--recursive\fR, \fB--si\fR, \fB--size\fR, and \fB--time\-style\fR, see
+\fBstandards\fR(7).
 .SS "/usr/xpg4/bin/ls"
 
 .TS
@@ -2776,13 +2774,14 @@ Standard	See below.
 .sp
 .LP
 For all options except \fB-A\fR, \fB-b\fR, \fB-e\fR, \fB-E,\fR \fB-h\fR,
-\fB-S\fR, U \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR, \fB--all\fR,
-\fB--almost-all\fR, \fB--block-size\fR, \fB--classify\fR, \fB--color\fR,
-\fB--colour\fR, \fB--dereference\fR, \fB--dereference-command-line\fR,
-\fB--escape\fR, \fB--file-type\fR, \fB--full-time\fR, \fB--human-readable\fR,
-\fB--ignore-backups\fR, \fB--inode\fR, \fB--no-group\fR,
-\fB--numeric-uid-gid\fR, \fB--reverse\fR, \fB--recursive\fR, \fB--si\fR,
-\fB--size\fR, and \fB--time-style\fR, see \fBstandards\fR(7).
+\fB-S\fR, \fB-U\fR, \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR,
+\fB--all\fR, \fB--almost\-all\fR, \fB--block\-size\fR, \fB--classify\fR,
+\fB--color\fR, \fB--colour\fR, \fB--dereference\fR,
+\fB--dereference\-command\-line\fR, \fB--escape\fR, \fB--file\-type\fR,
+\fB--full\-time\fR, \fB--human\-readable\fR, \fB--ignore\-backups\fR,
+\fB--inode\fR, \fB--no\-group\fR, \fB--numeric\-uid\-gid\fR, \fB--reverse\fR,
+\fB--recursive\fR, \fB--si\fR, \fB--size\fR, and \fB--time\-style\fR, see
+\fBstandards\fR(7).
 .SS "/usr/xpg6/bin/ls"
 
 .TS
@@ -2801,13 +2800,14 @@ Standard	See below.
 .sp
 .LP
 For all options except \fB-A\fR, \fB-b\fR, \fB-e\fR, \fB-E,\fR \fB-h\fR,
-\fB-S\fR, U \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR, \fB--all\fR,
-\fB--almost-all\fR, \fB--block-size\fR, \fB--classify\fR, \fB--color\fR,
-\fB--colour\fR, \fB--dereference\fR, \fB--dereference-command-line\fR,
-\fB--escape\fR, \fB--file-type\fR, \fB--full-time\fR, \fB--human-readable\fR,
-\fB--ignore-backups\fR, \fB--inode\fR, \fB--no-group\fR,
-\fB--numeric-uid-gid\fR, \fB--reverse\fR, \fB--recursive\fR, \fB--si\fR,
-\fB--size\fR, and \fB--time-style\fR, see \fBstandards\fR(7).
+\fB-S\fR, \fB-U\fR, \fB-v\fR, \fB-V\fR, \fB-@\fR, \fB-/\fR, \fB-%\fR,
+\fB--all\fR, \fB--almost\-all\fR, \fB--block\-size\fR, \fB--classify\fR,
+\fB--color\fR, \fB--colour\fR, \fB--dereference\fR,
+\fB--dereference\-command\-line\fR, \fB--escape\fR, \fB--file\-type\fR,
+\fB--full\-time\fR, \fB--human\-readable\fR, \fB--ignore\-backups\fR,
+\fB--inode\fR, \fB--no\-group\fR, \fB--numeric\-uid\-gid\fR, \fB--reverse\fR,
+\fB--recursive\fR, \fB--si\fR, \fB--size\fR, and \fB\-\-time\-style\fR, see
+\fBstandards\fR(7).
 .SH SEE ALSO
 .BR chmod (1),
 .BR cp (1),
@@ -2837,6 +2837,7 @@ leading dots as well as case are ignored in determining the sort order.
 .sp
 .LP
 For additional information regarding Windows Security Identifiers, consult
-Microsoft support document, \fIWell-known security identifiers in Windows
-operating systems\fR, which can be found at Microsoft's support site:
-https://support.microsoft.com/en-us/kb/243330/.
+Microsoft support document, \fISecurity identifiers\fR, which can be found at
+Microsoft's support site: https://support.microsoft.com/en-us/kb/243330/. Refer
+to the sub-section, "Well-known SIDs," where SIDs applicable to "Windows
+operating systems" are specified.
