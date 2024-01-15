@@ -24,6 +24,7 @@
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Gary Mills
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2024 Chris Fraire <cfraire@me.com>
  */
 
 /*
@@ -863,7 +864,7 @@ long_help(int cmd_num)
 			    "creates a configuration from a\n\tdetached "
 			    "zonepath.  '%s -b' results in a blank "
 			    "configuration.\n\t'%s' with no arguments applies "
-			    "the Sun default settings."),
+			    "the illumos default settings."),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE));
 			return (line);
@@ -1318,7 +1319,7 @@ usage(boolean_t verbose, uint_t flags)
 		    gettext("\t\t<IPv6-address>/<IPv6-prefix-length> |\n"));
 		(void) fprintf(fp,
 		    gettext("\t\t<hostname>[/<IPv4-prefix-length>]\n"));
-		(void) fprintf(fp, gettext("See inet(3SOCKET) for IPv4 and "
+		(void) fprintf(fp, gettext("See inet(3C) for IPv4 and "
 		    "IPv6 address syntax.\n"));
 		(void) fprintf(fp, gettext("<IPv4-prefix-length> := [0-32]\n"));
 		(void) fprintf(fp,
@@ -1469,7 +1470,7 @@ initialize(boolean_t handle_expected)
 				need_to_commit = B_TRUE;
 			} else if (err != Z_NO_ENTRY) {
 				zerr(gettext("failed to update "
-				    "admin  rights."));
+				    "admin rights."));
 				exit(Z_ERR);
 			} else if (need_to_commit) {
 				zerr(gettext("admin rights were updated "
@@ -1595,7 +1596,7 @@ scope_usage(uint_t cmd_num)
 {
 	zerr(gettext("The %s command only makes sense in the %s scope."),
 	    cmd_to_str(cmd_num),
-	    global_scope ?  gettext("resource") : gettext("global"));
+	    global_scope ? gettext("resource") : gettext("global"));
 	saw_error = B_TRUE;
 }
 
@@ -3103,7 +3104,7 @@ prompt_remove_resource(cmd_t *cmd, char *rsrc)
 		if (!interactive_mode) {
 			zerr(gettext("There are multiple instances of this "
 			    "resource.  Either qualify the resource to\n"
-			    "remove a single instance or use the -F option to "
+			    "remove a single instance, or use the -F option to "
 			    "remove all instances."));
 			saw_error = B_TRUE;
 			return (B_FALSE);
