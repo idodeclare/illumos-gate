@@ -17,7 +17,7 @@ zonecfg \- set up zone configuration
 
 .LP
 .nf
-\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIsubcommand\fR
+\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIcommand\fR
 .fi
 
 .LP
@@ -43,7 +43,7 @@ The following synopsis of the \fBzonecfg\fR command is for interactive usage:
 .sp
 .in +2
 .nf
-\fBzonecfg -z\fR \fIzonename subcommand\fR
+\fBzonecfg -z\fR \fIzonename command\fR
 .fi
 .in -2
 
@@ -1370,7 +1370,7 @@ The following options are supported:
 .sp .6
 .RS 4n
 Specify the name of \fBzonecfg\fR command file. \fIcommand_file\fR is a text
-file of \fBzonecfg\fR subcommands, one per line.
+file of \fBzonecfg\fR commands, one per line.
 .RE
 
 .sp
@@ -1387,15 +1387,15 @@ name \fBglobal\fR and all names beginning with \fBSUNW\fR are reserved and
 cannot be used.
 .RE
 
-.SH SUBCOMMANDS
-You can use the \fBadd\fR and \fBselect\fR subcommands to select a specific
+.SH COMMANDS
+You can use the \fBadd\fR and \fBselect\fR commands to select a specific
 resource, at which point the scope changes to that resource. The \fBend\fR and
-\fBcancel\fR subcommands are used to complete the resource specification, at
-which time the scope is reverted back to global. Certain subcommands, such as
+\fBcancel\fR commands are used to complete the resource specification, at
+which time the scope is reverted back to global. Certain commands, such as
 \fBadd\fR, \fBremove\fR and \fBset\fR, have different semantics in each scope.
 .sp
 .LP
-\fBzonecfg\fR supports a semicolon-separated list of subcommands. For example:
+\fBzonecfg\fR supports a semicolon-separated list of commands. For example:
 .sp
 .in +2
 .nf
@@ -1406,7 +1406,7 @@ which time the scope is reverted back to global. Certain subcommands, such as
 
 .sp
 .LP
-Subcommands which can result in destructive actions or loss of work have an
+Commands which can result in destructive actions or loss of work have an
 \fB-F\fR option to force the action. If input is from a terminal device, the
 user is prompted when appropriate if such a command is given without the
 \fB-F\fR option otherwise, if such a command is given without the \fB-F\fR
@@ -1414,7 +1414,7 @@ option, the action is disallowed, with a diagnostic message written to standard
 error.
 .sp
 .LP
-The following subcommands are supported:
+The following commands are supported:
 .sp
 .ne 2
 .na
@@ -1467,7 +1467,7 @@ Clear the value for the property.
 Commit the current configuration from memory to stable storage. The
 configuration must be committed to be used by \fBzoneadm\fR. Until the
 in-memory configuration is committed, you can remove changes with the
-\fBrevert\fR subcommand. The \fBcommit\fR operation is attempted automatically
+\fBrevert\fR command. The \fBcommit\fR operation is attempted automatically
 upon completion of a \fBzonecfg\fR session. Since a configuration must be
 correct to be committed, this operation automatically does a \fBverify\fR.
 .RE
@@ -1539,7 +1539,7 @@ Specify the \fB-F\fR option to force the action.
 .ad
 .sp .6
 .RS 4n
-End the resource specification. This subcommand is only applicable in the
+End the resource specification. This command is only applicable in the
 resource scope.
 .B zonecfg
 checks to make sure the current resource is completely specified. If so, it is
@@ -1567,7 +1567,7 @@ suitable for use in a command file.
 .ne 2
 .na
 .BR "help " [ usage ]
-.RI [ subcommand ]
+.RI [ command ]
 [syntax]
 .RI [ command-name ]
 .ad
@@ -1648,7 +1648,7 @@ option.
 .RS 4n
 Select the resource of the given type which matches the given
 .I property-name property-value
-pair criteria, for modification. This subcommand is applicable only in the
+pair criteria, for modification. This command is applicable only in the
 global scope. The scope is changed to that resource type. The {} syntax means 1
 or more of whatever is inside the curly braces. You must specify enough
 .I property-name property-value
@@ -1665,7 +1665,7 @@ pairs for the resource to be uniquely identified.
 .RS 4n
 Set a given property name to the given value. Some properties (for example,
 \fBzonename\fR and \fBzonepath\fR) are global while others are
-resource-specific. This subcommand is applicable in both the global and
+resource-specific. This command is applicable in both the global and
 resource scopes.
 .RE
 
