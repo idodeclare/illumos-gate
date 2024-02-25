@@ -11,6 +11,7 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
@@ -22,6 +23,8 @@ DATA = \
 
 PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
+OBJS32 =  $(PROGS:%=%.32.o)
+OBJS64 =  $(PROGS:%=%.64.o)
 
 ROOTOPTDIR = $(ROOT)/opt/os-tests/tests
 ROOTOPTEXECVPE = $(ROOTOPTDIR)/execvpe
