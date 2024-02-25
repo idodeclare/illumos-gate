@@ -11,6 +11,7 @@
 
 #
 # Copyright 2024 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
@@ -28,6 +29,7 @@ PROGS = \
 COMMON_SRCS = nvme_ioctl_util.c
 TESTDIR = ioctl
 
+include $(SRC)/Makefile.master
 include $(SRC)/test/nvme-tests/Makefile.com
 
 LDLIBS += -ldevinfo -lproc
