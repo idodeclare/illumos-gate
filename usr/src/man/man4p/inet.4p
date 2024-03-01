@@ -102,7 +102,7 @@ char     sin_zero[8];
 .sp
 .LP
 Library routines are provided to manipulate structures of this form; See
-\fBinet\fR(3SOCKET).
+\fBinet\fR(3C).
 .sp
 .LP
 The \fBsin_addr\fR field of the \fBsockaddr_in\fR structure specifies a local

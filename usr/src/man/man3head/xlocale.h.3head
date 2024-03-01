@@ -53,7 +53,7 @@ Interface Stability	Uncommitted
 .BR newlocale (3C),
 .BR setlocale (3C),
 .BR uselocale (3C),
-.BR locale (3HEAD),
+.BR locale.h (3HEAD),
 .BR attributes (7),
 .BR locale (7),
 .BR standards (7)

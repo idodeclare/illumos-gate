@@ -116,7 +116,7 @@ or
 .Sy MT-Safe
 .Sh SEE ALSO
 .Xr pthread_mutex_consistent 3C ,
-.Xr pthread 3HEAD ,
+.Xr pthread.h 3HEAD ,
 .Xr libpthread 3LIB ,
 .Xr attributes 7 ,
 .Xr mutex 7

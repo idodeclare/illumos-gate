@@ -158,7 +158,7 @@ MT-Level	MT-Safe
 .SH SEE ALSO
 .BR setlocale (3C),
 .BR uselocale (3C),
-.BR locale (3HEAD),
+.BR locale.h (3HEAD),
 .BR attributes (7),
 .BR standards (7)
 

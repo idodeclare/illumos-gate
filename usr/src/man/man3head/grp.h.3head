@@ -70,7 +70,7 @@ char  **gr_mem     /* pointer to a null-terminated array of
 .sp
 .LP
 The \fBgid_t\fR type is defined as described in <\fBsys/types.h\fR> (see
-\fBtypes\fR(3HEAD)).
+\fBtypes.h\fR(3HEAD)).
 .SH ATTRIBUTES
 .sp
 .LP

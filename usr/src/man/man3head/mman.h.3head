@@ -216,7 +216,7 @@ the \fBmmap()\fR function. See \fBmmap\fR(2).
 .sp
 .LP
 The \fBmode_t\fR, \fBoff_t\fR, and \fBsize_t\fR types are be defined as
-described in <\fBsys/types.h\fR>. See \fBtypes\fR(3HEAD).
+described in <\fBsys/types.h\fR>. See \fBtypes.h\fR(3HEAD).
 .SH ATTRIBUTES
 .sp
 .LP

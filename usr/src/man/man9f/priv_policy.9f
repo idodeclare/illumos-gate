@@ -169,7 +169,7 @@ Interface Stability	Committed
 .TE
 
 .SH SEE ALSO
-.BR acct (3HEAD),
+.BR acct.h (3HEAD),
 .BR attributes (7),
 .BR privileges (7)
 .sp

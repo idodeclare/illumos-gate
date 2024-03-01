@@ -81,7 +81,7 @@ char  d_name[]     /* name of entry */
 .sp
 .LP
 The type \fBino_t\fR is defined as described in <\fBsys/types.h\fR>. See
-\fBtypes\fR(3HEAD).
+\fBtypes.h\fR(3HEAD).
 .sp
 .LP
 The character array \fBd_name\fR is of unspecified size, but the number of
