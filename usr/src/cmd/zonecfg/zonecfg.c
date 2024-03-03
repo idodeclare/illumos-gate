@@ -854,7 +854,7 @@ long_help(int cmd_num)
 		case CMD_CREATE:
 			(void) snprintf(line, sizeof (line),
 			    gettext("Creates a configuration for the "
-			    "specified zone.  %s should be\n\tused to "
+			    "specified zone.  '%s' should be\n\tused to "
 			    "begin configuring a new zone.  If overwriting an "
 			    "existing\n\tconfiguration, the -F flag can be "
 			    "used to force the action.  If\n\t-t template is "
@@ -889,7 +889,7 @@ long_help(int cmd_num)
 			(void) snprintf(line, sizeof (line),
 			    gettext("Selects a resource to modify.  "
 			    "Resource modification is completed\n\twith the "
-			    "command \"%s\".  The property name/value pairs "
+			    "command '%s'.  The property name/value pairs "
 			    "must uniquely\n\tidentify a resource.  Note that "
 			    "the curly braces ('{', '}') mean one\n\tor more "
 			    "of whatever is between them."),
@@ -915,7 +915,7 @@ long_help(int cmd_num)
 			    gettext("Commits current configuration.  "
 			    "Configuration must be committed to\n\tbe used by "
 			    "%s.  Until the configuration is committed, "
-			    "changes \n\tcan be removed with the %s "
+			    "changes \n\tcan be removed with the '%s' "
 			    "command.  This operation is\n\tattempted "
 			    "automatically upon completion of a %s "
 			    "session."), "zoneadm", cmd_to_str(CMD_REVERT),
