@@ -202,8 +202,9 @@ if ($alltext =~ /^(UNIGNOREFILES)\s*=/mx) {
 # The following macros conventionally indicate some derived files that are
 # created by the Makefile and are used just as one signal that a run of
 # MAKE_GITIGNORE will be needed.
-if ($alltext =~ /^BINPROG|CLASSES|DERIVED_FILES|ETCPROG|INITPROG|JAR_FILE|JNIH|
-    LIBPROG|MANLINKS|MODULE|OBJECTS|PROG\s*=/mx) {
+if ($alltext =~ /^BINPROG|CLASSES|DERIVED_FILES|ETCPROG|INITPROG|
+    i386_ARCHITECTURES|JAR_FILE|JNIH|LIBPROG|MANLINKS|MODULE|OBJECTS|
+    PROG\s*=/mx) {
 	$force_make = 1;
 }
 
