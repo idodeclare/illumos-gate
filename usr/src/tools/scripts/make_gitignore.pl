@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2023 Chris Fraire <cfraire@me.com>
 #
 
 # Assemble contents of a .gitignore from relative path-files in @ARGV, and
