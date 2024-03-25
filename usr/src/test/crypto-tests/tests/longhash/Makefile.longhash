@@ -40,6 +40,8 @@ CMDS = $(PROGS:%=$(TESTDIR)/%)
 
 $(CMDS) := FILEMODE = 0555
 
+CLEANFILES +=	$(OBJS) $(COMMON_OBJS_32) $(COMMON_OBJS_64) $(PROGS)
+
 all: $(PROGS)
 
 %_32: %.32.o $(COMMON_OBJS_32)
@@ -64,7 +66,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
-	-$(RM) *.o $(PROGS)
+	-$(RM) $(CLEANFILES)
 
 $(CMDS): $(TESTDIR) $(PROGS)
 
