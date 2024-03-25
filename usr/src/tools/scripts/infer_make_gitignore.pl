@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016, 2023 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2024 Chris Fraire <cfraire@me.com>
 #
 
 # Examine files specified in @ARGV, and possibly add or append a command to run
@@ -113,12 +113,14 @@ undef $inclpathadj;
 if ($mname eq "Makefile") {
 	# ok, no path adjustment necessary
 } elsif ($mname eq "Makefile.digest" || $mname eq "Makefile.hmac" ||
-    $mname eq "Makefile.solaris") {
+    $mname eq "Makefile.longhash" || $mname eq "Makefile.solaris") {
 	# 1. usr/src/test/crypto-tests/tests/digest/Makefile directive:
 	#     $(MAKE) -f Makefile.digest
 	# 2. usr/src/test/crypto-tests/tests/hmac/Makefile directive:
 	#     $(MAKE) -f Makefile.hmac
-	# 3. usr/src/grub/... directive:
+	# 3. usr/src/test/crypto-tests/tests/longhash/Makefile directive:
+	#     $(MAKE) -f Makefile.longhash
+	# 4. usr/src/grub/... directive:
 	#     $(MAKE) -f Makefile.solaris
 	# ... then ok to continue; no path adjustment necessary
 } elsif ($mpath =~ m`/ptools/\z`x) {
