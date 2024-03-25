@@ -14,7 +14,7 @@
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2019 Joyent, Inc.
 # Copyright 2020 Oxide Computer Company
-# Copyright 2023 Chris Fraire <cfraire@me.com>
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/cmd/Makefile.cmd
