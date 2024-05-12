@@ -97,3 +97,6 @@ MANFILES= 	dat_cno_create.3dat			\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -44,3 +44,6 @@ uupick.1c	:= LINKSRC = uuto.1c
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -89,3 +89,6 @@ $(MCAMD_OFF_H): $(MCAMD_OFF_SRC)
 #       Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

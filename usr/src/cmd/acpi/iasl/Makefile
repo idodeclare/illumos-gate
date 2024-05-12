@@ -164,3 +164,6 @@ clean:
 	$(RM) -r AslCompiler.?????? DtParser.?????? PrParser.??????
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(INTERMEDIATES) $(OBJS) $(PROG)

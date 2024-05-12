@@ -68,3 +68,6 @@ $(TESTDIR)/%: %
 %.32: %.c
 	$(LINK.c) -o $@ $< $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG)

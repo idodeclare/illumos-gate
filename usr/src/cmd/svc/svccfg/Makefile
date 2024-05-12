@@ -173,3 +173,6 @@ clean: FRC
 include ../../Makefile.targ
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

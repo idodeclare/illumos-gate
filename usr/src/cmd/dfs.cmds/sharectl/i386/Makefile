@@ -28,3 +28,6 @@
 include ../Makefile.com
 
 install: all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

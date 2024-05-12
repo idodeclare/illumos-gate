@@ -2636,3 +2636,6 @@ wordfree.3c				:= LINKSRC = wordexp.3c
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -35,3 +35,6 @@ include ../../Makefile.plugin
 CPPFLAGS += -I$(SRC)/uts/common -I../../common/ufm
 
 LDLIBS += -ldevinfo -ldevid -lcfgadm -ldiskstatus -ldiskmgt -lnvme
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -26,3 +26,6 @@
 #
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

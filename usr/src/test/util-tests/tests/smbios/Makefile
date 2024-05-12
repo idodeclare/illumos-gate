@@ -72,3 +72,6 @@ $(TESTDIR)/%: %
 $(PROGS): $(OBJS)
 	$(LINK.c) -o $@ $(OBJS) $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROGS)

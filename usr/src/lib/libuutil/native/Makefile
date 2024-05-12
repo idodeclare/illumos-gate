@@ -52,3 +52,6 @@ sys/%: $(SRC)/uts/common/sys/%
 	@mkdir -p sys
 	cp -f $< $@
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

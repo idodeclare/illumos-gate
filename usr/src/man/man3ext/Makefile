@@ -222,3 +222,6 @@ SHA512Update.3ext		:= LINKSRC = sha2.3ext
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

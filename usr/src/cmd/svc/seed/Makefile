@@ -284,3 +284,6 @@ $(MFST_ROOT)/system/svc/%: ../milestone/%
 	$(INS.file)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERDIRS) $(CLOBBERFILES)

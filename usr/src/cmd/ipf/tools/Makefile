@@ -257,3 +257,6 @@ clean:
 install_local: $(USRLIBIPF) $(USRLIBIPFLICENCE)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

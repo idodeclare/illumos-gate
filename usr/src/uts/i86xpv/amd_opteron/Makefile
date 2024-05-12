@@ -93,3 +93,6 @@ $(OBJS_DIR)/%.o:		$(OBJS_DIR)/%.c
 #       Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

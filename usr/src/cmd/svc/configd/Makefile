@@ -133,3 +133,6 @@ clobber:
 include ../../Makefile.targ
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)
