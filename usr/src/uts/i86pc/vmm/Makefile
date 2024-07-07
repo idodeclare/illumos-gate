@@ -46,3 +46,6 @@ install:	$(INSTALL_DEPS)
 
 include $(UTSBASE)/i86pc//Makefile.targ
 include $(UTSBASE)/intel/io/vmm/Makefile.rules
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

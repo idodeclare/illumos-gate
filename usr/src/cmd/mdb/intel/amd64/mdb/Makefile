@@ -59,3 +59,6 @@ CPPFLAGS += -I../../mdb
 LDLIBS += -lsaveargs -lvmm
 
 install: all $(ISAEXEC) $(ROOTPROG64) $(ROOTLINK64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROG)

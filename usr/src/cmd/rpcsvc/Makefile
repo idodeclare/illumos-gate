@@ -241,3 +241,6 @@ lint:
 FRC:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DERIVED_FILES) $(OBJS)

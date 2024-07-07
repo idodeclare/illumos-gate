@@ -1215,3 +1215,7 @@ $(LIBCDIR)/port/gen/new_list.c: $(LIBCDIR)/port/gen/errlist $(LIBCDIR)/port/gen/
 pics/errlst.o: $(LIBCDIR)/port/gen/errlst.c
 
 pics/new_list.o: $(LIBCDIR)/port/gen/new_list.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

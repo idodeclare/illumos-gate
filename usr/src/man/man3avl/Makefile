@@ -60,3 +60,6 @@ avl_update_lt.3avl	:= LINKSRC = avl_update.3avl
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

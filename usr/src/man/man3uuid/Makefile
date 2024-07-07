@@ -50,3 +50,6 @@ uuid_unparse_upper.3uuid	:= LINKSRC = uuid_clear.3uuid
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

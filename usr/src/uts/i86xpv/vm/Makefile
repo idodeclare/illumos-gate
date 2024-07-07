@@ -77,3 +77,6 @@ CLEANFILES=
 CLOBBERFILES=
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

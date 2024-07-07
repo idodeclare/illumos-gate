@@ -96,3 +96,6 @@ $(KDI_ASSYM_H): $(KDI_OFFSETS_SRC) $(GENASSYM)
 #	Include common targets.
 #
 include $(UTSBASE)/i86xpv/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

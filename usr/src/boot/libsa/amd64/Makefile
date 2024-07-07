@@ -51,3 +51,6 @@ pics/%.o: $(SASRC)/x86/%.c
 include $(BOOTSRC)/Makefile.lib
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)
