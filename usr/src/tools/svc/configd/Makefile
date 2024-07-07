@@ -24,11 +24,11 @@
 #
 # Copyright 2015 RackTop Systems.
 # Copyright 2020 Joyent, Inc.
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/tools/Makefile.tools
 include $(SRC)/cmd/svc/configd/Makefile.shared.com
-
 
 LIBUUTIL	= $(SRC)/lib/libuutil
 LIBSCF		= $(SRC)/lib/libscf
@@ -66,6 +66,7 @@ $(PROG): $(OBJS)
 install: all $(ROOTONBLDMACHPROG)
 
 clean:
+	$(RM) $(OBJS)
 
 clobber: clean
 
