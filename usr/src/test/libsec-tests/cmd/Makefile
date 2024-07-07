@@ -10,6 +10,7 @@
 #
 
 # Copyright 2024 RackTop Systems, Inc.
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 
 PROGS = \
 	acl_fromtext \
@@ -58,5 +59,6 @@ clobber: clean
 	$(RM) $(PROGS)
 
 clean:
+	$(RM) $(OBJS1) $(OBJS2)
 
 FRC:
