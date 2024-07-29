@@ -11,6 +11,7 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 PROG = clock_lock
@@ -69,4 +70,4 @@ clean:
 	$(RM) $(OBJS32) $(OBJS64)
 
 clobber: clean
-	$(RM) $(PROGS32) $(PROGS64)
+	$(RM) $(PROG32) $(PROG64)
