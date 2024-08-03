@@ -130,5 +130,5 @@ are
 .Sy Unsafe
 .Sh SEE ALSO
 .Xr pututxline 3c ,
-.Xr utmpx 3head ,
+.Xr utmpx.h 3head ,
 .Xr utmpx 5

@@ -114,7 +114,7 @@ time_t             msg_ctime     Time of last change.
 .sp
 .LP
 The \fBpid_t\fR, \fBtime_t\fR, \fBkey_t\fR, \fBsize_t\fR, and \fBssize_t\fR
-types are defined as described in <\fBsys/types.h\fR>. See \fBtypes\fR(3HEAD).
+types are defined as described in <\fBsys/types.h\fR>. See \fBtypes.h\fR(3HEAD).
 .SH ATTRIBUTES
 .sp
 .LP
