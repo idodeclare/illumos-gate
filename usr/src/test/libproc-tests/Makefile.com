@@ -11,6 +11,7 @@
 
 #
 # Copyright 2024 Oxide Computer Company
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -57,6 +58,8 @@ CPPFLAGS += -D_REENTRANT
 CSTD = $(CSTD_GNU99)
 CTF_MODE = link
 
+CLEANFILES +=	*.o.32 *.o.64
+
 .KEEP_STATE:
 
 all: $(PROGS32) $(PROGS64)
@@ -65,7 +68,7 @@ clobber: clean
 	-$(RM) $(PROGS32) $(PROGS64)
 
 clean:
-	-$(RM) *.o.32 *.o.64
+	-$(RM) $(CLEANFILES)
 
 install: $(ROOTOPTTARG) .WAIT $(ROOTOPTPROGS)
 
