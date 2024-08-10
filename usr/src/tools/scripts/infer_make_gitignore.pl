@@ -441,8 +441,9 @@ sub mywarn {
 	warn @_;
 }
 
-# some Makefiles empirically do not need a MAKE_GITIGNORE cleanup. Ignore
+# Some Makefiles empirically do not need a MAKE_GITIGNORE cleanup. Ignore
 # those explicitly to quiet some warnings.
+# Running with option -V will validate that the below still exist in SRC.
 sub is_makefile_ok_to_skip {
 	my ($file) = @_;
 	# remove any leading part so $file is relative starting with usr/src/...
@@ -454,6 +455,9 @@ BEGIN {
 	my $oklist = <<'END_LIST';
 usr/src/cmd/abi/Makefile
 usr/src/cmd/abi/spectrans/Makefile
+usr/src/cmd/abi/spectrans/parser/Makefile
+usr/src/cmd/abi/spectrans/spec2map/Makefile
+usr/src/cmd/abi/spectrans/spec2trace/Makefile
 usr/src/cmd/bhyve/test/Makefile
 usr/src/cmd/bhyve/test/tests/Makefile
 usr/src/cmd/boot/installboot/Makefile
@@ -575,6 +579,7 @@ usr/src/test/crypto-tests/cmd/Makefile
 usr/src/test/crypto-tests/Makefile
 usr/src/test/crypto-tests/tests/digest/Makefile
 usr/src/test/crypto-tests/tests/hmac/Makefile
+usr/src/test/crypto-tests/tests/longhash/Makefile
 usr/src/test/crypto-tests/tests/Makefile
 usr/src/test/crypto-tests/tests/modes/aes/Makefile
 usr/src/test/crypto-tests/tests/modes/Makefile
@@ -593,11 +598,17 @@ usr/src/test/libc-tests/Makefile
 usr/src/test/libmlrpc-tests/Makefile
 usr/src/test/libmlrpc-tests/tests/Makefile
 usr/src/test/libmlrpc-tests/tests/netrlogon/Makefile
+usr/src/test/libproc-tests/Makefile
+usr/src/test/libproc-tests/tests/Makefile
+usr/src/test/libsec-tests/Makefile
 usr/src/test/Makefile
 usr/src/test/net-tests/Makefile
+usr/src/test/nvme-tests/Makefile
+usr/src/test/nvme-tests/tests/Makefile
 usr/src/test/os-tests/Makefile
 usr/src/test/os-tests/tests/cores/Makefile
 usr/src/test/os-tests/tests/Makefile
+usr/src/test/os-tests/tests/saveargs/Makefile
 usr/src/test/smbclient-tests/cmd/Makefile
 usr/src/test/smbclient-tests/Makefile
 usr/src/test/smbclient-tests/tests/Makefile
@@ -618,6 +629,7 @@ usr/src/tools/make/lib/Makefile
 usr/src/tools/make/Makefile
 usr/src/tools/sgs/Makefile
 usr/src/tools/smatch/src/Makefile
+usr/src/tools/svc/Makefile
 usr/src/ucblib/Makefile
 usr/src/uts/common/io/qede/579xx/drivers/ecore/Makefile
 usr/src/uts/sparc/dump/Makefile
