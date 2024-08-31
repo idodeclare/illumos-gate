@@ -864,7 +864,7 @@ long_help(int cmd_num)
 			    "creates a configuration from a\n\tdetached "
 			    "zonepath.  '%s -b' results in a blank "
 			    "configuration.\n\t'%s' with no arguments applies "
-			    "the illumos default settings."),
+			    "the default settings."),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE));
 			return (line);
