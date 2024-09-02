@@ -7,7 +7,7 @@
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License"). You may not use this file except in compliance with the License. You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.
 .\" See the License for the specific language governing permissions and limitations under the License. When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE. If applicable, add the following below this CDDL HEADER, with the
 .\" fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH ZONECFG 8 "Jan 15, 2024"
+.TH ZONECFG 8 "Sep 2, 2024"
 .SH NAME
 zonecfg \- set up zone configuration
 .SH SYNOPSIS
@@ -63,7 +63,7 @@ control". See \fBresource_controls\fR(7).
 .LP
 Every zone is configured with an associated brand. The brand determines the
 user-level environment used within the zone, as well as various behaviors for
-the zone when it is installed, boots, or is shutdown. Once a zone has been
+the zone when it is installed, boots, or is shut down. Once a zone has been
 installed the brand cannot be changed. The default brand is determined by the
 installed distribution in the global zone. Some brands do not support all of
 the \fBzonecfg\fR properties and resources. See the brand-specific man page for
@@ -1022,7 +1022,7 @@ The caps on the memory that can be used by this zone. A scale
 .BR T )
 can be applied to the value for each of these numbers (for example,
 .B 1M
-is one megabyte). Each of these properties is optional but at least one
+is one megabyte). Each of these properties is optional, but at least one
 property must be set when adding this resource. Only a single instance of this
 resource can be added to the zone. The
 .B physical
@@ -1409,7 +1409,7 @@ which time the scope is reverted back to global. Certain commands, such as
 Commands which can result in destructive actions or loss of work have an
 \fB-F\fR option to force the action. If input is from a terminal device, the
 user is prompted when appropriate if such a command is given without the
-\fB-F\fR option otherwise, if such a command is given without the \fB-F\fR
+\fB-F\fR option; otherwise, if such a command is given without the \fB-F\fR
 option, the action is disallowed, with a diagnostic message written to standard
 error.
 .sp
@@ -1442,7 +1442,7 @@ brackets, separated by commas (\fB[foo,bar,baz]\fR). See \fBPROPERTIES\fR.
 .ad
 .sp .6
 .RS 4n
-End the resource specification and reset scope to global. Abandons any
+End the resource specification, and reset scope to global. Abandons any
 partially specified resources. \fBcancel\fR is only applicable in the resource
 scope.
 .RE
@@ -1513,7 +1513,7 @@ All validation of the new zone happens during the
 process, not during zone configuration.
 .sp
 Use the \fB-b\fR option to create a blank configuration. Without arguments,
-\fBcreate\fR applies the illumos default settings.
+\fBcreate\fR applies the default settings.
 .RE
 
 .sp
