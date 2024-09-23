@@ -34,3 +34,6 @@ rnusers.3rpc	:= LINKSRC = rusers.3rpc
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

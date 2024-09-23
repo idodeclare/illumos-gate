@@ -112,3 +112,6 @@ clobber: clean
 
 clean:
 	$(RM) $(CLEANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

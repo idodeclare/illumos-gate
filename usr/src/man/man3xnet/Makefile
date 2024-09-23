@@ -127,3 +127,6 @@ setservent.3xnet	:= LINKSRC = endservent.3xnet
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

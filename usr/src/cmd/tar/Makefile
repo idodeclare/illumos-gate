@@ -80,3 +80,6 @@ $(DCFILE):
 	$(RM) messages.po
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

@@ -19,3 +19,6 @@ CLASS = common
 MODULESRCS = topo_ufm.c
 
 include ../../Makefile.plugin
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)
