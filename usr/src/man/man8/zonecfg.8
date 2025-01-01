@@ -365,7 +365,7 @@ The following properties are supported:
 .ad
 .sp .6
 .RS 4n
-.B fs-allowed
+.B fs\-allowed
 .RE
 
 .sp
@@ -711,7 +711,7 @@ Values needed to determine how, where, and so forth to mount file systems. See
 .na
 .BR net :
 .BR address ,
-.BR allowed-address ,
+.BR allowed\-address ,
 .BR physical ,
 .B defrouter
 .ad
@@ -772,7 +772,7 @@ properties cannot be set.
 .sp
 An exclusive-IP zone is responsible for managing its own network configuration.
 If the
-.B allowed-address
+.B allowed\-address
 property is set, the zone administrator will only be permitted to configure the
 interface with the specified address. To allow multiple addresses (for example,
 an IPv4 and IPv6 address), use
@@ -887,7 +887,7 @@ property is the preferred way to set the
 rctl. If
 .B max\-lwps
 is not explicitly set, then setting this property will automatically set
-.B max-lwps
+.B max\-lwps
 to 10 times the value of
 .BR max\-processes .
 .RE
@@ -955,7 +955,7 @@ class FSS is used.
 .ie t \(bu
 .el o
 If neither
-.B cpu-shares
+.B cpu\-shares
 nor the equivalent rctl is set and the zone's
 .B pool
 property references a pool that has a default scheduling class, that class is
@@ -974,7 +974,7 @@ Under any other conditions, the system default scheduling class is used.
 .sp
 .ne 2
 .na
-.BR dedicated-cpu :
+.BR dedicated\-cpu :
 .BR ncpus ,
 .B importance
 .ad
@@ -1008,7 +1008,7 @@ properties. Only a single instance of this resource can be added to the zone.
 .sp
 .ne 2
 .na
-.BR capped-memory :
+.BR capped\-memory :
 .BR physical ,
 .BR swap ,
 .B locked
@@ -1044,7 +1044,7 @@ rctl.
 .sp
 .ne 2
 .na
-.BR capped-cpu :
+.BR capped\-cpu :
 .B ncpus
 .ad
 .sp .6
@@ -1065,7 +1065,7 @@ control and is related to the \fBzone.cpu-cap\fR resource control. See
 .sp
 .ne 2
 .na
-.BR security-flags :
+.BR security\-flags :
 .BR lower ,
 .BR default ,
 .B upper
@@ -1554,7 +1554,7 @@ specification is incomplete, it issues an appropriate error message.
 .na
 .B export
 .RB [ -f
-.IR output-file ]
+.IR output\-file ]
 .ad
 .sp .6
 .RS 4n
@@ -1569,7 +1569,7 @@ suitable for use in a command file.
 .BR "help " [ usage ]
 .RB [ commands ]
 .RB [ syntax ]
-.RI [ command-name ]
+.RI [ command\-name ]
 .ad
 .sp .6
 .RS 4n
@@ -1594,9 +1594,9 @@ Print general help or help about given topic.
 .br
 .na
 .B info
-.RI [ resource-type
-.RI [ property-name\c
-.BI = property-value\c
+.RI [ resource\-type
+.RI [ property\-name\c
+.BI = property\-value\c
 ]]
 .ad
 .sp .6
@@ -1617,9 +1617,9 @@ modified.
 .ne 2
 .na
 .B remove
-.I resource-type
-.RI [ property-name\c
-.BI = property-value\c
+.I resource\-type
+.RI [ property\-name\c
+.BI = property\-value\c
 ] (global scope)
 .ad
 .sp .6
@@ -1627,9 +1627,9 @@ modified.
 In the global scope, removes the specified resource. The [] syntax means
 0 or more of whatever is inside the square braces. If you want only to remove a
 single instance of the resource, you must specify enough
-.I property-name property-value
+.I property\-name property\-value
 pairs for the resource to be uniquely identified. If no
-.I property-name property-value
+.I property\-name property\-value
 pairs are specified, all instances will be removed. If there are more than one
 pair specified, a confirmation is required, unless you use the \fB-F\fR
 option.
@@ -1639,19 +1639,19 @@ option.
 .ne 2
 .na
 .B select
-.I resource-type
-.RI { property-name\c
-.BI = property-value\c
+.I resource\-type
+.RI { property\-name\c
+.BI = property\-value\c
 }
 .ad
 .sp .6
 .RS 4n
 Select the resource of the given type which matches the given
-.I property-name property-value
+.I property\-name property\-value
 pair criteria, for modification. This command is applicable only in the
 global scope. The scope is changed to that resource type. The {} syntax means 1
 or more of whatever is inside the curly braces. You must specify enough
-.I property-name property-value
+.I property\-name property\-value
 pairs for the resource to be uniquely identified.
 .RE
 
@@ -1659,7 +1659,7 @@ pairs for the resource to be uniquely identified.
 .ne 2
 .na
 .B set
-.IB property-name = property-value
+.IB property\-name = property\-value
 .ad
 .sp .6
 .RS 4n
@@ -2184,7 +2184,7 @@ Interface Stability	Volatile
 .BR lx (7),
 .BR privileges (7),
 .BR resource_controls (7),
-.BR security-flags (7),
+.BR security\-flags (7),
 .BR zones (7),
 .BR ipadm (8),
 .BR kstat (8),
