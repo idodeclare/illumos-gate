@@ -22,10 +22,12 @@
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2021 H. William Welliver
+# Copyright 2017, 2021 Chris Fraire <cfraire@me.com>
 
 # This script configures IP routing.
 
 . /lib/svc/share/smf_include.sh
+. /lib/svc/share/net_include.sh
 
 #
 # In a shared-IP zone we need this service to be up, but all of the work
@@ -53,8 +55,11 @@ smf_configure_ip || exit $SMF_EXIT_OK
 # "current" values of ipv4/6-routing - if either are true, we are running
 # routing daemons (or at least they are enabled to run).
 #
+# Excerpt e.g.:
+# ipv4-routing persistent=enabled default=enabled current=enabled
+#
 dynamic_routing_test=`/sbin/routeadm -p | \
-nawk '/^ipv[46]-routing [.]*/ { print $2 }'  | /usr/bin/grep "current=enabled"`
+    /usr/bin/grep '^ipv[46]-routing .*current=enabled'`
 if [ -n "$dynamic_routing_test" ]; then
 	dynamic_routing="true"
 fi
@@ -110,8 +115,8 @@ if [ -f /etc/inet/static_routes ]; then
 fi
 
 if [ "$_INIT_NET_STRATEGY" = "dhcp" ] && \
-    [ -n "`/sbin/dhcpinfo Router`" ]; then
-	defrouters=`/sbin/dhcpinfo Router`
+    defrouters=`get_dhcp_var Router` && [ -n "$defrouters" ]; then
+	: # pass
 elif [ -f /etc/defaultrouter ]; then
 	defrouters=`/usr/bin/grep -v \^\# /etc/defaultrouter | \
 	    /usr/bin/awk '{print $1}'`
@@ -162,6 +167,18 @@ else
 fi
 
 #
+# Read /etc/inet/static_routes and add each non-link-local route. Do this here
+# prior to the netstat check below.
+#
+if [ -f /etc/inet/static_routes ]; then
+	echo "Adding persistent routes:"
+	/usr/bin/egrep -v "^(#|$)" /etc/inet/static_routes \
+	    | /usr/bin/grep -v -E -- "-interface |-iface " | while read line; do
+		/usr/sbin/route add $line
+	done
+fi
+
+#
 # Use routeadm(8) to configure forwarding and launch routing daemons
 # for IPv4 and IPv6 based on preset values.  These settings only apply
 # to the global zone.  For IPv4 dynamic routing, the system will default
@@ -199,8 +216,8 @@ if [ -z "$defrouters" ]; then
 	fi
 else
 	#
-	# Default router(s) have been found,  so ipv4-routing default value
-	# should be disabled.  If routaedm -e/d has not yet been run by
+	# Default router(s) have been found, so ipv4-routing default value
+	# should be disabled.  If routeadm -e/d has not yet been run by
 	# the administrator, we apply this default.  The -b option is
 	# project-private and informs routeadm not to treat the disable as
 	# administrator-driven.
@@ -210,17 +227,6 @@ else
 	if [ "$ipv4_routing_set" = "false" ]; then
 		/sbin/routeadm -b -d ipv4-routing -u
 	fi
-fi
-
-#
-# Read /etc/inet/static_routes and add each non-link-local route.
-#
-if [ -f /etc/inet/static_routes ]; then
-	echo "Adding persistent routes:"
-	/usr/bin/egrep -v "^(#|$)" /etc/inet/static_routes \
-	    | /usr/bin/grep -v -E -- "-interface |-iface " | while read line; do
-		/usr/sbin/route add $line
-	done
 fi
 
 # Clear exit status.

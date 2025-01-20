@@ -21,6 +21,7 @@
 #
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2017, 2025 Chris Fraire <cfraire@me.com>
 #
 # Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T.
 # All rights reserved.
@@ -888,4 +889,44 @@ nwam_get_loc_list_prop()
 	slist=`echo $clist | sed -e s/","/" "/g`
 	echo $slist
 	return $rtn
+}
+
+# get_dhcp_var PARAMNAME [ INTERFACE ]
+#
+#   Prints the value of the DHCP parameter named by PARAMNAME (defined in
+#   /etc/dhcp/inittab) as returned by the DHCP server. The query is retried up
+#   to five times if dhcpinfo(1) exits with 2, "The operation was not
+#   successful," or once if it exits with 4, "The operation timed out." For any
+#   other failure exit code, retry does not happen. Any retry happens after a
+#   one second pause.
+#
+#   If INTERFACE is defined, the value learned on that interface will be
+#   printed; otherwise the value learned on the primary interface will be
+#   printed.
+#
+#   Returns 0 on success (printed parameter value may be zero length) or
+#   non-zero otherwise.
+#
+get_dhcp_var() {
+	typeset -i timeouts=0 i rc
+	typeset val
+
+	[ -z "$1" ] && return 1
+
+	for i in {1..6}; do
+		[ $i -gt 1 ] && sleep 1
+
+		if [ -n "$2" ]; then
+			val="$(/sbin/dhcpinfo -i "$2" "$1")"
+		else
+			val="$(/sbin/dhcpinfo "$1")"
+		fi
+		rc=$?
+		[ $rc -eq 0 ] && { printf "%s\n" "$val"; return 0; }
+		[[ $rc -ne 2 && $rc -ne 4 ]] && return 1
+		[ $rc -eq 4 ] && timeouts=$((1 + timeouts))
+		[ $timeouts -gt 1 ] && return 1
+	done
+
+	return 1
 }
