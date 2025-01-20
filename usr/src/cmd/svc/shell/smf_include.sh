@@ -25,6 +25,7 @@
 # Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 # Copyright 2012 Joyent, Inc.  All rights reserved.
 # Copyright 2021 Oxide Computer Company
+# Copyright 2016 Chris Fraire <cfraire@me.com>
 #
 
 smf_present () {
@@ -136,10 +137,14 @@ smf_is_system_labeled() {
 #   assigned the value of the current network configuration strategy.
 #   Valid values for _INIT_NET_STRATEGY are "none", "dhcp", and "rarp".
 #
-#   The network boot strategy for a zone is always "none".
+#   The network boot strategy for an exclusive-IP, non-global zone is
+#   determined in the same manner as for a global zone.
+#
+#   The network boot strategy for a shared-IP, non-global zone is always
+#   "none".
 #
 smf_netstrategy () {
-	if smf_is_nonglobalzone; then
+	if smf_dont_configure_ip; then
 		_INIT_NET_STRATEGY="none" export _INIT_NET_STRATEGY
 		return 0
 	fi
@@ -147,7 +152,7 @@ smf_netstrategy () {
 	set -- `/sbin/netstrategy`
 	if [ $? -eq 0 ]; then
 		[ "$1" = "nfs" ] && \
-			_INIT_NET_IF="$2" export _INIT_NET_IF
+		    _INIT_NET_IF="$2" export _INIT_NET_IF
 		_INIT_NET_STRATEGY="$3" export _INIT_NET_STRATEGY
 	else
 		return 1
