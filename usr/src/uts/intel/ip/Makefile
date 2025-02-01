@@ -23,6 +23,7 @@
 # Use is subject to license terms.
 #
 # Copyright 2019 Joyent, Inc.
+# Copyright 2025 Chris Fraire <cfraire@me.com>
 #
 #	This makefile drives the production of the ip driver
 #	kernel module.
@@ -140,7 +141,7 @@ $(OBJECTS): $(OBJS_DIR)
 CLOBBERFILES += $(OBJS_DIR)/ipctf.a
 
 ipctf.obj64: FRC
-	@BUILD_TYPE=OBJ64 VERSION='$(VERSION)' $(MAKE) obj64/ipctf.a
+	@VERSION='$(VERSION)' $(MAKE) obj64/ipctf.a BUILD_TYPE=OBJ64
 
 ipctf.debug64: FRC
-	@BUILD_TYPE=DBG64 VERSION='$(VERSION)' $(MAKE) debug64/ipctf.a
+	@VERSION='$(VERSION)' $(MAKE) debug64/ipctf.a BUILD_TYPE=DBG64
