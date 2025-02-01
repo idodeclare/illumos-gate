@@ -41,10 +41,6 @@ cscope.po.out
 /usr/src/noise-*.out
 /usr/src/noise-*.ref
 /usr/src/tools/proto/
-/usr/src/uts/**/debug32/
-/usr/src/uts/**/debug64/
-/usr/src/uts/**/obj32/
-/usr/src/uts/**/obj64/
 
 # GRUB has a non-illumos-standard build which is not worth plumbing to support
 # make_gitignore.pl, so just ignore all objects therein.
