@@ -180,8 +180,8 @@ s/^\.DONE\s*:.*\n\K((?:\t[\t\x20]*\S.*\n)+)/	# match multi-line .DONE section
 
 my @macros = ();
 
-# CURTYPE= or @BUILD_TYPE indicates that -d <discriminator> is needed
-if ($alltext =~ /^(CURTYPE)\s*=/mx || $alltext =~ /@(BUILD_TYPE)=/mx) {
+# CURTYPE= or BUILD_TYPE indicates that -d <discriminator> is needed
+if ($alltext =~ /^(CURTYPE)\s*=/mx || $alltext =~ /\b(BUILD_TYPE)=/mx) {
 	$optdisc = "-d \"\$($1)\" ";
 	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
 }
