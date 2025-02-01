@@ -116,13 +116,13 @@ for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 	}
 }
 
-# if -d is used, write a cwd ".gitignore,<discriminator>," file, and then
+# if -d is non-empty, write a cwd ".gitignore,<discriminator>," file, and then
 # reset $contents
 if ($opt_d) {
 	my $gitignore_disc = "$gitignore$disc";
 	write_if_different($gitignore_disc, $contents);
 	$contents = "";
-} else {
+} elsif (! defined $opt_d) {
 	# otherwise, clean up any formerly-discriminated files
 	map { unlink } glob "$gitignore,*,*";
 }
