@@ -632,7 +632,6 @@ usr/src/tools/smatch/src/Makefile
 usr/src/tools/svc/Makefile
 usr/src/ucblib/Makefile
 usr/src/uts/common/io/qede/579xx/drivers/ecore/Makefile
-usr/src/uts/sparc/dump/Makefile
 END_LIST
 
 	push @oktoskip, split /\n/, $oklist;
