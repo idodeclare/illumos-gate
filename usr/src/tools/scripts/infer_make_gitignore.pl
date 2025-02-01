@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016, 2024 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2025 Chris Fraire <cfraire@me.com>
 #
 
 # Examine files specified in @ARGV, and possibly add or append a command to run
@@ -40,10 +40,10 @@
 # between the clean/clobber targets and the .DONE target used for
 # MAKE_GITIGNORE.
 #
-# A rare few illumos Makefiles execute multiple times in the same working
-# directory for iterating CURTYPE values (e.g., "library" and "standalone" for
-# libumem). This script detects CURTYPE in order to call MAKE_GITIGNORE with
-# the -d <discriminator> switch.
+# A few illumos Makefiles execute multiple times in the same working directory
+# for iterating CURTYPE values (e.g., "library" and "standalone" for libumem)
+# or BUILD_TYPE values for uts. This script detects CURTYPE or BUILD_TYPE in
+# order to call MAKE_GITIGNORE with the -d <discriminator> switch.
 #
 # Also, another rare few illumos Makefiles include in their clean/clobber
 # recipes (though not executed) some committed files (e.g.,
@@ -180,8 +180,8 @@ s/^\.DONE\s*:.*\n\K((?:\t[\t\x20]*\S.*\n)+)/	# match multi-line .DONE section
 
 my @macros = ();
 
-# CURTYPE= indicates that -d <discriminator> is needed
-if ($alltext =~ /^(CURTYPE)\s*=/mx) {
+# CURTYPE= or @BUILD_TYPE indicates that -d <discriminator> is needed
+if ($alltext =~ /^(CURTYPE)\s*=/mx || $alltext =~ /@(BUILD_TYPE)=/mx) {
 	$optdisc = "-d \$($1) ";
 	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
 }
