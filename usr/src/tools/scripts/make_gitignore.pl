@@ -34,12 +34,13 @@
 # to be incorporated by this script as addenda when called in that parent
 # directory.
 #
-# A rare few illumos Makefiles execute multiple times in the same working
-# directory for multiple values of a macro (e.g. CURTYPE values, "library" and
-# "standalone", for libumem; or BASEPROG values, sha1, sha256, etc., for digest
-# crypto-tests). Since normally an execution of this script would clobber
-# previous executions' .gitignore contents, support a -d <discriminator> switch
-# to write ".gitignore,<discriminator>," files in the current directory to be
+# A few illumos Makefiles execute multiple times in the same working directory
+# for multiple values of a macro (e.g. CURTYPE values, "library" and
+# "standalone", for libumem; BASEPROG values, sha1, sha256, etc., for digest
+# crypto-tests; or BUILD_TYPE values, DBG64, OBJ64, etc. for uts). Since
+# normally an execution of this script would clobber previous executions'
+# .gitignore contents, support a -d <discriminator> switch to write
+# ".gitignore,<discriminator>," files in the current directory to be
 # incorporated by the same "addenda" method used for ".gitignore-<subdir>"
 # intermediates when this script is later called again without -d.
 
