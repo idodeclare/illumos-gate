@@ -25,7 +25,6 @@
 # Copyright (c) 2017 by Delphix. All rights reserved.
 # Copyright 2019 Joyent, Inc.
 # Copyright 2021 Oxide Computer Company
-# Copyright 2025 Chris Fraire <cfraire@me.com>
 #
 #	This Makefiles contains the common targets and definitions for
 #	all kernels. It is to be included in the Makefiles for specific
@@ -256,22 +255,22 @@ ALL_TARGS	= def all clean clobber install symcheck
 ALL_OBJ32	= $(ALL_TARGS:%=%.obj32)
 
 $(ALL_OBJ32):	FRC
-	@VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ BUILD_TYPE=OBJ32
+	@BUILD_TYPE=OBJ32 VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ
 
 ALL_DEBUG32	= $(ALL_TARGS:%=%.debug32)
 
 $(ALL_DEBUG32):	FRC
-	@VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ BUILD_TYPE=DBG32
+	@BUILD_TYPE=DBG32 VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ
 
 ALL_OBJ64	= $(ALL_TARGS:%=%.obj64)
 
 $(ALL_OBJ64):	FRC
-	@VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ BUILD_TYPE=OBJ64
+	@BUILD_TYPE=OBJ64 VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ
 
 ALL_DEBUG64	= $(ALL_TARGS:%=%.debug64)
 
 $(ALL_DEBUG64):	FRC
-	@VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ BUILD_TYPE=DBG64
+	@BUILD_TYPE=DBG64 VERSION='$(VERSION)' $(MAKE) $(NO_STATE) $(TARGET).targ
 
 #
 #	Currently only the IP module needs symbol checking on obj64.
