@@ -46,3 +46,6 @@ $(ROOTOPTPKGAR)/%: %.ksh $(ROOTOPTPKGAR)
 
 $(ROOTOPTPKGAR)/%.o: %.o
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS)

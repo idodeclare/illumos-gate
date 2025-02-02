@@ -107,3 +107,6 @@ rsm_memseg_import_get_mode.3rsm		:= LINKSRC = rsm_memseg_import_set_mode.3rsm
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

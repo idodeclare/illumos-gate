@@ -34,3 +34,6 @@ clean:
 lint:	$(LINTPROGS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -87,3 +87,6 @@ include ../Makefile.targ
 %.o: $(COMMONBASE)/mdesc/%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(PROG)

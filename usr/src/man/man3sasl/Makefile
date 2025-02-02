@@ -104,3 +104,6 @@ sasl_encodev.3sasl	:= LINKSRC = sasl_encode.3sasl
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

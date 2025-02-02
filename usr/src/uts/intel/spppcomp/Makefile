@@ -95,3 +95,6 @@ $(OBJS_DIR)/%.o:		$(UTSBASE)/common/io/ppp/spppcomp/%.c
 #	Include common targets.
 #
 include $(UTSBASE)/intel/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)
