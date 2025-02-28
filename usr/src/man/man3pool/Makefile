@@ -163,3 +163,6 @@ pool_walk_resources.3pool		:= LINKSRC = pool_walk_components.3pool
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

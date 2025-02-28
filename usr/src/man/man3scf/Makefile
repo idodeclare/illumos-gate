@@ -479,3 +479,6 @@ smf_restore_instance.3scf			:= LINKSRC = smf_enable_instance.3scf
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

@@ -33,3 +33,6 @@ utempter_remove_record.3utempter := LINKSRC = utempter_add_record.3utempter
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)
