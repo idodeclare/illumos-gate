@@ -79,3 +79,6 @@ $(TESTDIR)/%_32: %_32
 
 $(TESTDIR)/%_64: %_64
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROGS)

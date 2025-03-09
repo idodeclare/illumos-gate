@@ -36,3 +36,5 @@ install:	all .WAIT $(ROOTPROG) $(ROOTLIBBLURB) $(ROOTCCSBINLINK)
 
 include		../Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

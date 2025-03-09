@@ -62,3 +62,6 @@ install:	$(TYPEPROG)
 
 clean:
 	$(RM) $(OBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

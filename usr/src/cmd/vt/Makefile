@@ -62,3 +62,6 @@ clean:
 	-$(RM) $(VTDAEMON_OBJ) $(VTINFO_OBJ)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(VTDAEMON_OBJ) $(VTINFO_OBJ)

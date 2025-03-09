@@ -228,3 +228,6 @@ include ../../Makefile.xref
 
 # include MACH-specific library targets
 include ../Makefile.mach
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

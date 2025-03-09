@@ -62,3 +62,6 @@ MANFILES= 	gss_accept_sec_context.3gss	\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

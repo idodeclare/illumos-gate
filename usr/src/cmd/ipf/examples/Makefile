@@ -74,3 +74,5 @@ include ../../Makefile.targ
 
 .PARALLEL:
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

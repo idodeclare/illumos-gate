@@ -70,3 +70,7 @@ clean:
 lint: lint_SRCS
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(COMMON_OBJS) $(OBJS) $(POFILES) \
+	    $(STAT_COMMON_OBJS)

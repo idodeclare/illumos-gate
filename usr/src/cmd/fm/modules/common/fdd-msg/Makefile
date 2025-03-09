@@ -33,3 +33,7 @@ LDLIBS_i386 = -L$(ROOT)/usr/lib/fm -lipmi -lumem -lfmd_agent
 LDFLAGS_i386 = -R/usr/lib/fm
 LDLIBS += $(LDLIBS_$(MACH))
 LDFLAGS += $(LDFLAGS_$(MACH))
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)
