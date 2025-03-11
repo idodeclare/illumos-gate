@@ -124,8 +124,9 @@ extern int lex_lineno;
 #define	SHELP_END	"end"
 #define	SHELP_EXIT	"exit [-F]"
 #define	SHELP_EXPORT	"export [-f output-file]"
-#define	SHELP_HELP	"help [commands] [syntax] [usage] [<command-name>]"
-#define	SHELP_INFO	"info [<resource-type> [property-name=property-value]*]"
+#define	SHELP_HELP	"help [usage] [commands] [syntax] [<command-name>]"
+#define	SHELP_INFO	"info [<resource-type> [ <property-name>=" \
+	"<property-value> ]*]"
 #define	SHELP_REMOVE	"remove [-F] <resource-type> " \
 	"[ <property-name>=<property-value> ]*\n" \
 	"\t(global scope)\n" \
@@ -903,9 +904,10 @@ long_help(int cmd_num)
 			return (gettext("Displays information about the "
 			    "current configuration.  If resource\n\ttype is "
 			    "specified, displays only information about "
-			    "resources of\n\tthe relevant type.  If resource "
-			    "id is specified, displays only\n\tinformation "
-			    "about that resource."));
+			    "resources of\n\tthe relevant type.  If any "
+			    "property name/value pairs are specified,\n"
+			    "\tdisplays only information about resources "
+			    "meeting the given criteria."));
 		case CMD_VERIFY:
 			return (gettext("Verifies current configuration "
 			    "for correctness (some resource types\n\thave "

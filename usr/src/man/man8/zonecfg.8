@@ -1454,7 +1454,7 @@ scope.
 .ad
 .sp .6
 .RS 4n
-Clear the value for the property.
+Clear the values for the property.
 .RE
 
 .sp
@@ -1512,8 +1512,9 @@ All validation of the new zone happens during the
 .B attach
 process, not during zone configuration.
 .sp
-Use the \fB-b\fR option to create a blank configuration. Without arguments,
-\fBcreate\fR applies the default settings.
+Use the \fB-b\fR option to create a blank configuration.
+.sp
+Without arguments, \fBcreate\fR applies the default settings.
 .RE
 
 .sp
@@ -1547,6 +1548,27 @@ added to the in-memory configuration (see
 .B commit
 for saving this to stable storage), and the scope reverts to global. If the
 specification is incomplete, it issues an appropriate error message.
+.RE
+
+.sp
+.ne 2
+.na
+.B exit
+.RB [ -F ]
+.ad
+.sp .6
+.RS 4n
+Exit the
+.B zonecfg
+session. A
+.B commit
+is automatically attempted if needed. You can also use an
+.B EOF
+character to exit
+.BR zonecfg .
+The
+.B -F
+option can be used to force the action.
 .RE
 
 .sp
@@ -1606,7 +1628,8 @@ Display information about the current configuration. If
 is specified, displays only information about resources of the relevant type.
 If any
 .I property\-name
-value pairs are specified, displays only information about resources meeting
+.I property\-value
+pairs are specified, displays only information about resources meeting
 the given criteria. In the resource scope, any arguments are ignored, and
 .B info
 displays information about the resource which is currently being added or
@@ -1617,22 +1640,44 @@ modified.
 .ne 2
 .na
 .B remove
+.RB [ -F ]
 .I resource\-type
 .RI [ property\-name\c
 .BI = property\-value\c
 ] (global scope)
 .ad
+.br
+.na
+.B remove
+.I property\-name
+.I property\-value
+(resource scope)
+.ad
 .sp .6
 .RS 4n
 In the global scope, removes the specified resource. The [] syntax means
-0 or more of whatever is inside the square braces. If you want only to remove a
-single instance of the resource, you must specify enough
+0 or more of whatever is inside the square brackets. If you want only to remove
+a single instance of the resource, you must specify enough
 .I property\-name property\-value
 pairs for the resource to be uniquely identified. If no
 .I property\-name property\-value
 pairs are specified, all instances will be removed. If there are more than one
 pair specified, a confirmation is required, unless you use the \fB-F\fR
 option.
+.sp
+In the resource scope, removes the specified property.
+.RE
+
+.sp
+.ne 2
+.na
+.B revert
+.RB [ -F ]
+.ad
+.sp .6
+.RS 4n
+Revert the configuration back to the last committed state. The \fB-F\fR option
+can be used to force the action.
 .RE
 
 .sp
@@ -1689,39 +1734,6 @@ All resources have all of their required properties specified.
 .el o
 A \fBzonepath\fR is specified.
 .RE
-.RE
-
-.sp
-.ne 2
-.na
-.B revert
-.RB [ -F ]
-.ad
-.sp .6
-.RS 4n
-Revert the configuration back to the last committed state. The \fB-F\fR option
-can be used to force the action.
-.RE
-
-.sp
-.ne 2
-.na
-.B exit
-.RB [ -F ]
-.ad
-.sp .6
-.RS 4n
-Exit the
-.B zonecfg
-session. A
-.B commit
-is automatically attempted if needed. You can also use an
-.B EOF
-character to exit
-.BR zonecfg .
-The
-.B -F
-option can be used to force the action.
 .RE
 
 .SH EXAMPLES
