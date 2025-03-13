@@ -909,9 +909,9 @@ long_help(int cmd_num)
 			    "\tdisplays only information about resources "
 			    "meeting the given criteria."));
 		case CMD_VERIFY:
-			return (gettext("Verifies current configuration "
-			    "for correctness (some resource types\n\thave "
-			    "required properties)."));
+			return (gettext("Verifies current configuration for "
+			"correctness, with zonepath\n\tspecified and with all "
+			"resources having their required properties."));
 		case CMD_COMMIT:
 			(void) snprintf(line, sizeof (line),
 			    gettext("Commits current configuration.  "
