@@ -76,7 +76,7 @@ The \fBchmod\fR utility changes or assigns the mode of a file.
 .sp
 .LP
 \fBchmod\fR can also be used to modify Access Control Lists (ACLs) on files and
-directories, and to modify boolean read-write system attributes on regular
+directories and to modify boolean read-write system attributes on regular
 files, directories, and opaque extended attribute files.
 .SS "Absolute Mode"
 .LP
@@ -510,7 +510,7 @@ Only the owner of a file or directory (or the super-user) can change that
 file's or directory's mode. Only the super-user can set the sticky bit on a
 non-directory file. If you are not super-user, \fBchmod\fR masks the sticky-bit
 but does not return an error. In order to turn on a file's set-group-ID bit,
-your own group ID must correspond to the file's and group execution must be
+your own group ID must correspond to the file's, and group execution must be
 set.
 .RE
 
@@ -520,9 +520,9 @@ An ACL Operation command line has the following format:
 .sp
 .in +2
 .nf
-chmod [\fIoptions\fR] A[\fIindex\fR]- \fIfile\fR ...
-chmod [\fIoptions\fR] A-\fIacl_specification\fR \fIfile\fR ...
-chmod [\fIoptions\fR] A[\fIindex\fR][+|=]\fIacl_specification\fR \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] A[\fIindex\fR]- \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] A-\fIacl_specification\fR \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] A[\fIindex\fR][+|=]\fIacl_specification\fR \fIfile\fR ...
 .fi
 .in -2
 .sp
@@ -862,7 +862,7 @@ Permission to list the contents of a directory.
 .BR "write_data " ( w )
 .ad
 .RS 24n
-Permission to modify a file's data. anywhere in the file's offset range.
+Permission to modify a file's data, anywhere in the file's offset range.
 .RE
 
 .sp
@@ -937,8 +937,8 @@ The ability to read basic attributes (non-ACLs) of a file.
 .BR "write_attributes " ( A )
 .ad
 .RS 24n
-Permission to change the times associated with a file or directory to an
-arbitrary value.
+Permission to change the times associated with a file or directory to
+arbitrary values.
 .RE
 
 .sp
@@ -992,7 +992,8 @@ Permission to change the owner of a file.
 .BR "synchronize " ( s )
 .ad
 .RS 24n
-Permission to access file locally at server with synchronized reads and writes.
+Permission to access a file locally at a server with synchronized reads and
+writes.
 .sp
 Currently, this permission is not supported.
 .RE
@@ -1017,7 +1018,7 @@ Permissions can be specified with these letters in the following way:
 .sp
 .in +2
 .nf
-rwx--D--------
+\fBrwx--D--------\fR
 .fi
 .in -2
 .sp
@@ -1028,7 +1029,7 @@ The hyphens can be removed to compact the string as follows:
 .sp
 .in +2
 .nf
-rwxD
+\fBrwxD\fR
 .fi
 .in -2
 .sp
@@ -1085,7 +1086,7 @@ a forward slash (\fB/\fR) character.
 .BR "file_inherit " ( f )
 .ad
 .RS 20n
-Inherit to all newly created files.
+Inherit to all newly-created files.
 .RE
 
 .sp
@@ -1094,7 +1095,7 @@ Inherit to all newly created files.
 .BR "dir_inherit " ( d )
 .ad
 .RS 20n
-Inherit to all newly created directories.
+Inherit to all newly-created directories.
 .RE
 
 .sp
@@ -1103,8 +1104,8 @@ Inherit to all newly created directories.
 .BR "inherit_only " ( i )
 .ad
 .RS 20n
-When placed on a directory, do not apply to the directory, only to newly
-created files and directories. This flag requires that \fBfile_inherit\fR and/or
+When placed on a directory, do not apply to the directory, only to newly-created
+files and directories. This flag requires that \fBfile_inherit\fR and/or
 \fBdir_inherit\fR is also specified.
 .RE
 
@@ -1152,15 +1153,15 @@ ACE was inherited.
 .LP
 The inheritance flags listed can also be specified in the compact format or as
 positional arguments similar to the \fBls\fR \fB-V\fR format. A hyphen
-character indicates that the inheritance flag at that position is not specified
-in the positional ACL format.
+character in the positional ACL format indicates that the inheritance flag at
+that position is not specified.
 .sp
 .LP
 The inheritance flags can be specified in any of the following equivalent ways:
 .sp
 .in +2
 .nf
-file_inherit/dir_inherit/no_propagate
+\fBfile_inherit/dir_inherit/no_propagate\fR
 .fi
 .in -2
 .sp
@@ -1168,7 +1169,7 @@ file_inherit/dir_inherit/no_propagate
 .sp
 .in +2
 .nf
-fd-n---
+\fBfd-n---\fR
 .fi
 .in -2
 .sp
@@ -1176,7 +1177,7 @@ fd-n---
 .sp
 .in +2
 .nf
-fdn
+\fBfdn\fR
 .fi
 .in -2
 .sp
@@ -1187,9 +1188,9 @@ With this inheritance model, an ACL entry can be specified such as:
 .sp
 .in +2
 .nf
-user:tom:read_data/write_data/read_attributes:file_inherit:allow
+\fBuser:tom:read_data/write_data/read_attributes:file_inherit:allow
 user:fred:read_data:file_inherit/dir_inherit:deny
-user:bob:read_data:allow
+user:bob:read_data:allow\fR
 .fi
 .in -2
 .sp
@@ -1200,7 +1201,7 @@ An attribute operation command line has the following format:
 .sp
 .in +2
 .nf
-chmod [\fIoptions\fR] \fIattribute_specification_list\fR \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] \fIattribute_specification_list\fR \fIfile\fR ...
 .fi
 .in -2
 .sp
@@ -1539,8 +1540,8 @@ Operation\fR in the \fBDESCRIPTION\fR section for more information.
 .sp .6
 .RS 4n
 Represents the modification to performed on the file's attributes. See
-Attribute Operation in the \fBDESCRIPTION\fR section of this manual page for
-more information.
+\fBAttribute Operation\fR in the \fBDESCRIPTION\fR section of this manual page
+for more information.
 .RE
 
 .sp
@@ -2211,12 +2212,12 @@ $ ls -v file
 .sp
 .LP
 You can only set inheritance flags on ZFS files. When setting ACLs on
-directories,  several inheritance flags can be optionally set.
+directories, several inheritance flags can be optionally set.
 
 .sp
 .LP
 Suppose you have an ACL entry for user \fBlp\fR that you want to be  inherited
-to newly created files in a directory.  First, you need to create an
+to newly-created files in a directory.  First, you need to create an
 inheritable ACL entry on the directory:
 
 .sp
@@ -2242,7 +2243,7 @@ drwxr-xr-x+  2 marks   staff          2 Aug 23 09:08 test.dir/
 
 .sp
 .LP
-The \fBlp\fR entry is inherited to newly created files in the directory
+The \fBlp\fR entry is inherited to newly-created files in the directory
 \fBtest.dir\fR.
 
 .sp
@@ -2268,7 +2269,7 @@ $ ls -v test.dir/file.test
 
 .sp
 .LP
-The user \fBlp\fR entry is inherited to the newly created file. Multiple
+The user \fBlp\fR entry is inherited to the newly-created file. Multiple
 combinations of the inheritance flags can be specified. For example, if you
 wanted the \fBlp\fR entry to also be inherited to directories, then the
 following command can be used:

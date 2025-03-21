@@ -251,11 +251,11 @@ Reading from right to left, you see that the current directory holds one file,
 named \fBpart2\fR. Next, the last time that file's contents were modified was
 \fB9:42 A.M.\fR on \fBMay 16\fR. The file contains 10,876 characters, or bytes.
 The owner of the file, or the user, belongs to the group \fBdev\fR (perhaps
-indicating \fBdevelopment\fR), and his or her login name is \fBsmith\fR. The
+indicating development), and his or her login name is \fBsmith\fR. The
 number, in this case \fB1\fR, indicates the number of links to file \fBpart2\fR
 (see \fBcp\fR(1)). The plus sign (\fB+\fR) indicates that there is an ACL
 associated with the file. If the \fB-@\fR option has been specified, the
-presence of extended attributes supersede the presence of an ACL and the
+presence of extended attributes supersedes the presence of an ACL, and the
 plus sign is replaced with an 'at' sign (\fB@\fR). Finally, the dash and
 letters tell you that user, group, and others have permissions to read, write,
 and execute \fBpart2\fR.
@@ -1124,7 +1124,7 @@ For each file, prints the i-node number in the first column of the report.
 .ad
 .sp .6
 .RS 4n
-All sizes are printed in kbytes. Equivalent to \fB--block-size=1024\fR.
+All sizes are printed in kilobytes. Equivalent to \fB--block-size=1024\fR.
 .RE
 
 .sp
@@ -1597,7 +1597,7 @@ displayed by using the \fB-v\fR or \fB-V\fR options:
 .ad
 .sp .6
 .RS 4n
-Inherit to all newly created files.
+Inherit to all newly-created files.
 .RE
 
 .sp
@@ -1607,7 +1607,7 @@ Inherit to all newly created files.
 .ad
 .sp .6
 .RS 4n
-Inherit to all newly created directories.
+Inherit to all newly-created directories.
 .RE
 
 .sp
@@ -1617,8 +1617,8 @@ Inherit to all newly created directories.
 .ad
 .sp .6
 .RS 4n
-When placed on a directory, do not apply to the directory, only to newly
-created files and directories. This flag requires that either
+When placed on a directory, do not apply to the directory, only to newly-created
+files and directories. This flag requires that either
 \fBfile_inherit\fR and/or \fBdir_inherit\fR are also specified.
 .RE
 
@@ -1948,7 +1948,7 @@ still be modified.
 .RS 4n
 Indicate that a file can be interpreted as sparse.  It does not indicate that
 the file is actually sparse or not.  The sparse attribute is cleared when the
-file is truncated to zero length.  illumos systems have no other special
+file is truncated to zero length.  illumos-based systems have no other special
 semantics for this attribute.
 .RE
 
@@ -1959,7 +1959,7 @@ semantics for this attribute.
 .ad
 .sp .6
 .RS 4n
-illumos systems have no special semantics for this attribute.
+illumos-based systems have no special semantics for this attribute.
 .RE
 
 .RE
@@ -2163,7 +2163,7 @@ Use color if a terminal is present.
 .ad
 .sp .6
 .RS 4n
-Never use color. This is the default
+Never use color. This is the default.
 .RE
 
 See \fBCOLOR OUTPUT\fR for information on how to control the output colors.
@@ -2187,7 +2187,7 @@ option, except \fB*\fR is not appended to executable files.
 .ad
 .sp .6
 .RS 4n
-Display human scaled sizes similar to the \fB-h\fR option, except values are
+Display human-scaled sizes similar to the \fB-h\fR option, except values are
 repeatedly divided by 1000 instead of 1024. The last option \fB--si\fR or
 \fB-h\fR determines the divisor used.
 .RE
@@ -2328,14 +2328,50 @@ Executable files are not marked. Follows symlinks named as operands.
 .sp
 .LP
 Specifying more than one of the options in the following groups of mutually
-exclusive options is not considered an error: \fB-C\fR and \fB-l\fR\~(ell),
-\fB-m\fR and \fB-l\fR\~(ell), \fB-x\fR and \fB-l\fR\~(ell), \fB-@\fR and
-\fB-l\fR\~(ell), \fB-C\fR and \fB-1\fR\~(one), \fB-H\fR and \fB-L\fR, \fB-c\fR
-and \fB-u\fR, \fB-e\fR and \fB-E\fR, \fB-t\fR and \fB-S\fR and \fB-U\fR. The last
-option specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-%\~atime\fR,
-\fB-%\~crtime\fR, \fB-%\~ctime\fR, and \fB-%\~mtime\fR) determines the
-timestamps used for sorting or in long format listings. The last \fB-t\fR,
-\fB-S\fR, or \fB-U\fR option determines the sorting behavior.
+exclusive options is not considered an error:
+.B -C
+and
+.BR -l \~(ell),
+.B -m
+and
+.BR -l \~(ell),
+.B -x
+and
+.BR -l \~(ell),
+.B -@
+and
+.BR -l \~(ell),
+.B -C
+and
+.BR -1 \~(one),
+.B -H
+and
+.BR -L ,
+.B -c
+and
+.BR -u ,
+.B -e
+and
+.BR -E ,
+.B -t
+and
+.B -S
+and
+.BR -U .
+The last option specifying a specific timestamp
+.RB ( -c ,
+.BR -u ,
+.BR -%\~atime ,
+.BR -%\~crtime ,
+.BR -%\~ctime ,
+and
+.BR -%\~mtime )
+determines the timestamps used for sorting or in long format listings. The last
+.BR -t ,
+.BR -S ,
+or
+.B -U
+option determines the sorting behavior.
 .SS "/usr/xpg6/bin/ls"
 .ne 2
 .na
@@ -2366,14 +2402,50 @@ unless the \fB-H\fR or \fB-L\fR option is specified.
 .sp
 .LP
 Specifying more than one of the options in the following mutually exclusive
-pairs is not considered an error: \fB-C\fR and \fB-l\fR\~(ell), \fB-m\fR and
-\fB-l\fR\~(ell), \fB-x\fR and \fB-l\fR\~(ell), \fB-@\fR and \fB-l\fR\~(ell),
-\fB-C\fR and \fB-1\fR\~(one), \fB-H\fR and \fB-L\fR, \fB-c\fR and \fB-u\fR,
-\fB-e\fR and \fB-E\fR, \fB-t\fR and \fB-S\fR and \fB-U\fR. The last option
-specifying a specific timestamp (\fB-c\fR, \fB-u\fR, \fB-%\~atime\fR,
-\fB-%\~crtime\fR, \fB-%\~ctime\fR, and \fB-%\~mtime\fR) determines the
-timestamps used for sorting or in long format listings. The last \fB-t\fR,
-\fB-S\fR, or \fB-U\fR option determines the sorting behavior.
+pairs is not considered an error:
+.B -C
+and
+.BR -l \~(ell),
+.B -m
+and
+.BR -l \~(ell),
+.B -x
+and
+.BR -l \~(ell),
+.B -@
+and
+.BR -l \~(ell),
+.B -C
+and
+.BR -1 \~(one),
+.B -H
+and
+.BR -L ,
+.B -c
+and
+.BR -u ,
+.B -e
+and
+.BR -E ,
+.B -t
+and
+.B -S
+and
+.BR -U .
+The last option specifying a specific timestamp
+.RB ( -c ,
+.BR -u ,
+.BR -%\~atime ,
+.BR -%\~crtime ,
+.BR -%\~ctime ,
+and
+.BR -%\~mtime )
+determines the timestamps used for sorting or in long format listings. The last
+.BR -t ,
+.BR -S ,
+or
+.B -U
+option determines the sorting behavior.
 .SH OPERANDS
 The following operand is supported:
 .sp
@@ -2544,13 +2616,28 @@ example% ls -aisn
 
 .sp
 .LP
-This command provides information on \fBa\fRll files, including those that
-begin with a dot (\fBa\fR), the \fBi\fR-node number, the memory address of the
-i-node associated with the file, printed in the left-hand column (\fBi\fR);
-the \fBs\fRize (in blocks) of the files, printed in the column to the right of
-the i-node numbers (\fBs\fR); finally, the report is displayed in the
-\fBn\fRumeric version of the long list, printing the \fBUID\fR (instead of user
-name) and \fBGID\fR (instead of group name) numbers associated with the files.
+This command provides information on
+.BR a ll
+files, including those that begin with a dot
+.RB ( a );
+the
+.BR i -node
+number, the memory address of the i-node associated with the file, printed in
+the left-hand column
+.RB ( i );
+the
+.BR s ize
+(in blocks) of the files, printed in the column to the right of the i-node
+numbers
+.RB ( s );
+finally, the report is displayed in the
+.BR n umeric
+version of the long list, printing the
+.B UID
+(instead of user name) and
+.B GID
+(instead of group name) numbers associated with the files
+.RB ( n ).
 
 .sp
 .LP
@@ -2838,6 +2925,6 @@ leading dots as well as case are ignored in determining the sort order.
 .LP
 For additional information regarding Windows Security Identifiers, consult
 Microsoft support document, \fISecurity identifiers\fR, which can be found at
-Microsoft's support site: https://support.microsoft.com/en-us/kb/243330/. Refer
+Microsoft's support site: https://support.microsoft.com/en\-us/kb/243330/. Refer
 to the sub-section, "Well-known SIDs," where SIDs applicable to "Windows
 operating systems" are specified.
