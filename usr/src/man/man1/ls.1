@@ -44,33 +44,33 @@
 .\" Portions Copyright (c) 1992, X/Open Company Limited All Rights Reserved
 .\" Copyright (c) 2009, Sun Microsystems, Inc. All Rights Reserved
 .\" Copyright 2016 Nexenta Systems, Inc.  All Rights Reserved.
-.\" Copyright 2024 Chris Fraire <cfraire@me.com>
+.\" Copyright 2025 Chris Fraire <cfraire@me.com>
 .\"
-.TH LS 1 "Jan 1, 2024"
+.TH LS 1 "Mar 21, 2025"
 .SH NAME
 ls \- list contents of directory
 .SH SYNOPSIS
 .nf
 \fB/usr/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
      [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
-     [\fB--block-size\fB \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
-     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
+     [\fB--block-size \fIsize\fR] [\fB--color\fR[\fB=\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .LP
 .nf
 \fB/usr/xpg4/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
      [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
-     [\fB--block-size\fR \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
-     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
+     [\fB--block-size \fIsize\fR] [\fB--color\fR[\fB=\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .LP
 .nf
 \fB/usr/xpg6/bin/ls\fR [\fB-aAbcCdeEfFghHiklLmnopqrRsStuUwvVx1@\fR]
      [\fB-/ c\fR | \fBv\fR] [\fB-% atime\fR | \fBcrtime\fR | \fBctime\fR | \fBmtime\fR | \fBall\fR]
-     [\fB--block-size\fR \fIsize\fR] [\fB--color\fR[\fB=\fR\fIwhen\fR]] [\fB--file-type\fR]
-     [\fB--si\fR] [\fB--time-style\fR \fIstyle\fR] [\fIfile\fR]...
+     [\fB--block-size \fIsize\fR] [\fB--color\fR[\fB=\fIwhen\fR]] [\fB--file-type\fR]
+     [\fB--si\fR] [\fB--time-style \fIstyle\fR] [\fIfile\fR]...
 .fi
 
 .SH DESCRIPTION
@@ -249,7 +249,7 @@ locale:
 .LP
 Reading from right to left, you see that the current directory holds one file,
 named \fBpart2\fR. Next, the last time that file's contents were modified was
-\fB9:42 A.M.\fR on \fBMay 16\fR. The file contains 10,876 characters, or bytes.
+\fB9:42 A.M.\fR on \fBMay 16\fR. The file contains 10,876 bytes.
 The owner of the file, or the user, belongs to the group \fBdev\fR (perhaps
 indicating development), and his or her login name is \fBsmith\fR. The
 number, in this case \fB1\fR, indicates the number of links to file \fBpart2\fR
@@ -314,7 +314,7 @@ The indicated permission is \fInot\fR granted.
 .ad
 .sp .6
 .RS 4n
-The \fBs\fRet-user-ID or \fBs\fRet-group-ID bit is on, and the corresponding
+The \fBs\fRet\-user\-ID or \fBs\fRet\-group\-ID bit is on, and the corresponding
 user or group execute bit is also on.
 .RE
 
@@ -325,8 +325,8 @@ user or group execute bit is also on.
 .ad
 .sp .6
 .RS 4n
-Undefined bit-state (the set-user-ID or set-group-id bit is on and the user or
-group execute bit is off). For group permissions, this applies only to
+Undefined bit-state (the set\-user\-ID or set\-group\-ID bit is on and the user
+or group execute bit is off). For group permissions, this applies only to
 non-regular files.
 .RE
 
@@ -358,8 +358,8 @@ The 1000 bit is turned on, and execute bit is off (undefined bit-state).
 .ad
 .sp .6
 .RS 4n
-Mandatory locking occurs during access (on a regular file, the set-group-ID bit
-is on and the group execute bit is off).
+Mandatory locking occurs during access (on a regular file, the set\-group\-ID
+bit is on and the group execute bit is off).
 .RE
 
 .SS "/usr/xpg4/bin/ls and /usr/xpg6/bin/ls"
@@ -369,15 +369,15 @@ is on and the group execute bit is off).
 .ad
 .sp .6
 .RS 4n
-Mandatory locking occurs during access (on a regular file, the set-group-ID bit
-is on and the group execute bit is off).
+Mandatory locking occurs during access (on a regular file, the set\-group\-ID
+bit is on and the group execute bit is off).
 .RE
 
 .sp
 .LP
 For user and group permissions, the third position is sometimes occupied by a
 character other than \fBx\fR or \fB-\fR. \fBs\fR or \fBS\fR also can occupy
-this position, referring to the state of the set-ID bit, whether it be the
+this position, referring to the state of the set\-ID bit, whether it be the
 user's or the group's. The ability to assume the same ID as the user during
 execution is, for example, used during login when you begin as root but need to
 assume the identity of the user you login as.
@@ -395,7 +395,7 @@ For others permissions, the third position can be occupied by \fBt\fR or
 If color output is enabled, the environment variable LS_COLORS is checked.  If
 it exists, its contents are used to control the colors used to display
 filenames.  If it is not set, a default list of colors is used. The format of
-LS_COLORS is a colon separated list of attribute specifications. Each attribute
+LS_COLORS is a colon-separated list of attribute specifications. Each attribute
 specification is of the format
 .sp
 .in +2
@@ -581,7 +581,7 @@ Sticky bit and \fBworld\fR writable
 
 .sp
 .LP
-\fIattr\fR is a semicolon delimited list of color and display attributes which
+\fIattr\fR is a semicolon-delimited list of color and display attributes which
 are combined to determine the final output color. Any combination of \fIattr\fR
 values can be specified. Possible \fIattr\fR values are:
 .sp
@@ -1080,9 +1080,9 @@ The same as \fB-l\fR, except that the owner is not printed.
 .ad
 .sp .6
 .RS 4n
-All sizes are scaled to a human readable format, for example, \fB14K\fR,
+All sizes are scaled to a human-readable format, for example, \fB14K\fR,
 \fB234M\fR, \fB2.7G\fR, or \fB3.0T\fR. Scaling is done by repetitively dividing
-by \fB1024\fR. The last \fB--si\fR or \fB-h\fR option determines the divisor
+by 1024 or 1000. The last \fB--si\fR or \fB-h\fR option determines the divisor
 used.
 .RE
 
@@ -1124,7 +1124,7 @@ For each file, prints the i-node number in the first column of the report.
 .ad
 .sp .6
 .RS 4n
-All sizes are printed in kilobytes. Equivalent to \fB--block-size=1024\fR.
+All sizes are printed in kilobytes. Equivalent to \fB--block\-size=1024\fR.
 .RE
 
 .sp
@@ -1347,7 +1347,7 @@ The format of the displayed ACL is as follows:
 .sp
 .in +2
 .nf
-\fIentry_type\fR:\fIpermissions\fR:\fIinheritance-flags\fR:\fIaccess_type\fR
+\fIentry_type\fR:\fIpermissions\fR:\fIinheritance\-flags\fR:\fIaccess_type\fR
 .fi
 .in -2
 .sp
@@ -1588,7 +1588,7 @@ Permission to access file locally at server with synchronize reads and writes.
 No permission granted
 .RE
 
-The following \fIinheritance-flags\fR, supported by the NFSv4 ACL model, are
+The following \fIinheritance\-flags\fR, supported by the NFSv4 ACL model, are
 displayed by using the \fB-v\fR or \fB-V\fR options:
 .sp
 .ne 2
@@ -1899,7 +1899,7 @@ fails with \fBEPERM\fR.
 .ad
 .sp .6
 .RS 4n
-illumos systems have no special semantics for this attribute.
+illumos-based systems have no special semantics for this attribute.
 .RE
 
 .sp
@@ -1923,8 +1923,8 @@ when attempting to unlink or rename files and directories that are marked as
 .ad
 .sp .6
 .RS 4n
-Indicate that a file is offline.  illumos systems have no special semantics for
-this attribute.
+Indicate that a file is offline.  illumos-based systems have no special
+semantics for this attribute.
 .RE
 
 .sp
@@ -1996,7 +1996,7 @@ the name prefixed by 'no' when it is not set.
 The attribute name \fBcrtime\fR and all other timestamps are handled by the
 option \fB-%\fR with the respective timestamp option arguments and also with
 \fBall\fR option argument. The display positions are as follows: The display in
-verbose mode (\fB-/ v\fR) uses full attribute names  when it is set and the
+verbose mode (\fB-/ v\fR) uses full attribute names when it is set and the
 name prefixed by \fBno\fR when it is not set. The attribute name \fBcrtime\fR
 and all other timestamps are handled by the option \fB-%\fR with the respective
 timestamp option arguments and also with \fBall\fR option argument.
@@ -2195,7 +2195,7 @@ repeatedly divided by 1000 instead of 1024. The last option \fB--si\fR or
 .sp
 .ne 2
 .na
-\fB--time-style\fR \fIstyle\fR
+\fB--time-style \fIstyle\fR
 .ad
 .sp .6
 .RS 4n
@@ -2570,7 +2570,7 @@ drwxr-xr-x   2 marks    staff          2 Mar 14 10:17 test.dir
 .sp
 .LP
 The following example illustrates the \fBls\fR \fB-v\fR behavior when listing
-ACL  information on a UFS file.
+ACL information on a UFS file.
 
 .sp
 .in +2
@@ -2685,7 +2685,7 @@ example% ls -/ c file        (extended system attribute
 
 .sp
 .LP
-\fBarchive\fR and \fBav_modified\fR attributes are set by default on  an
+\fBarchive\fR and \fBav_modified\fR attributes are set by default on an
 extended system attribute supported file.
 .sp
 .in +2

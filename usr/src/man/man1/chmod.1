@@ -44,9 +44,9 @@
 .\" Portions Copyright (c) 1992, X/Open Company Limited All Rights Reserved
 .\" Copyright (c) 2008, Sun Microsystems, Inc. All Rights Reserved.
 .\" Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
-.\" Copyright 2024 Chris Fraire <cfraire@me.com>
+.\" Copyright 2025 Chris Fraire <cfraire@me.com>
 .\"
-.TH CHMOD 1 "Jan 1, 2024"
+.TH CHMOD 1 "Mar 21, 2025"
 .SH NAME
 chmod \- change the permissions mode of a file
 .SH SYNOPSIS
@@ -67,7 +67,7 @@ chmod \- change the permissions mode of a file
 
 .LP
 .nf
-\fBchmod\fR [\fB-fR\fR] [\fB-@\fR \fInamed_attribute\fR]...\fIattribute_specification_list\fR \fIfile\fR ...
+\fBchmod\fR [\fB-fR\fR] [\fB-@\fR \fInamed_attribute\fR]... \fIattribute_specification_list\fR \fIfile\fR ...
 .fi
 
 .SH DESCRIPTION
@@ -118,7 +118,7 @@ Enable mandatory locking if \fI#\fR is \fB6\fR, \fB4\fR, \fB2\fR, or \fB0\fR.
 For directories, files are created with BSD semantics for propagation of the
 group ID. With this option, files and subdirectories created in the directory
 inherit the group ID of the directory, rather than of the current process. For
-directories, the set-gid bit can only be set or cleared by using symbolic mode.
+directories, the set\-gid bit can only be set or cleared by using symbolic mode.
 .RE
 
 .sp
@@ -414,7 +414,7 @@ read permission
 \fB\fBs\fR\fR
 .ad
 .RS 9n
-user or group set-ID
+user or group set\-ID
 .RE
 
 .sp
@@ -485,17 +485,16 @@ The letter \fBs\fR is only meaningful with \fBu\fR or \fBg\fR, and \fBt\fR only
 works with \fBu\fR.
 .sp
 Mandatory file and record locking (\fBl\fR) refers to a file's ability to have
-its reading or writing permissions locked while a program is accessing that
-file.
+its read or write permissions locked while a program is accessing that file.
 .sp
-In a directory which has the set-group-ID bit set (reflected as either
+In a directory which has the set\-group\-ID bit set (reflected as either
 \fB-----s---\fR or \fB-----l---\fR in the output of \fB\&'ls -ld'\fR), files
 and subdirectories are created with the group-ID of the parent directory, not
 that of current process.
 .sp
 It is not possible to permit group execution and enable a file to be locked on
 execution at the same time. In addition, it is not possible to turn on the
-set-group-ID bit and enable a file to be locked on execution at the same time.
+set\-group\-ID bit and enable a file to be locked on execution at the same time.
 The following examples, therefore, are invalid and elicit error messages:
 .sp
 .in +2
@@ -509,7 +508,7 @@ chmod g+s,+l \fIfile\fR
 Only the owner of a file or directory (or the super-user) can change that
 file's or directory's mode. Only the super-user can set the sticky bit on a
 non-directory file. If you are not super-user, \fBchmod\fR masks the sticky-bit
-but does not return an error. In order to turn on a file's set-group-ID bit,
+but does not return an error. In order to turn on a file's set\-group\-ID bit,
 your own group ID must correspond to the file's, and group execution must be
 set.
 .RE
@@ -520,9 +519,9 @@ An ACL Operation command line has the following format:
 .sp
 .in +2
 .nf
-\fBchmod\fR [\fIoptions\fR] A[\fIindex\fR]- \fIfile\fR ...
-\fBchmod\fR [\fIoptions\fR] A-\fIacl_specification\fR \fIfile\fR ...
-\fBchmod\fR [\fIoptions\fR] A[\fIindex\fR][+|=]\fIacl_specification\fR \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR]\fB- \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] \fBA-\fIacl_specification file\fR ...
+\fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR][\fB+\fR|\fB=\fR]\fIacl_specification file\fR ...
 .fi
 .in -2
 .sp
@@ -742,14 +741,14 @@ user:tom:rw-,mask:rwx,group:staff:r-x
 .sp
 .LP
 NFSv4 ACLs provide richer ACL semantics. They provide both allow and deny
-entries, finer grained permissions, and enhanced inheritance control.
+entries, finer-grained permissions, and enhanced inheritance control.
 .sp
 .LP
 NFSv4 ACLs are specified as colon (\fB:\fR) separated fields of the following.
 .sp
 .ne 2
 .na
-\fBowner@:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBowner@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -759,7 +758,7 @@ Permissions for file owner.
 .sp
 .ne 2
 .na
-\fBgroup@:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroup@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -769,7 +768,7 @@ Permissions for file group owner.
 .sp
 .ne 2
 .na
-\fBeveryone@:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBeveryone@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -779,7 +778,7 @@ Permissions for everyone, including file owner and group owner.
 .sp
 .ne 2
 .na
-\fBuser:\fR\fIusername\fR\fB:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBuser:\fIusername\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -789,7 +788,7 @@ Permissions for a specific user.
 .sp
 .ne 2
 .na
-\fBusersid:\fR\fIsid-string\fR\fB:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBusersid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -799,7 +798,7 @@ Permissions for a specific user, but user is specified by SID.
 .sp
 .ne 2
 .na
-\fBgroup:\fR\fIgroupname\fR\fB:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroup:\fIgroupname\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -809,7 +808,7 @@ Permissions for a specific group.
 .sp
 .ne 2
 .na
-\fBgroupsid:\fR\fIsid-string\fR\fB:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroupsid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -819,7 +818,7 @@ Permissions for a specific group, but group is specified by SID.
 .sp
 .ne 2
 .na
-\fBsid:\fR\fIsid-string\fR\fB:\fR\fIpermissions\fR[\fB:\fR\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBsid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -1018,7 +1017,7 @@ Permissions can be specified with these letters in the following way:
 .sp
 .in +2
 .nf
-\fBrwx--D--------\fR
+rwx--D--------
 .fi
 .in -2
 .sp
@@ -1029,7 +1028,7 @@ The hyphens can be removed to compact the string as follows:
 .sp
 .in +2
 .nf
-\fBrwxD\fR
+rwxD
 .fi
 .in -2
 .sp
@@ -1161,7 +1160,7 @@ The inheritance flags can be specified in any of the following equivalent ways:
 .sp
 .in +2
 .nf
-\fBfile_inherit/dir_inherit/no_propagate\fR
+file_inherit/dir_inherit/no_propagate
 .fi
 .in -2
 .sp
@@ -1169,7 +1168,7 @@ The inheritance flags can be specified in any of the following equivalent ways:
 .sp
 .in +2
 .nf
-\fBfd-n---\fR
+fd-n---
 .fi
 .in -2
 .sp
@@ -1177,7 +1176,7 @@ The inheritance flags can be specified in any of the following equivalent ways:
 .sp
 .in +2
 .nf
-\fBfdn\fR
+fdn
 .fi
 .in -2
 .sp
@@ -1188,9 +1187,9 @@ With this inheritance model, an ACL entry can be specified such as:
 .sp
 .in +2
 .nf
-\fBuser:tom:read_data/write_data/read_attributes:file_inherit:allow
+user:tom:read_data/write_data/read_attributes:file_inherit:allow
 user:fred:read_data:file_inherit/dir_inherit:deny
-user:bob:read_data:allow\fR
+user:bob:read_data:allow
 .fi
 .in -2
 .sp
@@ -1201,7 +1200,7 @@ An attribute operation command line has the following format:
 .sp
 .in +2
 .nf
-\fBchmod\fR [\fIoptions\fR] \fIattribute_specification_list\fR \fIfile\fR ...
+\fBchmod\fR [\fIoptions\fR] \fIattribute_specification_list file\fR ...
 .fi
 .in -2
 .sp
@@ -1279,7 +1278,7 @@ current file.
 .ad
 .br
 .na
-\fBc'{'\fR\fIcompact_attribute_list\fR\fB'}'\fR
+\fBc\fR'\fB{\fR'\fIcompact_attribute_list\fR'\fB}\fR'
 .ad
 .sp .6
 .RS 4n
@@ -1294,24 +1293,24 @@ Set each boolean read-write extended system attribute identified by
 .ad
 .br
 .na
-\fBv'{'\fR\fIverbose_attribute_setting_list\fR\fB'}'\fR
+\fBv\fR'\fB{\fR'\fIverbose_attribute_setting_list\fR'\fB}\fR'
 .ad
 .sp .6
 .RS 4n
 Set each boolean read-write extended system attribute identified by
-\fIverbose_attribute_setting\fR.
+\fIverbose_attribute_setting\fR or \fIverbose_attribute_setting_list\fR.
 .RE
 
 .sp
 .LP
 A \fIcompact_attribute_list\fR is a list of zero or more adjacent attribute
-abbreviation characters from  list of \fBAttribute Names and Abbreviation
+abbreviation characters from the list of \fBAttribute Names and Abbreviation
 Characters\fR later in this section. An arbitrary number of hyphen (\fB-\fR)
 characters can be included in a \fIcompact_attribute_list\fR. These are
 ignored.
 .sp
 .LP
-A \fIverbose_attribute_setting\fR is an attribute name from the  list of
+A \fIverbose_attribute_setting\fR is an attribute name from the list of
 \fBAttribute Names and Abbreviation Characters\fR later in this section,
 optionally, immediately preceded by \fBno\fR. If the attribute name is used
 without \fBno\fR, the attribute is set; otherwise the attribute is cleared.
@@ -1623,7 +1622,7 @@ group-ID\fR Permission on a File
 .sp
 .LP
 The following example grants everyone read, write, and execute permissions on
-the file, and turns on the set group-ID:
+the file, and turns on the set\-group\-ID bit:
 
 .sp
 .in +2
@@ -1779,7 +1778,7 @@ First, display the ACL to pick a location to insert a new ACE.
 
 .sp
 .LP
-Next, insert a new entry in location 3.   This  causes  the  entries  that  are
+Next, insert a new entry in location 3.  This causes the entries that are
 currently in position 3 - 6 to be pushed down.
 
 .sp
@@ -2216,7 +2215,7 @@ directories, several inheritance flags can be optionally set.
 
 .sp
 .LP
-Suppose you have an ACL entry for user \fBlp\fR that you want to be  inherited
+Suppose you have an ACL entry for user \fBlp\fR that you want to be inherited
 to newly-created files in a directory.  First, you need to create an
 inheritable ACL entry on the directory:
 
@@ -2409,7 +2408,7 @@ This results in the hidden system attribute being set for the named attribute
 file \fBmyattr\fR of \fBfile1\fR but not the file itself.
 
 .LP
-\fBExample 23 \fRSetting a System Attribute of All Named Attribute Files of a
+\fBExample 23\fR Setting a System Attribute of All Named Attribute Files of a
 ZFS File
 .sp
 .LP
@@ -2682,7 +2681,7 @@ Interface Stability	Committed
 .BR standards (7)
 .SH NOTES
 .LP
-Absolute changes do not work for the set-group-ID bit of a directory. You
+Absolute changes do not work for the set\-group\-ID bit of a directory. You
 must use \fBg+s\fR or \fBg-s\fR.
 .sp
 .LP
