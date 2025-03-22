@@ -1315,7 +1315,7 @@ ignored.
 A \fIverbose_attribute_setting\fR is an attribute name from the list of
 \fBAttribute Names and Abbreviation Characters\fR later in this section,
 optionally, immediately preceded by \fBno\fR. If the attribute name is used
-without \fBno\fR, the attribute is set; otherwise the attribute is cleared.
+with \fBno\fR, the attribute is cleared; otherwise the attribute is set.
 .sp
 .LP
 A \fIverbose_attribute_setting_list\fR is zero or more comma-separated
@@ -1323,7 +1323,7 @@ A \fIverbose_attribute_setting_list\fR is zero or more comma-separated
 .sp
 .LP
 Multiple operations specified for a file are accumulated and are all set for a
-file operand as a single attribute setting operation. If an attribute is
+file operand as a single attribute-setting operation. If an attribute is
 specified more than once in an \fIattribute_specification_list\fR, the last
 specified operation is applied.
 .sp
@@ -2085,8 +2085,8 @@ entirety:
 .sp
 .in +2
 .nf
-$ chmod A=owner@:read_data/write_data:allow,group@:read_data/
-               write_data:allow,user:lp:read_data:allow file.4
+$ chmod A=owner@:read_data/write_data:allow,group@:read_data/\e
+write_data:allow,user:lp:read_data:allow file.4
 $ ls -v file.4
 -rw-rw----+  1 marks    staff          0 Oct  9 16:12 file.4
        0:owner@:read_data/write_data:allow
@@ -2107,8 +2107,8 @@ and any additional entries you wish to set.
 .sp
 .in +2
 .nf
-$ chmod A=user::rw-,group::rw-,other::---,mask:r--,
-              user:lp:r-- file.3
+$ chmod A=user::rw-,group::rw-,other::---,mask:r--,\e
+user:lp:r-- file.3
 $ ls -v file.3
 -rw-r-----+  1 root     root           0 Oct  9 16:14 file.3
         0:user::rw-
@@ -2279,7 +2279,7 @@ following command can be used:
 .in +2
 .nf
 $ chmod A+user:lp:read_data:file_inherit/\e
-      dir_inherit:allow test.dir
+dir_inherit:allow test.dir
 .fi
 .in -2
 .sp
