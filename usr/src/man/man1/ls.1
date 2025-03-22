@@ -1434,7 +1434,7 @@ Permission to list the contents of a directory.
 .ad
 .sp .6
 .RS 4n
-Permission to modify a file's data. anywhere in the file's offset range.
+Permission to modify a file's data anywhere in the file's offset range.
 .RE
 
 .sp
@@ -1515,8 +1515,8 @@ The ability to read basic attributes (non-ACLs) of a file.
 .ad
 .sp .6
 .RS 4n
-Permission to change the times associated with a file or directory to an
-arbitrary value.
+Permission to change the times associated with a file or directory to
+arbitrary values.
 .RE
 
 .sp
@@ -1576,7 +1576,7 @@ Permission to change the owner of a file.
 .ad
 .sp .6
 .RS 4n
-Permission to access file locally at server with synchronize reads and writes.
+Permission to access file locally at server with synchronized reads and writes.
 .RE
 
 .sp
@@ -1811,7 +1811,7 @@ for files that have extended attributes.
 .RS 4n
 The same as \fB-l\fR, and in addition displays the extended system attributes
 associated with the file when extended system attributes are fully supported by
-the underlying file system. The option \fB-/\fR supports two option arguments
+the underlying file system. The option \fB-/\fR supports two option arguments,
 \fBc\fR (compact mode) and \fBv\fR (verbose mode).
 .sp
 .ne 2
@@ -1821,7 +1821,7 @@ the underlying file system. The option \fB-/\fR supports two option arguments
 .sp .6
 .RS 4n
 Allows a file to be modified only at offset \fBEOF\fR. Attempts to modify a
-file at a location other than \fBEOF\fR fails with \fBEPERM\fR.
+file at a location other than \fBEOF\fR fail with \fBEPERM\fR.
 .RE
 
 .sp
@@ -1889,8 +1889,8 @@ changes, except for access time updates. When placed on a directory, prevents
 the deletion and creation of files in the directories. Attempts to modify the
 content of a file or directory marked as \fBimmutable\fR fail with \fBEPERM\fR.
 Attempts to modify any attributes (with the exception of access time and, with
-the proper privileges, the \fBimmutable\fR) of a file marked as \fBimmutable\fR
-fails with \fBEPERM\fR.
+the proper privileges, \fBimmutable\fR) of a file marked as \fBimmutable\fR fail
+with \fBEPERM\fR.
 .RE
 
 .sp
@@ -1991,7 +1991,7 @@ sparse             s
 .sp
 .LP
 The display in verbose mode (\fB-/ v\fR) uses full attribute names when it is set and
-the name prefixed by 'no' when it is not set.
+the name prefixed by \fBno\fR when it is not set.
 .sp
 .LP
 The attribute name \fBcrtime\fR and all other timestamps are handled by the
@@ -2082,7 +2082,7 @@ not set, \fBcrtime\fR is treated as a synonym for \fBmtime\fR.
 When option argument \fBall\fR is specified, all available timestamps are
 printed which includes \fBatime\fR, \fBctime\fR, \fBmtime\fR and on the
 extended system attribute supporting file systems, \fBcrtime\fR (create time).
-The option \fB-% all\fR does not effect which timestamp is displayed in long
+The option \fB-% all\fR does not affect which timestamp is displayed in long
 format and does not affect sorting.
 .sp
 .ne 2
@@ -2456,7 +2456,7 @@ The following operand is supported:
 .ad
 .sp .6
 .RS 4n
-A path name of a file to be written. If the file specified is not found, a
+A path name of a file to be listed. If the file specified is not found, a
 diagnostic message is output on standard error.
 .RE
 
@@ -2481,8 +2481,8 @@ The following example shows how to display detailed information about a file.
 .sp
 .LP
 The permissions string above (\fB-rw-r--r--\fR) describes that the file owner
-has read and write permissions, the owning group has read permissions, and
-others have read permissions.
+has read and write permissions, the owning group has read permission, and
+others have read permission.
 
 .sp
 .LP
@@ -2687,7 +2687,7 @@ example% ls -/ c file        (extended system attribute
 .sp
 .LP
 \fBarchive\fR and \fBav_modified\fR attributes are set by default on an
-extended system attribute supported file.
+extended-system-attribute-supported file.
 .sp
 .in +2
 .nf
