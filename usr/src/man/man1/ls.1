@@ -75,11 +75,12 @@ ls \- list contents of directory
 
 .SH DESCRIPTION
 For each \fIfile\fR that is a directory, \fBls\fR lists the contents of the
-directory. For each \fIfile\fR that is an ordinary file, \fBls\fR repeats its
+directory. For each \fIfile\fR that is not a directory, \fBls\fR repeats its
 name and any other information requested. The output is sorted alphabetically
 by default. When no argument is given, the current directory (\fB\&.\fR) is
 listed. When several arguments are given, the arguments are first sorted
-appropriately, but file arguments appear before directories and their contents.
+appropriately, but non-directory file arguments appear before directories and
+their contents.
 .sp
 .LP
 There are three major listing formats. The default format for output directed
@@ -184,7 +185,7 @@ The entry is an \fBAF_UNIX\fR address family socket.
 .ad
 .sp .6
 .RS 4n
-The entry is an ordinary file.
+The entry is a regular file.
 .RE
 
 .sp
@@ -257,8 +258,8 @@ number, in this case \fB1\fR, indicates the number of links to file \fBpart2\fR
 associated with the file. If the \fB-@\fR option has been specified, the
 presence of extended attributes supersedes the presence of an ACL, and the
 plus sign is replaced with an 'at' sign (\fB@\fR). Finally, the dash and
-letters tell you that user, group, and others have permissions to read, write,
-and execute \fBpart2\fR.
+letters tell you that \fBpart2\fR is a regular file; and user, group, and others
+have permissions to read, write, and execute it.
 .sp
 .LP
 The execute (\fBx\fR) symbol occupies the third position of the three-character
