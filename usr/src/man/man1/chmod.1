@@ -118,7 +118,8 @@ Enable mandatory locking if \fI#\fR is \fB6\fR, \fB4\fR, \fB2\fR, or \fB0\fR.
 For directories, files are created with BSD semantics for propagation of the
 group ID. With this option, files and subdirectories created in the directory
 inherit the group ID of the directory, rather than of the current process. For
-directories, the set\-gid bit can only be set or cleared by using symbolic mode.
+directories, the set\&-gid bit can only be set or cleared by using symbolic
+mode.
 .RE
 
 .sp
@@ -244,7 +245,7 @@ Allow read, write, and execute (search) by others.
 .LP
 For directories, the \fBsetgid\fR bit cannot be set (or cleared) in absolute
 mode; it must be set (or cleared) in symbolic mode using \fBg+s\fR (or
-\fBg\-s\fR).
+\fBg\&-s\fR).
 .SS "Symbolic Mode"
 .LP
 A symbolic mode command line has the following format:
@@ -414,7 +415,7 @@ read permission
 \fB\fBs\fR\fR
 .ad
 .RS 9n
-user or group set\-ID
+user or group set\&-ID
 .RE
 
 .sp
@@ -487,15 +488,15 @@ works with \fBu\fR.
 Mandatory file and record locking (\fBl\fR) refers to a file's ability to have
 its read or write permissions locked while a program is accessing that file.
 .sp
-In a directory which has the set\-group\-ID bit set (reflected as either
+In a directory which has the set\&-group\&-ID bit set (reflected as either
 \fB-----s---\fR or \fB-----l---\fR in the output of \fB\&'ls -ld'\fR), files
 and subdirectories are created with the group-ID of the parent directory, not
 that of current process.
 .sp
 It is not possible to permit group execution and enable a file to be locked on
 execution at the same time. In addition, it is not possible to turn on the
-set\-group\-ID bit and enable a file to be locked on execution at the same time.
-The following examples, therefore, are invalid and elicit error messages:
+set\&-group\&-ID bit and enable a file to be locked on execution at the same
+time. The following examples, therefore, are invalid and elicit error messages:
 .sp
 .in +2
 .nf
@@ -508,7 +509,7 @@ chmod g+s,+l \fIfile\fR
 Only the owner of a file or directory (or the super-user) can change that
 file's or directory's mode. Only the super-user can set the sticky bit on a
 non-directory file. If you are not super-user, \fBchmod\fR masks the sticky-bit
-but does not return an error. In order to turn on a file's set\-group\-ID bit,
+but does not return an error. In order to turn on a file's set\&-group\&-ID bit,
 your own group ID must correspond to the file's, and group execution must be
 set.
 .RE
@@ -1622,7 +1623,7 @@ group-ID\fR Permission on a File
 .sp
 .LP
 The following example grants everyone read, write, and execute permissions on
-the file, and turns on the set\-group\-ID bit:
+the file, and turns on the set\&-group\&-ID bit:
 
 .sp
 .in +2
@@ -2681,8 +2682,8 @@ Interface Stability	Committed
 .BR standards (7)
 .SH NOTES
 .LP
-Absolute changes do not work for the set\-group\-ID bit of a directory. You
-must use \fBg+s\fR or \fBg\-s\fR.
+Absolute changes do not work for the set\&-group\&-ID bit of a directory. You
+must use \fBg+s\fR or \fBg\&-s\fR.
 .sp
 .LP
 \fBchmod\fR permits you to produce useless modes so long as they are not
