@@ -833,7 +833,7 @@ Permissions can be specified in three different \fBchmod\fR ACL formats:
 verbose, compact, or positional. The verbose format uses words to indicate that
 the permissions are separated with a forward slash (\fB/\fR) character. Compact
 format uses the permission letters, and positional format uses the permission
-letters or the hyphen (\fB-\fR) to identify no permissions.
+letters or the hyphen (\fB\(mi\fR) to identify no permissions.
 .sp
 .LP
 The permissions for verbose mode and their abbreviated form in parentheses for
@@ -1005,9 +1005,9 @@ letters to indicate permissions.
 .sp
 .LP
 Using the positional ACL format, permissions are specified as positional
-arguments similar to the \fBls\fR \fB-V\fR format. The hyphen (\fB-\fR), which
-indicates that no permission is granted at that position, can be omitted and
-only the required letters have to be specified.
+arguments similar to the \fBls\ -V\fR format. The hyphen (\fB\(mi\fR),
+which indicates that no permission is granted at that position, can be omitted
+and only the required letters have to be specified.
 .sp
 .LP
 The letters above are listed in the order they would be specified in positional
@@ -1618,8 +1618,8 @@ $ chmod +l \fIfile\fR
 .sp
 
 .LP
-\fBExample 5 \fRGranting \fBread\fR, \fBwrite\fR, \fBexecute\fR, and \fBset
-group-ID\fR Permission on a File
+\fBExample 5 \fRGranting \fBread\fR, \fBwrite\fR, \fBexecute\fR, and
+\fBset\&-group-ID\fR Permission on a File
 .sp
 .LP
 The following example grants everyone read, write, and execute permissions on
@@ -1780,7 +1780,7 @@ First, display the ACL to pick a location to insert a new ACE.
 .sp
 .LP
 Next, insert a new entry in location 3.  This causes the entries that are
-currently in position 3 - 6 to be pushed down.
+currently in position 3 \(en 6 to be pushed down.
 
 .sp
 .LP
@@ -1995,8 +1995,8 @@ $ ls -v file
 \fBExample 13 \fRRemoving a Specific POSIX-draft ACL Entry on a UFS File
 .sp
 .LP
-The following example removes the lp entry by index number from the following
-ACL:
+The following example removes the \fBlp\fR entry by index number from the
+following ACL:
 
 .sp
 .in +2
