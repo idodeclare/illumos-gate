@@ -489,9 +489,10 @@ Mandatory file and record locking (\fBl\fR) refers to a file's ability to have
 its read or write permissions locked while a program is accessing that file.
 .sp
 In a directory which has the set\-group\-ID bit set (reflected as either
-\fB-----s---\fR or \fB-----l---\fR in the output of \fB\&'ls\ -ld'\fR), files
-and subdirectories are created with the group-ID of the parent directory, not
-that of current process.
+\fB\(mi\(mi\(mi\(mi\(mis\(mi\(mi\(mi\fR or
+\fB\(mi\(mi\(mi\(mi\(mil\(mi\(mi\(mi\fR in the output of \fB\&'ls\ -ld'\fR),
+files and subdirectories are created with the group-ID of the parent directory,
+not that of current process.
 .sp
 It is not possible to permit group execution and enable a file to be locked on
 execution at the same time. In addition, it is not possible to turn on the
