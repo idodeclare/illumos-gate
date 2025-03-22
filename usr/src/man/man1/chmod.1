@@ -257,12 +257,12 @@ where \fIsymbolic-mode-list\fR is a comma-separated list (with no intervening
 white space) of symbolic mode expressions of the form:
 .sp
 .LP
-[\fIwho\fR]\fIoperator\fR[\fIpermissions\fR]
+[\fIwho\fR]\fIoperator\fR[\fIperms\fR]
 .sp
 .LP
-Operations are performed in the order given. Multiple \fIpermissions\fR letters
-following a single operator cause the corresponding operations to be performed
-simultaneously.
+Operations are performed in the order given. Multiple \fIperms\fR (permissions)
+letters following a single operator cause the corresponding operations to be
+performed simultaneously.
 .sp
 .ne 2
 .na
@@ -329,14 +329,14 @@ changed:
 .RS 8n
 Add permissions.
 .sp
-If \fIpermissions\fR are omitted, nothing is added.
+If \fIperms\fR are omitted, nothing is added.
 .sp
 If \fIwho\fR is omitted, add the file mode bits represented by
-\fIpermissions\fR, except for those with corresponding bits in the
+\fIperms\fR, except for those with corresponding bits in the
 file mode creation mask.
 .sp
 If \fIwho\fR is present, add the file mode bits represented by
-\fIpermissions\fR.
+\fIperms\fR.
 .RE
 
 .sp
@@ -347,14 +347,14 @@ If \fIwho\fR is present, add the file mode bits represented by
 .RS 8n
 Take away permissions.
 .sp
-If \fIpermissions\fR are omitted, do nothing.
+If \fIperms\fR are omitted, do nothing.
 .sp
 If \fIwho\fR is omitted, clear the file mode bits represented by
-\fIpermissions\fR, except for those with corresponding bits in the file
+\fIperms\fR, except for those with corresponding bits in the file
 mode creation mask.
 .sp
 If \fIwho\fR is present, clear the file mode bits represented by
-\fIpermissions\fR.
+\fIperms\fR.
 .RE
 
 .sp
@@ -368,25 +368,25 @@ Assign permissions absolutely.
 If \fIwho\fR is omitted, clear all file mode bits; if \fIwho\fR is present,
 clear the file mode bits represented by \fIwho\fR.
 .sp
-If \fIpermissions\fR are omitted, do nothing else.
+If \fIperms\fR are omitted, do nothing else.
 .sp
 If \fIwho\fR is omitted, add the file mode bits represented by
-\fIpermissions\fR, except for those with corresponding bits in the
+\fIperms\fR, except for those with corresponding bits in the
 file mode creation mask.
 .sp
 If \fIwho\fR is present, add the file mode bits represented by
-\fIpermissions\fR.
+\fIperms\fR.
 .RE
 
 Unlike other symbolic operations, \fB=\fR has an absolute effect in that it
-resets all other bits represented by \fIwho\fR. Omitting \fIpermissions\fR is
+resets all other bits represented by \fIwho\fR. Omitting \fIperms\fR is
 useful only with \fB=\fR to take away all permissions.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fIpermissions\fR\fR
+\fIperms\fR
 .ad
 .RS 14n
 any compatible combination of the following letters:
@@ -460,7 +460,7 @@ for one of the other user classes
 \fB\fBu\fR,\fBg\fR,\fBo\fR\fR
 .ad
 .RS 9n
-indicate that \fIpermissions\fR are to be taken from the current user, group or
+indicate that \fIperms\fR are to be taken from the current user, group or
 other mode respectively.
 .RE
 
@@ -605,7 +605,7 @@ separated fields of the following.
 .sp
 .ne 2
 .na
-.BI user:: permissions
+.BI user:: perms
 .ad
 .sp .6
 .RS 4n
@@ -615,7 +615,7 @@ File owner permissions.
 .sp
 .ne 2
 .na
-.BI user: username : permissions
+.BI user: username : perms
 .ad
 .sp .6
 .RS 4n
@@ -625,7 +625,7 @@ Permissions for a specific user.
 .sp
 .ne 2
 .na
-.BI group:: permissions
+.BI group:: perms
 .ad
 .sp .6
 .RS 4n
@@ -635,7 +635,7 @@ File group owner permissions.
 .sp
 .ne 2
 .na
-.BI group: groupname : permissions
+.BI group: groupname : perms
 .ad
 .sp .6
 .RS 4n
@@ -645,7 +645,7 @@ Permissions for a specific group.
 .sp
 .ne 2
 .na
-.BI other:: permissions
+.BI other:: perms
 .ad
 .sp .6
 .RS 4n
@@ -655,7 +655,7 @@ Permissions for user other than the file owner or members of file group owner.
 .sp
 .ne 2
 .na
-.BI mask: permissions
+.BI mask: perms
 .ad
 .sp .6
 .RS 4n
@@ -666,7 +666,7 @@ The ACL mask. The mask entry specifies the maximum permissions allowed for user
 .sp
 .ne 2
 .na
-.BI default:user:: permissions
+.BI default:user:: perms
 .ad
 .sp .6
 .RS 4n
@@ -676,7 +676,7 @@ Default file owner permissions.
 .sp
 .ne 2
 .na
-.BI default:user: username : permissions
+.BI default:user: username : perms
 .ad
 .sp .6
 .RS 4n
@@ -686,7 +686,7 @@ Default permissions for a specific user.
 .sp
 .ne 2
 .na
-.BI default:group:: permissions
+.BI default:group:: perms
 .ad
 .sp .6
 .RS 4n
@@ -696,7 +696,7 @@ Default file group owner permissions.
 .sp
 .ne 2
 .na
-.BI default:group: groupname : permissions
+.BI default:group: groupname : perms
 .ad
 .sp .6
 .RS 4n
@@ -706,7 +706,7 @@ Default permissions for a specific group.
 .sp
 .ne 2
 .na
-.BI default:other: permissions
+.BI default:other: perms
 .ad
 .sp .6
 .RS 4n
@@ -717,7 +717,7 @@ group owner.
 .sp
 .ne 2
 .na
-.BI default:mask: permissions
+.BI default:mask: perms
 .ad
 .sp .6
 .RS 4n
@@ -748,7 +748,7 @@ NFSv4 ACLs are specified as colon (\fB:\fR) separated fields of the following.
 .sp
 .ne 2
 .na
-\fBowner@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBowner@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -758,7 +758,7 @@ Permissions for file owner.
 .sp
 .ne 2
 .na
-\fBgroup@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroup@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -768,7 +768,7 @@ Permissions for file group owner.
 .sp
 .ne 2
 .na
-\fBeveryone@:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBeveryone@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -778,7 +778,7 @@ Permissions for everyone, including file owner and group owner.
 .sp
 .ne 2
 .na
-\fBuser:\fIusername\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBuser:\fIusername\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -788,7 +788,7 @@ Permissions for a specific user.
 .sp
 .ne 2
 .na
-\fBusersid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBusersid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -798,7 +798,7 @@ Permissions for a specific user, but user is specified by SID.
 .sp
 .ne 2
 .na
-\fBgroup:\fIgroupname\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroup:\fIgroupname\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -808,7 +808,7 @@ Permissions for a specific group.
 .sp
 .ne 2
 .na
-\fBgroupsid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBgroupsid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -818,7 +818,7 @@ Permissions for a specific group, but group is specified by SID.
 .sp
 .ne 2
 .na
-\fBsid:\fIsid-string\fB:\fIpermissions\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+\fBsid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
 .ad
 .sp .6
 .RS 4n
@@ -2682,7 +2682,7 @@ Interface Stability	Committed
 .SH NOTES
 .LP
 Absolute changes do not work for the set\-group\-ID bit of a directory. You
-must use \fBg+s\fR or \fBg-s\fR.
+must use \fBg+s\fR or \fBg\-s\fR.
 .sp
 .LP
 \fBchmod\fR permits you to produce useless modes so long as they are not
