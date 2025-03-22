@@ -314,7 +314,7 @@ The indicated permission is \fInot\fR granted.
 .ad
 .sp .6
 .RS 4n
-The \fBs\fRet\&-user\&-ID or \fBs\fRet\&-group\&-ID bit is on, and the
+The \fBs\fRet\-user\-ID or \fBs\fRet\-group\-ID bit is on, and the
 corresponding user or group execute bit is also on.
 .RE
 
@@ -325,7 +325,7 @@ corresponding user or group execute bit is also on.
 .ad
 .sp .6
 .RS 4n
-Undefined bit-state (the set\&-user\&-ID or set\&-group\&-ID bit is on and the
+Undefined bit-state (the set\-user\-ID or set\-group\-ID bit is on and the
 user or group execute bit is off). For group permissions, this applies only to
 non-regular files.
 .RE
@@ -358,7 +358,7 @@ The 1000 bit is turned on, and execute bit is off (undefined bit-state).
 .ad
 .sp .6
 .RS 4n
-Mandatory locking occurs during access (on a regular file, the set\&-group\&-ID
+Mandatory locking occurs during access (on a regular file, the set\-group\-ID
 bit is on and the group execute bit is off).
 .RE
 
@@ -369,7 +369,7 @@ bit is on and the group execute bit is off).
 .ad
 .sp .6
 .RS 4n
-Mandatory locking occurs during access (on a regular file, the set\&-group\&-ID
+Mandatory locking occurs during access (on a regular file, the set\-group\-ID
 bit is on and the group execute bit is off).
 .RE
 
@@ -377,7 +377,7 @@ bit is on and the group execute bit is off).
 .LP
 For user and group permissions, the third position is sometimes occupied by a
 character other than \fBx\fR or \fB\(mi\fR. \fBs\fR or \fBS\fR also can occupy
-this position, referring to the state of the set\&-ID bit, whether it be the
+this position, referring to the state of the set\-ID bit, whether it be the
 user's or the group's. The ability to assume the same ID as the user during
 execution is, for example, used during login when you begin as root but need to
 assume the identity of the user you login as.
@@ -1124,7 +1124,7 @@ For each file, prints the i-node number in the first column of the report.
 .ad
 .sp .6
 .RS 4n
-All sizes are printed in kilobytes. Equivalent to \fB-\&-block\&-size=1024\fR.
+All sizes are printed in kilobytes. Equivalent to \fB-\-block\-size=1024\fR.
 .RE
 
 .sp
@@ -1142,7 +1142,7 @@ than six months ago, it is shown in the format `month date year' for the POSIX
 locale. When the \fBLC_TIME\fR locale category is not set to the POSIX locale,
 a different format of the time field can be used. Files modified within six
 months show `month date time'. If the file is a symbolic link, the filename is
-printed followed by "\fB\&->\fR" and the path name of the referenced file.
+printed followed by "\fB\->\fR" and the path name of the referenced file.
 .RE
 
 .sp
@@ -1347,7 +1347,7 @@ The format of the displayed ACL is as follows:
 .sp
 .in +2
 .nf
-\fIentry_type\fR:\fIpermissions\fR:\fIinheritance\&-flags\fR:\fIaccess_type\fR
+\fIentry_type\fR:\fIpermissions\fR:\fIinheritance\-flags\fR:\fIaccess_type\fR
 .fi
 .in -2
 .sp
@@ -1588,7 +1588,7 @@ Permission to access file locally at server with synchronize reads and writes.
 No permission granted
 .RE
 
-The following \fIinheritance\&-flags\fR, supported by the NFSv4 ACL model, are
+The following \fIinheritance\-flags\fR, supported by the NFSv4 ACL model, are
 displayed by using the \fB-v\fR or \fB-V\fR options:
 .sp
 .ne 2
@@ -2230,8 +2230,8 @@ Display in \fIYYYY-MM-DD HH:MM\fR for all files.
 .ad
 .sp .6
 .RS 4n
-Display older files using \fIYYYY\&-MM\&-DD\fR and newer files with
-\fIMM\&-DD\ HH:MM\fR.
+Display older files using \fIYYYY\-MM\-DD\fR and newer files with
+\fIMM\-DD\ HH:MM\fR.
 .RE
 
 .sp
@@ -2848,27 +2848,27 @@ For all options except
 .BR -/ ,
 .BR -% ,
 .BR --all ,
-.BR -\&-almost\&-all ,
-.BR -\&-block\&-size ,
-.BR -\&-classify ,
-.BR -\&-color ,
-.BR -\&-colour ,
-.BR -\&-dereference ,
-.BR -\&-dereference\&-command\&-line ,
-.BR -\&-escape ,
-.BR -\&-file\&-type ,
-.BR -\&-full\&-time ,
-.BR -\&-human\&-readable ,
-.BR -\&-ignore\&-backups ,
-.BR -\&-inode ,
-.BR -\&-no\&-group ,
-.BR -\&-numeric\&-uid\&-gid ,
-.BR -\&-reverse ,
-.BR -\&-recursive ,
-.BR -\&-si ,
-.BR -\&-size ,
+.BR -\-almost\-all ,
+.BR -\-block\-size ,
+.BR -\-classify ,
+.BR -\-color ,
+.BR -\-colour ,
+.BR -\-dereference ,
+.BR -\-dereference\-command\-line ,
+.BR -\-escape ,
+.BR -\-file\-type ,
+.BR -\-full\-time ,
+.BR -\-human\-readable ,
+.BR -\-ignore\-backups ,
+.BR -\-inode ,
+.BR -\-no\-group ,
+.BR -\-numeric\-uid\-gid ,
+.BR -\-reverse ,
+.BR -\-recursive ,
+.BR -\-si ,
+.BR -\-size ,
 and
-.BR -\&-time\&-style ,
+.BR -\-time\-style ,
 see
 .BR standards (7).
 .SS "/usr/xpg4/bin/ls"
@@ -2901,28 +2901,28 @@ For all options except
 .BR -@ ,
 .BR -/ ,
 .BR -% ,
-.BR -\&-all ,
-.BR -\&-almost\&-all ,
-.BR -\&-block\&-size ,
-.BR -\&-classify ,
-.BR -\&-color ,
-.BR -\&-colour ,
-.BR -\&-dereference ,
-.BR -\&-dereference\&-command\&-line ,
-.BR -\&-escape ,
-.BR -\&-file\&-type ,
-.BR -\&-full\&-time ,
-.BR -\&-human\&-readable ,
-.BR -\&-ignore\&-backups ,
-.BR -\&-inode ,
-.BR -\&-no\&-group ,
-.BR -\&-numeric\&-uid\&-gid ,
-.BR -\&-reverse ,
-.BR -\&-recursive ,
-.BR -\&-si ,
-.BR -\&-size ,
+.BR -\-all ,
+.BR -\-almost\-all ,
+.BR -\-block\-size ,
+.BR -\-classify ,
+.BR -\-color ,
+.BR -\-colour ,
+.BR -\-dereference ,
+.BR -\-dereference\-command\-line ,
+.BR -\-escape ,
+.BR -\-file\-type ,
+.BR -\-full\-time ,
+.BR -\-human\-readable ,
+.BR -\-ignore\-backups ,
+.BR -\-inode ,
+.BR -\-no\-group ,
+.BR -\-numeric\-uid\-gid ,
+.BR -\-reverse ,
+.BR -\-recursive ,
+.BR -\-si ,
+.BR -\-size ,
 and
-.BR -\&-time\&-style ,
+.BR -\-time\-style ,
 see
 .BR standards (7).
 .SS "/usr/xpg6/bin/ls"
@@ -2955,28 +2955,28 @@ For all options except
 .BR -@ ,
 .BR -/ ,
 .BR -% ,
-.BR -\&-all ,
-.BR -\&-almost\&-all ,
-.BR -\&-block\&-size ,
-.BR -\&-classify ,
-.BR -\&-color ,
-.BR -\&-colour ,
-.BR -\&-dereference ,
-.BR -\&-dereference\&-command\&-line ,
-.BR -\&-escape ,
-.BR -\&-file\&-type ,
-.BR -\&-full\&-time ,
-.BR -\&-human\&-readable ,
-.BR -\&-ignore\&-backups ,
-.BR -\&-inode ,
-.BR -\&-no\&-group ,
-.BR -\&-numeric\&-uid\&-gid ,
-.BR -\&-reverse ,
-.BR -\&-recursive ,
-.BR -\&-si ,
-.BR -\&-size ,
+.BR -\-all ,
+.BR -\-almost\-all ,
+.BR -\-block\-size ,
+.BR -\-classify ,
+.BR -\-color ,
+.BR -\-colour ,
+.BR -\-dereference ,
+.BR -\-dereference\-command\-line ,
+.BR -\-escape ,
+.BR -\-file\-type ,
+.BR -\-full\-time ,
+.BR -\-human\-readable ,
+.BR -\-ignore\-backups ,
+.BR -\-inode ,
+.BR -\-no\-group ,
+.BR -\-numeric\-uid\-gid ,
+.BR -\-reverse ,
+.BR -\-recursive ,
+.BR -\-si ,
+.BR -\-size ,
 and
-.BR -\&-time\&-style ,
+.BR -\-time\-style ,
 see
 .BR standards (7).
 .SH SEE ALSO
@@ -3009,6 +3009,6 @@ leading dots as well as case are ignored in determining the sort order.
 .LP
 For additional information regarding Windows Security Identifiers, consult
 Microsoft support document, \fISecurity identifiers\fR, which can be found at
-Microsoft's support site: https://support.microsoft.com/en\&-us/kb/243330/.
+Microsoft's support site: https://support.microsoft.com/en\-us/kb/243330/.
 Refer to the sub-section, "Well-known SIDs," where SIDs applicable to "Windows
 operating systems" are specified.
