@@ -118,8 +118,8 @@ Enable mandatory locking if \fI#\fR is \fB6\fR, \fB4\fR, \fB2\fR, or \fB0\fR.
 For directories, files are created with BSD semantics for propagation of the
 group ID. With this option, files and subdirectories created in the directory
 inherit the group ID of the directory, rather than of the current process. For
-directories, the set\-gid bit can only be set or cleared by using symbolic
-mode.
+directories, the set\-group\-ID bit can only be set or cleared by using
+symbolic mode.
 .RE
 
 .sp
@@ -243,7 +243,7 @@ Allow read, write, and execute (search) by others.
 
 .sp
 .LP
-For directories, the \fBsetgid\fR bit cannot be set (or cleared) in absolute
+For directories, the set\-group\-ID bit cannot be set (or cleared) in absolute
 mode; it must be set (or cleared) in symbolic mode using \fBg+s\fR (or
 \fBg\-s\fR).
 .SS "Symbolic Mode"
