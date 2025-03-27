@@ -2283,12 +2283,26 @@ Options:
 	-w <wxfile>: Use specified wx active file.
 
 Environment:
+	AWK: set to forgo path search for "nawk", "gawk", "awk" in that order.
+	COL: set to forgo path search for "col".
+	FIND: set to forgo path search for "find".
+	GREP: set to forgo path search for "grep".
+	MANDOC: set to forgo path search for "mandoc".
+	MKTEMP: set to forgo path search for "mktemp".
+	PERL: set to forgo path search for "perl".
+	RSYNC: set to forgo path search for "rsync".
+	SCP: set to forgo path search for "scp".
+	SED: set to forgo path search for "sed".
+	SFTP: set to forgo path search for "sftp".
+	WDIFF: set to forgo path search for "wdiff".
 	WDIR: Control the output directory.
 	WEBREV_TRASH_DIR: Set directory for webrev delete.
+	WHICH_SCM: set to forgo path search for "which_scm".
 
 SCM Environment:
 	CODEMGR_WS: Workspace location.
 	CODEMGR_PARENT: Parent workspace location.
+	GIT: set to forgo path search for "git".
 '
 
 	exit 2
@@ -2306,22 +2320,22 @@ set +o noclobber
 
 PATH=$(/bin/dirname "$(whence $0)"):$PATH
 
-[[ -z $WDIFF ]] && WDIFF=$(look_for_prog wdiff)
-[[ -z $GIT ]] && GIT=$(look_for_prog git)
-[[ -z $WHICH_SCM ]] && WHICH_SCM=$(look_for_prog which_scm)
-[[ -z $PERL ]] && PERL=$(look_for_prog perl)
-[[ -z $RSYNC ]] && RSYNC=$(look_for_prog rsync)
 [[ -z $AWK ]] && AWK=$(look_for_prog nawk)
 [[ -z $AWK ]] && AWK=$(look_for_prog gawk)
 [[ -z $AWK ]] && AWK=$(look_for_prog awk)
+[[ -z $COL ]] && COL=$(look_for_prog col)
+[[ -z $FIND ]] && FIND=$(look_for_prog find)
+[[ -z $GIT ]] && GIT=$(look_for_prog git)
+[[ -z $GREP ]] && GREP=$(look_for_prog grep)
+[[ -z $MANDOC ]] && MANDOC=$(look_for_prog mandoc)
+[[ -z $MKTEMP ]] && MKTEMP=$(look_for_prog mktemp)
+[[ -z $PERL ]] && PERL=$(look_for_prog perl)
+[[ -z $RSYNC ]] && RSYNC=$(look_for_prog rsync)
 [[ -z $SCP ]] && SCP=$(look_for_prog scp)
 [[ -z $SED ]] && SED=$(look_for_prog sed)
 [[ -z $SFTP ]] && SFTP=$(look_for_prog sftp)
-[[ -z $MKTEMP ]] && MKTEMP=$(look_for_prog mktemp)
-[[ -z $GREP ]] && GREP=$(look_for_prog grep)
-[[ -z $FIND ]] && FIND=$(look_for_prog find)
-[[ -z $MANDOC ]] && MANDOC=$(look_for_prog mandoc)
-[[ -z $COL ]] && COL=$(look_for_prog col)
+[[ -z $WDIFF ]] && WDIFF=$(look_for_prog wdiff)
+[[ -z $WHICH_SCM ]] && WHICH_SCM=$(look_for_prog which_scm)
 
 # set name of trash directory for remote webrev deletion
 TRASH_DIR=".trash"
@@ -2342,8 +2356,6 @@ fi
 # Declare global total counters.
 integer TOTL TINS TDEL TMOD TUNC
 
-# default remote host for upload/delete
-typeset -r DEFAULT_REMOTE_HOST="cr.opensolaris.org"
 # prefixes for upload targets
 typeset -r rsync_prefix="rsync://"
 typeset -r ssh_prefix="ssh://"
@@ -2428,6 +2440,10 @@ fi
 
 if [[ -n $tflag && -z $Uflag && -z $Dflag ]]; then
 	echo "remote target has to be used only for upload or delete"
+	exit 1
+fi
+if [[ -z $tflag && (-n $Uflag || -n $Dflag) ]]; then
+	echo "remote target is required for upload or delete"
 	exit 1
 fi
 
@@ -2903,40 +2919,30 @@ fi
 # Make sure remote target is well formed for remote upload/delete.
 if [[ -n $Dflag || -n $Uflag ]]; then
 	#
-	# If remote target is not specified, build it from scratch using
-	# the default values.
+	# Check upload target prefix first.
 	#
-	if [[ -z $tflag ]]; then
-		remote_target=${DEFAULT_REMOTE_HOST}:${WNAME}
-	else
-		#
-		# Check upload target prefix first.
-		#
-		if [[ "${remote_target}" != ${rsync_prefix}* &&
-		    "${remote_target}" != ${ssh_prefix}* ]]; then
-			print "ERROR: invalid prefix of upload URI" \
-			    "($remote_target)"
-			exit 1
+	if [[ "${remote_target}" != ${rsync_prefix}* &&
+	    "${remote_target}" != ${ssh_prefix}* ]]; then
+		print "ERROR: invalid prefix of upload URI ($remote_target)"
+		exit 1
+	fi
+	#
+	# If destination specification is not in the form of
+	# host_spec:remote_dir then assume it is just remote hostname
+	# and append a colon and destination directory formed from
+	# local webrev directory name.
+	#
+	typeset target_no_prefix=${remote_target##*://}
+	if [[ ${target_no_prefix} == *:* ]]; then
+		if [[ "${remote_target}" == *: ]]; then
+			remote_target=${remote_target}${WNAME}
 		fi
-		#
-		# If destination specification is not in the form of
-		# host_spec:remote_dir then assume it is just remote hostname
-		# and append a colon and destination directory formed from
-		# local webrev directory name.
-		#
-		typeset target_no_prefix=${remote_target##*://}
-		if [[ ${target_no_prefix} == *:* ]]; then
-			if [[ "${remote_target}" == *: ]]; then
-				remote_target=${remote_target}${WNAME}
-			fi
+	else
+		if [[ ${target_no_prefix} == */* ]]; then
+			print "ERROR: badly formed upload URI ($remote_target)"
+			exit 1
 		else
-			if [[ ${target_no_prefix} == */* ]]; then
-				print "ERROR: badly formed upload URI" \
-					"($remote_target)"
-				exit 1
-			else
-				remote_target=${remote_target}:${WNAME}
-			fi
+			remote_target=${remote_target}:${WNAME}
 		fi
 	fi
 
