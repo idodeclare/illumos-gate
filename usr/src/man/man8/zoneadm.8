@@ -1,6 +1,7 @@
 '\" te
 .\" Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 .\" Copyright (c) 2009 Sun Microsystems, Inc. All Rights Reserved.
+.\" Copyright 2026 Chris Fraire <cfraire@me.com>
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
 .\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
 .\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
@@ -69,11 +70,12 @@ String identifier for a zone.
 .SH SUBCOMMANDS
 Subcommands which can result in destructive actions or loss of work have a
 \fB-F\fR flag to force the action. If input is from a terminal device, the user
-is prompted if such a command is given without the \fB-F\fR flag; otherwise, if
-such a command is given without the \fB-F\fR flag, the action is disallowed,
-with a diagnostic message written to standard error. If a zone installation or
-uninstallation is interrupted, the zone is left in the incomplete state. Use
-uninstall to reset such a zone back to the configured state.
+is prompted if such a subcommand is given without the \fB-F\fR flag; otherwise,
+if such a subcommand is given without the \fB-F\fR flag, the action is
+disallowed, with a diagnostic message written to standard error. If a zone
+installation or uninstallation is interrupted, the zone is left in the
+incomplete state. Use \fBuninstall\fR to reset such a zone back to the
+configured state.
 .sp
 .LP
 The following subcommands are supported:
@@ -96,17 +98,17 @@ The \fB-F\fR option can be used to force the zone into the "installed" state
 with no validation. This option should be used with care since it can leave the
 zone in an unsupportable state if it was moved from a source system to a target
 system that is unable to properly host the zone. The \fB-n\fR option can be
-used to run the \fBattach\fR subcommand, without executing the command. It uses
-the output of the "\fBdetach\fR \fB-n\fR" subcommand as input and is useful to
-identify any conflicting issues, such as the network device being incompatible,
-and can also determine whether the host is capable of supporting the zone. The
-path can be "\fB-\fR", to read the input from standard input.
+used to run the \fBattach\fR subcommand, without executing the subcommand. It
+uses the output of the "\fBdetach\fR\~\fB-n\fR" subcommand as input and is
+useful to identify any conflicting issues, such as the network device being
+incompatible, and can also determine whether the host is capable of supporting
+the zone. The path can be "\fB-\fR", to read the input from standard input.
 .sp
 The zone's brand may include additional options that govern how the zone will
 be attached. See \fBbrands\fR(7) for specific brand information.
 .sp
 The zone being attached must first be configured using the \fBzonecfg\fR (see
-\fBzonecfg\fR(8)) command. This does not apply when running "\fBattach\fR
+\fBzonecfg\fR(8)) command. This does not apply when running "\fBattach\fR\~\c
 \fB-n\fR".
 .sp
 Use the following command to attach a zone:
@@ -222,11 +224,11 @@ left in the configured state. If you try to install or clone to a configured
 zone that has been detached, you will receive an error message and the
 \fBinstall\fR or \fBclone\fR subcommand will not be allowed to proceed. The
 \fB-n\fR option can be used to run the \fBdetach\fR subcommand, without
-executing the command. This generates the information needed for running the
-"\fBattach\fR \fB-n\fR" subcommand, which is useful to identify any conflicting
+executing the subcommand. This generates the information needed for running the
+"\fBattach\fR\~\fB-n\fR" subcommand, which is useful to identify any conflicting
 issues, such as the network device being incompatible or if the host is capable
 of supporting the zone. The information is sent to standard output and can be
-saved to a file or piped to the "\fBattach\fR \fB-n\fR" subcommand.
+saved to a file or piped to the "\fBattach\fR\~\fB-n\fR" subcommand.
 .sp
 Use the following command to detach a zone:
 .sp
@@ -357,7 +359,7 @@ backslash ("\:"), which is parsable by using the shell \fBread\fR(1) function
 with the environmental variable \fBIFS\fR. The \fIuuid\fR value is assigned by
 \fBlibuuid\fR(3LIB) when the zone is installed, and is useful for identifying
 the same zone when present (or renamed) on alternate boot environments. Any
-software that parses the output of the "\fBzoneadm list -p\fR" command must be
+software that parses the output of the "\fBzoneadm\~list\~-p\fR" command must be
 able to handle any fields that may be added in the future.
 .sp
 The \fB-v\fR and \fB-p\fR options are mutually exclusive. If neither \fB-v\fR
@@ -387,7 +389,7 @@ nor \fB-p\fR is used, just the zone name is listed.
 .ad
 .sp .6
 .RS 4n
-Change the state of an installed zone to "incomplete." This command may be
+Change the state of an installed zone to "incomplete." This subcommand may be
 useful in cases where administrative changes on the system have rendered a zone
 unusable or inconsistent. This change cannot be undone (except by uninstalling
 the zone).
