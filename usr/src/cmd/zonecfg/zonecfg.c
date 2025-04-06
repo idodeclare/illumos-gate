@@ -24,6 +24,7 @@
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Gary Mills
  * Copyright 2019 Joyent, Inc.
+ * Copyright 2025 Chris Fraire <cfraire@me.com>
  */
 
 /*
@@ -123,8 +124,9 @@ extern int lex_lineno;
 #define	SHELP_END	"end"
 #define	SHELP_EXIT	"exit [-F]"
 #define	SHELP_EXPORT	"export [-f output-file]"
-#define	SHELP_HELP	"help [commands] [syntax] [usage] [<command-name>]"
-#define	SHELP_INFO	"info [<resource-type> [property-name=property-value]*]"
+#define	SHELP_HELP	"help [usage] [commands] [syntax] [<command-name>]"
+#define	SHELP_INFO	"info [<resource-type> [ <property-name>=" \
+	"<property-value> ]*]"
 #define	SHELP_REMOVE	"remove [-F] <resource-type> " \
 	"[ <property-name>=<property-value> ]*\n" \
 	"\t(global scope)\n" \
@@ -853,7 +855,7 @@ long_help(int cmd_num)
 		case CMD_CREATE:
 			(void) snprintf(line, sizeof (line),
 			    gettext("Creates a configuration for the "
-			    "specified zone.  %s should be\n\tused to "
+			    "specified zone.  '%s' should be\n\tused to "
 			    "begin configuring a new zone.  If overwriting an "
 			    "existing\n\tconfiguration, the -F flag can be "
 			    "used to force the action.  If\n\t-t template is "
@@ -863,7 +865,7 @@ long_help(int cmd_num)
 			    "creates a configuration from a\n\tdetached "
 			    "zonepath.  '%s -b' results in a blank "
 			    "configuration.\n\t'%s' with no arguments applies "
-			    "the Sun default settings."),
+			    "the default settings."),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE));
 			return (line);
@@ -872,7 +874,7 @@ long_help(int cmd_num)
 			    "be used to force the action."));
 		case CMD_EXPORT:
 			return (gettext("Prints configuration to standard "
-			    "output, or to output-file if\n\tspecified, in "
+			    "output or to output-file if\n\tspecified, in "
 			    "a form suitable for use in a command-file."));
 		case CMD_ADD:
 			return (gettext("Add specified resource to "
@@ -888,7 +890,7 @@ long_help(int cmd_num)
 			(void) snprintf(line, sizeof (line),
 			    gettext("Selects a resource to modify.  "
 			    "Resource modification is completed\n\twith the "
-			    "command \"%s\".  The property name/value pairs "
+			    "command '%s'.  The property name/value pairs "
 			    "must uniquely\n\tidentify a resource.  Note that "
 			    "the curly braces ('{', '}') mean one\n\tor more "
 			    "of whatever is between them."),
@@ -902,19 +904,20 @@ long_help(int cmd_num)
 			return (gettext("Displays information about the "
 			    "current configuration.  If resource\n\ttype is "
 			    "specified, displays only information about "
-			    "resources of\n\tthe relevant type.  If resource "
-			    "id is specified, displays only\n\tinformation "
-			    "about that resource."));
+			    "resources of\n\tthe relevant type.  If any "
+			    "property name/value pairs are specified,\n"
+			    "\tdisplays only information about resources "
+			    "meeting the given criteria."));
 		case CMD_VERIFY:
-			return (gettext("Verifies current configuration "
-			    "for correctness (some resource types\n\thave "
-			    "required properties)."));
+			return (gettext("Verifies current configuration for "
+			    "correctness, with zonepath\n\tspecified and with "
+			    "all resources having their required properties."));
 		case CMD_COMMIT:
 			(void) snprintf(line, sizeof (line),
 			    gettext("Commits current configuration.  "
 			    "Configuration must be committed to\n\tbe used by "
 			    "%s.  Until the configuration is committed, "
-			    "changes \n\tcan be removed with the %s "
+			    "changes \n\tcan be removed with the '%s' "
 			    "command.  This operation is\n\tattempted "
 			    "automatically upon completion of a %s "
 			    "session."), "zoneadm", cmd_to_str(CMD_REVERT),
@@ -1469,7 +1472,7 @@ initialize(boolean_t handle_expected)
 				need_to_commit = B_TRUE;
 			} else if (err != Z_NO_ENTRY) {
 				zerr(gettext("failed to update "
-				    "admin  rights."));
+				    "admin rights."));
 				exit(Z_ERR);
 			} else if (need_to_commit) {
 				zerr(gettext("admin rights were updated "
@@ -1595,7 +1598,7 @@ scope_usage(uint_t cmd_num)
 {
 	zerr(gettext("The %s command only makes sense in the %s scope."),
 	    cmd_to_str(cmd_num),
-	    global_scope ?  gettext("resource") : gettext("global"));
+	    global_scope ? gettext("resource") : gettext("global"));
 	saw_error = B_TRUE;
 }
 
