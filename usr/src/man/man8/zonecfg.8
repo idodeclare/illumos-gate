@@ -3,10 +3,11 @@
 .\" Copyright 2013 Joyent, Inc. All Rights Reserved.
 .\" Copyright 2017 Peter Tribble
 .\" Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
+.\" Copyright 2019, 2025 Chris Fraire <cfraire@me.com>
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License"). You may not use this file except in compliance with the License. You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.
 .\" See the License for the specific language governing permissions and limitations under the License. When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE. If applicable, add the following below this CDDL HEADER, with the
 .\" fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH ZONECFG 8 "Jan 23, 2021"
+.TH ZONECFG 8 "Apr 6, 2025"
 .SH NAME
 zonecfg \- set up zone configuration
 .SH SYNOPSIS
@@ -16,7 +17,7 @@ zonecfg \- set up zone configuration
 
 .LP
 .nf
-\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIsubcommand\fR
+\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIcommand\fR
 .fi
 
 .LP
@@ -26,7 +27,7 @@ zonecfg \- set up zone configuration
 
 .LP
 .nf
-\fBzonecfg\fR help
+\fBzonecfg help\fR
 .fi
 
 .SH DESCRIPTION
@@ -42,12 +43,10 @@ The following synopsis of the \fBzonecfg\fR command is for interactive usage:
 .sp
 .in +2
 .nf
-zonecfg \fB-z\fR \fIzonename subcommand\fR
+\fBzonecfg -z\fR \fIzonename command\fR
 .fi
 .in -2
-.sp
 
-.sp
 .LP
 Parameters changed through \fBzonecfg\fR do not affect a running zone. The zone
 must be rebooted for the changes to take effect.
@@ -64,7 +63,7 @@ control". See \fBresource_controls\fR(7).
 .LP
 Every zone is configured with an associated brand. The brand determines the
 user-level environment used within the zone, as well as various behaviors for
-the zone when it is installed, boots, or is shutdown. Once a zone has been
+the zone when it is installed, boots, or is shut down. Once a zone has been
 installed the brand cannot be changed. The default brand is determined by the
 installed distribution in the global zone. Some brands do not support all of
 the \fBzonecfg\fR properties and resources. See the brand-specific man page for
@@ -192,7 +191,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -202,7 +201,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -212,7 +211,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -222,7 +221,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -232,7 +231,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -242,7 +241,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -252,7 +251,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -262,7 +261,17 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
+.ad
+.sp .6
+.RS 4n
+\fBip-type\fR
+.RE
+
+.sp
+.ne 2
+.na
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -272,7 +281,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -282,7 +291,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -292,7 +301,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -302,7 +311,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -312,7 +321,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -322,7 +331,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -332,7 +341,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -342,7 +351,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-\fB(global)\fR
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -352,7 +361,7 @@ The following properties are supported:
 .sp
 .ne 2
 .na
-.B (global)
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -478,26 +487,32 @@ the syntax:
 .sp
 .in +2
 .nf
-(<\fIname\fR>=<\fIvalue\fR>,<\fIname\fR>=<\fIvalue\fR>,...)
+\fB(\fIname\fB=\fIvalue\fB,\fIname\fB=\fIvalue\fB,\fR...\fB)\fR
 .fi
 .in -2
 .sp
 
 .sp
 .LP
-where each <\fIvalue\fR> is simple, and the <\fIname\fR> strings are unique
-within a given property. Lists have the syntax:
+where each
+.I value
+is simple, and the
+.I name
+strings are unique within a given property. Lists have the syntax:
 .sp
 .in +2
 .nf
-[<\fIvalue\fR>,...]
+\fB[\fIvalue\fB,\fR...\fB]\fR
 .fi
 .in -2
 .sp
 
 .sp
 .LP
-where each <\fIvalue\fR> is either simple or complex. A list of a single value
+where each
+.I value
+is either simple or complex. A list of a single
+.I value
 (either simple or complex) is equivalent to specifying that value without the
 list syntax. That is, "foo" is equivalent to "[foo]". A list can be empty
 (denoted by "[]").
@@ -511,7 +526,8 @@ The property types are described as follows:
 .sp
 .ne 2
 .na
-\fBglobal: \fBzonename\fR\fR
+.B zonename
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -521,7 +537,8 @@ The name of the zone.
 .sp
 .ne 2
 .na
-\fBglobal: \fBzonepath\fR\fR
+.B zonepath
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -531,14 +548,20 @@ Path to zone's file system.
 .sp
 .ne 2
 .na
-\fBglobal: \fBautoboot\fR\fR
+.B autoboot
+(global)
 .ad
 .sp .6
 .RS 4n
 Boolean indicating that a zone should be booted automatically at system boot.
-Note that if the zones service is disabled, the zone will not autoboot,
-regardless of the setting of this property. You enable the zones service with a
-\fBsvcadm\fR command, such as:
+Note that if the
+.B zones
+service is disabled, the zone will not autoboot, regardless of the setting of
+this property. You enable the
+.B zones
+service with a
+.B svcadm
+command, such as:
 .sp
 .in +2
 .nf
@@ -547,26 +570,28 @@ regardless of the setting of this property. You enable the zones service with a
 .in -2
 .sp
 
-Replace \fBenable\fR with \fBdisable\fR to disable the zones service. See
+Replace \fBenable\fR with \fBdisable\fR to disable the \fBzones\fR service. See
 \fBsvcadm\fR(8).
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBbootargs\fR\fR
+.B bootargs
+(global)
 .ad
 .sp .6
 .RS 4n
 Arguments (options) to be passed to the zone bootup, unless options are
-supplied to the "\fBzoneadm boot\fR" command, in which case those take
+supplied to the \fBzoneadm boot\fR command, in which case those take
 precedence. The valid arguments are described in \fBzoneadm\fR(8).
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBpool\fR\fR
+.B pool
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -577,41 +602,67 @@ property is incompatible with the \fBdedicated-cpu\fR resource.
 .sp
 .ne 2
 .na
-\fBglobal: \fBlimitpriv\fR\fR
+.B limitpriv
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum set of privileges any process in this zone can obtain. The property
 should consist of a comma-separated privilege set specification as described in
-\fBpriv_str_to_set\fR(3C). Privileges can be excluded from the resulting set by
-preceding their names with a dash (-) or an exclamation point (!). The special
-privilege string "zone" is not supported in this context. If the special string
-"default" occurs as the first token in the property, it expands into a safe set
-of privileges that preserve the resource and security isolation described in
-\fBzones\fR(7). A missing or empty property is equivalent to this same set of
-safe privileges.
+.BR priv_str_to_set (3C).
+Privileges can be excluded from the resulting set by preceding their names with
+a dash
+.RB ( - )
+or an exclamation point
+.RB ( !\& ).
+The special privilege string
+.RB \(dq zone \(dq
+is not supported in this context. If the special string
+.RB \(dq default \(dq
+occurs as the first token in the property, it expands into a safe set of
+privileges that preserve the resource and security isolation described in
+.BR zones (7).
+A missing or empty property is equivalent to this same set of safe privileges.
 .sp
 The system administrator must take extreme care when configuring privileges for
 a zone. Some privileges cannot be excluded through this mechanism as they are
 required in order to boot a zone. In addition, there are certain privileges
 which cannot be given to a zone as doing so would allow processes inside a zone
-to unduly affect processes in other zones. \fBzoneadm\fR(8) indicates when an
-invalid privilege has been added or removed from a zone's privilege set when an
-attempt is made to either "boot" or "ready" the zone.
+to unduly affect processes in other zones.
+.BR zoneadm (8)
+indicates when an invalid privilege has been added or removed from a zone's
+privilege set when an attempt is made to either
+.B boot
+or
+.B ready
+the zone.
 .sp
-See \fBprivileges\fR(7) for a description of privileges. The command "\fBppriv
--l\fR" (see \fBppriv\fR(1)) produces a list of all Solaris privileges. You can
-specify privileges as they are displayed by \fBppriv\fR. In
-\fBprivileges\fR(7), privileges are listed in the form
-PRIV_\fIprivilege_name\fR. For example, the privilege \fIsys_time\fR, as you
-would specify it in this property, is listed in \fBprivileges\fR(7) as
-\fBPRIV_SYS_TIME\fR.
+See
+.BR privileges (7)
+for a description of privileges. The command
+.RB \(dq "ppriv -l" \(dq
+(see
+.BR ppriv (1))
+produces a list of all illumos privileges. You can specify privileges as they
+are displayed by
+.BR ppriv .
+In
+.BR privileges (7),
+privileges are listed in the form
+.BI PRIV_ privilege_name\c
+\&. For example, the privilege
+.IR sys_time ,
+as you would specify it in this property, is listed in
+.BR privileges (7)
+as
+.BR PRIV_SYS_TIME .
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBbrand\fR\fR
+.B brand
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -621,7 +672,8 @@ The zone's brand type.
 .sp
 .ne 2
 .na
-\fBglobal: \fBip-type\fR\fR
+.B ip-type
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -634,7 +686,8 @@ This property takes the values \fBshared\fR and \fBexclusive\fR.
 .sp
 .ne 2
 .na
-\fBglobal: \fBhostid\fR\fR
+.B hostid
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -648,7 +701,12 @@ uppercase and lowercase hexadecimal digits are acceptable.
 .sp
 .ne 2
 .na
-\fB\fBfs\fR: dir, special, raw, type, options\fR
+.BR fs :
+.BR dir ,
+.BR special ,
+.BR raw ,
+.BR type ,
+.B options
 .ad
 .sp .6
 .RS 4n
@@ -659,7 +717,11 @@ Values needed to determine how, where, and so forth to mount file systems. See
 .sp
 .ne 2
 .na
-\fB\fBnet\fR: address, allowed-address, physical, defrouter\fR
+.BR net :
+.BR address ,
+.BR allowed\-address ,
+.BR physical ,
+.B defrouter
 .ad
 .sp .6
 .RS 4n
@@ -683,6 +745,7 @@ a valid IPv6 address, which must be followed by "\fB/\fR" and a prefix length;
 .el o
 a host name which resolves to an IPv4 address.
 .RE
+.sp
 Note that host names that resolve to IPv6 addresses are not supported.
 .sp
 The physical interface name is the network interface name.
@@ -691,27 +754,45 @@ The default router is specified similarly to the network address except that it
 must not be followed by a \fB/\fR (slash) and a network prefix length.
 .sp
 A zone can be configured to be either exclusive-IP or shared-IP. For a
-shared-IP zone, you must set both the physical and address properties; setting
-the default router is optional. The interface specified in the physical
+shared-IP zone, you must set both the
+.B physical
+and
+.B address
+properties; setting the
+.B defrouter
+is optional. The interface specified in the
+.B physical
 property must be plumbed in the global zone prior to booting the non-global
 zone. However, if the interface is not used by the global zone, it should be
-configured \fBdown\fR in the global zone, and the default router for the
-interface should be specified here.
+configured
+.B down
+in the global zone, and the
+.B defrouter
+for the interface should be specified here.
 .sp
-For an exclusive-IP zone, the physical property must be set and the address and
-default router properties cannot be set.
+For an exclusive-IP zone, the
+.B physical
+property must be set, and the
+.B address
+and
+.B defrouter
+properties cannot be set.
 .sp
 An exclusive-IP zone is responsible for managing its own network configuration.
-If the allowed-address property is set, the zone administrator will only be
-permitted to configure the interface with the specified address. To allow
-multiple addresses (for example, an IPv4 and IPv6 address), use add net
+If the
+.B allowed\-address
+property is set, the zone administrator will only be permitted to configure the
+interface with the specified address. To allow multiple addresses (for example,
+an IPv4 and IPv6 address), use
+.B add net
 multiple times.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBdevice\fR: match\fR
+.BR device :
+.B match
 .ad
 .sp .6
 .RS 4n
@@ -721,7 +802,9 @@ Device name to match.
 .sp
 .ne 2
 .na
-\fB\fBrctl\fR: name, value\fR
+.BR rctl :
+.BR name ,
+.B value
 .ad
 .sp .6
 .RS 4n
@@ -733,7 +816,10 @@ is to use the global property name associated with a specific rctl.
 .sp
 .ne 2
 .na
-\fB\fBattr\fR: name, type, value\fR
+.BR attr :
+.BR name ,
+.BR type ,
+.B value
 .ad
 .sp .6
 .RS 4n
@@ -745,7 +831,8 @@ that type. \fBuint\fR means unsigned, that is, a non-negative integer.
 .sp
 .ne 2
 .na
-\fB\fBdataset\fR: name\fR
+.BR dataset :
+.B name
 .ad
 .sp .6
 .RS 4n
@@ -756,91 +843,122 @@ The name of a \fBZFS\fR dataset to be accessed from within the zone. See
 .sp
 .ne 2
 .na
-\fBglobal: \fBcpu-shares\fR\fR
+\fBcpu-shares\fR (global)
 .ad
 .sp .6
 .RS 4n
 The number of Fair Share Scheduler (FSS) shares to allocate to this zone. This
-property is incompatible with the \fBdedicated-cpu\fR resource. This property
-is the preferred way to set the \fBzone.cpu-shares\fR rctl.
+property is incompatible with the
+.B dedicated\-cpu
+resource. This property is the preferred way to set the
+.B zone.cpu\-shares
+rctl.
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-lwps\fR\fR
+.B max-lwps
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum number of LWPs simultaneously available to this zone. This property
-is the preferred way to set the \fBzone.max-lwps\fR rctl.
-If \fBmax-processes\fR is not explicitly set then it will be set to the
-same value as \fBmax-lwps\fR.
+is the preferred way to set the
+.B zone.max\-lwps
+rctl. If
+.B max\-processes
+is not explicitly set then it will be set to the same value as
+.BR max\-lwps .
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-msg-ids\fR\fR
+.B max-msg-ids
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum number of message queue IDs allowed for this zone. This property is
-the preferred way to set the \fBzone.max-msg-ids\fR rctl.
+the preferred way to set the
+.B zone.max\-msg\-ids
+rctl.
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-processes\fR\fR
+.B max-processes
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum number of processes simultaneously available to this zone. This
-property is the preferred way to set the \fBzone.max-processes\fR rctl.
-If \fBmax-lwps\fR is not explicitly set, then setting this property will
-automatically set \fBmax-lwps\fR to 10 times the value of
-\fBmax-processes\fR.
+property is the preferred way to set the
+.B zone.max\-processes
+rctl. If
+.B max\-lwps
+is not explicitly set, then setting this property will automatically set
+.B max\-lwps
+to 10 times the value of
+.BR max\-processes .
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-sem-ids\fR\fR
+.B max-sem-ids
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum number of semaphore IDs allowed for this zone. This property is the
-preferred way to set the \fBzone.max-sem-ids\fR rctl.
+preferred way to set the
+.B zone.max\-sem\-ids
+rctl.
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-shm-ids\fR\fR
+.B max-shm-ids
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum number of shared memory IDs allowed for this zone. This property is
-the preferred way to set the \fBzone.max-shm-ids\fR rctl.
+the preferred way to set the
+.B zone.max\-shm\-ids
+rctl.
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBmax-shm-memory\fR\fR
+.B max-shm-memory
+(global)
 .ad
 .sp .6
 .RS 4n
 The maximum amount of shared memory allowed for this zone. This property is the
-preferred way to set the \fBzone.max-shm-memory\fR rctl. A scale (K, M, G, T)
-can be applied to the value for this number (for example, 1M is one megabyte).
+preferred way to set the
+.B zone.max\-shm\-memory
+rctl. A scale
+.RB ( K ,
+.BR M ,
+.BR G ,
+.BR T )
+can be applied to the value for this number (for example,
+.B 1M
+is one megabyte).
 .RE
 
 .sp
 .ne 2
 .na
-\fBglobal: \fBscheduling-class\fR\fR
+.B scheduling-class
+(global)
 .ad
 .sp .6
 .RS 4n
@@ -857,7 +975,10 @@ class FSS is used.
 .TP
 .ie t \(bu
 .el o
-If neither \fBcpu-shares\fR nor the equivalent rctl is set and the zone's pool
+If neither
+.B cpu\-shares
+nor the equivalent rctl is set and the zone's
+.B pool
 property references a pool that has a default scheduling class, that class is
 used.
 .RE
@@ -874,45 +995,78 @@ Under any other conditions, the system default scheduling class is used.
 .sp
 .ne 2
 .na
-\fB\fBdedicated-cpu\fR: ncpus, importance\fR
+.BR dedicated\-cpu :
+.BR ncpus ,
+.B importance
 .ad
 .sp .6
 .RS 4n
 The number of CPUs that should be assigned for this zone's exclusive use. The
-zone will create a pool and processor set when it boots. See \fBpooladm\fR(8)
-and \fBpoolcfg\fR(8) for more information on resource pools. The \fBncpu\fR
-property can specify a single value or a range (for example, 1-4) of
-processors. The \fBimportance\fR property is optional; if set, it will specify
-the \fBpset.importance\fR value for use by \fBpoold\fR(8). If this resource is
-used, there must be enough free processors to allocate to this zone when it
-boots or the zone will not boot. The processors assigned to this zone will not
-be available for the use of the global zone or other zones. This resource is
-incompatible with both the \fBpool\fR and \fBcpu-shares\fR properties. Only a
-single instance of this resource can be added to the zone.
+zone will create a pool and processor set when it boots. See
+.BR pooladm (8)
+and
+.BR poolcfg (8)
+for more information on resource pools. The
+.B ncpus
+property can specify a single value or a range (for example,
+.BR 1-4 )
+of processors. The
+.B importance
+property is optional; if set, it will specify the
+.B pset.importance
+value for use by
+.BR poold (8).
+If this resource is used, there must be enough free processors to allocate to
+this zone when it boots, or the zone will not boot. The processors assigned to
+this zone will not be available for the use of the global zone or other zones.
+This resource is incompatible with both the
+.B pool
+and
+.B cpu\-shares
+properties. Only a single instance of this resource can be added to the zone.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBcapped-memory\fR: physical, swap, locked\fR
+.BR capped\-memory :
+.BR physical ,
+.BR swap ,
+.B locked
 .ad
 .sp .6
 .RS 4n
-The caps on the memory that can be used by this zone. A scale (K, M, G, T) can
-be applied to the value for each of these numbers (for example, 1M is one
-megabyte). Each of these properties is optional but at least one property must
-be set when adding this resource. Only a single instance of this resource can
-be added to the zone. The \fBphysical\fR property sets the \fBmax-rss\fR for
-this zone. This will be enforced by \fBrcapd\fR(8) running in the global zone.
-The \fBswap\fR property is the preferred way to set the \fBzone.max-swap\fR
-rctl. The \fBlocked\fR property is the preferred way to set the
-\fBzone.max-locked-memory\fR rctl.
+The caps on the memory that can be used by this zone. A scale
+.RB ( K ,
+.BR M ,
+.BR G ,
+.BR T )
+can be applied to the value for each of these numbers (for example,
+.B 1M
+is one megabyte). Each of these properties is optional, but at least one
+property must be set when adding this resource. Only a single instance of this
+resource can be added to the zone. The
+.B physical
+property sets the
+.B max\-rss
+for this zone. This will be enforced by
+.BR rcapd (8)
+running in the global zone. The
+.B swap
+property is the preferred way to set the
+.B zone.max\-swap
+rctl. The
+.B locked
+property is the preferred way to set the
+.B zone.max\-locked\-memory
+rctl.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBcapped-cpu\fR: ncpus\fR
+.BR capped\-cpu :
+.B ncpus
 .ad
 .sp .6
 .RS 4n
@@ -920,7 +1074,7 @@ Sets a limit on the amount of CPU time that can be used by a zone. The unit
 used translates to the percentage of a single CPU that can be used by all user
 threads in a zone, expressed as a fraction (for example, \fB\&.75\fR) or a
 mixed number (whole number and fraction, for example, \fB1.25\fR). An
-\fBncpu\fR value of \fB1\fR means 100% of a CPU, a value of \fB1.25\fR means
+\fBncpus\fR value of \fB1\fR means 100% of a CPU, a value of \fB1.25\fR means
 125%, \fB\&.75\fR mean 75%, and so forth. When projects within a capped zone
 have their own caps, the minimum value takes precedence.
 .sp
@@ -932,19 +1086,24 @@ control and is related to the \fBzone.cpu-cap\fR resource control. See
 .sp
 .ne 2
 .na
-\fB\fBsecurity-flags\fR: lower, default, upper\fR
+.BR security\-flags :
+.BR lower ,
+.BR default ,
+.B upper
 .ad
 .sp .6
 .RS 4n
 Set the process security flags associated with the zone.  The \fBlower\fR and
-\fBupper\fR fields set the limits, the \fBdefault\fR field is set of flags all
+\fBupper\fR fields set the limits. The \fBdefault\fR field is set of flags all
 zone processes inherit.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBadmin\fR: user, auths\fR
+.BR admin :
+.BR user ,
+.B auths
 .ad
 .sp .6
 .RS 4n
@@ -961,21 +1120,29 @@ a new zone using this zone as a clone source.
 .sp
 .ne 2
 .na
-\fBglobal: \fBfs-allowed\fR\fR
+\fBfs-allowed\fR (global)
 .ad
 .sp .6
 .RS 4n
-A comma-separated list of additional filesystems that may be mounted within
-the zone; for example "ufs,pcfs". By default, only hsfs(4FS) and network
-filesystems can be mounted. If the first entry in the list is "-" then
-that disables all of the default filesystems. If any filesystems are listed
-after "-" then only those filesystems can be mounted.
+A comma-separated list of additional filesystems that may be mounted within the
+the zone; for example
+.BR ufs,pcfs .
+By default, only
+.BR hsfs (4FS)
+and network filesystems can be mounted. If the first entry in the list is
+.RB \(dq - \(dq
+then that disables all of the default filesystems. If any filesystems are
+listed after
+.RB \(dq - \(dq
+then only those filesystems can be mounted.
 
-This property does not apply to filesystems mounted into the zone via "add fs"
-or "add dataset".
+This property does not apply to filesystems mounted into the zone via
+.B "add fs"
+or
+.BR "add dataset" .
 
 WARNING: allowing filesystem mounts other than the default may allow the zone
-administrator to compromise the system with a malicious filesystem image, and
+administrator to compromise the system with a malicious filesystem image and
 is not supported.
 .RE
 
@@ -985,66 +1152,84 @@ The following table summarizes resources, property-names, and types:
 .sp
 .in +2
 .nf
-resource          property-name   type
-(global)          zonename        simple
-(global)          zonepath        simple
-(global)          autoboot        simple
-(global)          bootargs        simple
-(global)          pool            simple
-(global)          limitpriv       simple
-(global)          brand           simple
-(global)          ip-type         simple
-(global)          hostid          simple
-(global)          cpu-shares      simple
-(global)          max-lwps        simple
-(global)          max-msg-ids     simple
-(global)          max-processes   simple
-(global)          max-sem-ids     simple
-(global)          max-shm-ids     simple
-(global)          max-shm-memory  simple
-(global)          scheduling-class simple
-fs                dir             simple
-                   special         simple
-                   raw             simple
-                   type            simple
-                   options         list of simple
-net               address         simple
-                   physical        simple
-device            match           simple
-rctl              name            simple
-                   value           list of complex
-attr              name            simple
-                   type            simple
-                   value           simple
-dataset           name            simple
-dedicated-cpu     ncpus           simple or range
-                   importance      simple
-
-capped-memory     physical        simple with scale
-                   swap            simple with scale
-                   locked          simple with scale
-
-capped-cpu        ncpus           simple
-security-flags	  lower           simple
-                   default        simple
-                   upper          simple
-admin             user            simple
-                   auths          simple
+resource        property-name     type
+(global)        zonename          simple
+(global)        zonepath          simple
+(global)        autoboot          simple
+(global)        bootargs          simple
+(global)        pool              simple
+(global)        limitpriv         simple
+(global)        brand             simple
+(global)        ip-type           simple
+(global)        hostid            simple
+(global)        cpu-shares        simple
+(global)        max-lwps          simple
+(global)        max-msg-ids       simple
+(global)        max-processes     simple
+(global)        max-sem-ids       simple
+(global)        max-shm-ids       simple
+(global)        max-shm-memory    simple
+(global)        scheduling-class  simple
+fs              dir               simple
+                 special           simple
+                 raw               simple
+                 type              simple
+                 options           list of simple
+net             address           simple
+                 physical          simple
+device          match             simple
+rctl            name              simple
+                 value             list of complex
+attr            name              simple
+                 type              simple
+                 value             simple
+dataset         name              simple
+dedicated-cpu   ncpus             simple or range
+                 importance        simple
+capped-memory   physical          simple with scale
+                 swap              simple with scale
+                 locked            simple with scale
+capped-cpu      ncpus             simple
+security-flags  lower             simple
+                 default           simple
+                 upper             simple
+admin           user              simple
+                 auths             simple
 .fi
 .in -2
 .sp
 
 .sp
 .LP
-To further specify things, the breakdown of the complex property "value" of the
-"rctl" resource type, it consists of three name/value pairs, the names being
-"priv", "limit" and "action", each of which takes a simple value. The "name"
-property of an "attr" resource is syntactically restricted in a fashion similar
-but not identical to zone names: it must begin with an alphanumeric, and can
-contain alphanumerics plus the hyphen (\fB-\fR), underscore (\fB_\fR), and dot
-(\fB\&.\fR) characters. Attribute names beginning with "zone" are reserved for
-use by the system. Finally, the "autoboot" global property must have a value of
-"true" or "false".
+To further specify things, the breakdown of the complex property
+.I value
+of the
+.B rctl
+resource type, it consists of three name/value pairs, the names being
+.BR priv ,
+.B limit
+and
+.BR action ,
+each of which takes a simple value. The
+.I name
+property of an
+.B attr
+resource is syntactically restricted in a fashion similar but not identical to
+zone names: it must begin with an alphanumeric and can contain alphanumerics
+plus the hyphen
+.RB ( - ),
+underscore
+.RB ( _ ),
+and dot
+.RB ( \&. )
+characters. Attribute names beginning with
+.B zone
+are reserved for use by the system. Finally, the
+.B autoboot
+global property must have a value of
+.B true
+or
+.BR false .
 .SS "Using Kernel Statistics to Monitor CPU Caps"
 Using the kernel statistics (\fBkstat\fR(3KSTAT)) module \fBcaps\fR, the system
 maintains information for all capped projects and zones. You can access this
@@ -1206,7 +1391,7 @@ The following options are supported:
 .sp .6
 .RS 4n
 Specify the name of \fBzonecfg\fR command file. \fIcommand_file\fR is a text
-file of \fBzonecfg\fR subcommands, one per line.
+file of \fBzonecfg\fR commands, one per line.
 .RE
 
 .sp
@@ -1223,15 +1408,15 @@ name \fBglobal\fR and all names beginning with \fBSUNW\fR are reserved and
 cannot be used.
 .RE
 
-.SH SUBCOMMANDS
-You can use the \fBadd\fR and \fBselect\fR subcommands to select a specific
+.SH COMMANDS
+You can use the \fBadd\fR and \fBselect\fR commands to select a specific
 resource, at which point the scope changes to that resource. The \fBend\fR and
-\fBcancel\fR subcommands are used to complete the resource specification, at
-which time the scope is reverted back to global. Certain subcommands, such as
+\fBcancel\fR commands are used to complete the resource specification, at
+which time the scope is reverted back to global. Certain commands, such as
 \fBadd\fR, \fBremove\fR and \fBset\fR, have different semantics in each scope.
 .sp
 .LP
-\fBzonecfg\fR supports a semicolon-separated list of subcommands. For example:
+\fBzonecfg\fR supports a semicolon-separated list of commands. For example:
 .sp
 .in +2
 .nf
@@ -1242,15 +1427,15 @@ which time the scope is reverted back to global. Certain subcommands, such as
 
 .sp
 .LP
-Subcommands which can result in destructive actions or loss of work have an
+Commands which can result in destructive actions or loss of work have an
 \fB-F\fR option to force the action. If input is from a terminal device, the
 user is prompted when appropriate if such a command is given without the
-\fB-F\fR option otherwise, if such a command is given without the \fB-F\fR
+\fB-F\fR option; otherwise, if such a command is given without the \fB-F\fR
 option, the action is disallowed, with a diagnostic message written to standard
 error.
 .sp
 .LP
-The following subcommands are supported:
+The following commands are supported:
 .sp
 .ne 2
 .na
@@ -1278,7 +1463,7 @@ brackets, separated by commas (\fB[foo,bar,baz]\fR). See \fBPROPERTIES\fR.
 .ad
 .sp .6
 .RS 4n
-End the resource specification and reset scope to global. Abandons any
+End the resource specification, and reset scope to global. Abandons any
 partially specified resources. \fBcancel\fR is only applicable in the resource
 scope.
 .RE
@@ -1290,7 +1475,7 @@ scope.
 .ad
 .sp .6
 .RS 4n
-Clear the value for the property.
+Clear the values for the property.
 .RE
 
 .sp
@@ -1303,16 +1488,23 @@ Clear the value for the property.
 Commit the current configuration from memory to stable storage. The
 configuration must be committed to be used by \fBzoneadm\fR. Until the
 in-memory configuration is committed, you can remove changes with the
-\fBrevert\fR subcommand. The \fBcommit\fR operation is attempted automatically
+\fBrevert\fR command. The \fBcommit\fR operation is attempted automatically
 upon completion of a \fBzonecfg\fR session. Since a configuration must be
-correct to be committed, this operation automatically does a verify.
+correct to be committed, this operation automatically does a \fBverify\fR.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBcreate [\fR\fB-F\fR\fB] [\fR \fB-a\fR \fIpath\fR |\fB-b\fR \fB|\fR
-\fB-t\fR \fItemplate\fR\fB]\fR\fR
+.B create
+.RB [ -F ]
+.RB [ -a
+.I path
+|
+.B -b
+|
+.B -t
+.IR template ]
 .ad
 .sp .6
 .RS 4n
@@ -1325,27 +1517,39 @@ to force the action. Specify the \fB-t\fR \fItemplate\fR option to create a
 configuration identical to \fItemplate\fR, where \fItemplate\fR is the name of
 a configured zone.
 .sp
-Use the \fB-a\fR \fIpath\fR option to facilitate configuring a detached zone on
-a new host. The \fIpath\fR parameter is the zonepath location of a detached
-zone that has been moved on to this new host. Once the detached zone is
-configured, it should be installed using the "\fBzoneadm attach\fR" command
-(see \fBzoneadm\fR(8)). All validation of the new zone happens during the
-\fBattach\fR process, not during zone configuration.
+Use the
+.B -a
+.I path
+option to facilitate configuring a detached zone on a new host. The
+.I path
+parameter is the
+.B zonepath
+location of a detached zone that has been moved on to this new host. Once the
+detached zone is configured, it should be installed using the
+.B "zoneadm attach"
+command (see
+.BR zoneadm (8)).
+All validation of the new zone happens during the
+.B attach
+process, not during zone configuration.
 .sp
-Use the \fB-b\fR option to create a blank configuration. Without arguments,
-\fBcreate\fR applies the Sun default settings.
+Use the \fB-b\fR option to create a blank configuration.
+.sp
+Without arguments, \fBcreate\fR applies the default settings.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBdelete [\fR\fB-F\fR\fB]\fR\fR
+.B delete
+.RB [ -F ]
 .ad
 .sp .6
 .RS 4n
 Delete the specified configuration from memory and stable storage. This action
-is instantaneous, no commit is necessary. A deleted configuration cannot be
-reverted.
+is instantaneous; no
+.B commit
+is necessary. A deleted configuration cannot be reverted.
 .sp
 Specify the \fB-F\fR option to force the action.
 .RE
@@ -1357,18 +1561,43 @@ Specify the \fB-F\fR option to force the action.
 .ad
 .sp .6
 .RS 4n
-End the resource specification. This subcommand is only applicable in the
-resource scope. \fBzonecfg\fR checks to make sure the current resource is
-completely specified. If so, it is added to the in-memory configuration (see
-\fBcommit\fR for saving this to stable storage) and the scope reverts to
-global. If the specification is incomplete, it issues an appropriate error
-message.
+End the resource specification. This command is only applicable in the
+resource scope.
+.B zonecfg
+checks to make sure the current resource is completely specified. If so, it is
+added to the in-memory configuration (see
+.B commit
+for saving this to stable storage), and the scope reverts to global. If the
+specification is incomplete, it issues an appropriate error message.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBexport [\fR\fB-f\fR \fIoutput-file\fR\fB]\fR\fR
+.B exit
+.RB [ -F ]
+.ad
+.sp .6
+.RS 4n
+Exit the
+.B zonecfg
+session. A
+.B commit
+is automatically attempted if needed. You can also use an
+.B EOF
+character to exit
+.BR zonecfg .
+The
+.B -F
+option can be used to force the action.
+.RE
+
+.sp
+.ne 2
+.na
+.B export
+.RB [ -f
+.IR output\-file ]
 .ad
 .sp .6
 .RS 4n
@@ -1381,9 +1610,9 @@ suitable for use in a command file.
 .ne 2
 .na
 .BR "help " [ usage ]
-.RI [ subcommand ]
-[syntax]
-.RI [ command-name ]
+.RB [ commands ]
+.RB [ syntax ]
+.RI [ command\-name ]
 .ad
 .sp .6
 .RS 4n
@@ -1393,66 +1622,117 @@ Print general help or help about given topic.
 .sp
 .ne 2
 .na
-\fB\fBinfo zonename | zonepath | autoboot | brand | pool | limitpriv\fR\fR
+.B "info zonename"
+|
+.B zonepath
+|
+.B autoboot
+|
+.B brand
+|
+.B pool
+|
+.B limitpriv
 .ad
 .br
 .na
-\fB\fBinfo [\fR\fIresource-type\fR
-\fB[\fR\fIproperty-name\fR\fB=\fR\fIproperty-value\fR\fB]*]\fR\fR
+.B info
+.RI [ resource\-type
+.RI [ property\-name\c
+.BI = property\-value\c
+]]
 .ad
 .sp .6
 .RS 4n
-Display information about the current configuration. If \fIresource-type\fR is
-specified, displays only information about resources of the relevant type. If
-any \fIproperty-name\fR value pairs are specified, displays only information
-about resources meeting the given criteria. In the resource scope, any
-arguments are ignored, and \fBinfo\fR displays information about the resource
-which is currently being added or modified.
+Display information about the current configuration. If
+.I resource\-type
+is specified, displays only information about resources of the relevant type.
+If any
+.I property\-name
+.I property\-value
+pairs are specified, displays only information about resources meeting
+the given criteria. In the resource scope, any arguments are ignored, and
+.B info
+displays information about the resource which is currently being added or
+modified.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBremove\fR \fIresource-type\fR\fB{\fR\fIproperty-name\fR\fB=\fR\fIproperty
--value\fR\fB}\fR(global scope)\fR
+.B remove
+.RB [ -F ]
+.I resource\-type
+.RI [ property\-name\c
+.BI = property\-value\c
+] (global scope)
+.ad
+.br
+.na
+.B remove
+.I property\-name
+.I property\-value
+(resource scope)
 .ad
 .sp .6
 .RS 4n
-In the global scope, removes the specified resource. The \fB[]\fR syntax means
-0 or more of whatever is inside the square braces. If you want only to remove a
-single instance of the resource, you must specify enough property name-value
-pairs for the resource to be uniquely identified. If no property name-value
-pairs are specified, all instances will be removed. If there is more than one
-pair is specified, a confirmation is required, unless you use the \fB-F\fR
+In the global scope, removes the specified resource. The [] syntax means
+0 or more of whatever is inside the square brackets. If you want only to remove
+a single instance of the resource, you must specify enough
+.I property\-name property\-value
+pairs for the resource to be uniquely identified. If no
+.I property\-name property\-value
+pairs are specified, all instances will be removed. If there are more than one
+pair specified, a confirmation is required, unless you use the \fB-F\fR
 option.
+.sp
+In the resource scope, removes the specified property.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBselect\fR \fIresource-type\fR
-\fB{\fR\fIproperty-name\fR\fB=\fR\fIproperty-value\fR\fB}\fR\fR
+.B revert
+.RB [ -F ]
+.ad
+.sp .6
+.RS 4n
+Revert the configuration back to the last committed state. The
+.B -F
+option can be used to force the action.
+.RE
+
+.sp
+.ne 2
+.na
+.B select
+.I resource\-type
+.RI { property\-name\c
+.BI = property\-value\c
+}
 .ad
 .sp .6
 .RS 4n
 Select the resource of the given type which matches the given
-\fIproperty-name\fR \fIproperty-value\fR pair criteria, for modification. This
-subcommand is applicable only in the global scope. The scope is changed to that
-resource type. The \fB{}\fR syntax means 1 or more of whatever is inside the
-curly braces. You must specify enough \fIproperty -name property-value\fR pairs
-for the resource to be uniquely identified.
+.I property\-name property\-value
+pair criteria, for modification. This command is applicable only in the
+global scope. The scope is changed to that resource type. The {} syntax means 1
+or more of whatever is inside the curly braces. You must specify enough
+.I property\-name property\-value
+pairs for the resource to be uniquely identified.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBset\fR \fIproperty-name\fR\fB=\fR\fIproperty\fR\fB-\fR\fIvalue\fR\fR
+.B set
+.IB property\-name = property\-value
 .ad
 .sp .6
 .RS 4n
 Set a given property name to the given value. Some properties (for example,
 \fBzonename\fR and \fBzonepath\fR) are global while others are
-resource-specific. This subcommand is applicable in both the global and
+resource-specific. This command is applicable in both the global and
 resource scopes.
 .RE
 
@@ -1478,49 +1758,25 @@ A \fBzonepath\fR is specified.
 .RE
 .RE
 
-.sp
-.ne 2
-.na
-\fB\fBrevert\fR \fB[\fR\fB-F\fR\fB]\fR\fR
-.ad
-.sp .6
-.RS 4n
-Revert the configuration back to the last committed state. The \fB-F\fR option
-can be used to force the action.
-.RE
-
-.sp
-.ne 2
-.na
-\fB\fBexit [\fR\fB-F\fR\fB]\fR\fR
-.ad
-.sp .6
-.RS 4n
-Exit the \fBzonecfg\fR session. A commit is automatically attempted if needed.
-You can also use an \fBEOF\fR character to exit \fBzonecfg\fR. The \fB-F\fR
-option can be used to force the action.
-.RE
-
 .SH EXAMPLES
 \fBExample 1 \fRCreating the Environment for a New Zone
 .sp
 .LP
 In the following example, \fBzonecfg\fR creates the environment for a new zone.
 \fB/usr/local\fR is loopback mounted from the global zone into
-\fB/opt/local\fR. \fB/opt/sfw\fR is loopback mounted from the global zone,
-three logical network interfaces are added, and a limit on the number of
+\fB/opt/local\fR. \fB/mnt\fR is UFS-mounted from the global zone.
+Three logical network interfaces are added, and a limit on the number of
 fair-share scheduler (FSS) CPU shares for a zone is set using the \fBrctl\fR
-resource type. The example also shows how to select a given resource for
-modification.
+resource type.
 
 .sp
 .in +2
 .nf
 example# \fBzonecfg -z myzone3\fR
-my-zone3: No such zone configured
+myzone3: No such zone configured
 Use 'create' to begin configuring a new zone.
 zonecfg:myzone3> \fBcreate\fR
-zonecfg:myzone3> \fBset zonepath=/export/home/my-zone3\fR
+zonecfg:myzone3> \fBset zonepath=/export/home/myzone3\fR
 zonecfg:myzone3> \fBset autoboot=true\fR
 zonecfg:myzone3> \fBadd fs\fR
 zonecfg:myzone3:fs> \fBset dir=/usr/local\fR
@@ -1546,11 +1802,11 @@ zonecfg:myzone3> \fBadd net\fR
 zonecfg:myzone3:net> \fBset address=192.168.2.3/24\fR
 zonecfg:myzone3:net> \fBset physical=eri0\fR
 zonecfg:myzone3:net> \fBend\fR
-zonecfg:my-zone3> \fBset cpu-shares=5\fR
-zonecfg:my-zone3> \fBadd capped-memory\fR
-zonecfg:my-zone3:capped-memory> \fBset physical=50m\fR
-zonecfg:my-zone3:capped-memory> \fBset swap=100m\fR
-zonecfg:my-zone3:capped-memory> \fBend\fR
+zonecfg:myzone3> \fBset cpu-shares=5\fR
+zonecfg:myzone3> \fBadd capped-memory\fR
+zonecfg:myzone3:capped-memory> \fBset physical=50m\fR
+zonecfg:myzone3:capped-memory> \fBset swap=100m\fR
+zonecfg:myzone3:capped-memory> \fBend\fR
 zonecfg:myzone3> \fBexit\fR
 .fi
 .in -2
@@ -1739,16 +1995,18 @@ zone to three CPUs.
 .nf
 zonecfg:myzone> \fBadd capped-cpu\fR
 zonecfg:myzone>capped-cpu> \fBset ncpus=3\fR
-zonecfg:myzone>capped-cpu>capped-cpu> \fBend\fR
+zonecfg:myzone>capped-cpu> \fBend\fR
 .fi
 .in -2
 .sp
 
 .sp
 .LP
-The preceding sequence, which uses the capped-cpu property, is equivalent to
-the following sequence, which makes use of the \fBzone.cpu-cap\fR resource
-control.
+The preceding sequence, which uses the
+.B capped\-cpu
+property, is equivalent to the following sequence, which makes use of the
+.B zone.cpu\-cap
+resource control.
 
 .sp
 .in +2
@@ -1959,7 +2217,7 @@ Interface Stability	Volatile
 .BR lx (7),
 .BR privileges (7),
 .BR resource_controls (7),
-.BR security-flags (7),
+.BR security\-flags (7),
 .BR zones (7),
 .BR ipadm (8),
 .BR kstat (8),
@@ -1972,9 +2230,5 @@ Interface Stability	Volatile
 .BR svcadm (8),
 .BR zfs (8),
 .BR zoneadm (8)
-.sp
-.LP
-\fISystem Administration Guide: Solaris Containers-Resource Management, and
-Solaris Zones\fR
 .SH NOTES
 All character data used by \fBzonecfg\fR must be in US-ASCII encoding.
