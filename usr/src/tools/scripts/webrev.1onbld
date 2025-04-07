@@ -53,7 +53,9 @@ for review.  If that fails, or if more control
 over the set of files is needed, a \fIfile list (file)\fR may be specified.
 \fBwebrev\fR also attempts to deduce a
 .I basis-for-comparison
-(interchangeably called the \fIparent\fR, but see \fBSCM INTERACTIONS\fR below).
+(interchangeably called the \fIparent\fR, but see
+.B "SCM INTERACTIONS"
+below).
 A basis for comparison is needed in order to determine the differences
 introduced by the code changes under review.
 
@@ -74,15 +76,21 @@ In the index file, each file is listed on a line with a link to the
 relevant review materials.  Comments for each change will be included
 automatically.  Cross-references to bug (or other information) tracking
 databases in the comments will become hyperlinks in the associated web
-interface, according to the rules in \fBCROSS REFERENCING\fR below.
+interface, according to the rules in
+.B "CROSS REFERENCING"
+below.
 
 As a review aid, content may be added to the index file in two ways.
 First, the author may manually edit the file (for example by including
 text that explains the changes in front of the links for each file).
-Note that if \fBwebrev\fR is run again, manual edits will be lost.  Second,
-if a file named \fBwebrev-info\fR is present at the root of the workspace,
-it will be automatically included in the index file.  To include a
-different file, see the \fB-i\fR option.
+Note that if
+.B webrev
+is run again, manual edits will be lost. Second, if a file named
+.B webrev\-info
+is present at the root of the workspace, it will be automatically included in
+the index file. To include a different file, see the
+.B -i
+option.
 
 For each file in the file list, \fBwebrev\fR compares the file with the
 version in the basis for comparison (i.e. the parent workspace) and
@@ -90,7 +98,7 @@ generates a variety of HTML renderings of the differences between
 the two files; which of these renderings to use is largely a matter
 of personal preference.  Additionally, \fBwebrev\fR emits a patch, the old
 and new versions of the file, and a "raw" copy of the file which is
-suitable for download.  For files that express differences, source text
+suitable for download.  For files which express differences, source text
 is formatted according to the following color coding:
 .IP
 .nf
@@ -113,7 +121,9 @@ will also attempt to auto-discover.  In all cases,
 must either discover the list of files which have changed, or else this list
 must be manually specified, either in "webrev file list" format or in "wx"
 format.
-See \fBFILE LIST\fR for more details.
+See
+.B "FILE LIST"
+for more details.
 .PP
 In all cases, if the user has activated the workspace with the
 .BR ws (1ONBLD)
@@ -154,14 +164,20 @@ from the
 The file list will be created from the output of the "svn status" command.
 
 .SH CROSS REFERENCING
-After extracting comments (see \fBFILE LIST\fR below),
+After extracting comments (see
+.B "FILE LIST"
+below),
 .B webrev
 will translate cross references into hyperlinks.  By default, information
 about available information tracking systems can be found in
 /opt/onbld/etc/its.reg, and the specification of a local domain and
 selection and prioritization of systems
 in /opt/onbld/etc/its.conf.  These file formats are self documenting.  Also
-see the \fB-I\fR and \fB-C\fR options below.
+see the
+.B -I
+and
+.B -C
+options below.
 .SH OPTIONS
 .TP 10
 .BI "-c " revision
@@ -174,15 +190,23 @@ of information tracking systems to be searched automatically when resolving cros
 references.
 .TP 10
 .BI "-D"
-Delete remote webrev via SFTP. Remote target is required with the \fB-t\fR
-option. Default remote directory for removal is the same as workspace/repository
-basename. If combined with \fB-U\fR, the deletion will be performed first. Also,
-if used together with \fB-U\fR and the removal fails, no upload is done. Without
-the \fB-U\fR option, no webrev will be generated, just like if \fB-n\fR option
-was used. The deletion is done by moving the webrev to a special directory in
-the user's home directory. It is expected that the remote host periodically runs
-a script which deletes the contents of this directory. See the \fBENVIRONMENT
-VARIABLES\fR section for more details about this directory.
+Delete remote webrev via SFTP. Remote target is required with the
+.B -t
+option. Default remote directory for removal is the same as
+workspace/repository basename. If combined with
+.BR -U ,
+the deletion will be performed first. Also, if used together with
+.B -U
+and the removal fails, no upload is done. Without the
+.B -U
+option, no webrev will be generated, just like if
+.B -n
+option was used. The deletion is done by moving the webrev to a special
+directory in the user's home directory. It is expected that the remote host
+periodically runs a script which deletes the contents of this directory. See
+the
+.B "ENVIRONMENT VARIABLES"
+section for more details about this directory.
 .TP 10
 .BI "-h " head-revision
 Specify the explicit head to generate the webrev from (Git only).
@@ -210,8 +234,9 @@ instead of the default INTERNAL_URL_domain field, and sources which appear in
 .TP 10
 .BI "-o " output-dir
 Place output from running the script in the directory specified.  If
-specified, this option takes precedence over the \fBWDIR\fR environment
-variable.
+specified, this option takes precedence over the
+.B WDIR
+environment variable.
 .TP 10
 .BI "-p " basis-of-comparison
 Specify a basis of comparison meaningful for the SCM currently in use.
@@ -225,14 +250,21 @@ the \fB-o\fR option if the URI is fully specified. The target is relative to
 the top level directory of the default sftp/rsync directory tree.
 .TP 10
 .BI "-U"
-Upload the webrev. Remote target is required with the \fB-t\fR option.
+Upload the webrev. Remote target is required with the
+.B -t
+option.
 Default transport is rsync. If it fails, fallback to SCP/SFTP transport
 is done.
 .TP 10
 .BI "-w " wx-file
 Extract the file list from the wx "active" file specified.  'wx' uses
-this mode when invoking \fBwebrev\fR.  The list is assumed to be in the
-format expected by the \fIwx\fR package.  See \fBFILE LIST\fR below.
+this mode when invoking
+.BR webrev .
+The list is assumed to be in the format expected by the
+.I wx
+package. See
+.B "FILE LIST"
+below.
 
 .SH FILE LIST
 .B webrev
@@ -261,11 +293,15 @@ usr/src/cmd/fs.d/nfs/mountd/mountd.c
 .PP
 Include the paths of any files added, deleted, or modified.
 You can keep this list of files in the webrev directory
-that \fBwebrev\fR creates in the workspace directory
-(\fBCODEMGR_WS\fR).
+that
+.B webrev
+creates in the workspace directory
+.RB ( CODEMGR_WS ).
 
-If \fBCODEMGR_WS\fR is not set, it may be specified as an environment variable
-within the file list, e.g.
+If
+.B CODEMGR_WS
+is not set, it may be specified as an environment variable within the file
+list, e.g.
 .IP
 .nf
 \f(CWCODEMGR_WS=/home/brent/myws
@@ -275,8 +311,11 @@ usr/src/cmd/fs.d/nfs/mountd/mountd.c
 .fi
 .PP
 To compare the workspace against one other than the parent (see also
-the \fB-p\fR option), include a \fBCODEMGR_PARENT\fR line in the file list,
-like:
+the
+.B -p
+option), include a
+.B CODEMGR_PARENT
+line in the file list, like:
 .IP
 .nf
 \f(CWCODEMGR_WS=/home/brent/myws
@@ -286,17 +325,23 @@ usr/src/uts/common/fs/nfs/nfs_export.c
 usr/src/cmd/fs.d/nfs/mountd/mountd.c
 .fi
 .PP
-Finally, run \fBwebrev\fR with the name of the file containing the file list as
-an argument, e.g.
+Finally, run
+.B webrev
+with the name of the file containing the file list as an argument, e.g.
 
 .nf
         $ webrev file.list
 .fi
 .PP
-If "\fB-\fR" is supplied as the name of the file, then stdin will be used.
+If
+.B -
+(dash) is supplied as the name of the file, then stdin will be used.
 
 .SS wx Format
-If the \fB-w\fR flag is specified, then \fBwebrev\fR
+If the
+.B -w
+flag is specified, then
+.B webrev
 will assume the file list is in the format expected by the "wx" package:
 pathname lines alternating with SCCS comment lines separated by blank
 lines, e.g.
@@ -337,15 +382,18 @@ with more (or less) strict whitespace handling, set one or both of
 these variables in the user environment accordingly.
 
 \fBWDIR\fR sets the output directory.  It is functionally equivalent to
-the \fB-o\fR option.
+the
+.B -o
+option.
 
 \fBWDIFF\fR specifies the command used to generate Wdiffs. Wdiff generates a
 full unified context listing with line numbers where unchanged
 sections of code may be expanded and collapsed.  It also provides a
 "split" feature that shows the same file in two HTML frames one above the
 other.  The default path for this script is
-/ws/onnv\-gate/public/bin/wdiff, but \fBWDIFF\fR may be set to customize this
-to use a more convenient location.
+/ws/onnv\-gate/public/bin/wdiff, but
+.B WDIFF
+may be set to customize this to use a more convenient location.
 
 \fBWEBREV_TRASH_DIR\fR specifies alternative location of trash directory
 for remote webrev deletion using the \fB-D\fR option. The directory is
@@ -353,8 +401,10 @@ relative to the top level directory of the default sftp/rsync directory tree.
 The default value of this directory is ".trash".
 
 .SH UPLOADING WEBREVS
-A webrev can be uploaded to remote site using the \fB-U\fR option. To simply
-generate a new webrev and upload it to a remote host, use the following command:
+A webrev can be uploaded to remote site using the
+.B -U
+option. To simply generate a new webrev and upload it to a remote host, use the
+following command:
 .IP
 .nf
 \f(CW$ webrev -U -t cr.example.org
@@ -363,25 +413,31 @@ generate a new webrev and upload it to a remote host, use the following command:
 This will generate the webrev to local directory named 'webrev' and upload it
 to the remote host with remote directory name equal to local
 workspace/repository name. To change both local and remote directory name,
-\fB-U\fR can be combined with the \fB-o\fR option. The following command will
-store the webrev to local directory named "foo.onnv" and upload it to the remote
-host with the same directory name:
+.B -U
+can be combined with the
+.B -o
+option. The following command will store the webrev to local directory named
+\&"foo.onnv" and upload it to the remote host with the same directory name:
 .IP
 .nf
 \f(CW$ webrev -U -o $CODEMGR_WS/foo.onnv
 .fi
 .PP
-If there is a need for manual change of the webrev before uploading, \fB-U\fR
-can be combined with \fB-n\fR option so that the first command will just
-generate the webrev, and the second command will upload it without generating it
-again:
+If there is a need for manual change of the webrev before uploading,
+.B -U
+can be combined with
+.B -n
+option so that the first command will just generate the webrev, and the second
+command will upload it without generating it again:
 .IP
 .nf
 \f(CW$ webrev
 \f(CW$ webrev -n -U
 .fi
 .PP
-For custom remote targets, the \fB-t\fR option allows to specify all components:
+For custom remote targets, the
+.B -t
+option allows to specify all components:
 .IP
 .nf
 \f(CW$ webrev -U -t ssh://user@cr.example.org:foo/bar/bugfix.onnv
