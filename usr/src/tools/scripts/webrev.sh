@@ -1715,7 +1715,7 @@ diff_to_html()
 	/^\*\*\* old/	{ next }
 	/^\*\*\*\*/	{ next }
 	/^-------/	{ printf "<center><h1>%s</h1></center>\n", $0; next }
-	/^\@\@.*\@\@$/	{ printf "</pre><hr></hr><pre>\n";
+	/^@@.*@@$/	{ printf "</pre><hr></hr><pre>\n";
 			  printf "<span class=\"newmarker\">%s</span>\n", $0;
 			  next}
 
@@ -2283,7 +2283,7 @@ Options:
 	-w <wxfile>: Use specified wx active file.
 
 Environment:
-	AWK: set to forgo path search for "nawk", "gawk", "awk" in that order.
+	AWK: set to forgo path search for "nawk", "gawk", "awk" (in that order).
 	COL: set to forgo path search for "col".
 	FIND: set to forgo path search for "find".
 	GREP: set to forgo path search for "grep".
