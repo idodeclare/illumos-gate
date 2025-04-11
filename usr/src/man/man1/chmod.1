@@ -519,9 +519,9 @@ An ACL Operation command line has the following format:
 .sp
 .in +2
 .nf
+\fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR]\fB+\fIacl_specification file\fR ...
 \fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR]\fB- \fIfile\fR ...
 \fBchmod\fR [\fIoptions\fR] \fBA-\fIacl_specification file\fR ...
-\fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR]\fB+\fIacl_specification file\fR ...
 \fBchmod\fR [\fIoptions\fR] \fBA\fR[\fIindex\fR]\fB=\fIacl_specification file\fR ...
 .fi
 .in -2
@@ -593,7 +593,7 @@ the file. If multiple ACEs are specified, then each subsequent ACE in
 
 .sp
 Where \fIacl_specification\fR is a comma-separated list (with no intervening
-white space) of ACLs of one of the following forms.
+white space) of ACEs of one of the following forms.
 .sp
 
 .LP
