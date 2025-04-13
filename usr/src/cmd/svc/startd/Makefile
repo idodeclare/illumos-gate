@@ -133,3 +133,6 @@ clean:
 	$(RM) $(ALLOBJS)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLOBJS) $(CMDCLOBBEREES)

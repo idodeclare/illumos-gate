@@ -36,3 +36,7 @@ include ../../../Makefile.module
 CPPFLAGS += -I$(SRC)/uts/common
 
 CERRWARN += -_gcc=-Wno-unused-function
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

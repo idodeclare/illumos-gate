@@ -97,3 +97,6 @@ $(ROOTLINK):	$(USR_STRMOD_DIR) $(ROOTMODULE)
 #	Include common targets.
 #
 include $(UTSBASE)/intel/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

@@ -28,3 +28,7 @@ CPPFLAGS += -I$(SRC)/uts/common/io/i40e
 CPPFLAGS += -I$(SRC)/uts/common/io/i40e/core
 CPPFLAGS += -I$(SRC)/uts/common
 CPPFLAGS += -D_I40E_MDB_DMOD
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

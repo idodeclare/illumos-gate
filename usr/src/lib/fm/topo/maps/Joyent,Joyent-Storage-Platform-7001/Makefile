@@ -31,3 +31,6 @@ SRCDIR = ../Joyent,Joyent-Storage-Platform-7001
 PLATFORM = Joyent-Storage-Platform-7001
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

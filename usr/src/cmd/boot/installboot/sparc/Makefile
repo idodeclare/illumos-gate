@@ -16,3 +16,6 @@ include ../Makefile.com
 all:
 
 include $(SRC)/cmd/boot/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

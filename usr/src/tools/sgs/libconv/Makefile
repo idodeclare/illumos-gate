@@ -43,3 +43,5 @@ install all:	$(LIBRARY)
 
 include		$(SGSHOME)/libconv/Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBRARY) $(PICS)

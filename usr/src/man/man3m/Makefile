@@ -535,3 +535,6 @@ ynl.3m					:= LINKSRC = y0.3m
 include ../Makefile.man
 
 install: $(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

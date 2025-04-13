@@ -42,3 +42,6 @@ MANFILES= 	SLPClose.3slp			\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

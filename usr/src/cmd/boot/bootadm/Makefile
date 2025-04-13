@@ -69,3 +69,6 @@ clean:
 	-$(RM) $(OBJS) $(POFILE) $(POFILES)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(POFILE) $(POFILES)
