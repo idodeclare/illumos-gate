@@ -243,8 +243,8 @@ long_help(int cmd_num)
 		    "See zoneadm(8) for valid boot arguments."));
 	case CMD_REBOOT:
 		return (gettext("Restarts the zone (equivalent to a halt / "
-		    "boot sequence).\n\tFails if the zone is not active.  "
-		    "See zoneadm(8) for valid boot\n\targuments."));
+		    "boot sequence).  Fails if the\n\tzone is not active.  "
+		    "See zoneadm(8) for valid boot arguments."));
 	case CMD_LIST:
 		return (gettext("Lists the current zones, or a "
 		    "specific zone if indicated.  By default,\n\tall "
@@ -254,21 +254,21 @@ long_help(int cmd_num)
 		    "option.  When used with the general -z <zone> and/or -u "
 		    "<uuid-match>\n\toptions, lists only the specified "
 		    "matching zone, but lists it\n\tregardless of its state, "
-		    "and the -i, -c, and -n options are disallowed.  The\n\t-v "
+		    "and the -i, -c, and -n options are disallowed.\n\tThe -v "
 		    "option can be used to display verbose information: zone "
-		    "name, id,\n\tcurrent state, root directory and options.  "
-		    "The -p option can be used\n\tto request machine-parsable "
-		    "output.  The -v and -p options are mutually\n\texclusive."
-		    "  If neither -v nor -p is used, just the zone name is "
+		    "name,\n\tID, current state, root directory and options.  "
+		    "The -p option can be\n\tused to request machine-parsable "
+		    "output.  The -v and -p options are\n\tmutually exclusive."
+		    "  If neither -v nor -p is used, just the zone name\n\tis "
 		    "listed."));
 	case CMD_VERIFY:
 		return (gettext("Check to make sure the configuration "
-		    "can safely be instantiated\n\ton the machine: "
+		    "can safely be instantiated on the\n\tmachine: "
 		    "physical network interfaces exist, etc."));
 	case CMD_INSTALL:
 		return (gettext("Install the configuration on to the system.  "
-		    "All arguments are passed to the brand installation "
-		    "function;\n\tsee brands(7) for more information."));
+		    "All arguments are passed\n\tto the brand installation "
+		    "function; see brands(7) for more information."));
 	case CMD_UNINSTALL:
 		return (gettext("Uninstall the configuration from the system.  "
 		    "The -F flag can be used\n\tto force the action.  All "
