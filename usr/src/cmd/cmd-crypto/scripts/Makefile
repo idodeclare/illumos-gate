@@ -53,3 +53,6 @@ install: $(CLASS_SCR_FILES) $(ROOTMANIFEST)
 check: $(CHKMANIFEST)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

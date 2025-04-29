@@ -64,3 +64,7 @@ ASTSRC= $(CONTRIB)/ast/src/cmd/ksh93
 include Makefile.tests
 
 include $(SRC)/lib/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

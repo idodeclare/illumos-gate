@@ -77,3 +77,5 @@ clean:
 include ../../Makefile.targ
 include Makefile.shared.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

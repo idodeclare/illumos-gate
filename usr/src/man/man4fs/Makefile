@@ -48,3 +48,6 @@ stdout.4fs	:= LINKSRC = fd.4fs
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

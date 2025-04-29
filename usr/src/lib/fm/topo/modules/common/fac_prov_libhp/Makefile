@@ -22,3 +22,6 @@ include ../../Makefile.plugin
 
 CPPFLAGS += -I$(SRC)/lib/libhotplug/common
 LDLIBS += -lhotplug
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -36,3 +36,6 @@ TOPDIR =	../../../../../..
 PLATSRCS =
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBBOOT) $(LINTLIBBOOT) $(L_OBJS) $(OBJS)

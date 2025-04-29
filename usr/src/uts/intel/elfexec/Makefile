@@ -101,3 +101,6 @@ $(OBJS_DIR)/elf32_notes.o: $(UTSBASE)/common/exec/elf/elf_notes.c
 $(OBJS_DIR)/old32_notes.o: $(UTSBASE)/common/exec/elf/old_notes.c
 	$(COMPILE.c) -o $@ -D_ELF32_COMPAT $(UTSBASE)/common/exec/elf/old_notes.c
 	$(CTFCONVERT_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

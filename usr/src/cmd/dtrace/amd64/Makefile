@@ -33,3 +33,6 @@ install: all $(ROOTUSRSBINPROG) $(ROOTLINK)
 
 $(ROOTLINK): all
 	$(RM) $@; $(SYMLINK) ../../sbin/$(@F) $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)
