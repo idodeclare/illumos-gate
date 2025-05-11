@@ -28,3 +28,6 @@ include ../Makefile.com
 CPPFLAGS += -I../../../../src/uts/i86pc
 
 install: all $(ROOTUSRSBINPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(PROG)

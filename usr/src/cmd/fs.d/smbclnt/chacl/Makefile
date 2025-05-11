@@ -48,3 +48,6 @@ clean:
 	$(RM) $(OBJS)
 
 .KEEP_STATE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

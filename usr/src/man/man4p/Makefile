@@ -84,3 +84,6 @@ VXLAN.4p	:= LINKSRC = vxlan.4p
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)

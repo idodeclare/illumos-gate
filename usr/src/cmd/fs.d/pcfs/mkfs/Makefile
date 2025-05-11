@@ -70,3 +70,6 @@ $(POFILE):
 %.o : $(SRC)/common/util/%.c
 	$(COMPILE.c) $(OUTPUT_OPTION) $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

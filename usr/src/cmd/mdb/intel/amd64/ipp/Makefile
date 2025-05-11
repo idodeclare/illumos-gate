@@ -35,3 +35,7 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 CERRWARN += $(CNOWARN_UNINIT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

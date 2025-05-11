@@ -52,3 +52,6 @@ kvm_write.3kvm		:= LINKSRC = kvm_read.3kvm
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(ROOTMANLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(MANLINKS)
