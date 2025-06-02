@@ -44,3 +44,7 @@ ns-disc.64 := LDLIBS64 += -lumem
 
 ns-info.32 := LDLIBS += -lumem
 ns-info.64 := LDLIBS64 += -lumem
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EXTRA_OBJS32) $(EXTRA_OBJS64) $(OBJS32) \
+	    $(OBJS64) $(PROGS32) $(PROGS64)

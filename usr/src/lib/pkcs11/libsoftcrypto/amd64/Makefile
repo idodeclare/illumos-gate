@@ -105,3 +105,7 @@ arcfour-x86_64.S: $(ARCFOUR_DIR)/amd64/arcfour-x86_64.pl
 pics/%.o: arcfour-x86_64.S
 		$(COMPILE64.s) $(ARCFOUR_FLAGS) -o $@ $<
 		$(POST_PROCESS_S_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

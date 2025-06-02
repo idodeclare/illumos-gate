@@ -81,3 +81,6 @@ $(POFILE):	$(POFILES)
 	$(RM) $@; cat $(POFILES) > $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(COMMON_OBJS) $(OBJS) $(POFILES)

@@ -50,3 +50,7 @@ FRC:
 include ../Makefile.targ
 
 .PARALLEL: $(SUBDIRS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

@@ -110,3 +110,7 @@ check:	$(HDRS)
 include ../../../lib/Makefile.targ
 
 _msg:		$(POFILE)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

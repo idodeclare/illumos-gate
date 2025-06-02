@@ -59,3 +59,6 @@ objs/%.o: $(RPC_CMNDIR)/%.c
 	$(POST_PROCESS_O)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)
