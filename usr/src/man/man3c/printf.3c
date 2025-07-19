@@ -822,7 +822,7 @@ may fail, refer to \fBfputc\fR(3C) or \fBfputwc\fR(3C).
 .sp
 .LP
 For the conditions under which \fBdprintf()\fR will fail and may fail, refer to
-\fBfdopen\fR(3C) in addition to \fBfputc\fR(3C) or \fBfputw\fR(3C).
+\fBfdopen\fR(3C) in addition to \fBfputc\fR(3C) or \fBfputwc\fR(3C).
 .sp
 .LP
 The \fBsnprintf()\fR function will fail if:

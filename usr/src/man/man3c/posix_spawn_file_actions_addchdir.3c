@@ -120,6 +120,6 @@ is negative or an otherwise invalid file descriptor.
 .Xr fchdir 2 ,
 .Xr posix_spawn 3C ,
 .Xr posix_spawn_file_actions_addclose 3C ,
-.Xr posix_spawn_file_actions_adddup 3C ,
+.Xr posix_spawn_file_actions_adddup2 3C ,
 .Xr posix_spawn_file_actions_addopen 3C ,
 .Xr posix_spawn_file_actions_init 3C
