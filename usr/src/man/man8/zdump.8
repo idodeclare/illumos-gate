@@ -56,9 +56,9 @@ For each
 on the command line,
 print the times at the two extreme time values,
 the times (if present) at and just beyond the boundaries of years that
-.BR localtime (3)
+.BR localtime (3C)
 and
-.BR gmtime (3)
+.BR gmtime (3C)
 can represent, and
 the times both one second before and exactly at
 each detected time discontinuity.
@@ -234,7 +234,7 @@ many of its time zone abbreviations are omitted since they duplicate
 the text of the UT offset.
 .SH LIMITATIONS
 Time discontinuities are found by sampling the results returned by
-.BR localtime (3)
+.BR localtime (3C)
 at twelve-hour intervals.
 This works in all real-world cases;
 one can construct artificial time zones for which this fails.
@@ -246,7 +246,7 @@ and
 output,
 .q "UT"
 denotes the value returned by
-.BR gmtime (3),
+.BR gmtime (3C),
 which uses UTC for modern timestamps and some other UT flavor for
 timestamps that predate the introduction of UTC.
 No attempt is currently made to have the output use
