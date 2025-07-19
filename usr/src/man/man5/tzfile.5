@@ -12,7 +12,7 @@ tzfile \- timezone information
 \\$3\*(lq\&\\$1\*(rq\&\\$2
 ..
 The timezone information files used by
-.BR tzset (3)
+.BR tzset (3C)
 are typically found under a directory with a name like
 .IR /usr/share/zoneinfo .
 These files use the format described in Internet RFC 9636.
@@ -115,7 +115,7 @@ gives the number of seconds to be added to UT,
 tells whether
 .B tm_isdst
 should be set by
-.BR localtime (3)
+.BR localtime (3C)
 and
 .B tt_desigidx
 serves as an index into the array of time zone abbreviation bytes
@@ -199,7 +199,7 @@ TZ="EET\-2EEST,M3.5.0/3,M10.5.0/4" if POSIX conformance is required
 and older timestamps need not be handled accurately.
 .PP
 The
-.BR localtime (3)
+.BR localtime (3C)
 function
 normally uses the first
 .B ttinfo
@@ -504,8 +504,8 @@ of one hour, or of 15 minutes, or of 1 minute.
 .RE
 .SH SEE ALSO
 .BR time (2),
-.BR localtime (3),
-.BR tzset (3),
+.BR localtime (3C),
+.BR tzset (3C),
 .BR tzselect (8),
 .BR zdump (8),
 .BR zic (8).
