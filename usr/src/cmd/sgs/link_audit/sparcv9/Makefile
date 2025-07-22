@@ -44,3 +44,7 @@ install:	all $(ROOTCCSLIB64) .WAIT $(ROOTCCSLIBS64) \
 
 include		../Makefile.targ
 include		$(SRC)/Makefile.master.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

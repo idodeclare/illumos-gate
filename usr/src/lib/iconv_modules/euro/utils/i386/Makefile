@@ -16,3 +16,6 @@
 include ../Makefile.com
 
 install: all $(ICONV_DIR) .WAIT $(ICONV_LIBS) $(ROOT_BINTABLES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROTOCLEANFILES)

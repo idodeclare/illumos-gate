@@ -61,3 +61,6 @@ port_ipv6.h: probe_ipv6 FRC
 	CC="$(CC)" CPPFLAGS="$(CPPFLAGS) $(CSTD)" ./probe_ipv6
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(HDRS) $(TMPHDRS)

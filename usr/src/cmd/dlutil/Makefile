@@ -45,3 +45,6 @@ dltraninfo: $(DLTRANINFO_OBJS)
 
 include $(SRC)/common/hexdump/Makefile.targ
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DLTRANINFO_OBJS)

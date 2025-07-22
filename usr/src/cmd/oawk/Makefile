@@ -119,3 +119,6 @@ strip:
 		$(STRIP) $(PROG)
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)
