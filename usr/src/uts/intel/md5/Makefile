@@ -93,3 +93,6 @@ md5_amd64.S: $(COMDIR)/amd64/md5_amd64.pl
 
 $(OBJS_DIR)/md5_amd64.o: md5_amd64.S
 	$(COMPILE.s) -o $@ md5_amd64.S
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

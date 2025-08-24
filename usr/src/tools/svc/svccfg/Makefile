@@ -67,3 +67,6 @@ clean:
 
 include ../../Makefile.targ
 include $(SRC)/cmd/svc/svccfg/Makefile.shared.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

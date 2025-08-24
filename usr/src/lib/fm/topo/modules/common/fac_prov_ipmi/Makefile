@@ -32,3 +32,6 @@ MODULESRCS = fac_prov_ipmi.c
 include ../../Makefile.plugin
 
 LDLIBS += -lipmi
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

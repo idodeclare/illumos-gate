@@ -34,3 +34,6 @@ clean:
 FRC:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLOBJS) $(PROGS32) $(PROGS64)

@@ -18,3 +18,6 @@ PROG = memory_balloon
 include $(SRC)/cmd/Makefile.cmd
 
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)
