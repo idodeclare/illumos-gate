@@ -91,3 +91,6 @@ clobber: clean
 lint:
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

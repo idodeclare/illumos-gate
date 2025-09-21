@@ -92,3 +92,6 @@ lint:
 clean:
 
 clobber:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

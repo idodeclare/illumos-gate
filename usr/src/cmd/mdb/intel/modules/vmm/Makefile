@@ -12,3 +12,6 @@
 include $(SRC)/Makefile.master
 $(BUILD64)SUBDIRS += $(MACH64)
 include ../../../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

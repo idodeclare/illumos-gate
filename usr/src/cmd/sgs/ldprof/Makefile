@@ -26,3 +26,6 @@
 #
 
 include		../Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

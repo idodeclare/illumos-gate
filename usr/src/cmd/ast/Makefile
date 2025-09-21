@@ -65,3 +65,6 @@ libsum:		libast
 shcomp:		libshell
 msgcc:		libast libpp
 ksh:		libshell shcomp
+
+.DONE:
+	@$(MAKE_GITIGNORE)

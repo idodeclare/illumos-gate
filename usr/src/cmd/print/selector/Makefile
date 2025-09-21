@@ -52,3 +52,5 @@ all check clean clobber lint:
 
 install:	$(ROOTUSRSBINPROG) $(ROOTUSRBINPROG) $(ROOTUSRBINLINKS) $(ROOTUSRSBINLINKS)
 
+.DONE:
+	@$(MAKE_GITIGNORE)

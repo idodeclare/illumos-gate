@@ -29,3 +29,6 @@ SUBDIRS = \
 
 include ./Makefile.subdirs
 include ../../Makefile.cmd
+
+.DONE:
+	@$(MAKE_GITIGNORE)

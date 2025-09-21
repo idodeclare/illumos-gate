@@ -49,3 +49,6 @@ $(SUBDIRS):	FRC
 
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

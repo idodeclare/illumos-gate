@@ -52,3 +52,6 @@ lint:
 _msg:
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

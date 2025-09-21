@@ -67,3 +67,6 @@ $(ROOTBIN):
 install: all $(ROOTBIN) $(ROOTPROG)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

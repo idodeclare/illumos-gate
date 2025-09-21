@@ -736,3 +736,6 @@ $(SUBDIRS:%=%-nodepend):
 	cd $(@:%-nodepend=%); pwd; $(MAKE) $(TARGET)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

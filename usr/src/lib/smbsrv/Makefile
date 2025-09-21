@@ -38,3 +38,6 @@ include ./Makefile.subdirs
 libsmbns: libsmb
 libmlsvc: libsmb libsmbns
 libfksmbsrv: libsmb
+
+.DONE:
+	@$(MAKE_GITIGNORE)

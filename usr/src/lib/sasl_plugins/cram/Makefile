@@ -8,3 +8,6 @@
 #
 
 include		../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

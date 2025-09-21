@@ -26,3 +26,6 @@
 BUILD32 = $(POUND_SIGN)
 
 include		$(SRC)/cmd/sgs/Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

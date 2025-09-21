@@ -40,3 +40,6 @@ $(SUBDIRS): FRC
 	cd $@; $(MAKE) $(TARGET)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

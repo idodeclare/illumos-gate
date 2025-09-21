@@ -99,3 +99,6 @@ $(ROOTDEMODIRBASE)/%: common/%.demo
 	$(INS.rename)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -71,3 +71,6 @@ FRC:
 #
 XRDIRS = common $(i386_SUBDIRS)
 XRDEL = mdb_lex.c mdb_grammar.c Makefile*
+
+.DONE:
+	@$(MAKE_GITIGNORE)

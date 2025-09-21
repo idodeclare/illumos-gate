@@ -28,3 +28,6 @@ install:	$(ROOTMANFILES) $(MANLINK_SRCS)
 # Force an explicit dependency on the directory, since this section currently
 # lacks any files to install
 install: $(ROOTMAN)/man$(MANSECT)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

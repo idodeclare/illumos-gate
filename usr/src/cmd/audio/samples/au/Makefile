@@ -88,3 +88,6 @@ clean clobber:
 lint:
 
 _msg:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

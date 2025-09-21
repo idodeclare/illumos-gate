@@ -22,3 +22,6 @@ SUBDIRS = \
 libfksmbfs: libfknsmb
 
 include ./Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -61,3 +61,6 @@ $(V4SSDIR):
 .KEEP_STATE:
 
 clean clobber:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -28,3 +28,6 @@ include		$(SRC)/cmd/sgs/Makefile.com
 EXTRASUBDIRS =	mdbmod
 
 include		$(SRC)/cmd/sgs/Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -60,3 +60,6 @@ clean:
 
 include $(SRC)/common/hexdump/Makefile.targ
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

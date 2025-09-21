@@ -149,3 +149,6 @@ clean:
 	$(RM) -r *out input geninput
 
 clobber:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

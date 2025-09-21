@@ -33,3 +33,6 @@ SUBDIRS = scripts setdynflag
 .PARALLEL: $(SUBDIRS)
 
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

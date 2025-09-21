@@ -37,3 +37,6 @@ include		../Makefile.sub
 #
 
 install:=	TARGET= all
+
+.DONE:
+	@$(MAKE_GITIGNORE)

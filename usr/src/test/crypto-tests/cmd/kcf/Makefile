@@ -49,3 +49,6 @@ $(ROOTDIGEST)/%: %.ksh
 	$(INS.rename)
 $(ROOTHMAC)/%: %.ksh
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

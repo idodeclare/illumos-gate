@@ -54,3 +54,6 @@ $(SUBDIRS): FRC
 FRC:
 
 include ../../Makefile.msg.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -20,3 +20,6 @@ ROOTOPTPKG = $(ROOT)/opt/zfs-tests
 TARGETDIR = $(ROOTOPTPKG)/include
 
 include $(SRC)/test/zfs-tests/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE)

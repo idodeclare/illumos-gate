@@ -47,3 +47,6 @@ FRC:
 # Cross-reference customization: include curses.ext in the cross-reference.
 #
 XRADD = curses.ext
+
+.DONE:
+	@$(MAKE_GITIGNORE)

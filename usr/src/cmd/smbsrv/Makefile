@@ -31,3 +31,6 @@ MSGSUBDIRS = smbadm smbstat
 
 include ../Makefile.cmd
 include ./Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -86,3 +86,6 @@ FRC:
 
 $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

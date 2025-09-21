@@ -60,3 +60,6 @@ $(ROOTCHARLIB)/% :	%
 clean clobber strip lint :
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

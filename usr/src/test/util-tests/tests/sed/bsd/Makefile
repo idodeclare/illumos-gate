@@ -47,3 +47,6 @@ $(TESTDIR)/%: %
 
 $(DATADIR)/%: regress.multitest.out/%
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

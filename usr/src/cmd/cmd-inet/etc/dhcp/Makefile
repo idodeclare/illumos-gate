@@ -40,3 +40,6 @@ install:	$(ETCDHCPFILES)
 
 $(ETCDHCPDIR)/%: %
 		$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

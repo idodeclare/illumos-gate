@@ -46,3 +46,6 @@ $(SUBDIRS): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 include ../../../../Makefile.xref
+
+.DONE:
+	@$(MAKE_GITIGNORE)

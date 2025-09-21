@@ -27,3 +27,6 @@
 
 
 include		$(SRC)/cmd/sgs/Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

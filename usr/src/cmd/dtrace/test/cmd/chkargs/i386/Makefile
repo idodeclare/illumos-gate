@@ -28,3 +28,6 @@
 include ../Makefile.com
 
 install: $(ROOTPROG32) $(ROOTISAEXEC)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG) $(ROOTISAEXEC)

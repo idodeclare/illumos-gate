@@ -84,3 +84,5 @@ $(MSGDOMAIN):
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE)

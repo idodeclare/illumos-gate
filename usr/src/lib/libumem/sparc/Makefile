@@ -30,3 +30,7 @@ ASFLAGS += -xarch=v8plus		# we use flushw in asm_subr.S
 
 include ../Makefile.com
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(CURTYPE)" $(CLEANFILES) $(CLOBBERTARGFILES) \
+	    $(DUPLICATE_SRC) $(OBJS) $(PICS)

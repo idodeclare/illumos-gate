@@ -28,3 +28,6 @@ include $(SRC)/Makefile.master
 
 SUBDIRS = scripts baddof badioctl chkargs jdtrace
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

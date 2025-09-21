@@ -35,3 +35,6 @@ $(ROOTBIN):
 
 $(ROOTBIN)/%: %
 	$(INS.pyfile)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

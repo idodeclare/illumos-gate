@@ -83,3 +83,6 @@ FRC:
 clean clobber: $(SUBDIRS)
 
 lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

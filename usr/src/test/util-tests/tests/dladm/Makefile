@@ -36,3 +36,6 @@ $(ROOTOPTPKG):
 
 $(ROOTOPTPKG)/%: %.ksh $(ROOTOPTPKG)
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

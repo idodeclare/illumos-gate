@@ -63,3 +63,5 @@ $(MACH) $(MACH64): FRC
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -29,3 +29,6 @@ $(BUILD64)SUBDIRS += $(MACH64)
 SUBDIRS += .WAIT modules
 
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -61,3 +61,6 @@ clobber:
 lint:
 
 .PARALLEL:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

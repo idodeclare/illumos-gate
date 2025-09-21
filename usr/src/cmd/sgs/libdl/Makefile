@@ -28,3 +28,6 @@
 # sgs/libdl/Makefile
 
 include		$(SRC)/cmd/sgs/Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -76,3 +76,6 @@ install_h check: $(CHECKHDRS)
 	@cd libnvfru; pwd; $(MAKE) $@
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

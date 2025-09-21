@@ -49,3 +49,6 @@ STANDDIR=	../../stand
 PROMDIRS=	../promif
 XRDIRS +=	$(STANDDIR)/lib $(STANDDIR)/sys $(PROMDIRS)
 XRPRUNE =	old
+
+.DONE:
+	@$(MAKE_GITIGNORE)

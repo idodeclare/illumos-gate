@@ -47,3 +47,6 @@ FRC:
 _msg: $(SUBDIRS)
 
 isnsadm: isnsd
+
+.DONE:
+	@$(MAKE_GITIGNORE)

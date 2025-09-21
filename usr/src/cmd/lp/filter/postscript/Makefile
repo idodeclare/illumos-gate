@@ -62,3 +62,6 @@ $(ROOTDIRS):
 		$(INS.dir)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

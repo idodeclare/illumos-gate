@@ -34,3 +34,6 @@ include		$(SRC)/man/Makefile.man
 ROOTMAN=	$(ROOTHASMAN)
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

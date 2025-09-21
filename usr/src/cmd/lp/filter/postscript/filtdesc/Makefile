@@ -60,3 +60,6 @@ $(ROOTETCLPFD)/% :	%
 		$(INS.file)
 
 clean clobber strip lint catalog:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

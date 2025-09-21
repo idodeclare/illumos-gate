@@ -44,3 +44,6 @@ $(SUBDIRS): FRC
 _msg:	$(MSGSUBDIRS)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

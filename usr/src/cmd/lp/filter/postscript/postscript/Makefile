@@ -56,3 +56,6 @@ all:		$(TXTFILES) $(FILES)
 install:	all $(ROOTPOSTFILES)
 
 clean clobber strip lint catalog:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -37,3 +37,6 @@ $(TESTDIR)/%: %
 SUBDIRS = data
 
 include $(SRC)/test/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE)

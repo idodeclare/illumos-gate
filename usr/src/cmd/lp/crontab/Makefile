@@ -44,3 +44,6 @@ $(ROOTCRONTABS)/% :	%
 			$(INS.file)
 
 clobber clean strip lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -35,3 +35,6 @@ SUBDIRS = mdb .WAIT $(MODULES)
 include ../../Makefile.subdirs
 
 .PARALLEL: $(SUBDIRS)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -41,3 +41,6 @@ include ../../Makefile.subdirs
 
 # inter-module dependencies
 kmdb: libstand libstandctf mdb_ks
+
+.DONE:
+	@$(MAKE_GITIGNORE)

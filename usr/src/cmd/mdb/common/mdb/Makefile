@@ -40,3 +40,6 @@ $(ROOTHDRDIR)/%.h: %.h
 .SUFFIXES:
 
 install_h: $(ROOTHDRS)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

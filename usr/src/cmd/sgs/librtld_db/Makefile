@@ -22,3 +22,6 @@
 # Copyright (c) 1995, 2010, Oracle and/or its affiliates. All rights reserved.
 
 include		$(SRC)/cmd/sgs/Makefile.sub
+
+.DONE:
+	@$(MAKE_GITIGNORE)

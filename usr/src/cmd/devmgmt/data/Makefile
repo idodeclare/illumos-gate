@@ -41,3 +41,6 @@ clean clobber lint:
 
 # no PROG to lint or clobber, so don't include.
 #include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE)

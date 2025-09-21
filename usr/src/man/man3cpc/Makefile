@@ -47,3 +47,6 @@ include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES) $(MANLINK_SRCS)
 	$(MANLINK_INSTALL)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

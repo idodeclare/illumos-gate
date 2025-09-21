@@ -62,3 +62,6 @@ $(ETCPEERSDIR)/% : %
 		$(INS.file)
 
 clean clobber lint:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

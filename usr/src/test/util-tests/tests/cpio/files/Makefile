@@ -37,3 +37,6 @@ $(TESTDIR) $(DATADIR):
 
 $(DATADIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

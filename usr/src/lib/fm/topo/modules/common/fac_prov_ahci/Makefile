@@ -21,3 +21,6 @@ MODULESRCS = fac_prov_ahci.c
 include ../../Makefile.plugin
 
 CPPFLAGS += -I$(SRC)/uts/common
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

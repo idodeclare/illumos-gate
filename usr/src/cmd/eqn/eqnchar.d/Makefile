@@ -30,3 +30,6 @@ $(ROOTSHPUB) :
 
 $(ROOTSHPUB)/% :	%
 			$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

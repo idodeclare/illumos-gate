@@ -103,3 +103,6 @@ $(POFILE):      $(CATSRCS) ../common/ud_lib.h
 	$(XGETTEXT) $(XGETFLAGS)        $(POFILE).i
 	$(SED) "/^domain/d" messages.po >  $@
 	$(RM) $(POFILE).i messages.po
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

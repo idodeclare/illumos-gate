@@ -36,3 +36,6 @@ check: FRC
 	@$(MAKE) dstyle
 
 dstyle: $(SUBDIRS)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

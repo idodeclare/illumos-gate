@@ -29,3 +29,6 @@ MANFILES=	Kstat.3perl			\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -5,3 +5,6 @@
 # ident	"%Z%%M%	%I%	%E% SMI"
 
 include		../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

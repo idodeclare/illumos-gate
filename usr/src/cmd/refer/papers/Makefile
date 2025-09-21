@@ -32,3 +32,6 @@ $(ROOTDIRS) :
 		$(INS.dir)
 
 clean clobber strip:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

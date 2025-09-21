@@ -31,3 +31,5 @@ MSGSUBDIRS = vscand vscanadm
 include ../Makefile.cmd
 include ./Makefile.subdirs
 
+.DONE:
+	@$(MAKE_GITIGNORE)

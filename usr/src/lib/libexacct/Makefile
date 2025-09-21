@@ -71,3 +71,5 @@ $(POFILES):
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE)

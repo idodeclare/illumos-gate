@@ -40,3 +40,6 @@ $(CLASS_SCR_DIR)/%: %
 	$(INS.file)
 
 install: $(CLASS_SCR_FILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

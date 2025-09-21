@@ -52,3 +52,6 @@ $(SUBDIRS): FRC
 FRC:
 
 check:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

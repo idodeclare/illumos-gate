@@ -43,3 +43,6 @@ install: all				\
 	$(ROOTETCSYSEVENTCONFIGFILES)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE)

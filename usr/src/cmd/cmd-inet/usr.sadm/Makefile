@@ -49,3 +49,6 @@ $(SUBDIRS1) $(SUBDIRS2): FRC
 	@cd $@; pwd; $(MAKE) $(TARGET)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -207,3 +207,6 @@ rewritetbl: rewritetbl.c
 
 clean:
 	$(RM) -r *.head *.tbl gen_* *info debug.inc *.out *.btbl
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -82,3 +82,6 @@ $(MSGDOMAIN):
 	$(INS.dir)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -34,3 +34,6 @@ $(BUILD64)SUBDIRS += $(MACH64)
 LDLIBS +=	-lc
 
 include ../../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

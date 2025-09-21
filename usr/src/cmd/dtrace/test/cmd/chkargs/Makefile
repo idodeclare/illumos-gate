@@ -31,3 +31,6 @@ SUBDIRS = $(MACH)
 $(BUILD64)SUBDIRS += $(MACH64)
 
 include ../../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

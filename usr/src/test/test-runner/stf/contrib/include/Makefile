@@ -35,3 +35,6 @@ $(INCLUDEDIR):
 
 $(INCLUDEDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

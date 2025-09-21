@@ -45,3 +45,6 @@ libfmd_snmp: libfmd_adm topo
 topo: libfmd_agent libdiskstatus
 
 include ./Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -91,3 +91,6 @@ $(TESTSUBDIRS): $(TESTDIR)
 
 $(TESTDIR)/%: % $(TESTSUBDIRS)
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

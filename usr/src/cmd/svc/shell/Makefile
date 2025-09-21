@@ -46,3 +46,6 @@ all:
 lint _msg:
 
 clobber clean:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -52,3 +52,6 @@ $(ROOT_BOOT_GRUB):
 clean clobber: $(SUBDIRS)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

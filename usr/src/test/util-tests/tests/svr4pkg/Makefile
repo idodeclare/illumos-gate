@@ -40,3 +40,6 @@ $(TESTDIR)/%: %.ksh
 SUBDIRS = files
 
 include $(SRC)/test/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE)

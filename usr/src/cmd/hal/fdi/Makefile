@@ -69,3 +69,5 @@ clean clobber:
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE)

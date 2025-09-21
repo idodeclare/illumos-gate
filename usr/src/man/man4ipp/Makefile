@@ -31,3 +31,6 @@ MANFILES=	dlcosmk.4ipp	\
 include		$(SRC)/man/Makefile.man
 
 install:	$(ROOTMANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

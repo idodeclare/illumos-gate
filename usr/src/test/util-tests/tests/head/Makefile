@@ -65,3 +65,6 @@ $(ROOTOPTPKG)/%: %.ksh $(ROOTOPTPKG)
 
 $(ROOTOPTPKG)/%: % $(ROOTOPTPKG)
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE)

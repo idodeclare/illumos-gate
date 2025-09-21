@@ -65,3 +65,5 @@ XRINCDIRS = $(XRINC_TMP:O!%=$(UTSDIR)/%)
 
 include ../../../Makefile.xref
 
+.DONE:
+	@$(MAKE_GITIGNORE)

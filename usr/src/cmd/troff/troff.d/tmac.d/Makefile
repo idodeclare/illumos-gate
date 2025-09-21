@@ -55,3 +55,6 @@ $(ROOTTMAC)/% :	%
 		$(INS.file)
 
 clean clobber lint strip :
+
+.DONE:
+	@$(MAKE_GITIGNORE)

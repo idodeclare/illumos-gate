@@ -109,3 +109,6 @@ $(OBJS_DIR)/bignum_amd64.o: $(BIGNUMDIR)/amd64/bignum_amd64.c
 $(OBJS_DIR)/bignum_amd64_asm.o: $(BIGNUMDIR)/amd64/bignum_amd64_asm.S
 	$(COMPILE.s) -c -o $@ $(BIGNUM_CFG) \
 		$(BIGNUMDIR)/amd64/bignum_amd64_asm.S
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

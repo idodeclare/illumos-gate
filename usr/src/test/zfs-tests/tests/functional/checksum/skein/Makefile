@@ -19,3 +19,6 @@ SUBDIRS = $(MACH)
 $(BUILD64) SUBDIRS += $(MACH64)
 
 include $(SRC)/test/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE)
