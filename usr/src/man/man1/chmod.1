@@ -539,7 +539,7 @@ An ACL Operation command line has the following format:
 Prepends the access control entries (ACE) specified in \fIacl_specification\fR
 to the beginning of the file's ACL. Depending on the file system, the ACL can
 be reordered when applied to the file. If optional \fIindex\fR number is
-specified, then new ACEs are inserted before specified number.
+specified, then new ACEs are inserted before the specified number.
 .RE
 
 .sp
@@ -653,8 +653,8 @@ Permissions for a specific group.
 .ad
 .sp .6
 .RS 4n
-Permissions for users aside from the file owner or for members of the file group
-owner.
+Permissions for users aside from the file owner or from members of the file
+group owner.
 .RE
 
 .sp
@@ -1104,9 +1104,9 @@ Inherit to all newly-created directories.
 .BR "inherit_only " ( i )
 .ad
 .RS 20n
-When placed on a directory, do not apply to the directory, only to newly-created
-files and directories. This flag requires that \fBfile_inherit\fR and/or
-\fBdir_inherit\fR is also specified.
+When placed on a directory, do not apply to the directory, only to
+newly-created files and directories. This flag requires that \fBfile_inherit\fR
+and/or \fBdir_inherit\fR is also specified.
 .RE
 
 .sp
@@ -1594,7 +1594,7 @@ others:
 .sp
 
 .LP
-\fBExample 4 \fRLocking a File From Access
+\fBExample 4 \fRLocking a File from Access
 .sp
 .LP
 The following example locks a file from access:
