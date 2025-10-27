@@ -77,7 +77,7 @@ ls \- list contents of directory
 For each \fIfile\fR that is a directory, \fBls\fR lists the contents of the
 directory. For each \fIfile\fR that is not a directory, \fBls\fR repeats its
 name and any other information requested. The output is sorted alphabetically
-by default. When no argument is given, the current directory (\fB\&.\fR) is
+by default. When no argument is given, the working directory (\fB\&.\fR) is
 listed. When several arguments are given, the arguments are first sorted
 appropriately, but non-directory file arguments appear before directories and
 their contents.
@@ -205,8 +205,8 @@ space character if not.
 .sp
 .LP
 If \fB-/\fR and/or \fB-%\fR are in effect, then the extended system attributes
-are printed when a filesystem supports extended system attributes. The display
-looks as follows:
+are printed when the filesystem supports extended system attributes. The
+display looks as follows:
 .sp
 .in +2
 .nf
@@ -233,7 +233,7 @@ $ ls -l -% all file
 
 .sp
 .LP
-See the option descriptions of the \fB-/\fR and \fB-%\fR option for details.
+See the descriptions of the \fB-/\fR and \fB-%\fR options for details.
 .sp
 .LP
 \fBls -l\fR (the long list) prints its output as follows for the POSIX
@@ -248,23 +248,24 @@ locale:
 
 .sp
 .LP
-Reading from right to left, you see that the current directory holds one file,
+Reading from right to left, you see that the working directory holds one file,
 named \fBpart2\fR. Next, the last time that file's contents were modified was
 \fB9:42 A.M.\fR on \fBMay 16\fR. The file contains 10,876 bytes.
-The owner of the file, or the user, belongs to the group \fBdev\fR (perhaps
-indicating development), and his or her login name is \fBsmith\fR. The
-number, in this case \fB1\fR, indicates the number of links to file \fBpart2\fR
-(see \fBcp\fR(1)). The plus sign (\fB+\fR) indicates that there is an ACL
+The group associated to the file is the group \fBdev\fR (perhaps indicating
+development), and the file owner's login name is \fBsmith\fR. The number
+\fB1\fR indicates the number of links to file \fBpart2\fR (see \fBcp\fR(1)).
+The plus sign (\fB+\fR) indicates that there is an ACL
 associated with the file. If the \fB-@\fR option has been specified, the
 presence of extended attributes supersedes the presence of an ACL, and the
-plus sign is replaced with an 'at' sign (\fB@\fR). Finally, the dash and
-letters tell you that \fBpart2\fR is a regular file; and user, group, and others
-have permissions to read, write, and execute it.
+plus sign is replaced with an 'at' sign (\fB@\fR). Finally, the letters and
+dash tell you that the user, group, and others have permissions to read, write,
+and execute \fBpart2\fR, and it is a regular file.
 .sp
 .LP
-The execute (\fBx\fR) symbol occupies the third position of the three-character
-sequence. A \fB\(mi\fR in the third position would have indicated a denial of
-execute permission.
+The execute (\fBx\fR) symbol occupies the third position of a three-character
+sequence (there are three such sequences). A dash (\fB\(mi\fR) in the third
+position would have indicated a denial of execute permission. (See below for
+other letters that may appear in the third position for various reasons.)
 .sp
 .LP
 The permissions are indicated as follows:
@@ -390,8 +391,9 @@ describes a file's ability to allow other files to lock its reading or writing
 permissions during access.
 .sp
 .LP
-For others permissions, the third position can be occupied by \fBt\fR or
-\fBT\fR. These refer to the state of the sticky bit and execute permission.
+For the sequence of other permissions, the third position can be occupied by
+\fBt\fR or \fBT\fR. These refer to the state of the sticky bit and execute
+permission.
 .SS "Color Output"
 If color output is enabled, the environment variable LS_COLORS is checked.  If
 it exists, its contents are used to control the colors used to display
@@ -840,7 +842,7 @@ be high-intensity, that is, brighter. In such cases the low-intensity yellow is
 often displayed as a brown or orange color.
 .sp
 .LP
-At least one attribute must be listed for a file specification.
+At least one attribute must be listed for a \fIfilespec\fR.
 .sp
 .LP
 The appropriate color codes are chosen by selecting the most specific match,
@@ -979,7 +981,7 @@ timezone.
 .ad
 .sp .6
 .RS 4n
-Forces each argument to be interpreted as a directory and list the name found
+Forces each argument to be interpreted as a directory and lists the name found
 in each slot. This option turns off \fB-l\fR, \fB-t\fR, \fB-s\fR, \fB-S\fR, and
 \fB-r\fR, and turns on \fB-a\fR. The order is the order in which entries appear
 in the directory.
@@ -1619,8 +1621,8 @@ Inherit to all newly-created directories.
 .ad
 .sp .6
 .RS 4n
-When placed on a directory, do not apply to the directory, only to newly-created
-files and directories. This flag requires that either
+When placed on a directory, do not apply to the directory, only to
+newly-created files and directories. This flag requires that either
 \fBfile_inherit\fR and/or \fBdir_inherit\fR are also specified.
 .RE
 
@@ -2299,7 +2301,7 @@ Specifying more than one of the options in the following mutually exclusive
 groups is not considered an error: \fB-C\fR and \fB-1\fR (one), \fB-H\fR and
 \fB-L\fR, \fB-c\fR and \fB-u\fR, and \fB-e\fR and \fB-E\fR, and \fB-t\fR and
 \fB-S\fR. The last option specifying a specific timestamp (\fB-c\fR, \fB-u\fR,
-\fB-%\~atime\fR, \fB-%\~crtime\fR, \fB-% ctime\fR, and \fB-%\~mtime\fR)
+\fB-%\~atime\fR, \fB-%\~crtime\fR, \fB-%\~ctime\fR, and \fB-%\~mtime\fR)
 determines the timestamps used for sorting or in long format listings. The last
 option \fB-t\fR, \fB-S\fR, or \fB-U\fR determines the sorting behavior.
 .SS "/usr/xpg4/bin/ls"
@@ -2591,7 +2593,7 @@ $ ls -v file.3
 \fBExample 3 \fRPrinting the Names of All Files
 .sp
 .LP
-The following example prints the names of all files in the current directory,
+The following example prints the names of all files in the working directory,
 including those that begin with a dot (\fB\&.\fR), which normally do not print:
 
 .sp
