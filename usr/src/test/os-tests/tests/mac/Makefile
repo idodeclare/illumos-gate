@@ -11,6 +11,7 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2025 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/Makefile.master.64
@@ -25,6 +26,8 @@ PROGS = \
 	mac_parsing
 
 COMMON_OBJS = mac_ktest_common.o
+
+OBJS =	$(PROGS:%=%.o) $(COMMON_OBJS)
 
 SCRIPTS = mac_ktest
 
@@ -71,6 +74,7 @@ clobber: clean
 	-$(RM) $(PROGS)
 
 clean:
+	-$(RM) $(OBJS)
 
 mac_lso: mac_lso.o $(COMMON_OBJS)
 	$(LINK.c) $^ -o $@ $(LDLIBS)
