@@ -11,6 +11,7 @@
 
 #
 # Copyright 2025 Oxide Computer Company
+# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -20,6 +21,9 @@
 
 PROGS32 += $(PROGS:%=%.32)
 PROGS64 += $(PROGS:%=%.64)
+
+OBJS32 += $(PROGS:%=%.o.32)
+OBJS64 += $(PROGS:%=%.o.64)
 
 EXTRA_OBJS32 = $(COMMON_SRCS:%.c=%.o.32)
 EXTRA_OBJS64 = $(COMMON_SRCS:%.c=%.o.64)
@@ -47,7 +51,7 @@ clobber: clean
 	-$(RM) $(PROGS32) $(PROGS64)
 
 clean:
-	-$(RM) *.o.32 *.o.64
+	-$(RM) $(OBJS32) $(OBJS64) $(EXTRA_OBJS32) $(EXTRA_OBJS64)
 
 install: $(ROOTOPTTARG) .WAIT $(ROOTOPTPROGS) $(ROOTFILES)
 
