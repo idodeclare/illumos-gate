@@ -594,6 +594,8 @@ usr/src/test/elf-tests/tests/sections/Makefile
 usr/src/test/elf-tests/tests/tls/amd64/Makefile
 usr/src/test/elf-tests/tests/tls/i386/Makefile
 usr/src/test/elf-tests/tests/tls/Makefile
+usr/src/test/i2c-tests/Makefile
+usr/src/test/i2c-tests/tests/Makefile
 usr/src/test/libc-tests/Makefile
 usr/src/test/libmlrpc-tests/Makefile
 usr/src/test/libmlrpc-tests/tests/Makefile
@@ -617,6 +619,7 @@ usr/src/test/smbclient-tests/tests/smbfs/Makefile
 usr/src/test/smbsrv-tests/Makefile
 usr/src/test/test-runner/Makefile
 usr/src/test/test-runner/stf/Makefile
+usr/src/test/tz-tests/Makefile
 usr/src/test/util-tests/Makefile
 usr/src/test/util-tests/tests/make/files/make_a/Makefile
 usr/src/test/util-tests/tests/Makefile
