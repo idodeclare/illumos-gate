@@ -114,3 +114,6 @@ rpcb_prot.h: rpcb_prot.x
 	$(RPCGEN) -M -h rpcb_prot.x > $@
 
 check:	$(CHECKHDRS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(DERIVED_FILES)

@@ -25,3 +25,6 @@ all clean:
 install: $(ROOTAMDFBFILES)
 
 include $(SRC)/data/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

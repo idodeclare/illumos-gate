@@ -43,3 +43,5 @@ install:	all $(ROOTUSRSBINPROG)
 
 include $(SRC)/cmd/svr4pkg/Makefile.svr4pkg.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(MSGFILES) $(OBJS)

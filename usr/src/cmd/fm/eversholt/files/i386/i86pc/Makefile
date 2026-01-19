@@ -28,3 +28,7 @@ EFT_PLAT= i86pc
 EFT_PLAT_FILES= amd64.eft gcpu.eft gcpu_amd.eft intel.eft
 
 include ../../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EFT_COMMON_FILES) $(EFT_PLAT_FILES) \
+	    $(ROOT_COMMON_EFT_FILES) $(USR_PLAT_EFT_FILES)

@@ -21,3 +21,6 @@ MODULESRCS = topo_dimm.c
 include ../../Makefile.plugin
 
 LDLIBS += -ljedec
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

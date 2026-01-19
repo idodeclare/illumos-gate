@@ -66,3 +66,6 @@ XRDIRS	+=	../../common \
 		$(TOPDIR)/uts/common/os/compress.c \
 		$(TOPDIR)/uts/common/sys/cpr.h \
 		$(TOPDIR)/uts/sun4u/sys/cpr_impl.h
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALL)

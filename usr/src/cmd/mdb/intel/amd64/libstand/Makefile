@@ -40,3 +40,6 @@ CPPFLAGS += -I.
 
 %.o: %.S
 	$(COMPILE.s) $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIB) $(LINTFILES) $(OBJS)

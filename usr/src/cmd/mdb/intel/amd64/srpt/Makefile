@@ -40,3 +40,7 @@ include ../../../Makefile.module
 CPPFLAGS += -I$(UTSBASE)/common -I$(UTSBASE)/common/sys -I$(SRPTBASE)
 
 CSTD=	$(CSTD_GNU99)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

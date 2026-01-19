@@ -68,3 +68,6 @@ smfcfg.o:	../lib/smfcfg.c
 
 clean:
 	$(RM) $(OBJS) $(DOBJ)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DOBJ) $(OBJS)

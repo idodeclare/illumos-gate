@@ -100,3 +100,6 @@ XRDIRS	= ../i86pc ../intel ../common
 XRPRUNE	= sun4u sun4
 
 include ../../Makefile.xref
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

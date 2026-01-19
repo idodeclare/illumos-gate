@@ -20,3 +20,7 @@ include ../Makefile.com
 install: all $(ROOTLIBS) $(ROOTCOMPATLINKS)
 
 include $(SRC)/lib/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

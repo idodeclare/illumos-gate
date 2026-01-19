@@ -142,3 +142,6 @@ clean clobber:
 	rm -f $(PROG) $(OBJECTS)
 
 _msg:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS) $(PROG)

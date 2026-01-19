@@ -19,3 +19,6 @@ LIBPROG=	mount
 include		../Makefile.fstype
 include		../Makefile.mount
 include		../Makefile.mount.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

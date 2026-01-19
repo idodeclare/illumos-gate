@@ -34,3 +34,6 @@ LDLIBS += -lfmd_agent -lumem -lkstat
 %.o: $(SHAREDDIR)/%.c
 	$(COMPILE.c) -o $@ $<
 	$(CTFCONVERT_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

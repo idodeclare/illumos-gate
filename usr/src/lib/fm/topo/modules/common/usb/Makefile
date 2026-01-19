@@ -26,3 +26,6 @@ include ../../Makefile.plugin
 CPPFLAGS	+= -I../shared  -I$(SRC)/uts/intel/sys/acpi -DACPI_APPLICATION
 CPPFLAGS	+= -D_POSIX_PTHREAD_SEMANTICS
 LDLIBS		+= -ldevinfo
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

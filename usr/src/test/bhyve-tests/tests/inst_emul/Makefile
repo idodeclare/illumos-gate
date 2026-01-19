@@ -89,3 +89,6 @@ $(TESTDIR)/%: %
 	$(POST_PROCESS)
 
 $(CPAYLOADS:%=payload_%): payload_utils.o
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

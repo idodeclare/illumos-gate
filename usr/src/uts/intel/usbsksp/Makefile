@@ -73,3 +73,6 @@ install:	$(INSTALL_DEPS)
 include $(UTSBASE)/intel/Makefile.targ
 
 CERRWARN	+= $(CNOWARN_UNINIT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

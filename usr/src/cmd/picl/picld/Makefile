@@ -67,3 +67,6 @@ $(ROOTLIBPICLD)/%:	%
 include ../../Makefile.targ
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -65,3 +65,6 @@ $(POFILE):      $(POFILES)
 %.po: ../sharemgr/%.c
 	$(COMPILE.cpp) $<  > $<.i
 	$(BUILD.po)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

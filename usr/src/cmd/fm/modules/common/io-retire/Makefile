@@ -31,3 +31,7 @@ include ../../Makefile.plugin
 
 LDLIBS += -ldevinfo
 CERRWARN += -_gcc=-Wno-parentheses
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)

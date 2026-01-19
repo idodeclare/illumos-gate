@@ -100,3 +100,7 @@ clean:
 	$(RM) $(OBJS) $(PROG) $(GENCAT_PROG) $(GENMSG_LUX)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(GENCAT_PROG) $(GENMSG_LUX) \
+	    $(OBJS) $(PROG)

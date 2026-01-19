@@ -48,3 +48,6 @@ $(ROOTLINK):
 	$(RM) $@; $(SYMLINK) ../../bin/$(@F) $@
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

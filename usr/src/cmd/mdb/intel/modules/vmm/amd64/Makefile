@@ -25,3 +25,6 @@ CPPFLAGS += -I$(SRC)/uts/intel/io/vmm
 CPPFLAGS += -I$(SRC)/uts/intel/
 CPPFLAGS += -I$(SRC)/uts/i86pc
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

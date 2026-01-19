@@ -28,3 +28,6 @@ CFLAGS +=	-m32
 CLOBBERFILES +=	machine x86 libefi.a
 
 $(OBJS): machine x86
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

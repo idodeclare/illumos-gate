@@ -20,3 +20,7 @@ OBJS_OVERRIDE=1
 OBJS = qsort_test.o merge.o antiqsort.o
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ARCHPROG) $(KSHPROG) $(OBJS32) $(OBJS64) \
+	    $(PROG32) $(PROG64)

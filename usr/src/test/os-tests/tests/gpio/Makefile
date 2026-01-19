@@ -115,3 +115,6 @@ clobber:
 	$(RM) $(PROGS32) $(PROGS64)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS32) $(PROGS64)

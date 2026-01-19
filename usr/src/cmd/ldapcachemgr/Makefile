@@ -111,3 +111,6 @@ $(POFILE): $(POFILES)
 	cat $(POFILES) > $@
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LINTOUT) $(OBJS)

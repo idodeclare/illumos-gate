@@ -43,3 +43,6 @@ $(ROOTLINK):
 	$(RM) $@; $(SYMLINK) ../../bin/ksh $@
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJECTS)

@@ -1216,3 +1216,7 @@ $(LIBCDIR)/port/gen/new_list.c: $(LIBCDIR)/port/gen/errlist $(LIBCDIR)/port/gen/
 	cd $(LIBCDIR)/port/gen; pwd; $(AWK) -f errlist.awk < errlist
 
 pics/new_list.o: $(LIBCDIR)/port/gen/new_list.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

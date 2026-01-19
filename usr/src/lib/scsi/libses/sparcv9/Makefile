@@ -33,3 +33,7 @@ include ../Makefile.defs.64
 install: all $(ROOTLIBS64) $(ROOTLINKS64)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

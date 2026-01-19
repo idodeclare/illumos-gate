@@ -74,3 +74,7 @@ rm -f piclfrutree.conf; \
 ln -s ../../../../$(CHERRY_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrutree.so.1 libpiclfrutree.so.1; \
 ln -s ../../../../$(CHERRY_LINKTO_PLATFORM)/lib/picl/plugins/libpiclfrutree.so libpiclfrutree.so; \
 ln -s ../../../../$(CHERRY_LINKTO_PLATFORM)/lib/picl/plugins/piclfrutree.conf piclfrutree.conf`
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

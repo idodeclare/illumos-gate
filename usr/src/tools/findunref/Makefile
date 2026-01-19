@@ -50,3 +50,6 @@ exception_list: $(EXCEPTION_LISTS)
 clean:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

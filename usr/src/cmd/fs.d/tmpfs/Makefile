@@ -32,3 +32,6 @@ include		../Makefile.mount
 include		../Makefile.mount.targ
 
 CERRWARN +=	$(CNOWARN_UNINIT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

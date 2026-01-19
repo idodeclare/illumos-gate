@@ -57,3 +57,5 @@ $(TESTDIR)/%: %
 $(DATADIR)/%:	data/%
 	$(INS.file)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

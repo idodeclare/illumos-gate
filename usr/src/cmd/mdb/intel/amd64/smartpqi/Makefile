@@ -21,3 +21,7 @@ include ../../Makefile.amd64
 include ../../../Makefile.module
 
 CPPFLAGS += -I$(SRC)/uts/common/io/scsi/adapters/smartpqi -I$(SRC)/uts/common
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

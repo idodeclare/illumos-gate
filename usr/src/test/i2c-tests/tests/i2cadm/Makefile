@@ -27,3 +27,7 @@ FILES = common.ksh
 TESTDIR = i2cadm
 
 include $(SRC)/test/i2c-tests/tests/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EXTRA_OBJS32) $(EXTRA_OBJS64) $(OBJS32) \
+	    $(OBJS64) $(PROGS32) $(PROGS64)

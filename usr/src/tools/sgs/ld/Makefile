@@ -39,3 +39,6 @@ install: $(ROOTONBLDMACH64PROG)
 .KEEP_STATE:
 
 include		$(SGSHOME)/ld/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

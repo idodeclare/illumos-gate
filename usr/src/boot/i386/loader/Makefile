@@ -169,3 +169,6 @@ $(FONT).c: $(FONT_DIR)/$(FONT_SRC)
 
 $(ROOT_BOOT)/%: ../../forth/% $(ROOT_BOOT)
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS)

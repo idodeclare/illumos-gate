@@ -32,3 +32,6 @@ CLASS = common
 MODULESRCS = xfp.c
 
 include ../../Makefile.plugin
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

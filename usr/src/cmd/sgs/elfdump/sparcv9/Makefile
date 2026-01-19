@@ -40,3 +40,6 @@ install:	$(ROOTPROG) $(ROOTPROG64) \
 
 $(ROOTBIN64)/elfdump:
 	$(RM) $@; $(SYMLINK) ../../bin/elfdump $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

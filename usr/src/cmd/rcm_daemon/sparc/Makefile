@@ -31,3 +31,7 @@
 include ../Makefile.com
 
 install: all
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(COMMON_MOD_OBJ) $(POFILES) \
+	    $(RCM_OBJ)

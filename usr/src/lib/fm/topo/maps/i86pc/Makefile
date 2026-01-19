@@ -37,3 +37,6 @@ TOPOBASE = i86pc-hc-topology.xml
 CLOBBERFILES = fan-hc-topology.xml
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

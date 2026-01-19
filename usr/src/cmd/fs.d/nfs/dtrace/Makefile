@@ -35,3 +35,6 @@ clean:
 include $(SRC)/cmd/Makefile.targ
 
 install: all $(ROOTNFSDTRACEDIR) .WAIT $(ROOTNFSDTRACEFILE)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

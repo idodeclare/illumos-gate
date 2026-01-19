@@ -50,3 +50,5 @@ $(TESTDIR)/%: %.ksh
 $(TESTDIR)/%: %.py
 	$(INS.pyfile)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDS)

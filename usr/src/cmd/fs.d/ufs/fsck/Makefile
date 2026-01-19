@@ -68,3 +68,6 @@ clean:
 include ../../../../Makefile.xref
 
 XREFFLAGS=	-f -x
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(FSCKOBJS) $(FSLIB) $(UFSOBJS)

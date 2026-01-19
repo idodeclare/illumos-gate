@@ -63,3 +63,6 @@ clobber: clean
 	$(RM) $(PROG)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

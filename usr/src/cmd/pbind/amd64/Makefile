@@ -30,3 +30,6 @@ include ../Makefile.com
 include ../../Makefile.cmd.64
 
 install: all $(ROOTUSRSBINPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

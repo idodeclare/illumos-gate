@@ -92,3 +92,5 @@ smed_xdr.c: smed.x smed.h
 smed_svc.c: smed.x
 	$(RPCGEN) -m smed.x > $@
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(DERIVED_FILES) $(OBJS)

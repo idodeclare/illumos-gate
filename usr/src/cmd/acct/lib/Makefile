@@ -59,3 +59,6 @@ lint:
 install:
 
 .PRECIOUS: $(LIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBS) $(OBJS)

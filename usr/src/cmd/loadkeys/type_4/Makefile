@@ -269,3 +269,6 @@ $(ROOTKEYDIR)/layout_61: $(ROOTKEYDIR)/canadian_french_hobo
 	$(RM) $@; $(LN) $(ROOTKEYDIR)/canadian_french_hobo $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

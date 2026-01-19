@@ -28,3 +28,6 @@ CFLAGS += -m64 $(CFLAGS64)
 include $(BOOTSRC)/Makefile.lib
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

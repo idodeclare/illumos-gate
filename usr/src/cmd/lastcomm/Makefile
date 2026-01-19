@@ -59,3 +59,6 @@ lint:	lint_SRCS
 	$(COMPILE.c) $<
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(EXPOBJ) $(OBJS)

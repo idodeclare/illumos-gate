@@ -98,3 +98,6 @@ sha512-x86_64.S: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 
 sha256-x86_64.S: $(COMDIR)/sha2/amd64/sha512-x86_64.pl
 	$(PERL) $? $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

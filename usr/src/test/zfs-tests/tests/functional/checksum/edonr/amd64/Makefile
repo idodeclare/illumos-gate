@@ -18,3 +18,6 @@ include ../../Makefile.subdirs
 include $(SRC)/cmd/Makefile.cmd.64
 
 install: all $(CMD64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROG)

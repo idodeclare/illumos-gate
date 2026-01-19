@@ -210,3 +210,6 @@ $(ROOTKEYDIR)/layout_3e9:	$(ROOTKEYDIR)/us
 	$(RM) $@; $(LN) $(ROOTKEYDIR)/us $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -28,3 +28,6 @@ include ../Makefile.com
 
 CERRWARN += -_gcc=-Wno-switch
 LDLIBS += -lnsl -lgss
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

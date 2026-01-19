@@ -35,3 +35,6 @@ $(ROOTLIBDIR)/%: ../common/%
 	$(INS.pyfile)
 	$(PYTHON3b) -mpy_compile $@
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

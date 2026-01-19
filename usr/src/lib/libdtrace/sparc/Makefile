@@ -30,3 +30,7 @@ include ../Makefile.com
 
 install yydebug: all $(ROOTLIBS) $(ROOTLINKS) \
 	$(ROOTDLIBS) $(ROOTDOBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

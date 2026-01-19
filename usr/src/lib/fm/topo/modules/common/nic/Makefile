@@ -24,3 +24,6 @@ include ../../Makefile.plugin
 
 CPPFLAGS	+= -I../shared
 LDLIBS		+= -ldevinfo -ldladm -lsff
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)
