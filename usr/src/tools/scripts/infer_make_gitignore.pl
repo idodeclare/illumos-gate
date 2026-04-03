@@ -112,8 +112,9 @@ undef $inclpathadj;
 # exceptions found empirically
 if ($mname eq "Makefile") {
 	# ok, no path adjustment necessary
-} elsif ($mname eq "Makefile.digest" || $mname eq "Makefile.hmac" ||
-    $mname eq "Makefile.longhash" || $mname eq "Makefile.solaris") {
+} elsif ($mname eq "Makefile.digest" || $mname eq "Makefile.gmac" ||
+    $mname eq "Makefile.hmac" || $mname eq "Makefile.longhash" ||
+    $mname eq "Makefile.solaris") {
 	# 1. usr/src/test/crypto-tests/tests/digest/Makefile directive:
 	#     $(MAKE) -f Makefile.digest
 	# 2. usr/src/test/crypto-tests/tests/hmac/Makefile directive:
@@ -122,6 +123,8 @@ if ($mname eq "Makefile") {
 	#     $(MAKE) -f Makefile.longhash
 	# 4. usr/src/grub/... directive:
 	#     $(MAKE) -f Makefile.solaris
+	# 5. usr/src/test/crypto-tests/tests/modes/aes/gmac/Makefile directive:
+	#     $(MAKE) -e -f Makefile.gmac
 	# ... then ok to continue; no path adjustment necessary
 } elsif ($mpath =~ m`/ptools/\z`x) {
 	# usr/src/cmd/ptools
