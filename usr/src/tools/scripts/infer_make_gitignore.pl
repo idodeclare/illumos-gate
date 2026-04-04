@@ -71,7 +71,7 @@ INIT {
 	local $/ = "\n";
 	$num_updated = 0;
 
-	die "Error: need to be in illumos-gate root\n" if ! -d ".git";
+	die "Error: need to be in illumos-gate root\n" if (! -d ".git");
 	$cwd = getcwd;
 
 	# $(SRC) is common macro used in makefile include statements
@@ -86,7 +86,7 @@ INIT {
 	-n : dryrun
 	-v : verbose
 	-V : validate the script's hardcoded exception list of files\n" if
-	!getopts('nvV') || (@ARGV < 1 && !$opt_V);
+	    (!getopts('nvV') || (@ARGV < 1 && !$opt_V));
 
 	# Validate that @oktoskip refers to extant files.
 	if ($opt_V) {
@@ -98,6 +98,9 @@ INIT {
 			if (! -f $f) {
 				warn "Warn: missing file, $f\n";
 			} else {
+				# Read $f, and read any include files, in order
+				# to double check MAKE_GITIGNORE presence.
+
 				my ($mname, $mpath) = fileparse($f);
 				$fullpath = pathjoin($cwd, $mpath);
 				$fullname = "$fullpath$mname";
@@ -199,27 +202,27 @@ s/^\.DONE\s*:.*\n\K((?:\t[\t\x20]*\S.*\n)+)/	# match multi-line .DONE section
 	$v =~ s`^\t[\t\x20]*\@?\$\(MAKE_GITIGNORE\)	# match entire command,
 	    (?:.+\x20\\\n)* .* (?<!\x20\\)\n	# detecting line continuations;
 	    ``mx;				# and remove the entire command
-	$v/emx if !$opt_n;
+	$v/emx if (!$opt_n);
 
 my @macros = ();
 
 # CURTYPE= or BUILD_TYPE indicates that -d <discriminator> is needed
 if ($alltext =~ /^(CURTYPE)\s*=/mx || $alltext =~ /\b(BUILD_TYPE)=/mx) {
 	$optdisc = "-d \"\$($1)\" ";
-	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
+	mywarn("\t${optdisc}determined from $MATCH\n") if ($opt_v);
 }
 
 # include ... /Makefile.crypto indicates that -d <discriminator> is needed. NB,
 # the match from the global $_.
 if (m`^include\s.*/Makefile.crypto \b`mx) {
 	$optdisc = "-d \$(BASEPROG) ";
-	mywarn("\t${optdisc}determined from $MATCH\n") if $opt_v;
+	mywarn("\t${optdisc}determined from $MATCH\n") if ($opt_v);
 }
 
 # UNIGNOREFILES indicates that -x <filepath> is needed
 if ($alltext =~ /^(UNIGNOREFILES)\s*=/mx) {
 	$optexcl = "\$($1:%=-x %) ";
-	mywarn("\t-x ${optexcl}determined from $MATCH\n") if $opt_v;
+	mywarn("\t-x ${optexcl}determined from $MATCH\n") if ($opt_v);
 }
 
 # The following macros conventionally indicate some derived files that are
@@ -331,7 +334,7 @@ sub inline_includes {
 	my ($content, $file) = @_;
 
 	$content =~ s/^include \s+ (\S+)/
-		mywarn("\t$MATCH\n") if $opt_v;
+		mywarn("\t$MATCH\n") if ($opt_v);
 		expand_and_read($1, $file)/egmx;
 	return $content;
 }
@@ -357,7 +360,7 @@ sub expand_and_read {
 	# iteratively substitute any of the known macros above by
 	# searching for their definitionsn in $alltext
 	while ($incl =~ s`$macro_match_syn`
-		mywarn("\tBefore transformation: $incl\n") if $opt_v;
+		mywarn("\tBefore transformation: $incl\n") if ($opt_v);
 		my $macro = substr($1, 1, length($1) - 2);
 		try_get_def($macro)`ex) {
 	}
@@ -366,14 +369,14 @@ sub expand_and_read {
 	$incl =~ s`\$\(ARCHDIR\)`$archdir`gx;
 	$incl =~ s`\$\(REL_PATH\)`..\/`gx;
 	$incl =~ s`\$\(SRC\)`$usrsrc`gx;
-	$incl =~ s`$inclpathadj`` if defined $inclpathadj;
+	$incl =~ s`$inclpathadj`` if (defined $inclpathadj);
 
 	my $repl = "";
 	if ($incl =~ m`\$\(MACH(?:INE)?\)`x ||
 	    $incl =~ m`\$\{MACH(?:INE)?\}`x) {
 		my $incl0 = $incl;
 		my $found_arch = 0;
-		mywarn("\tBefore transformation: $incl\n") if $opt_v;
+		mywarn("\tBefore transformation: $incl\n") if ($opt_v);
 		foreach my $mach ("amd64", "i386", "sparc", "sparcv9") {
 			$incl = $incl0;
 			$incl =~ s`\$\(MACH(?:INE)?\)`$mach`gx;
@@ -384,7 +387,7 @@ sub expand_and_read {
 				$found_arch = 1;
 			}
 		}
-		mywarn("\tNo MACH(INE) for $incl0\n") if !$found_arch;
+		mywarn("\tNo MACH(INE) for $incl0\n") if (!$found_arch);
 	} else {
 		my $fullincl = pathjoin($fullpath, $incl);
 		$repl .= read_include($fullincl, $from);
@@ -403,7 +406,7 @@ sub try_get_def {
 	    \t+\@\Q$macro\E=)(\S*)/mx;
 	my $yn = $isfound ? "yes" : "no";
 	mywarn("\tWas the definition of macro $macro inferred: $yn\n") if
-	    $opt_v;
+	    ($opt_v);
 	if ($isfound) {
 		$macros{$macro} = $1;
 		return $1;
@@ -418,8 +421,8 @@ sub try_get_def {
 sub read_include {
 	my ($file, $from) = @_;
 
-	mywarn("\tTry to read $file\n") if $opt_v;
-	push @includes, $file if -f $file;
+	mywarn("\tTry to read $file\n") if ($opt_v);
+	push @includes, $file if (-f $file);
 
 	local $/;
 	open(my $fh, "<$file") or do {
@@ -444,8 +447,8 @@ sub read_include {
 # combines $root and $path if $path is relative; else returns $path untouched
 sub pathjoin {
 	my ($root, $path) = @_;
-	return $path if $path =~ m`^/`x;
-	$root .= "/" if $root !~ m`/\z`x;
+	return $path if ($path =~ m`^/`x);
+	$root .= "/" if ($root !~ m`/\z`x);
 	return "$root$path";
 }
 
