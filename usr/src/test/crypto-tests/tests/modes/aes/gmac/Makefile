@@ -14,10 +14,7 @@
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2019 Joyent, Inc.
 # Copyright 2023-2025 RackTop Systems, Inc.
-# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
-
-include $(SRC)/Makefile.master
 
 ALGS	= aes_gmac aes_gmac_enc
 
