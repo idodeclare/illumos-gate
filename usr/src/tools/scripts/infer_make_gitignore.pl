@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016, 2025 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2026 Chris Fraire <cfraire@me.com>
 #
 
 # Examine files specified in @ARGV, and possibly add or append a command to run
@@ -96,9 +96,29 @@ INIT {
 
 		for my $f (@oktoskip) {
 			if (! -f $f) {
-				warn "Warn: missing file $f\n";
+				warn "Warn: missing file, $f\n";
 			} else {
-				print $f, "\n";
+				my ($mname, $mpath) = fileparse($f);
+				$fullpath = pathjoin($cwd, $mpath);
+				$fullname = "$fullpath$mname";
+
+				my $c;
+				open(my $fh, '<', $f) or
+				    die "cannot open file $f";
+				{
+					local $/;
+					$c = <$fh>;
+				}
+				close($fh);
+
+				my $alltext = inline_includes($c, $fullname);
+				if ($alltext =~ /^MAKE_GITIGNORE\b/mx) {
+					warn "Warn: MAKE_GITIGNORE is in " .
+					    "file, $f\n";
+				} else {
+					print "OK to skip: ", $f, "\n"
+					    if ($opt_v);
+				}
 			}
 		}
 		exit;
