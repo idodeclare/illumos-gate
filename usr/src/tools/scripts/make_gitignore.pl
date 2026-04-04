@@ -11,7 +11,7 @@
 #
 
 #
-# Copyright 2016, 2023 Chris Fraire <cfraire@me.com>
+# Copyright 2016, 2026 Chris Fraire <cfraire@me.com>
 #
 
 # Assemble contents of a .gitignore from relative path-files in @ARGV, and
@@ -85,7 +85,7 @@ my $contents = join("", map { s/\z/\n/rx } @lines);
 my @dirs = reverse splitdir($cwd);
 for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 	my $subdir = join("-", reverse @dirs[0..$j]);
-	last if $subdir =~ /^usr-src\b/x;
+	last if ($subdir =~ /^usr-src\b/x);
 	my $dotdot = join("", map { "../" } @dirs[0..$j]);
 	my $gitignore_sub = "$cwd/$dotdot.gitignore$disc-$subdir";
 
@@ -97,7 +97,7 @@ for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 		my $addendum = join("", map { s/\z/\n/rx } @addenda);
 		write_if_different($gitignore_sub, $addendum);
 	} elsif (-f $gitignore_sub) {
-		print "Removing defunct $gitignore_sub.\n" if $opt_v;
+		print "Removing defunct $gitignore_sub.\n" if ($opt_v);
 		unlink $gitignore_sub;
 	}
 
@@ -106,13 +106,16 @@ for (my $j = 0; $j <= 4 && $j < @dirs; ++$j) {
 	if ($opt_d) {
 		my $gitignore_subnodisc = "$cwd/$dotdot.gitignore-$subdir";
 		if (-f $gitignore_subnodisc) {
-			print "Removing defunct $gitignore_subnodisc.\n" if
-			    $opt_v;
+			warn "clobbering defunct $gitignore_subnodisc\n";
 			unlink $gitignore_subnodisc;
 		}
 	} else {
+		my @former = glob "$cwd/$dotdot.gitignore,*,-$subdir";
 		# otherwise, clean up any formerly-discriminated files
-		map { unlink } glob "$cwd/$dotdot.gitignore,*,-$subdir";
+		if (@former > 0) {
+			warn "clobbering defunct (@former) from $cwd\n";
+			map { unlink } @former;
+		}
 	}
 }
 
@@ -161,7 +164,7 @@ sub is_addendum_already_ignored {
 # return true if the arg matches an -x <file-path> switch
 sub is_opt_excluded {
 	my ($file) = @_;
-	return 0 if @opt_x < 1;
+	return 0 if (@opt_x < 1);
 	return 0 < grep { $_ eq $file } @opt_x;
 }
 
@@ -171,10 +174,10 @@ sub write_if_different {
 	my ($file, $contents) = @_;
 
 	my $has_file = -f $file;
-	printf("$file exists: %s\n", $has_file ? "yes" : "no") if $opt_v;
+	printf("$file exists: %s\n", $has_file ? "yes" : "no") if ($opt_v);
 
 	if ($contents eq "") {
-		unlink $file if $has_file;
+		unlink $file if ($has_file);
 	}
 	elsif (!$has_file or !is_equal_contents($file, $contents)) {
 		open(my $fh, ">$file")
@@ -190,11 +193,11 @@ sub is_equal_contents {
 
 	open(my $fh, "<$filename") or die "Error opening $filename\n";
 	my $fcontents = <$fh>;
-	die "Error reading $filename\n" if ! defined $fcontents;
+	die "Error reading $filename\n" if (!defined $fcontents);
 	my $is_equal = $contents eq $fcontents;
 
 	printf("$gitignore has matching content: %s\n", $is_equal ? "yes" :
-	    "no") if $opt_v;
+	    "no") if ($opt_v);
 	return $is_equal;
 }
 
@@ -214,26 +217,26 @@ sub normalize_gitignore_entry {
 			my $clink = condense_link($entry);
 			my $rel = abs2rel($clink, $cwd);
 			# the double-# prevents pattern-matching for @addenda
-			return "##$entry" if !defined $rel;
+			return "##$entry" if (!defined $rel);
 			$entry = $rel;
-			return "#$entry" if !defined $clink ||
-			    $clink !~ m`^\Q$cwd/`x;
+			return "#$entry" if (!defined $clink ||
+			    $clink !~ m`^\Q$cwd/`x);
 			# otherwise, leave $entry as is
 		} else {
 			my $realentry = realpath($entry);
 			# the double-# prevents pattern-matching for @addenda
-			return "##$entry" if !defined $realentry;
+			return "##$entry" if (!defined $realentry);
 
 			if ($entry =~ m`^/`x) {
 				my $rel = abs2rel($entry, $cwd);
 				# the double-# prevents pattern-matching for
 				# @addenda
-				return "##$entry" if !defined $rel;
+				return "##$entry" if (!defined $rel);
 				$entry = $rel;
 				# this value is only used if the realpath is up
 				# and out of cwd
 			}
-			return "#$entry" if $realentry !~ m`^\Q$cwd/`x;
+			return "#$entry" if ($realentry !~ m`^\Q$cwd/`x);
 			$entry = $realentry;
 			$entry =~ s/^\Q$cwd//x;
 		}
@@ -241,7 +244,7 @@ sub normalize_gitignore_entry {
 
 	# ensure a trailing / for a directory (but not a dir-symlink or else Git
 	# is confused)
-	$entry .= "/" if $entry !~ m`/\z`x && -d $entry && !-l $entry;
+	$entry .= "/" if ($entry !~ m`/\z`x && -d $entry && !-l $entry);
 
 	# translate to anchored .gitignore form
 	$entry =~ s`^\./`/`x;
@@ -255,7 +258,7 @@ sub normalize_gitignore_entry {
 # /code/illumos-gate/usr/src/abc/def/ as /code/illumos-gate/usr/src/foobar.
 sub condense_link {
 	my ($link) = @_;
-	return $link if $link =~ m`^/`x;
+	return $link if ($link =~ m`^/`x);
 
 	my $lroot = $cwd;
 	$link =~ s`^(\./)+``x;
@@ -272,7 +275,7 @@ sub condense_link {
 sub affirm_in_git_repo {
 	my ($p) = @_;
 
-	chop $p if length($p) > 1 && substr($p, -1, 1) eq "/";
+	chop $p if (length($p) > 1 && substr($p, -1, 1) eq "/");
 	do {
 		if (-d "$p/.git") {
 			return;
