@@ -14,7 +14,7 @@
 # Copyright 2015 Nexenta Systems, Inc.  All rights reserved.
 # Copyright 2019 Joyent, Inc.
 # Copyright 2020 Oxide Computer Company
-# Copyright 2024, 2026 Chris Fraire <cfraire@me.com>
+# Copyright 2024 Chris Fraire <cfraire@me.com>
 #
 
 include $(SRC)/cmd/Makefile.cmd
@@ -63,7 +63,7 @@ $(CMDS) := FILEMODE = 0555
 CPPFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CPPFLAGS += -I$(COMMONDIR) -I$(SRC)/common/crypto/
 
-CLEANFILES +=	*.o $(OBJS) $(PROGS) $(PROGS_pkcs) $(PROGS_kcf)
+CLEANFILES +=	*.o $(PROGS)
 
 all: $(PROGS)
 
