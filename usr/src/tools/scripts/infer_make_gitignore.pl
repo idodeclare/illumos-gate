@@ -585,6 +585,7 @@ usr/src/test/crypto-tests/tests/hmac/Makefile
 usr/src/test/crypto-tests/tests/longhash/Makefile
 usr/src/test/crypto-tests/tests/Makefile
 usr/src/test/crypto-tests/tests/modes/aes/Makefile
+usr/src/test/crypto-tests/tests/modes/aes/gmac/Makefile
 usr/src/test/crypto-tests/tests/modes/Makefile
 usr/src/test/elf-tests/Makefile
 usr/src/test/elf-tests/tests/Makefile
