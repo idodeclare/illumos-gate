@@ -11,6 +11,7 @@
 
 #
 # Copyright 2026 Oxide Computer Company
+# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -21,6 +22,9 @@ PROGS = \
 	getifaddrs_dl \
 	inet6_opt \
 	nametoindex
+
+OBJS32 += $(PROGS:%=%.o.32)
+OBJS64 += $(PROGS:%=%.o.64)
 
 PROGS32 += $(PROGS:%=%.32)
 PROGS64 += $(PROGS:%=%.64)
@@ -49,7 +53,7 @@ clobber: clean
 	-$(RM) $(PROGS32) $(PROGS64)
 
 clean:
-	-$(RM) *.o.32 *.o.64
+	-$(RM) $(OBJS32) $(OBJS64)
 
 install: $(ROOTOPTSOCK) .WAIT $(ROOTOPTPROGS)
 
