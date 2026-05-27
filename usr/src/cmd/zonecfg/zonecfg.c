@@ -30,13 +30,13 @@
 /*
  * zonecfg is a lex/yacc based command interpreter used to manage zone
  * configurations.  The lexer (see zonecfg_lex.l) builds up tokens, which
- * the grammar (see zonecfg_grammar.y) builds up into commands, some of
- * which takes resources and/or properties as arguments.  See the block
+ * the grammar (see zonecfg_grammar.y) builds up into subcommands, some of
+ * which take resources and/or properties as arguments.  See the block
  * comments near the end of zonecfg_grammar.y for how the data structures
  * which keep track of these resources and properties are built up.
  *
  * The resource/property data structures are inserted into a command
- * structure (see zonecfg.h), which also keeps track of command names,
+ * structure (see zonecfg.h), which also keeps track of subcommand names,
  * miscellaneous arguments, and function handlers.  The grammar selects
  * the appropriate function handler, each of which takes a pointer to a
  * command structure as its sole argument, and invokes it.  The grammar
@@ -47,7 +47,7 @@
  *
  * The rest of this module consists of the various function handlers and
  * their helper functions.  Some of these functions, particularly the
- * X_to_str() functions, which maps command, resource and property numbers
+ * X_to_str() functions, which maps subcommand, resource and property numbers
  * to strings, are used quite liberally, as doing so results in a better
  * program w/rt I18N, reducing the need for translation notes.
  */
@@ -124,7 +124,8 @@ extern int lex_lineno;
 #define	SHELP_END	"end"
 #define	SHELP_EXIT	"exit [-F]"
 #define	SHELP_EXPORT	"export [-f output-file]"
-#define	SHELP_HELP	"help [usage] [commands] [syntax] [<command-name>]"
+#define	SHELP_HELP	"help [usage] [subcommands] [syntax] " \
+	"[<subcommand-name>]"
 #define	SHELP_INFO	"info [<resource-type> [ <property-name>=" \
 	"<property-value> ]*]"
 #define	SHELP_REMOVE	"remove [-F] <resource-type> " \
@@ -257,9 +258,9 @@ static char *prop_val_types[] = {
  */
 
 /*
- * remove has a space afterwards because it has qualifiers; the other commands
- * that have qualifiers (add, select, etc.) don't need a space here because
- * they have their own _cmds[] lists below.
+ * remove has a space afterwards because it has qualifiers; the other
+ * subcommands that have qualifiers (add, select, etc.) don't need a space here
+ * because they have their own _cmds[] lists below.
  */
 static const char *global_scope_cmds[] = {
 	"add",
@@ -875,7 +876,7 @@ long_help(int cmd_num)
 		case CMD_EXPORT:
 			return (gettext("Prints configuration to standard "
 			    "output or to output-file if\n\tspecified, in "
-			    "a form suitable for use in a command-file."));
+			    "a form suitable for use in a subcommand-file."));
 		case CMD_ADD:
 			return (gettext("Add specified resource to "
 			    "configuration."));
@@ -890,9 +891,9 @@ long_help(int cmd_num)
 			(void) snprintf(line, sizeof (line),
 			    gettext("Selects a resource to modify.  "
 			    "Resource modification is completed\n\twith the "
-			    "command '%s'.  The property name/value pairs "
-			    "must uniquely\n\tidentify a resource.  Note that "
-			    "the curly braces ('{', '}') mean one\n\tor more "
+			    "subcommand '%s'.  The property name/value pairs "
+			    "must\n\tuniquely identify a resource.  Note that "
+			    "the curly braces ('{', '}')\n\tmean one or more "
 			    "of whatever is between them."),
 			    cmd_to_str(CMD_END));
 			return (line);
@@ -918,7 +919,7 @@ long_help(int cmd_num)
 			    "Configuration must be committed to\n\tbe used by "
 			    "%s.  Until the configuration is committed, "
 			    "changes \n\tcan be removed with the '%s' "
-			    "command.  This operation is\n\tattempted "
+			    "subcommand.  This operation is\n\tattempted "
 			    "automatically upon completion of a %s "
 			    "session."), "zoneadm", cmd_to_str(CMD_REVERT),
 			    "zonecfg");
@@ -1063,14 +1064,14 @@ usage(boolean_t verbose, uint_t flags)
 	if (flags & HELP_META) {
 		(void) fprintf(fp, gettext("More help is available for the "
 		    "following:\n"));
-		(void) fprintf(fp, "\n\tcommands ('%s commands')\n",
+		(void) fprintf(fp, "\n\tsubcommands ('%s subcommands')\n",
 		    cmd_to_str(CMD_HELP));
 		(void) fprintf(fp, "\tsyntax ('%s syntax')\n",
 		    cmd_to_str(CMD_HELP));
 		(void) fprintf(fp, "\tusage ('%s usage')\n\n",
 		    cmd_to_str(CMD_HELP));
 		(void) fprintf(fp, gettext("You may also obtain help on any "
-		    "command by typing '%s <command-name>.'\n"),
+		    "subcommand by typing '%s <subcommand-name>.'\n"),
 		    cmd_to_str(CMD_HELP));
 	}
 	if (flags & HELP_RES_SCOPE) {
@@ -1079,7 +1080,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to configure a file-system.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_DIR), gettext("<path>"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
@@ -1106,7 +1107,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to configure a network interface.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_ADDRESS), gettext("<IP-address>"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
@@ -1139,7 +1140,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to configure a device node.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_MATCH), gettext("<device-path>"));
 			break;
@@ -1147,7 +1148,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to configure a resource control.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_NAME), gettext("<string>"));
 			(void) fprintf(fp, "\t%s %s (%s=%s,%s=%s,%s=%s)\n",
@@ -1168,7 +1169,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to configure a generic attribute.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_NAME), gettext("<name>"));
 			(void) fprintf(fp, "\t%s %s=boolean\n",
@@ -1195,7 +1196,7 @@ usage(boolean_t verbose, uint_t flags)
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to export ZFS datasets.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_NAME), gettext("<name>"));
 			break;
@@ -1205,7 +1206,7 @@ usage(boolean_t verbose, uint_t flags)
 			    "subset of the system's processors to this zone "
 			    "while it is running.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_NCPUS),
 			    gettext("<unsigned integer | range>"));
@@ -1223,7 +1224,7 @@ usage(boolean_t verbose, uint_t flags)
 			    "also be less than 1,\nrepresenting a fraction of "
 			    "a cpu.\n"),
 			    rt_to_str(resource_scope), pt_to_str(PT_NCPUS));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_NCPUS), gettext("<unsigned decimal>"));
 			break;
@@ -1233,7 +1234,7 @@ usage(boolean_t verbose, uint_t flags)
 			    "amount of physical memory, swap space and locked "
 			    "memory that can be used by\nthis zone.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_PHYSICAL),
 			    gettext("<qualified unsigned decimal>"));
@@ -1250,13 +1251,13 @@ usage(boolean_t verbose, uint_t flags)
 			    "rights to users and roles. These rights are "
 			    "only applicable to this zone.\n"),
 			    rt_to_str(resource_scope));
-			(void) fprintf(fp, gettext("Valid commands:\n"));
+			(void) fprintf(fp, gettext("Valid subcommands:\n"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_USER),
 			    gettext("<single user or role name>"));
 			(void) fprintf(fp, "\t%s %s=%s\n", cmd_to_str(CMD_SET),
 			    pt_to_str(PT_AUTHS),
-			    gettext("<comma separated list>"));
+			    gettext("<comma-separated list>"));
 			break;
 		case RT_SECFLAGS:
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
@@ -1288,12 +1289,12 @@ usage(boolean_t verbose, uint_t flags)
 		    execname, cmd_to_str(CMD_HELP));
 		(void) fprintf(fp, "\t%s -z <zone>\t\t\t(%s)\n",
 		    execname, gettext("interactive"));
-		(void) fprintf(fp, "\t%s -z <zone> <command>\n", execname);
-		(void) fprintf(fp, "\t%s -z <zone> -f <command-file>\n",
+		(void) fprintf(fp, "\t%s -z <zone> <subcommand>\n", execname);
+		(void) fprintf(fp, "\t%s -z <zone> -f <subcommand-file>\n",
 		    execname);
 	}
 	if (flags & HELP_SUBCMDS) {
-		(void) fprintf(fp, "%s:\n\n", gettext("Commands"));
+		(void) fprintf(fp, "%s:\n\n", gettext("Subcommands"));
 		for (i = 0; i <= CMD_MAX; i++) {
 			(void) fprintf(fp, "%s\n", helptab[i].short_usage);
 			if (verbose)
@@ -1590,13 +1591,13 @@ longer_usage(uint_t cmd_num)
 }
 
 /*
- * scope_usage() is simply used when a command is called from the wrong scope.
+ * scope_usage() is used when a subcommand is called from the wrong scope.
  */
 
 static void
 scope_usage(uint_t cmd_num)
 {
-	zerr(gettext("The %s command only makes sense in the %s scope."),
+	zerr(gettext("The %s subcommand only makes sense in the %s scope."),
 	    cmd_to_str(cmd_num),
 	    global_scope ? gettext("resource") : gettext("global"));
 	saw_error = B_TRUE;
@@ -1673,7 +1674,7 @@ check_if_zone_already_exists(boolean_t force)
 	    cmd_to_str(CMD_CREATE));
 	if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 		zerr(gettext("Zone exists, input not from terminal and -F not "
-		    "specified:\n%s command ignored, exiting."),
+		    "specified:\n%s subcommand ignored, exiting."),
 		    cmd_to_str(CMD_CREATE));
 		exit(Z_ERR);
 	}
@@ -2181,7 +2182,7 @@ exit_func(cmd_t *cmd)
 	answer = ask_yesno(B_FALSE, "Resource incomplete; really quit");
 	if (answer == -1) {
 		zerr(gettext("Resource incomplete, input "
-		    "not from terminal and -F not specified:\n%s command "
+		    "not from terminal and -F not specified:\n%s subcommand "
 		    "ignored, but exiting anyway."), cmd_to_str(CMD_EXIT));
 		exit(Z_ERR);
 	} else if (answer == 1) {
@@ -2664,7 +2665,7 @@ delete_func(cmd_t *cmd)
 		    gettext("Are you sure you want to delete zone %s"), zone);
 		if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 			zerr(gettext("Input not from terminal and -F not "
-			    "specified:\n%s command ignored, exiting."),
+			    "specified:\n%s subcommand ignored, exiting."),
 			    cmd_to_str(CMD_DELETE));
 			exit(Z_ERR);
 		}
@@ -7059,7 +7060,7 @@ commit_func(cmd_t *cmd)
 	/*
 	 * cmd_arg normally comes from a strdup() in the lexer, and the
 	 * whole cmd structure and its (char *) attributes are freed at
-	 * the completion of each command, so the strdup() below is needed
+	 * the completion of each subcommand, so the strdup() below is needed
 	 * to match this and prevent a core dump from trying to free()
 	 * something that can't be.
 	 */
@@ -7125,7 +7126,7 @@ revert_func(cmd_t *cmd)
 		    gettext("Are you sure you want to revert"));
 		if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 			zerr(gettext("Input not from terminal and -F not "
-			    "specified:\n%s command ignored, exiting."),
+			    "specified:\n%s subcommand ignored, exiting."),
 			    cmd_to_str(CMD_REVERT));
 			exit(Z_ERR);
 		}
@@ -7176,7 +7177,8 @@ help_func(cmd_t *cmd)
 		usage(B_TRUE, HELP_USAGE);
 		return;
 	}
-	if (strcmp(cmd->cmd_argv[0], "commands") == 0) {
+	if (strcmp(cmd->cmd_argv[0], "subcommands") == 0 ||
+	    strcmp(cmd->cmd_argv[0], "commands") == 0) {
 		usage(B_TRUE, HELP_SUBCMDS);
 		return;
 	}
@@ -7229,11 +7231,11 @@ cleanup()
 
 	if (!interactive_mode && !cmd_file_mode) {
 		/*
-		 * If we're not in interactive mode, and we're not in command
-		 * file mode, then we must be in commands-from-the-command-line
+		 * If we're not in interactive mode, and we're not in subcommand
+		 * file mode, then we must be in subcommands-from-command-line
 		 * mode.  As such, we can't loop back and ask for more input.
 		 * It was OK to prompt for such things as whether or not to
-		 * really delete a zone in the command handler called from
+		 * really delete a zone in the subcommand handler called from
 		 * yyparse() above, but "really quit?" makes no sense in this
 		 * context.  So disable prompting.
 		 */
@@ -7441,7 +7443,7 @@ done:
 /*
  * Since yacc is based on reading from a (FILE *) whereas what we get from
  * the command line is in argv format, we need to convert when the user
- * gives us commands directly from the command line.  That is done here by
+ * gives us subcommands directly from the command line.  That is done here by
  * concatenating the argv list into a space-separated string, writing it
  * to a temp file, and rewinding the file so yyin can be set to it.  Then
  * we call read_input(), and only once, since prompting about whether to
