@@ -23,13 +23,14 @@
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2014 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2015 by Delphix. All rights reserved.
+ * Copyright 2026 Chris Fraire <cfraire@me.com>
  */
 
 /*
  * zoneadm is a command interpreter for zone administration.  It is all in
  * C (i.e., no lex/yacc), and all the argument passing is argc/argv based.
  * main() calls parse_and_run() which calls cmd_match(), then invokes the
- * appropriate command's handler function.  The rest of the program is the
+ * appropriate subcommand's handler function.  The rest of the program is the
  * handler functions and their helper functions.
  *
  * Some of the helper functions are used largely to simplify I18N: reducing
@@ -121,8 +122,8 @@ struct net_if {
 	(S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
 
 struct cmd {
-	uint_t	cmd_num;				/* command number */
-	char	*cmd_name;				/* command name */
+	uint_t	cmd_num;				/* subcommand number */
+	char	*cmd_name;				/* subcommand name */
 	char	*short_usage;				/* short form help */
 	int	(*handler)(int argc, char *argv[]);	/* function to call */
 
@@ -190,7 +191,7 @@ static struct cmd cmdtab[] = {
 	{ CMD_INSTALL,		"install",	SHELP_INSTALL,	install_func },
 	{ CMD_UNINSTALL,	"uninstall",	SHELP_UNINSTALL,
 	    uninstall_func },
-	/* mount and unmount are private commands for admin/install */
+	/* mount and unmount are private subcommands for admin/install */
 	{ CMD_MOUNT,		"mount",	NULL,		mount_func },
 	{ CMD_UNMOUNT,		"unmount",	NULL,		unmount_func },
 	{ CMD_CLONE,		"clone",	SHELP_CLONE,	clone_func },
@@ -279,7 +280,7 @@ long_help(int cmd_num)
 		    "The -m option can be used to\n\tspecify 'copy' which "
 		    "forces a copy of the source zone.  The -s option\n\t"
 		    "can be used to specify the name of a ZFS snapshot "
-		    "that was taken from\n\ta previous clone command.  The "
+		    "that was taken from\n\ta previous clone subcommand.  The "
 		    "snapshot will be used as the source\n\tinstead of "
 		    "creating a new ZFS snapshot.  All other arguments are "
 		    "passed\n\tto the brand clone function; see "
@@ -2779,7 +2780,7 @@ no_net:
 		return_code = Z_ERR;
 
 	/*
-	 * As the "mount" command is used for patching/upgrading of zones
+	 * As the "mount" subcommand is used for patching/upgrading of zones
 	 * or other maintenance processes, the zone's privilege set is not
 	 * checked in this case.  Instead, the default, safe set of
 	 * privileges will be used when this zone is created in the
