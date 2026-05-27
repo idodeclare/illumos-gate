@@ -3,7 +3,7 @@
 .\" Copyright 2013 Joyent, Inc. All Rights Reserved.
 .\" Copyright 2017 Peter Tribble
 .\" Copyright 2021 OmniOS Community Edition (OmniOSce) Association.
-.\" Copyright 2019, 2025 Chris Fraire <cfraire@me.com>
+.\" Copyright 2019, 2026 Chris Fraire <cfraire@me.com>
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License"). You may not use this file except in compliance with the License. You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.
 .\" See the License for the specific language governing permissions and limitations under the License. When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE. If applicable, add the following below this CDDL HEADER, with the
 .\" fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
@@ -17,12 +17,12 @@ zonecfg \- set up zone configuration
 
 .LP
 .nf
-\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIcommand\fR
+\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fIsubcommand\fR
 .fi
 
 .LP
 .nf
-\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fB-f\fR \fIcommand_file\fR
+\fBzonecfg\fR \fB-z\fR \fIzonename\fR \fB-f\fR \fIsubcommand_file\fR
 .fi
 
 .LP
@@ -43,7 +43,7 @@ The following synopsis of the \fBzonecfg\fR command is for interactive usage:
 .sp
 .in +2
 .nf
-\fBzonecfg -z\fR \fIzonename command\fR
+\fBzonecfg -z\fR \fIzonename subcommand\fR
 .fi
 .in -2
 
@@ -1386,12 +1386,12 @@ The following options are supported:
 .sp
 .ne 2
 .na
-\fB\fB-f\fR \fIcommand_file\fR\fR
+\fB\fB-f\fR \fIsubcommand_file\fR\fR
 .ad
 .sp .6
 .RS 4n
-Specify the name of \fBzonecfg\fR command file. \fIcommand_file\fR is a text
-file of \fBzonecfg\fR commands, one per line.
+Specify the name of \fBzonecfg\fR subcommand file. \fIsubcommand_file\fR is a
+text file of \fBzonecfg\fR subcommands, one per line.
 .RE
 
 .sp
@@ -1409,14 +1409,14 @@ cannot be used.
 .RE
 
 .SH COMMANDS
-You can use the \fBadd\fR and \fBselect\fR commands to select a specific
+You can use the \fBadd\fR and \fBselect\fR subcommands to select a specific
 resource, at which point the scope changes to that resource. The \fBend\fR and
-\fBcancel\fR commands are used to complete the resource specification, at
-which time the scope is reverted back to global. Certain commands, such as
+\fBcancel\fR subcommands are used to complete the resource specification, at
+which time the scope is reverted back to global. Certain subcommands, such as
 \fBadd\fR, \fBremove\fR and \fBset\fR, have different semantics in each scope.
 .sp
 .LP
-\fBzonecfg\fR supports a semicolon-separated list of commands. For example:
+\fBzonecfg\fR supports a semicolon-separated list of subcommands. For example:
 .sp
 .in +2
 .nf
@@ -1427,15 +1427,15 @@ which time the scope is reverted back to global. Certain commands, such as
 
 .sp
 .LP
-Commands which can result in destructive actions or loss of work have an
+Subcommands which can result in destructive actions or loss of work have an
 \fB-F\fR option to force the action. If input is from a terminal device, the
-user is prompted when appropriate if such a command is given without the
-\fB-F\fR option; otherwise, if such a command is given without the \fB-F\fR
+user is prompted when appropriate if such a subcommand is given without the
+\fB-F\fR option; otherwise, if such a subcommand is given without the \fB-F\fR
 option, the action is disallowed, with a diagnostic message written to standard
 error.
 .sp
 .LP
-The following commands are supported:
+The following subcommands are supported:
 .sp
 .ne 2
 .na
@@ -1488,7 +1488,7 @@ Clear the values for the property.
 Commit the current configuration from memory to stable storage. The
 configuration must be committed to be used by \fBzoneadm\fR. Until the
 in-memory configuration is committed, you can remove changes with the
-\fBrevert\fR command. The \fBcommit\fR operation is attempted automatically
+\fBrevert\fR subcommand. The \fBcommit\fR operation is attempted automatically
 upon completion of a \fBzonecfg\fR session. Since a configuration must be
 correct to be committed, this operation automatically does a \fBverify\fR.
 .RE
@@ -1561,7 +1561,7 @@ Specify the \fB-F\fR option to force the action.
 .ad
 .sp .6
 .RS 4n
-End the resource specification. This command is only applicable in the
+End the resource specification. This subcommand is only applicable in the
 resource scope.
 .B zonecfg
 checks to make sure the current resource is completely specified. If so, it is
@@ -1603,16 +1603,16 @@ option can be used to force the action.
 .RS 4n
 Print configuration to standard output. Use the \fB-f\fR option to print the
 configuration to \fIoutput-file\fR. This option produces output in a form
-suitable for use in a command file.
+suitable for use in a subcommand file.
 .RE
 
 .sp
 .ne 2
 .na
 .BR "help " [ usage ]
-.RB [ commands ]
+.RB [ subcommands ]
 .RB [ syntax ]
-.RI [ command\-name ]
+.RI [ subcommand\-name ]
 .ad
 .sp .6
 .RS 4n
@@ -1715,7 +1715,7 @@ option can be used to force the action.
 .RS 4n
 Select the resource of the given type which matches the given
 .I property\-name property\-value
-pair criteria, for modification. This command is applicable only in the
+pair criteria, for modification. This subcommand is applicable only in the
 global scope. The scope is changed to that resource type. The {} syntax means 1
 or more of whatever is inside the curly braces. You must specify enough
 .I property\-name property\-value
@@ -1732,7 +1732,7 @@ pairs for the resource to be uniquely identified.
 .RS 4n
 Set a given property name to the given value. Some properties (for example,
 \fBzonename\fR and \fBzonepath\fR) are global while others are
-resource-specific. This command is applicable in both the global and
+resource-specific. This subcommand is applicable in both the global and
 resource scopes.
 .RE
 
@@ -1927,7 +1927,7 @@ zonecfg:myzone2> \fBexit\fR
 \fBExample 7 \fRSetting the \fBzone.cpu-shares\fR Property for the Global Zone
 .sp
 .LP
-The following command sets the \fBzone.cpu-shares\fR property for the global
+The following subcommand sets the \fBzone.cpu-shares\fR property for the global
 zone:
 
 .sp
@@ -1944,7 +1944,7 @@ zonecfg:global> \fBexit\fR
 \fBExample 8 \fRUsing Pattern Matching
 .sp
 .LP
-The following commands illustrate \fBzonecfg\fR support for pattern matching.
+The following subcommands illustrate \fBzonecfg\fR support for pattern matching.
 In the zone \fBflexlm\fR, enter:
 
 .sp
