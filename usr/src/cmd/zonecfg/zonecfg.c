@@ -24,7 +24,7 @@
  * Copyright 2014 Nexenta Systems, Inc.  All rights reserved.
  * Copyright 2014 Gary Mills
  * Copyright 2019 Joyent, Inc.
- * Copyright 2025 Chris Fraire <cfraire@me.com>
+ * Copyright 2025, 2026 Chris Fraire <cfraire@me.com>
  */
 
 /*
