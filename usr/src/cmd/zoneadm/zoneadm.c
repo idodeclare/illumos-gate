@@ -244,28 +244,27 @@ long_help(int cmd_num)
 		    "See zoneadm(8) for valid boot arguments."));
 	case CMD_REBOOT:
 		return (gettext("Restarts the zone (equivalent to a halt / "
-		    "boot sequence).  Fails if the\n\tzone is not active.  "
-		    "See zoneadm(8) for valid boot arguments."));
+		    "boot sequence).  Fails if the\n\tzone is not active.  See "
+		    "zoneadm(8) for valid boot arguments."));
 	case CMD_LIST:
-		return (gettext("Lists the current zones, or a "
-		    "specific zone if indicated.  By default,\n\tall "
-		    "running zones are listed, though this can be "
-		    "expanded to all\n\tinstalled zones with the -i "
-		    "option or all configured zones with the\n\t-c "
-		    "option.  When used with the general -z <zone> and/or -u "
-		    "<uuid-match>\n\toptions, lists only the specified "
-		    "matching zone, but lists it\n\tregardless of its state, "
-		    "and the -i, -c, and -n options are disallowed.\n\tThe -v "
-		    "option can be used to display verbose information: zone "
-		    "name,\n\tID, current state, root directory and options.  "
-		    "The -p option can be\n\tused to request machine-parsable "
-		    "output.  The -v and -p options are\n\tmutually exclusive."
-		    "  If neither -v nor -p is used, just the zone name\n\tis "
-		    "listed."));
+		return (gettext("Lists the current zones, or a specific zone "
+		    "if indicated.  By default,\n\tall running zones are "
+		    "listed, though this can be expanded to all\n\tinstalled "
+		    "zones with the -i option or all configured zones with the"
+		    "\n\t-c option.  When used with the general -z <zone> "
+		    "and/or -u <uuid-match>\n\toptions, lists only the "
+		    "specified matching zone, but lists it\n\tregardless of "
+		    "its state, and the -i, -c, and -n options are "
+		    "disallowed.\n\tThe -v option can be used to display "
+		    "verbose information: zone name,\n\tID, current state, "
+		    "root directory and options.  The -p option can be\n\tused "
+		    "to request machine-parsable output.  The -v and -p "
+		    "options are\n\tmutually exclusive.  If neither -v nor -p "
+		    "is used, just the zone name\n\tis listed."));
 	case CMD_VERIFY:
-		return (gettext("Check to make sure the configuration "
-		    "can safely be instantiated on the\n\tmachine: "
-		    "physical network interfaces exist, etc."));
+		return (gettext("Check to make sure the configuration can "
+		    "safely be instantiated on the\n\tmachine: physical "
+		    "network interfaces exist, etc."));
 	case CMD_INSTALL:
 		return (gettext("Install the configuration on to the system.  "
 		    "All arguments are passed\n\tto the brand installation "
@@ -276,15 +275,14 @@ long_help(int cmd_num)
 		    "other arguments are passed to the brand\n\tuninstall "
 		    "function; see brands(7) for more information."));
 	case CMD_CLONE:
-		return (gettext("Clone the installation of another zone.  "
-		    "The -m option can be used to\n\tspecify 'copy' which "
-		    "forces a copy of the source zone.  The -s option\n\t"
-		    "can be used to specify the name of a ZFS snapshot "
-		    "that was taken from\n\ta previous clone subcommand.  The "
-		    "snapshot will be used as the source\n\tinstead of "
-		    "creating a new ZFS snapshot.  All other arguments are "
-		    "passed\n\tto the brand clone function; see "
-		    "brands(7) for more information."));
+		return (gettext("Clone the installation of another zone.  The "
+		    "-m option can be used to\n\tspecify 'copy' which forces a "
+		    "copy of the source zone.  The -s option\n\tcan be used to "
+		    "specify the name of a ZFS snapshot that was taken from a\n"
+		    "\tprevious clone subcommand.  The snapshot will be used "
+		    "as the source\n\tinstead of creating a new ZFS snapshot.  "
+		    "All other arguments are passed\n\tto the brand clone "
+		    "function; see brands(7) for more information."));
 	case CMD_MOVE:
 		return (gettext("Move the zone to a new zonepath."));
 	case CMD_DETACH:

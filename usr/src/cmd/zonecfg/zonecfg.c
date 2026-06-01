@@ -125,8 +125,8 @@ extern int lex_lineno;
 #define	SHELP_EXIT	"exit [-F]"
 #define	SHELP_EXPORT	"export [-f output-file]"
 #define	SHELP_HELP	"help [usage] [subcommands] [syntax] " \
-	"[<subcommand-name>]"
-#define	SHELP_INFO	"info [<resource-type> [ <property-name>=" \
+	"[ <subcommand-name> ]"
+#define	SHELP_INFO	"info [ <resource-type> [ <property-name>=" \
 	"<property-value> ]*]"
 #define	SHELP_REMOVE	"remove [-F] <resource-type> " \
 	"[ <property-name>=<property-value> ]*\n" \
@@ -855,18 +855,18 @@ long_help(int cmd_num)
 			return (gettext("Prints help message."));
 		case CMD_CREATE:
 			(void) snprintf(line, sizeof (line),
-			    gettext("Creates a configuration for the "
-			    "specified zone.  '%s' should be\n\tused to "
-			    "begin configuring a new zone.  If overwriting an "
+			    gettext("Creates a configuration for the specified "
+			    "zone.  '%s' should be\n\tused to begin "
+			    "configuring a new zone.  If overwriting an "
 			    "existing\n\tconfiguration, the -F flag can be "
-			    "used to force the action.  If\n\t-t template is "
+			    "used to force the action.  If\n\t-t <template> is "
 			    "given, creates a configuration identical to the\n"
 			    "\tspecified template, except that the zone name "
-			    "is changed from\n\ttemplate to zonename.  '%s -a' "
-			    "creates a configuration from a\n\tdetached "
+			    "is changed from template\n\tto zonename.  '%s "
+			    "-a' creates a configuration from a detached\n\t"
 			    "zonepath.  '%s -b' results in a blank "
-			    "configuration.\n\t'%s' with no arguments applies "
-			    "the default settings."),
+			    "configuration.  '%s' with\n\tno arguments "
+			    "applies the default settings."),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE),
 			    cmd_to_str(CMD_CREATE), cmd_to_str(CMD_CREATE));
 			return (line);
@@ -875,8 +875,8 @@ long_help(int cmd_num)
 			    "be used to force the action."));
 		case CMD_EXPORT:
 			return (gettext("Prints configuration to standard "
-			    "output or to output-file if\n\tspecified, in "
-			    "a form suitable for use in a subcommand-file."));
+			    "output or to output-file if specified,\n\tin a "
+			    "form suitable for use in a subcommand-file."));
 		case CMD_ADD:
 			return (gettext("Add specified resource to "
 			    "configuration."));
@@ -889,12 +889,12 @@ long_help(int cmd_num)
 			    "force the action."));
 		case CMD_SELECT:
 			(void) snprintf(line, sizeof (line),
-			    gettext("Selects a resource to modify.  "
-			    "Resource modification is completed\n\twith the "
-			    "subcommand '%s'.  The property name/value pairs "
-			    "must\n\tuniquely identify a resource.  Note that "
-			    "the curly braces ('{', '}')\n\tmean one or more "
-			    "of whatever is between them."),
+			    gettext("Selects a resource to modify.  Resource "
+			    "modification is completed with\n\tthe subcommand "
+			    "'%s'.  The property name/value pairs must "
+			    "uniquely\n\tidentify a resource.  Note that the "
+			    "curly braces ('{', '}') mean one or\n\tmore of "
+			    "whatever is between them."),
 			    cmd_to_str(CMD_END));
 			return (line);
 		case CMD_SET:
@@ -903,23 +903,23 @@ long_help(int cmd_num)
 			return (gettext("Clears property values."));
 		case CMD_INFO:
 			return (gettext("Displays information about the "
-			    "current configuration.  If resource\n\ttype is "
+			    "current configuration.  If resource type\n\tis "
 			    "specified, displays only information about "
-			    "resources of\n\tthe relevant type.  If any "
-			    "property name/value pairs are specified,\n"
-			    "\tdisplays only information about resources "
-			    "meeting the given criteria."));
+			    "resources of the relevant\n\ttype.  If any "
+			    "property name/value pairs are specified, displays "
+			    "only\n\tinformation about resources meeting the "
+			    "given criteria."));
 		case CMD_VERIFY:
 			return (gettext("Verifies current configuration for "
-			    "correctness, with zonepath\n\tspecified and with "
+			    "correctness, with zonepath specified\n\tand with "
 			    "all resources having their required properties."));
 		case CMD_COMMIT:
 			(void) snprintf(line, sizeof (line),
 			    gettext("Commits current configuration.  "
-			    "Configuration must be committed to\n\tbe used by "
+			    "Configuration must be committed to be\n\tused by "
 			    "%s.  Until the configuration is committed, "
-			    "changes \n\tcan be removed with the '%s' "
-			    "subcommand.  This operation is\n\tattempted "
+			    "changes can be\n\tremoved with the '%s' "
+			    "subcommand.  This operation is attempted\n\t"
 			    "automatically upon completion of a %s "
 			    "session."), "zoneadm", cmd_to_str(CMD_REVERT),
 			    "zonecfg");
