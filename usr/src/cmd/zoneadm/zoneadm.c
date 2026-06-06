@@ -302,7 +302,7 @@ long_help(int cmd_num)
 		    "successful completion, the zone state will be\n\t"
 		    "'installed'.  The system software on the current system "
 		    "must be\n\tcompatible with the software on the zone's "
-		    "original system.  Specify -F\n\tto force the attach and "
+		    "original system.  Specify\n\t-F to force the attach and "
 		    "skip software compatibility tests.  The\n\t-n option can "
 		    "be used to specify 'no-execute' mode.  When -n is used,\n"
 		    "\tthe information needed to attach the zone is read from "
