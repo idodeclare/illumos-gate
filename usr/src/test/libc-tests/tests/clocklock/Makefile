@@ -69,4 +69,4 @@ clean:
 	$(RM) $(OBJS32) $(OBJS64)
 
 clobber: clean
-	$(RM) $(PROGS32) $(PROGS64)
+	$(RM) $(PROG32) $(PROG64)
