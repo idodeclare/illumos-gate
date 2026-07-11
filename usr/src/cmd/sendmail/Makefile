@@ -74,3 +74,6 @@ THIRDPARTYLICENSE: LICENSE db/LICENSE
 	$(SED) -n '/The following are the copyrights/,$$p' db/LICENSE >> $@
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

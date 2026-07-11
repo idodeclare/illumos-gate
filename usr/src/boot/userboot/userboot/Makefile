@@ -125,3 +125,7 @@ pics/%.o:	../../common/linenoise/%.c
 	$(POST_PROCESS_O)
 
 include $(SRC)/lib/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

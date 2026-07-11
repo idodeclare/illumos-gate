@@ -36,3 +36,6 @@ CERRWARN += -_gcc=-Wno-unused-variable
 
 # not linted
 SMATCH=off
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

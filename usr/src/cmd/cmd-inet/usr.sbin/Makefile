@@ -220,3 +220,6 @@ clean_local:
 clobber: $(SUBDIRS) clobber_local
 clobber_local: clean_local
 	$(RM) $(CLOBBERFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

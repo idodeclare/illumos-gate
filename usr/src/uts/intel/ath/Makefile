@@ -100,3 +100,6 @@ $(OBJS_DIR)/hal.o:     $(ATHEROS_HAL)
 	uudecode -o $@ $(ATHEROS_HAL)
 	if [ `elfedit -r -e 'ehdr:e_machine' $@` = EM_AMD64 ]; \
 		then elfedit -e 'shdr:sh_type .eh_frame SHT_AMD64_UNWIND' $@; fi
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

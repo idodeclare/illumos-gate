@@ -122,3 +122,6 @@ install_h check:	FRC
 	@cd amd64/sys; pwd; $(MAKE) $(TARGET)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

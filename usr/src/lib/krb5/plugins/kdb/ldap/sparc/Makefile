@@ -32,3 +32,7 @@ include ../Makefile.com
 sparc_COPTFLAG=	-O
 
 install: all $(ROOTLIBDIR) $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

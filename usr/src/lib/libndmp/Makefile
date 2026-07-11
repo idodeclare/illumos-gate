@@ -65,3 +65,6 @@ FRC:
 include ../Makefile.targ
 include ../../Makefile.msg.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

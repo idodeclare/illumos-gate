@@ -40,3 +40,7 @@ include		../Makefile.targ
 include		../../../Makefile.targ
 
 all install:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS) $(PICS) \
+	    $(POBJS)

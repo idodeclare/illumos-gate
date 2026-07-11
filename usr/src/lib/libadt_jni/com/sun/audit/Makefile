@@ -67,3 +67,6 @@ $(JAR_FILE): $(CLASSES)
 	cd $(TOP); \
 	pwd; \
 	$(JAR) -cvf $(TOP)/com/sun/audit/$(JAR_FILE) com/sun/audit/*.class
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEAN_FILES)

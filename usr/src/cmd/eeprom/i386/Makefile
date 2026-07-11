@@ -35,3 +35,6 @@ LDLIBS += -lzfsbootenv
 all:	$(PROG)
 
 include $(SRCDIR)/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LINT_OBJS) $(OBJS) $(PROG)

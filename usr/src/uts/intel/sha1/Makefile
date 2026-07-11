@@ -93,3 +93,6 @@ $(OBJS_DIR)/sha1-x86_64.o: sha1-x86_64.S
 
 sha1-x86_64.S: $(COMDIR)/sha1/amd64/sha1-x86_64.pl
 	$(PERL) $? $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

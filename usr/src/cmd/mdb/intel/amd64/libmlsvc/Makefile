@@ -42,3 +42,7 @@ MODSRCS_DIR = ../../../common/modules/libmlsvc
 CPPFLAGS += -I$(SRC)/uts/common
 
 CSTD=	$(CSTD_GNU99)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

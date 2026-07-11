@@ -242,3 +242,7 @@ $(DB_TABLE)_xdr.c:	$(DB_TABLE).x
 
 # include library targets
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

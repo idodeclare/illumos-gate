@@ -78,3 +78,5 @@ clean:
 
 include $(SRC)/tools/Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

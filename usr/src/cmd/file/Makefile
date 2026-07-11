@@ -107,3 +107,6 @@ clean:
 	$(RM) $(OBJS) $(XPG4OBJS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(XPG4OBJS)

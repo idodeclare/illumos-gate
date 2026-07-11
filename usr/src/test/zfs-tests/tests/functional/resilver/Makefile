@@ -72,3 +72,6 @@ $(TARGETDIR)/%: %
 
 $(TARGETDIR)/%: %.ksh
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

@@ -35,3 +35,6 @@ install:	$(ROOTPROG) $(ROOTPROG64)
 
 $(ROOTBIN64)/ldd:
 	$(RM) $@; $(SYMLINK) ../../bin/ldd $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

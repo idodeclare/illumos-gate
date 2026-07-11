@@ -165,3 +165,6 @@ clean:  rpcclean
 clobber: clean
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(REL_NDMP_H)

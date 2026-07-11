@@ -30,3 +30,6 @@ all clean:
 install: $(ROOTINTELFILES) $(ROOTINTELLINKS)
 
 include $(SRC)/data/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

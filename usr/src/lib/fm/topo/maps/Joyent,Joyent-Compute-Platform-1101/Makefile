@@ -41,3 +41,6 @@ TOPOBASE = ../i86pc/i86pc-hc-topology.xml
 CLOBBERFILES +=	$(TOPOFILE)
 
 include ../Makefile.map
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

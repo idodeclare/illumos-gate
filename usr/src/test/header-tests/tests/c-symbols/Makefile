@@ -71,3 +71,6 @@ $(KSHPROG): $(KSHPROG).ksh
 $(LINKS:%=$(TESTDIR)/%): $(TESTDIR)/setup
 	-$(RM) $@
 	$(LN) $(TESTDIR)/setup $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(KSHPROG)

@@ -50,3 +50,7 @@ include ../../../Makefile.targ
 
 # append this value late after all include statements
 CLEANFILES +=	ao_gendisp.pl
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES) \
+	    $(PERLFILES)

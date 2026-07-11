@@ -32,3 +32,6 @@ include ../../Makefile.cmd.64
 all: $(LIB)
 
 install: all  $(ROOTLIB64) $(ROOTLINKS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

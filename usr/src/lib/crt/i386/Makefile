@@ -27,3 +27,6 @@
 include ../Makefile.com
 
 install:	$(ROOTOBJECTS) $(ROOTCOMPATLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

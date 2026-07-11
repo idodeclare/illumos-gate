@@ -8,3 +8,7 @@
 include ../Makefile.com
 
 install: all $(ROOTLIBS) .WAIT $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

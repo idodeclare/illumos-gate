@@ -66,3 +66,6 @@ lint:
 	$(LINT.c) $(DAEMON_OBJS:%.o=%.c) $(LDLIBS)
 
 include		../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

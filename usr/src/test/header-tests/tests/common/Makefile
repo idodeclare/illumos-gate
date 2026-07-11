@@ -34,3 +34,6 @@ clobber: clean
 	-$(RM) $(PROG)
 
 clean:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG)

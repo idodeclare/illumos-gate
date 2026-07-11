@@ -37,3 +37,6 @@ clean:
 	$(RM) $(OBJS)
 
 include ../../../cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

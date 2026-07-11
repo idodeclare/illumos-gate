@@ -68,3 +68,6 @@ $(POFILE):	$(SRCS) ../common/ud_lib.h
 
 clean:
 	$(RM) $(CLEANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

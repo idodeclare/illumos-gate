@@ -74,3 +74,6 @@ $(PROG): $(OBJS)
 %.o: $(SRC)/common/mc/imc/%.c
 	$(COMPILE.c) $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

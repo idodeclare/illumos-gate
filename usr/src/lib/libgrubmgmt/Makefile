@@ -63,3 +63,7 @@ include ../../Makefile.msg.targ
 common/libgrub_errno.po := XGETFLAGS += -a
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

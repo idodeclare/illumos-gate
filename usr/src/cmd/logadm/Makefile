@@ -117,3 +117,6 @@ luttest: luttest.o err.o
 optstest: optstest.o err.o fn.o lut.o
 	$(LINK.c) -o optstest optstest.o err.o fn.o lut.o $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(TESTOBJS)

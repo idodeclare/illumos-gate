@@ -33,3 +33,6 @@ LDLIBS += -linet -ltcp
 CPPFLAGS += -I../inet -I../tcp $(SOCKCPPFLAGS)
 CERRWARN += -_gcc=-Wno-type-limits
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

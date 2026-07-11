@@ -19,3 +19,6 @@ include		../../Makefile.com
 PROG=		cp_mmap
 
 include		../Makefile.cmd
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

@@ -52,3 +52,6 @@ include ../../Makefile.targ
 	$(POST_PROCESS)
 
 mevent.o: ../../../common/mevent.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

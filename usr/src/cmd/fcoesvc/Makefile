@@ -74,3 +74,6 @@ lint:
 	$(LINT.c) $(SRCSFCOEI) ${LDLIBS}
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJSFCOEI) $(OBJSFCOET)

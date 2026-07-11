@@ -266,3 +266,6 @@ openssl-version:
 	else							\
 		$(ECHO) No OpenSSL utility found;		\
 	fi
+
+.DONE:
+	@$(MAKE_GITIGNORE)

@@ -28,3 +28,6 @@ $(ROOTMAN3CPC):
 	$(INS.dir)
 
 include	$(SRC)/data/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

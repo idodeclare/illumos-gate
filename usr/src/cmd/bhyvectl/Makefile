@@ -59,3 +59,6 @@ include ../Makefile.targ
 %.o: $(CONTRIB)/bhyve/lib/libutil/%.c
 	$(COMPILE.c) -o $@ $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

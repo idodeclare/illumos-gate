@@ -67,3 +67,7 @@ ns-info.32 := LDLIBS += -lumem
 ns-info.64 := LDLIBS64 += -lumem
 
 check-destruct.64 := LDLIBS64 += -lpcidb
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EXTRA_OBJS32) $(EXTRA_OBJS64) $(OBJS32) \
+	    $(OBJS64) $(PROGS32) $(PROGS64)

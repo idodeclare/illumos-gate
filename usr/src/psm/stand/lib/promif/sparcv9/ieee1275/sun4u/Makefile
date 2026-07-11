@@ -142,3 +142,6 @@ $(OBJSDIR)/%.ln: $(PLATSUN4DIR)/%.c
 $(OBJSDIR)/%.ln: $(PLATSUN4DIR)/%.s
 	@($(LHEAD) $(LINT.s) $< $(LTAIL))
 	@$(MV) $(@F) $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBPLAT) $(LINTLIBPLAT) $(L_OBJS) $(OBJS)

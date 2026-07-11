@@ -81,3 +81,6 @@ include ../Makefile.targ
 bz2%.o: ../../common/bzip2/%.c
 	$(COMPILE.c) -o $@ -I$(SRC)/common/bzip2 $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(BZIP2OBJS) $(CMDCLOBBEREES) $(OBJS)

@@ -72,3 +72,6 @@ clean:
 
 include $(SRC)/cmd/Makefile.targ
 include $(SRC)/Makefile.msg.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

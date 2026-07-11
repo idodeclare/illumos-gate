@@ -18,3 +18,7 @@ include ../Makefile.com
 DYNFLAGS +=	-R/usr/lib/smbfs
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

@@ -21,3 +21,6 @@ CPPFLAGS += -I$(SRC)/uts/common/fs/zfs -DDEBUG
 LDLIBS += -lavl -lzpool -lumem
 
 include ../Makefile.subdirs
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

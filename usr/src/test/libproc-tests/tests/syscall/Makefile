@@ -26,3 +26,6 @@ include $(SRC)/test/libproc-tests/Makefile.com
 
 pr_inject.32 := LDLIBS += -lproc
 pr_inject.64 := LDLIBS64 += -lproc
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROGS32) $(PROGS64)

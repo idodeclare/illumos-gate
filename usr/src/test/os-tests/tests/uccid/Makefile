@@ -88,3 +88,6 @@ $(TESTDIR)/%: %
 	$(POST_PROCESS)
 
 include $(SRC)/common/hexdump/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(COMMON_OBJS) $(OBJS) $(PROGS)

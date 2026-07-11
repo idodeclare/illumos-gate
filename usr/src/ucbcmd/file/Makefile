@@ -36,3 +36,6 @@ install: all $(ROOTBIN) $(ROOTPROG)
 clean:
 
 include ../Makefile.ucbtarg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

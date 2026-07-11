@@ -79,4 +79,5 @@ definit_test.32: $(OBJS32)
 	$(LINK.c) -o $@ $(OBJS32) $(LDLIBS)
 	$(POST_PROCESS)
 
-
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS32) $(OBJS64) $(PROG)

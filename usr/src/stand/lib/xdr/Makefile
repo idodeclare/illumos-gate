@@ -35,3 +35,6 @@ CMNDIR	= $(TOPDIR)/uts/common/rpc
 SRCS	= $(LOCOBJS:%.o=$(SRCDIR)/%.c) $(CMNOBJS:%.o=$(CMNDIR)/%.c)
 
 include Makefile.$(MACH).targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)
