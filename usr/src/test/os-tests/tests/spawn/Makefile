@@ -11,10 +11,14 @@
 
 #
 # Copyright 2026 Oxide Computer Company
+# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
 
 PROGS = \
 	spawn-syscall
+
+OBJS32 = $(PROGS:%=%.32.o)
+OBJS64 = $(PROGS:%=%.64.o)
 
 PROGS32 = $(PROGS:%=%.32)
 PROGS64 = $(PROGS:%=%.64)
