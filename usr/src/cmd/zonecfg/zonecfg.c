@@ -123,7 +123,7 @@ extern int lex_lineno;
 #define	SHELP_DELETE	"delete [-F]"
 #define	SHELP_END	"end"
 #define	SHELP_EXIT	"exit [-F]"
-#define	SHELP_EXPORT	"export [-f output-file]"
+#define	SHELP_EXPORT	"export [ -f <output-file> ]"
 #define	SHELP_HELP	"help [usage] [subcommands] [syntax] " \
 	"[ <subcommand-name> ]"
 #define	SHELP_INFO	"info [ <resource-type> [ <property-name>=" \
@@ -875,8 +875,8 @@ long_help(int cmd_num)
 			    "be used to force the action."));
 		case CMD_EXPORT:
 			return (gettext("Prints configuration to standard "
-			    "output or to output-file if specified,\n\tin a "
-			    "form suitable for use in a subcommand-file."));
+			    "output or to <output-file> if\n\tspecified, in a "
+			    "form suitable for use in a subcommand file."));
 		case CMD_ADD:
 			return (gettext("Add specified resource to "
 			    "configuration."));
@@ -1262,7 +1262,7 @@ usage(boolean_t verbose, uint_t flags)
 		case RT_SECFLAGS:
 			(void) fprintf(fp, gettext("The '%s' resource scope is "
 			    "used to specify the default security-flags\n"
-			    "of this zone, and their upper and lower bound.\n"),
+			    "of this zone and their upper and lower bound.\n"),
 			    rt_to_str(resource_scope));
 			(void) fprintf(fp, "\t%s %s=%s\n",
 			    cmd_to_str(CMD_SET), pt_to_str(PT_DEFAULT),
@@ -1597,7 +1597,7 @@ longer_usage(uint_t cmd_num)
 static void
 scope_usage(uint_t cmd_num)
 {
-	zerr(gettext("The %s subcommand only makes sense in the %s scope."),
+	zerr(gettext("The '%s' subcommand only makes sense in the %s scope."),
 	    cmd_to_str(cmd_num),
 	    global_scope ? gettext("resource") : gettext("global"));
 	saw_error = B_TRUE;
@@ -1674,7 +1674,7 @@ check_if_zone_already_exists(boolean_t force)
 	    cmd_to_str(CMD_CREATE));
 	if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 		zerr(gettext("Zone exists, input not from terminal and -F not "
-		    "specified:\n%s subcommand ignored, exiting."),
+		    "specified:\n'%s' subcommand ignored, exiting."),
 		    cmd_to_str(CMD_CREATE));
 		exit(Z_ERR);
 	}
@@ -2182,7 +2182,7 @@ exit_func(cmd_t *cmd)
 	answer = ask_yesno(B_FALSE, "Resource incomplete; really quit");
 	if (answer == -1) {
 		zerr(gettext("Resource incomplete, input "
-		    "not from terminal and -F not specified:\n%s subcommand "
+		    "not from terminal and -F not specified:\n'%s' subcommand "
 		    "ignored, but exiting anyway."), cmd_to_str(CMD_EXIT));
 		exit(Z_ERR);
 	} else if (answer == 1) {
@@ -2665,7 +2665,7 @@ delete_func(cmd_t *cmd)
 		    gettext("Are you sure you want to delete zone %s"), zone);
 		if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 			zerr(gettext("Input not from terminal and -F not "
-			    "specified:\n%s subcommand ignored, exiting."),
+			    "specified:\n'%s' subcommand ignored, exiting."),
 			    cmd_to_str(CMD_DELETE));
 			exit(Z_ERR);
 		}
@@ -7126,7 +7126,7 @@ revert_func(cmd_t *cmd)
 		    gettext("Are you sure you want to revert"));
 		if ((answer = ask_yesno(B_FALSE, line)) == -1) {
 			zerr(gettext("Input not from terminal and -F not "
-			    "specified:\n%s subcommand ignored, exiting."),
+			    "specified:\n'%s' subcommand ignored, exiting."),
 			    cmd_to_str(CMD_REVERT));
 			exit(Z_ERR);
 		}
