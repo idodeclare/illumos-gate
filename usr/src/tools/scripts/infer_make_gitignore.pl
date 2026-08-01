@@ -621,6 +621,7 @@ usr/src/test/elf-tests/tests/sections/Makefile
 usr/src/test/elf-tests/tests/tls/amd64/Makefile
 usr/src/test/elf-tests/tests/tls/i386/Makefile
 usr/src/test/elf-tests/tests/tls/Makefile
+usr/src/test/header-tests/Makefile
 usr/src/test/i2c-tests/Makefile
 usr/src/test/i2c-tests/tests/Makefile
 usr/src/test/libc-tests/Makefile
