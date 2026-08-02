@@ -11,6 +11,7 @@
 
 #
 # Copyright 2026 Oxide Computer Company
+# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
 
 PROG= usmn udf
@@ -23,6 +24,8 @@ CFLAGS += $(CCVERBOSE)
 CSTD = $(CSTD_GNU17)
 COMMON_OBJS = amdzen_common.o
 LDLIBS += -ldevinfo
+
+CLEANFILES += $(PROG:%=%.o)
 
 .KEEP_STATE:
 
@@ -37,6 +40,6 @@ $(PROG): $(COMMON_OBJS)
 install: all $(ROOTCMD)
 
 clean:
-	$(RM) $(COMMON_OBJS) $(PROG:%=%.o)
+	$(RM) $(COMMON_OBJS) $(CLEANFILES)
 
 include ../Makefile.targ
