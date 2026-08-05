@@ -2292,6 +2292,7 @@ Environment:
 	MKTEMP: set to forgo path search for "mktemp".
 	PERL: set to forgo path search for "perl".
 	RSYNC: set to forgo path search for "rsync".
+	SCCS: set to forgo path search for "sccs".
 	SCP: set to forgo path search for "scp".
 	SED: set to forgo path search for "sed".
 	SFTP: set to forgo path search for "sftp".
@@ -2299,6 +2300,7 @@ Environment:
 	WDIR: Control the output directory.
 	WEBREV_TRASH_DIR: Set directory for webrev delete.
 	WHICH_SCM: set to forgo path search for "which_scm".
+	WX: set to forgo path search for "wx".
 
 SCM Environment:
 	CODEMGR_WS: Workspace location.
@@ -2332,11 +2334,13 @@ PATH=$(/bin/dirname "$(whence $0)"):$PATH
 [[ -z $MKTEMP ]] && MKTEMP=$(look_for_prog mktemp)
 [[ -z $PERL ]] && PERL=$(look_for_prog perl)
 [[ -z $RSYNC ]] && RSYNC=$(look_for_prog rsync)
+[[ -z $SCCS ]] && SCCS=$(look_for_prog sccs)
 [[ -z $SCP ]] && SCP=$(look_for_prog scp)
 [[ -z $SED ]] && SED=$(look_for_prog sed)
 [[ -z $SFTP ]] && SFTP=$(look_for_prog sftp)
 [[ -z $WDIFF ]] && WDIFF=$(look_for_prog wdiff)
 [[ -z $WHICH_SCM ]] && WHICH_SCM=$(look_for_prog which_scm)
+[[ -z $WX ]] && WX=$(look_for_prog wx)
 
 # set name of trash directory for remote webrev deletion
 TRASH_DIR=".trash"
