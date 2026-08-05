@@ -22,8 +22,9 @@
 .\" Use is subject to license terms.
 .\"
 .\" Copyright 2019 Joyent, Inc.
+.\" Copyright 2026 Chris Fraire <cfraire@me.com>
 .\"
-.TH WEBREV 1ONBLD "Aug 2, 2019"
+.TH WEBREV 1ONBLD "Aug 4, 2026"
 .SH NAME
 webrev \- Generate HTML codereview materials
 .SH SYNOPSIS
@@ -41,7 +42,7 @@ webrev \- Generate HTML codereview materials
 .B webrev
 builds a set of HTML files suitable for performing code review of
 source changes in a web browser.
-It supports the Git and Subversion repositories.
+It supports Git and Subversion repositories.
 At its most basic, usage is:
 
 .nf

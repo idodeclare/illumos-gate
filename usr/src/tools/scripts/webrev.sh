@@ -29,6 +29,7 @@
 # Copyright 2019 Joyent, Inc.
 # Copyright 2016 RackTop Systems.
 # Copyright 2024 Bill Sommerfeld <sommerfeld@hamachi.org>
+# Copyright 2026 Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -3211,6 +3212,7 @@ do
 		print " man-raw\c"
 		if [[ -f "$ofile" && -z $mv_but_nodiff ]]; then
 			$MANDOC -Tascii $ofile | $COL -b > $ofile.man.txt
+			print "$MANCSS" > $WDIR/raw_files/old/$DIR/man.css
 			$MANDOC -Thtml -Ostyle=man.css $ofile > $ofile.man.html
 			${CDIFFCMD:-diff -bt -C 5} $ofile.man.txt \
 			    $nfile.man.txt > $WDIR/$DIR/$F.man.cdiff
