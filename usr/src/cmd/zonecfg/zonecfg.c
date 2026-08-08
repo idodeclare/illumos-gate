@@ -119,17 +119,17 @@ extern int lex_lineno;
 #define	SHELP_CANCEL	"cancel"
 #define	SHELP_CLEAR	"clear <property-name>"
 #define	SHELP_COMMIT	"commit"
-#define	SHELP_CREATE	"create [-F] [ -a <path> | -b | -t <template> ]"
+#define	SHELP_CREATE	"create [-F] [-a <path> | -b | -t <template>]"
 #define	SHELP_DELETE	"delete [-F]"
 #define	SHELP_END	"end"
 #define	SHELP_EXIT	"exit [-F]"
-#define	SHELP_EXPORT	"export [ -f <output-file> ]"
-#define	SHELP_HELP	"help [usage] [subcommands] [syntax] " \
-	"[ <subcommand-name> ]"
-#define	SHELP_INFO	"info [ <resource-type> [ <property-name>=" \
-	"<property-value> ]*]"
+#define	SHELP_EXPORT	"export [-f <output-file>]"
+#define	SHELP_HELP	"help [usage | subcommands | syntax | " \
+	"<subcommand-name>]"
+#define	SHELP_INFO	"info [<resource-type> [<property-name>=" \
+	"<property-value>]*]"
 #define	SHELP_REMOVE	"remove [-F] <resource-type> " \
-	"[ <property-name>=<property-value> ]*\n" \
+	"[<property-name>=<property-value>]*\n" \
 	"\t(global scope)\n" \
 	"remove <property-name> <property-value>\n" \
 	"\t(resource scope)"

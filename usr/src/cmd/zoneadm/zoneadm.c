@@ -2816,7 +2816,7 @@ verify_details(int cmd_num, char *argv[])
 		return (Z_ERR);
 	}
 	/*
-	 * zonecfg_get_zonepath() gets its data from the XML repository.
+	 * zone_get_zonepath() gets its data from the XML repository.
 	 * Verify this against the index file, which is checked first by
 	 * zone_get_zonepath().  If they don't match, bail out.
 	 */
