@@ -10,19 +10,20 @@
 zoneadm \- administer zones
 .SH SYNOPSIS
 .nf
-\fBzoneadm\fR \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] \fIsubcommand\fR
-     [\fIsubcommand_options\fR]
+\fBzoneadm\fR \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] \c
+\fIsubcommand\fR [\fIsubcommand_options\fR]
 .fi
 
 .LP
 .nf
-\fBzoneadm\fR [\fB-R\fR \fIroot\fR] [\fB-z\fR \fIzonename\fR] [\fB-u\fR \fIuuid-match\fR] list
-     [\fIlist_options\fR]
+\fBzoneadm\fR [\fB-R\fR \fIroot\fR] [\fB-z\fR \fIzonename\fR] \c
+[\fB-u\fR \fIuuid-match\fR] \fBlist\fR [\fIlist_options\fR]
 .fi
 
 .LP
 .nf
-\fBzoneadm\fR [\fB-R\fR \fIroot\fR] \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] mark incomplete
+\fBzoneadm\fR [\fB-R\fR \fIroot\fR] \fB-z\fR \fIzonename\fR \c
+[\fB-u\fR \fIuuid-match\fR] \fBmark incomplete\fR
 .fi
 
 .SH DESCRIPTION
@@ -41,7 +42,7 @@ The following options are supported:
 .sp .6
 .RS 4n
 Specify an alternate root (boot environment). This option can only be used in
-conjunction with the "\fBlist\fR" and "\fBmark\fR" subcommands.
+conjunction with the \fBlist\fR and \fBmark\fR subcommands.
 .RE
 
 .sp
@@ -74,8 +75,8 @@ is prompted if such a subcommand is given without the \fB-F\fR flag; otherwise,
 if such a subcommand is given without the \fB-F\fR flag, the action is
 disallowed, with a diagnostic message written to standard error. If a zone
 installation or uninstallation is interrupted, the zone is left in the
-incomplete state. Use \fBuninstall\fR to reset such a zone back to the
-configured state.
+"incomplete" state. Use \fBuninstall\fR to reset such a zone back to the
+"configured" state.
 .sp
 .LP
 The following subcommands are supported:
@@ -90,7 +91,7 @@ options\fR]\fR
 The \fBattach\fR subcommand takes a zone that has been detached from one system
 and attaches the zone onto a new system. Therefore, it is advised (though not
 required) that the \fBdetach\fR subcommand should be run before the "attach"
-takes place. Once you have the new zone in the configured state, use the
+takes place. Once you have the new zone in the "configured" state, use the
 \fBattach\fR subcommand to set up the zone root instead of installing the zone
 as a new zone.
 .sp
@@ -107,8 +108,8 @@ the zone. The path can be "\fB-\fR", to read the input from standard input.
 The zone's brand may include additional options that govern how the zone will
 be attached. See \fBbrands\fR(7) for specific brand information.
 .sp
-The zone being attached must first be configured using the \fBzonecfg\fR (see
-\fBzonecfg\fR(8)) command. This does not apply when running "\fBattach\fR\~\c
+The zone being attached must first be configured using the \fBzonecfg\fR(8)
+command. This does not apply when running "\fBattach\fR\~\c
 \fB-n\fR".
 .sp
 Use the following command to attach a zone:
@@ -203,7 +204,7 @@ Force the clone to be a copy, even if a "\fBZFS\fR clone" is possible.
 .RS 4n
 Specify the name of a \fBZFS\fR snapshot to use as the source of the clone. The
 \fIsnapshot\fR must be a \fIsnapshot\fR of the source zone taken from a
-previous "\fBzoneadm\fR clone" installation.
+previous "\fBzoneadm clone\fR" installation.
 .RE
 
 The source zone must be halted before this subcommand can be used.
@@ -220,7 +221,7 @@ Detach the specified zone. Detaching a zone is the first step in moving a zone
 from one system to another. The full procedure to migrate a zone is that the
 zone is detached, the \fIzonepath\fR directory is moved to the new host, and
 then the zone is attached on the new host. Once the zone is detached, it is
-left in the configured state. If you try to \fBinstall\fR or \fBclone\fR to a
+left in the "configured" state. If you try to \fBinstall\fR or \fBclone\fR to a
 configured zone that has been detached, you will receive an error message and
 the \fBinstall\fR or \fBclone\fR subcommand will not be allowed to proceed. The
 \fB-n\fR option can be used to run the \fBdetach\fR subcommand, without
@@ -403,7 +404,7 @@ the zone).
 .sp .6
 .RS 4n
 Move the \fIzonepath\fR to \fInew_zonepath\fR. The zone must be halted before
-this subcommand can be used. The \fInew_zonepath\fR must be a local file system
+this subcommand can be used. The \fInew_zonepath\fR must be a local file system,
 and normal restrictions for \fIzonepath\fR apply.
 .RE
 
@@ -474,7 +475,7 @@ installed on the machine. Following is a break-down of the checks by
 .RS 4n
 \fBzonepath\fR and its parent directory exist and are owned by root with
 appropriate modes. The appropriate modes are that \fBzonepath\fR is \fB700\fR,
-its parent is not \fBgroup\fR or \fBworld-writable\fR and so forth.
+its parent is not \fBgroup-\fR or \fBworld-writable\fR and so forth.
 \fBzonepath\fR is not over an NFS mount. A sub-directory of the \fBzonepath\fR
 named "root" does not exist.
 .sp
