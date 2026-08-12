@@ -137,13 +137,13 @@ struct cmd {
 #define	SHELP_REBOOT	"reboot [-- boot_arguments]"
 #define	SHELP_LIST	"list [-cinpv]"
 #define	SHELP_VERIFY	"verify"
-#define	SHELP_INSTALL	"install [brand-specific args]"
-#define	SHELP_UNINSTALL	"uninstall [-F] [brand-specific args]"
+#define	SHELP_INSTALL	"install [<brand-specific-options>]"
+#define	SHELP_UNINSTALL	"uninstall [-F] [<brand-specific-options>]"
 #define	SHELP_CLONE	"clone [-m method] [-s <ZFS snapshot>] "\
 	"[brand-specific args] zonename"
 #define	SHELP_MOVE	"move zonepath"
-#define	SHELP_DETACH	"detach [-n] [brand-specific args]"
-#define	SHELP_ATTACH	"attach [-F] [-n <path>] [brand-specific args]"
+#define	SHELP_DETACH	"detach [-n] [<brand-specific-options>]"
+#define	SHELP_ATTACH	"attach [-F] [-n <path>] [<brand-specific-options>]"
 #define	SHELP_MARK	"mark incomplete"
 
 #define	EXEC_PREFIX	"exec "
@@ -151,7 +151,6 @@ struct cmd {
 #define	RMCOMMAND	"/usr/bin/rm -rf"
 
 static int cleanup_zonepath(char *, boolean_t);
-
 
 static int help_func(int argc, char *argv[]);
 static int ready_func(int argc, char *argv[]);
