@@ -259,7 +259,7 @@ where \fIsymbolic-mode-list\fR is a comma-separated list (with no intervening
 white space) of symbolic mode expressions of the form:
 .sp
 .LP
-[\fIwho\fR]\fIoperator\fR[\fIperms\fR]
+.RI [ who ] operator [ perms ]
 .sp
 .LP
 Operations are performed in the order given. Multiple \fIperms\fR (permissions)
@@ -533,7 +533,9 @@ An ACL Operation command line has the following format:
 .LP
 .ne 2
 .na
-\fBA\fR[\fIindex\fR]\fB+\fIacl_specification\fR
+.BR A [\c
+.IR index ]\c
+.BI + acl_specification
 .ad
 .RS 30n
 Prepends the access control entries (ACE) specified in \fIacl_specification\fR
@@ -555,7 +557,7 @@ that represents only the current mode of the file.
 .sp
 .ne 2
 .na
-\fBA\fIindex\fB-\fR
+.BI A index -
 .ad
 .RS 30n
 Removes ACE specified by \fIindex\fR number.
@@ -753,7 +755,11 @@ NFSv4 ACLs are specified as colon- (\fB:\fR) separated fields of the following.
 .sp
 .ne 2
 .na
-\fBowner@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR owner@:\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -763,7 +769,11 @@ Permissions for file owner.
 .sp
 .ne 2
 .na
-\fBgroup@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR group@:\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -773,7 +783,11 @@ Permissions for file group owner.
 .sp
 .ne 2
 .na
-\fBeveryone@:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR everyone@:\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -783,7 +797,13 @@ Permissions for everyone, including file owner and group owner.
 .sp
 .ne 2
 .na
-\fBuser:\fIusername\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR user:\c
+.IR username\c
+.BR :\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -793,7 +813,13 @@ Permissions for a specific user.
 .sp
 .ne 2
 .na
-\fBusersid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR usersid:\c
+.IR sid-string\c
+.BR :\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -803,7 +829,13 @@ Permissions for a specific user, but user is specified by SID.
 .sp
 .ne 2
 .na
-\fBgroup:\fIgroupname\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR group:\c
+.IR groupname\c
+.BR :\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -813,7 +845,13 @@ Permissions for a specific group.
 .sp
 .ne 2
 .na
-\fBgroupsid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR groupsid:\c
+.IR sid-string\c
+.BR :\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -823,7 +861,13 @@ Permissions for a specific group, but group is specified by SID.
 .sp
 .ne 2
 .na
-\fBsid:\fIsid-string\fB:\fIperms\fR[\fB:\fIinheritance-flags\fR]\fB:allow\fR|\fBdeny\fR
+.BR sid:\c
+.IR sid-string\c
+.BR :\c
+.IR perms [\c
+.BR :\c
+.IR inheritance-flags ]\c
+.BR :allow | deny
 .ad
 .sp .6
 .RS 4n
@@ -1062,7 +1106,11 @@ All permissions except \fBwrite_acl\fR and \fBwrite_owner\fR.
 \fB\fBread_set\fR\fR
 .ad
 .RS 14n
-\fBread_data\fR, \fBread_acl\fR, \fBread_attributes\fR, and \fBread_xattr\fR.
+.BR read_data ,
+.BR read_acl ,
+.BR read_attributes ,
+and
+.BR read_xattr .
 .RE
 
 .sp
@@ -1071,15 +1119,21 @@ All permissions except \fBwrite_acl\fR and \fBwrite_owner\fR.
 \fB\fBwrite_set\fR\fR
 .ad
 .RS 14n
-\fBwrite_data\fR, \fBappend_data\fR, \fBwrite_attributes\fR, and
-\fBwrite_xattr\fR.
+.BR write_data ,
+.BR append_data ,
+.BR write_attributes ,
+and
+.BR write_xattr .
 .RE
 
 .sp
 .LP
-The optional \fIinheritance-flags\fR can be specified in three formats. The
-first format uses words to indicate the various inheritance flags separated with
-a forward slash (\fB/\fR) character.
+The optional
+.I inheritance-flags
+can be specified in three formats. The first format uses words to indicate the
+various inheritance flags separated with a forward slash
+.RB ( / )
+character.
 .sp
 .ne 2
 .na
@@ -1262,11 +1316,14 @@ current file.
 .sp
 .ne 2
 .na
-\fBc\fR[\fIcompact_attribute_list\fR]
+.BR c [\c
+.IR compact_attribute_list ]
 .ad
 .br
 .na
-\fBc\fR'\fB{\fR'\fIcompact_attribute_list\fR'\fB}\fR'
+.BR c ' { '\c
+.IR compact_attribute_list '\c
+.BR } '
 .ad
 .sp .6
 .RS 4n
@@ -1277,16 +1334,21 @@ Set each boolean read-write extended system attribute identified by
 .sp
 .ne 2
 .na
-\fBv\fR[\fIverbose_attribute_setting\fR]
+.BR v [\c
+.IR verbose_attribute_setting ]
 .ad
 .br
 .na
-\fBv\fR'\fB{\fR'\fIverbose_attribute_setting_list\fR'\fB}\fR'
+.BR v ' { '\c
+.IR verbose_attribute_setting_list '\c
+.BR } '
 .ad
 .sp .6
 .RS 4n
 Set each boolean read-write extended system attribute identified by
-\fIverbose_attribute_setting\fR or \fIverbose_attribute_setting_list\fR.
+.I verbose_attribute_setting
+or
+.IR verbose_attribute_setting_list .
 .RE
 
 .sp
