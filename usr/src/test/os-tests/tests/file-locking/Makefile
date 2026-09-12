@@ -71,3 +71,6 @@ $(ROOTOPTDIR)/%: %.ksh
 clobber: clean
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJECTS) $(PROGS32) $(PROGS64)

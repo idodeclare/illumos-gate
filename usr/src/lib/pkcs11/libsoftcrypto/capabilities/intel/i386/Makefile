@@ -56,3 +56,7 @@ pics/bignum_i386.o: $(BIGNUM_DIR)/i386/bignum_i386.c
 pics/bignum_i386_asm.o: $(BIGNUM_DIR)/i386/bignum_i386_asm.S
 		$(COMPILE.s) -o $@ $(BIGNUM_DIR)/i386/bignum_i386_asm.S
 		$(POST_PROCESS_S_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

@@ -69,3 +69,6 @@ include ../../Makefile.targ
 
 $(POFILE):      $(POFILES)
 	$(RM) $@; cat $(POFILES) > $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

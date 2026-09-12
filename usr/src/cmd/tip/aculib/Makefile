@@ -44,3 +44,6 @@ clean:
 
 lint:
 	$(LINT.c) $(OBJS:%.o=%.c) $(LDLIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ACULIB) $(OBJS)

@@ -58,3 +58,6 @@ install:	$(INSTALL_DEPS)
 
 include $(UTSBASE)/intel/Makefile.targ
 include $(UTSBASE)/intel/io/vmm/Makefile.rules
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

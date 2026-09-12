@@ -43,3 +43,6 @@ CERRWARN += -_gcc=-Wno-parentheses
 FILEMODE= 0555
 
 include $(SRC)/cmd/stat/Makefile.stat.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

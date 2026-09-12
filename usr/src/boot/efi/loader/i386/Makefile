@@ -37,3 +37,6 @@ $(OBJS):	machine x86
 
 %.o: ../../../i386/libi386/%.c
 	$(COMPILE.c) $<
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

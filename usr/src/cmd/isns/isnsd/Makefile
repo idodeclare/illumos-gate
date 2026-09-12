@@ -105,3 +105,6 @@ check:	$(CHKMANIFEST)
 include ../../Makefile.targ
 
 install: all .WAIT $(ROOTUSRSBINPROG) $(ROOTMANIFEST)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

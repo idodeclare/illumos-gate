@@ -37,3 +37,6 @@ install: all $(ROOTPROG32)
 	$(INSTALL.ksh.32bit)
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJECTS)

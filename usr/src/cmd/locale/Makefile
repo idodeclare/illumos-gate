@@ -40,3 +40,6 @@ clean:
 .KEEP_STATE:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

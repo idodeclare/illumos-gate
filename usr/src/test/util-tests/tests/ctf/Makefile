@@ -155,3 +155,6 @@ $(TESTDIR)/%: %.ksh
 %: %.o
 	$(LINK.c) -o $@ $< $(COMMON_OBJS) $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALL_OBJS) $(CHECKS)

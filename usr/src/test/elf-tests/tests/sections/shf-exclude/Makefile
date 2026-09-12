@@ -52,3 +52,6 @@ $(TESTDIR)/%: %
 
 $(TESTDIR)/%: %.sh
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

@@ -141,3 +141,6 @@ $(POFILE) : $(POFILES)
 	$(RM) messages.po
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

@@ -166,3 +166,6 @@ clean: _FORCE
 clobber: clean
 
 _FORCE:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBDRIVERS)

@@ -83,3 +83,6 @@ $(OBJS_DIR)/arcfour-x86_64.o: arcfour-x86_64.S
 
 arcfour-x86_64.S: $(COM_DIR)/amd64/arcfour-x86_64.pl
 	$(PERL) $? $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

@@ -48,3 +48,6 @@ LINTFLAGS	+= -u
 all:	$(LIBPRTDIAG) $(PROG)
 
 include $(SRCDIR)/sparc/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LINT_OBJS) $(OBJS) $(PROG)

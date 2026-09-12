@@ -103,3 +103,6 @@ proctab.o: proctab.c
 	$(POST_PROCESS_O)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

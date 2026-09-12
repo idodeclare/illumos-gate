@@ -50,3 +50,6 @@ clean:
 	$(RM) $(CLEANFILES)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

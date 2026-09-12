@@ -77,3 +77,6 @@ clobber: clean
 	$(RM) $(PROGS32) $(PROGS64)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(COMOBJS32) $(COMOBJS64) $(PROGS32) $(PROGS64)

@@ -154,3 +154,5 @@ generic.po: FRC
 
 FRC:
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

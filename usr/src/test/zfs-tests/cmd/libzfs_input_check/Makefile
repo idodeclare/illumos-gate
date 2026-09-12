@@ -20,3 +20,6 @@ include ../Makefile.subdirs
 
 CPPFLAGS += -I$(SRC)/uts/common/fs/zfs
 LDLIBS += -lnvpair -lzfs_core
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

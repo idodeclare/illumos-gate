@@ -22,3 +22,6 @@ include ../Makefile.com
 SMATCH=off
 
 LDLIBS +=	-lnsl -lsocket
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

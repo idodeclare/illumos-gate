@@ -70,3 +70,6 @@ smfcfg.o:	../lib/smfcfg.c
 
 clean:
 		$(RM) $(OBJS) $(TYPEPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(TYPEPROG)

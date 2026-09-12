@@ -57,3 +57,6 @@ clean:
 	$(RM) $(PROGOBJS)
 
 include ../Makefile.ucbtarg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROGOBJS)

@@ -38,3 +38,6 @@ include		../Makefile.mount
 include		../Makefile.mount.targ
 
 CERRWARN +=	-_gcc=-Wno-parentheses
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

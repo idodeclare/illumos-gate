@@ -96,3 +96,6 @@ XRDIRS	= ../i86xpv ../i86pc ../intel ../common
 XRPRUNE	= sun4v sun4u sun4 sfmmu sparc
 
 include ../../Makefile.xref
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

@@ -70,3 +70,6 @@ clobber: clean
 
 clean:
 	-$(RM) $(OBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROGS)

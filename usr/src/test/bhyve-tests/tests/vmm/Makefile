@@ -81,3 +81,6 @@ $(TESTDIR)/%: %
 %: %.o
 	$(LINK.c) -o $@ $< $(COMMON_OBJS) $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEAN_OBJS) $(COMMON_OBJS) $(PROG)

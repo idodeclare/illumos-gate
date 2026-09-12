@@ -82,3 +82,6 @@ clean:
 	$(RM) $(OBJS) $(KCMDOBJS) $(YOBJS)
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(KCMDOBJS) $(OBJS) $(YOBJS)

@@ -32,3 +32,6 @@ PROG	=	in.timed
 MANIFEST=	time.xml
 
 include ../Makefile.inetsvc
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

@@ -81,3 +81,6 @@ test: $(RUNLINKS)
 %.run: $(TESTDIR)/%
 	( export HEADER_TEST_ROOT=$(ROOT) ;\
 	cd $(TESTDIR) && ./$* $(RUNOPTS) )
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(KSHPROG)

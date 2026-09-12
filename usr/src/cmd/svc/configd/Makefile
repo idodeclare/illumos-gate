@@ -59,3 +59,6 @@ clobber: clean
 include $(SRC)/cmd/Makefile.targ
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

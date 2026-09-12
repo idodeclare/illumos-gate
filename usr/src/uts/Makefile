@@ -199,3 +199,6 @@ XRDIRS = $(sparc_ARCHITECTURES) $(i386_ARCHITECTURES) sun4 sfmmu	\
 XRINCDIRS = $(XRDIRS)
 
 include ../Makefile.xref
+
+.DONE:
+	@$(MAKE_GITIGNORE)

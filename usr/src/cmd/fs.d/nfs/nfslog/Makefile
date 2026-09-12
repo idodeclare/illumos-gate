@@ -77,3 +77,6 @@ nfslogtab.o:	../lib/nfslogtab.c
 
 clean:
 	$(RM) $(OBJS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

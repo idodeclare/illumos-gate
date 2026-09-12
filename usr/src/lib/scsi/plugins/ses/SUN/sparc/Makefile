@@ -29,3 +29,7 @@ include ../Makefile.com
 install: all $(ROOTPROG) $(ROOTALIASES)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(OBJS) \
+	    $(PROG)

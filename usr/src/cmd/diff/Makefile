@@ -68,3 +68,6 @@ install: all $(ROOTBINDIFF) $(ROOTLIBDIFFH)
 clean:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

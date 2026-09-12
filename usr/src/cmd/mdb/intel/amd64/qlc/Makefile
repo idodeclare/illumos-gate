@@ -41,3 +41,7 @@ CPPFLAGS += -I$(SRC)/uts/common/sys/fibre-channel/impl
 CSTD=	$(CSTD_GNU99)
 
 CERRWARN +=	-_gcc=-Wno-address
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

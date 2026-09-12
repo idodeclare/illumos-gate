@@ -115,3 +115,6 @@ $(BTSDIRS)/%: $(BTSDIRS) %
 #	$(GENICONVTBL) -o $@ -f $<
 
 #   include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OUTPUTFILES)

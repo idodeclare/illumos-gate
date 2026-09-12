@@ -153,3 +153,6 @@ $(ROOTUSRLIBDRP)/%: %
 FRC:
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(CMDCLOBBEREES) $(OBJS)

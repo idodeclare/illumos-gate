@@ -102,3 +102,6 @@ generic.po:
 	$(XGETTEXT) $(XGETFLAGS) `($(GREP) -l gettext *.[ch] || echo /dev/null)`
 	$(SED) "/^domain/d" messages.po > $@
 	$(RM) messages.po
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

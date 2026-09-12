@@ -78,3 +78,6 @@ $(ROOTOPTSOCK)/%: %
 %.32: %.o.32
 	$(LINK.c) -o $@ $< $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS32) $(OBJS64) $(PROGS32) $(PROGS64)

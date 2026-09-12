@@ -42,3 +42,6 @@ install:	all $(ROOTPROG64) $(ROOTSTRIPFILEPROG64) \
 
 include		../Makefile.targ
 include		$(SRC)/Makefile.master.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

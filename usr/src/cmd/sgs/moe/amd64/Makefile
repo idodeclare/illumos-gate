@@ -40,3 +40,5 @@ include		$(SRC)/Makefile.master.64
 
 install:	$(ROOTPROG64)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

@@ -143,3 +143,6 @@ $(OBJSDIR)/%.ln: $(PROMDIR)/%.c
 $(OBJSDIR)/%.ln: $(PROMDIR)/%.s
 	@($(LHEAD) $(LINT.s) $< $(LTAIL))
 	@$(MV) $(@F) $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBPROM) $(LINTLIBPROM) $(L_OBJS) $(OBJS)

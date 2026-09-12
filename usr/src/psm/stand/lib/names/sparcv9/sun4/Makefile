@@ -33,3 +33,6 @@ PLATSRCS =
 
 include ../Makefile.com
 include $(TOPDIR)/psm/Makefile.psm.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LIBNAMES) $(LINTLIBNAMES) $(L_OBJS) $(OBJS)

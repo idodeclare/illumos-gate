@@ -90,3 +90,6 @@ clean:
 		$(RM) $(ALLOBJS) $(CLEANFILES)
 
 include		../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLOBJS) $(CLEANFILES) $(CMDCLOBBEREES)

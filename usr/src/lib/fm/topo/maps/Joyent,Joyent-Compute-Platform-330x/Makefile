@@ -47,3 +47,5 @@ $(ROOTJOYENTMAPS): Joyent-Compute-Platform-3301-hc-topology.xml
 	$(RM) $@
 	$(SYMLINK) ./$? $@
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(ROOTTOPOMAPS) $(TEMPTOPOFILE)

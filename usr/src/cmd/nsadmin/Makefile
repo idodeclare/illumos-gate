@@ -90,3 +90,6 @@ clobber:
 	$(RM) $(CLOBBERFILES)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

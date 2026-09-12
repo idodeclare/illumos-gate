@@ -757,3 +757,6 @@ i386/%:
 i386: $$(@)/install
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

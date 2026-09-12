@@ -34,3 +34,6 @@ all:
 install: $(ROOTBOOTSOLARISDATA)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

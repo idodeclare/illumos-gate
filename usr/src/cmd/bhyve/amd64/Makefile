@@ -42,3 +42,6 @@ include ../Makefile.com
 CPPFLAGS += -I.
 
 install: all $(ROOTUSRSBINPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES)

@@ -18,3 +18,6 @@ include $(SRC)/Makefile.master
 PROG = fexecve_test
 
 include ../Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(KSHPROG) $(OBJS32) $(OBJS64) $(PROG32) $(PROG64)

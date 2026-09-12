@@ -48,3 +48,6 @@ clean:
 
 clobber: clean
 	$(RM) $(PROGS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)
