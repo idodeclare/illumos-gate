@@ -23,13 +23,14 @@
  * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * Copyright 2014 Nexenta Systems, Inc. All rights reserved.
  * Copyright (c) 2015 by Delphix. All rights reserved.
+ * Copyright 2026 Chris Fraire <cfraire@me.com>
  */
 
 /*
  * zoneadm is a command interpreter for zone administration.  It is all in
  * C (i.e., no lex/yacc), and all the argument passing is argc/argv based.
  * main() calls parse_and_run() which calls cmd_match(), then invokes the
- * appropriate command's handler function.  The rest of the program is the
+ * appropriate subcommand's handler function.  The rest of the program is the
  * handler functions and their helper functions.
  *
  * Some of the helper functions are used largely to simplify I18N: reducing
@@ -121,8 +122,8 @@ struct net_if {
 	(S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH)
 
 struct cmd {
-	uint_t	cmd_num;				/* command number */
-	char	*cmd_name;				/* command name */
+	uint_t	cmd_num;				/* subcommand number */
+	char	*cmd_name;				/* subcommand name */
 	char	*short_usage;				/* short form help */
 	int	(*handler)(int argc, char *argv[]);	/* function to call */
 
@@ -136,13 +137,13 @@ struct cmd {
 #define	SHELP_REBOOT	"reboot [-- boot_arguments]"
 #define	SHELP_LIST	"list [-cinpv]"
 #define	SHELP_VERIFY	"verify"
-#define	SHELP_INSTALL	"install [brand-specific args]"
-#define	SHELP_UNINSTALL	"uninstall [-F] [brand-specific args]"
+#define	SHELP_INSTALL	"install [<brand-specific-options>]"
+#define	SHELP_UNINSTALL	"uninstall [-F] [<brand-specific-options>]"
 #define	SHELP_CLONE	"clone [-m method] [-s <ZFS snapshot>] "\
 	"[brand-specific args] zonename"
 #define	SHELP_MOVE	"move zonepath"
-#define	SHELP_DETACH	"detach [-n] [brand-specific args]"
-#define	SHELP_ATTACH	"attach [-F] [-n <path>] [brand-specific args]"
+#define	SHELP_DETACH	"detach [-n] [<brand-specific-options>]"
+#define	SHELP_ATTACH	"attach [-F] [-n <path>] [<brand-specific-options>]"
 #define	SHELP_MARK	"mark incomplete"
 
 #define	EXEC_PREFIX	"exec "
@@ -150,7 +151,6 @@ struct cmd {
 #define	RMCOMMAND	"/usr/bin/rm -rf"
 
 static int cleanup_zonepath(char *, boolean_t);
-
 
 static int help_func(int argc, char *argv[]);
 static int ready_func(int argc, char *argv[]);
@@ -190,7 +190,7 @@ static struct cmd cmdtab[] = {
 	{ CMD_INSTALL,		"install",	SHELP_INSTALL,	install_func },
 	{ CMD_UNINSTALL,	"uninstall",	SHELP_UNINSTALL,
 	    uninstall_func },
-	/* mount and unmount are private commands for admin/install */
+	/* mount and unmount are private subcommands for admin/install */
 	{ CMD_MOUNT,		"mount",	NULL,		mount_func },
 	{ CMD_UNMOUNT,		"unmount",	NULL,		unmount_func },
 	{ CMD_CLONE,		"clone",	SHELP_CLONE,	clone_func },
@@ -243,47 +243,45 @@ long_help(int cmd_num)
 		    "See zoneadm(8) for valid boot arguments."));
 	case CMD_REBOOT:
 		return (gettext("Restarts the zone (equivalent to a halt / "
-		    "boot sequence).\n\tFails if the zone is not active.  "
-		    "See zoneadm(8) for valid boot\n\targuments."));
+		    "boot sequence).  Fails if the\n\tzone is not active.  See "
+		    "zoneadm(8) for valid boot arguments."));
 	case CMD_LIST:
-		return (gettext("Lists the current zones, or a "
-		    "specific zone if indicated.  By default,\n\tall "
-		    "running zones are listed, though this can be "
-		    "expanded to all\n\tinstalled zones with the -i "
-		    "option or all configured zones with the\n\t-c "
-		    "option.  When used with the general -z <zone> and/or -u "
-		    "<uuid-match>\n\toptions, lists only the specified "
-		    "matching zone, but lists it\n\tregardless of its state, "
-		    "and the -i, -c, and -n options are disallowed.  The\n\t-v "
-		    "option can be used to display verbose information: zone "
-		    "name, id,\n\tcurrent state, root directory and options.  "
-		    "The -p option can be used\n\tto request machine-parsable "
-		    "output.  The -v and -p options are mutually\n\texclusive."
-		    "  If neither -v nor -p is used, just the zone name is "
-		    "listed."));
+		return (gettext("Lists the current zones, or a specific zone "
+		    "if indicated.  By default,\n\tall running zones are "
+		    "listed, though this can be expanded to all\n\tinstalled "
+		    "zones with the -i option or all configured zones with the"
+		    "\n\t-c option.  When used with the general -z <zone> "
+		    "and/or -u <uuid-match>\n\toptions, lists only the "
+		    "specified matching zone, but lists it\n\tregardless of "
+		    "its state, and the -i, -c, and -n options are "
+		    "disallowed.\n\tThe -v option can be used to display "
+		    "verbose information: zone name,\n\tID, current state, "
+		    "root directory and options.  The -p option can be\n\tused "
+		    "to request machine-parsable output.  The -v and -p "
+		    "options are\n\tmutually exclusive.  If neither -v nor -p "
+		    "is used, just the zone name\n\tis listed."));
 	case CMD_VERIFY:
-		return (gettext("Check to make sure the configuration "
-		    "can safely be instantiated\n\ton the machine: "
-		    "physical network interfaces exist, etc."));
+		return (gettext("Check to make sure the configuration can "
+		    "safely be instantiated on the\n\tmachine: physical "
+		    "network interfaces exist, etc."));
 	case CMD_INSTALL:
 		return (gettext("Install the configuration on to the system.  "
-		    "All arguments are passed to the brand installation "
-		    "function;\n\tsee brands(7) for more information."));
+		    "All arguments are passed\n\tto the brand installation "
+		    "function; see brands(7) for more information."));
 	case CMD_UNINSTALL:
 		return (gettext("Uninstall the configuration from the system.  "
 		    "The -F flag can be used\n\tto force the action.  All "
 		    "other arguments are passed to the brand\n\tuninstall "
 		    "function; see brands(7) for more information."));
 	case CMD_CLONE:
-		return (gettext("Clone the installation of another zone.  "
-		    "The -m option can be used to\n\tspecify 'copy' which "
-		    "forces a copy of the source zone.  The -s option\n\t"
-		    "can be used to specify the name of a ZFS snapshot "
-		    "that was taken from\n\ta previous clone command.  The "
-		    "snapshot will be used as the source\n\tinstead of "
-		    "creating a new ZFS snapshot.  All other arguments are "
-		    "passed\n\tto the brand clone function; see "
-		    "brands(7) for more information."));
+		return (gettext("Clone the installation of another zone.  The "
+		    "-m option can be used to\n\tspecify 'copy' which forces a "
+		    "copy of the source zone.  The -s option\n\tcan be used to "
+		    "specify the name of a ZFS snapshot that was taken from a\n"
+		    "\tprevious clone subcommand.  The snapshot will be used "
+		    "as the source\n\tinstead of creating a new ZFS snapshot.  "
+		    "All other arguments are passed\n\tto the brand clone "
+		    "function; see brands(7) for more information."));
 	case CMD_MOVE:
 		return (gettext("Move the zone to a new zonepath."));
 	case CMD_DETACH:
@@ -301,18 +299,17 @@ long_help(int cmd_num)
 		return (gettext("Attach the zone to the system.  The zone "
 		    "state must be 'configured'\n\tprior to attach; upon "
 		    "successful completion, the zone state will be\n\t"
-		    "'installed'.  The system software on the current "
-		    "system must be\n\tcompatible with the software on the "
-		    "zone's original system.\n\tSpecify -F "
-		    "to force the attach and skip software compatibility "
-		    "tests.\n\tThe -n option can be used to specify "
-		    "'no-execute' mode.  When -n is\n\tused, the information "
-		    "needed to attach the zone is read from the\n\tspecified "
-		    "path and the configuration is only validated.  The path "
-		    "can\n\tbe '-' to specify standard input.  The -F and -n "
-		    "options are mutually\n\texclusive.  All other arguments "
-		    "are passed to the brand attach\n\tfunction; see "
-		    "brands(7) for more information."));
+		    "'installed'.  The system software on the current system "
+		    "must be\n\tcompatible with the software on the zone's "
+		    "original system.  Specify\n\t-F to force the attach and "
+		    "skip software compatibility tests.  The\n\t-n option can "
+		    "be used to specify 'no-execute' mode.  When -n is used,\n"
+		    "\tthe information needed to attach the zone is read from "
+		    "the specified\n\tpath, and the configuration is only "
+		    "validated.  The path can be '-' to\n\tspecify standard "
+		    "input.  The -F and -n options are mutually exclusive.\n\t"
+		    "All other arguments are passed to the brand attach "
+		    "function; see\n\tbrands(7) for more information."));
 	case CMD_MARK:
 		return (gettext("Set the state of the zone.  This can be used "
 		    "to force the zone\n\tstate to 'incomplete' "
@@ -2779,7 +2776,7 @@ no_net:
 		return_code = Z_ERR;
 
 	/*
-	 * As the "mount" command is used for patching/upgrading of zones
+	 * As the "mount" subcommand is used for patching/upgrading of zones
 	 * or other maintenance processes, the zone's privilege set is not
 	 * checked in this case.  Instead, the default, safe set of
 	 * privileges will be used when this zone is created in the
@@ -2818,7 +2815,7 @@ verify_details(int cmd_num, char *argv[])
 		return (Z_ERR);
 	}
 	/*
-	 * zonecfg_get_zonepath() gets its data from the XML repository.
+	 * zone_get_zonepath() gets its data from the XML repository.
 	 * Verify this against the index file, which is checked first by
 	 * zone_get_zonepath().  If they don't match, bail out.
 	 */
