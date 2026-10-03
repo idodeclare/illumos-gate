@@ -1,27 +1,29 @@
 '\" te
 .\" Copyright 2015 Nexenta Systems, Inc. All rights reserved.
 .\" Copyright (c) 2009 Sun Microsystems, Inc. All Rights Reserved.
+.\" Copyright 2026 Chris Fraire <cfraire@me.com>
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
 .\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
 .\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH ZONEADM 8 "February 21, 2023"
+.TH ZONEADM 8 "Oct 1, 2026"
 .SH NAME
 zoneadm \- administer zones
 .SH SYNOPSIS
 .nf
-\fBzoneadm\fR \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] \fIsubcommand\fR
-     [\fIsubcommand_options\fR]
+\fBzoneadm\fR \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] \c
+\fIsubcommand\fR [\fIsubcommand_options\fR]
 .fi
 
 .LP
 .nf
-\fBzoneadm\fR [\fB-R\fR \fIroot\fR] [\fB-z\fR \fIzonename\fR] [\fB-u\fR \fIuuid-match\fR] list
-     [\fIlist_options\fR]
+\fBzoneadm\fR [\fB-R\fR \fIroot\fR] [\fB-z\fR \fIzonename\fR] \c
+[\fB-u\fR \fIuuid-match\fR] \fBlist\fR [\fIlist_options\fR]
 .fi
 
 .LP
 .nf
-\fBzoneadm\fR [\fB-R\fR \fIroot\fR] \fB-z\fR \fIzonename\fR [\fB-u\fR \fIuuid-match\fR] mark incomplete
+\fBzoneadm\fR [\fB-R\fR \fIroot\fR] \fB-z\fR \fIzonename\fR \c
+[\fB-u\fR \fIuuid-match\fR] \fBmark incomplete\fR
 .fi
 
 .SH DESCRIPTION
@@ -40,7 +42,7 @@ The following options are supported:
 .sp .6
 .RS 4n
 Specify an alternate root (boot environment). This option can only be used in
-conjunction with the "\fBlist\fR" and "\fBmark\fR" subcommands.
+conjunction with the \fBlist\fR and \fBmark\fR subcommands.
 .RE
 
 .sp
@@ -68,52 +70,73 @@ String identifier for a zone.
 
 .SH SUBCOMMANDS
 Subcommands which can result in destructive actions or loss of work have a
-\fB-F\fR flag to force the action. If input is from a terminal device, the user
-is prompted if such a command is given without the \fB-F\fR flag; otherwise, if
-such a command is given without the \fB-F\fR flag, the action is disallowed,
-with a diagnostic message written to standard error. If a zone installation or
-uninstallation is interrupted, the zone is left in the incomplete state. Use
-uninstall to reset such a zone back to the configured state.
+.B -F
+flag to force the action.
+If input is from a terminal device, the user is prompted if such a subcommand
+is given without the
+.B -F
+flag; otherwise, if such a subcommand is given without the
+.B -F
+flag, the action is disallowed, with a diagnostic message written to standard
+error.
+If a zone installation or uninstallation is interrupted, the zone is left in
+the "incomplete" state.
+Use
+.B uninstall
+to reset such a zone back to the "configured" state.
 .sp
 .LP
 The following subcommands are supported:
 .sp
 .ne 2
 .na
-\fB\fBattach\fR [\fB-F\fR] [\fB-n\fR \fIpath\fR] [\fIbrand-specific
-options\fR]\fR
+.B attach
+.RB [ -F ]
+.RB [ -n
+.IR path ]
+.RI [ brand-specific-options ]
 .ad
 .sp .6
 .RS 4n
 The \fBattach\fR subcommand takes a zone that has been detached from one system
 and attaches the zone onto a new system. Therefore, it is advised (though not
 required) that the \fBdetach\fR subcommand should be run before the "attach"
-takes place. Once you have the new zone in the configured state, use the
+takes place. Once you have the new zone in the "configured" state, use the
 \fBattach\fR subcommand to set up the zone root instead of installing the zone
 as a new zone.
 .sp
 The \fB-F\fR option can be used to force the zone into the "installed" state
 with no validation. This option should be used with care since it can leave the
 zone in an unsupportable state if it was moved from a source system to a target
-system that is unable to properly host the zone. The \fB-n\fR option can be
-used to run the \fBattach\fR subcommand, without executing the command. It uses
-the output of the "\fBdetach\fR \fB-n\fR" subcommand as input and is useful to
-identify any conflicting issues, such as the network device being incompatible,
-and can also determine whether the host is capable of supporting the zone. The
-path can be "\fB-\fR", to read the input from standard input.
+system that is unable to properly host the zone.
+.sp
+The
+.B -n
+option can be used to run the
+.B attach
+subcommand, without executing the subcommand.
+It uses the output of the
+.B detach\~-n
+subcommand as input and is useful to identify any conflicting issues, such as
+the network device being incompatible or if the host is not capable of
+supporting the zone.
+The path can be
+.RB \(dq - \(dq
+to read from the standard input.
 .sp
 The zone's brand may include additional options that govern how the zone will
 be attached. See \fBbrands\fR(7) for specific brand information.
 .sp
-The zone being attached must first be configured using the \fBzonecfg\fR (see
-\fBzonecfg\fR(8)) command. This does not apply when running "\fBattach\fR
-\fB-n\fR".
+The zone being attached must first be configured using the
+.BR zonecfg (8)
+command, except when running
+.BR attach\~-n .
 .sp
-Use the following command to attach a zone:
+The following is an example command to attach a zone:
 .sp
 .in +2
 .nf
-# \fBzoneadm -z my-zone attach\fR
+# \fBzoneadm -z\fR my-zone \fBattach\fR
 .fi
 .in -2
 .sp
@@ -137,7 +160,7 @@ The following \fIboot_options\fR are supported:
 .ad
 .sp .6
 .RS 4n
-Select an alternative executable to be the primordial Process. \fIaltinit\fR is
+Select an alternative executable to be the primordial process. \fIaltinit\fR is
 a valid path to an executable. The default primordial process is
 \fBinit\fR(8).
 .RE
@@ -153,7 +176,7 @@ The \fIsmf_options\fR include two categories of options to control booting
 behavior of the service management facility: recovery options and messages
 options.
 .sp
-Message options determine the type and amount of messages that \fBsmf\fR(7)
+Messages options determine the type and amount of messages that \fBsmf\fR(7)
 displays during boot. Service options determine the services which are used to
 boot the system. See \fBkernel\fR(8) for a listing of the \fB-m\fR suboptions.
 .RE
@@ -165,7 +188,7 @@ boot the system. See \fBkernel\fR(8) for a listing of the \fB-m\fR suboptions.
 .ad
 .sp .6
 .RS 4n
-Boots only to milestone \fBsvc:/milestone/single-user:default\fR. This
+Boot only to milestone \fBsvc:/milestone/single-user:default\fR. This
 milestone is equivalent to init level \fBs\fR. See \fBsvc.startd\fR(8) and
 \fBinit\fR(8).
 .RE
@@ -175,8 +198,12 @@ milestone is equivalent to init level \fBs\fR. See \fBsvc.startd\fR(8) and
 .sp
 .ne 2
 .na
-\fB\fBclone\fR [\fB-m\fR \fIcopy\fR] [\fB-s\fR \fIzfs_snapshot\fR]
-\fIsource_zone\fR\fR
+.B clone
+.RB [ -m
+.BR copy ]
+.RB [ -s
+.IR zfs_snapshot ]
+.I source_zonename
 .ad
 .sp .6
 .RS 4n
@@ -185,11 +212,11 @@ alternative way to install the zone.
 .sp
 .ne 2
 .na
-\fB\fB-m\fR \fIcopy\fR\fR
+.B -m copy
 .ad
 .sp .6
 .RS 4n
-Force the clone to be a copy, even if a "\fBZFS\fR clone" is possible.
+Force the clone method to be by copy, even if a \fBzfs clone\fR is possible.
 .RE
 
 .sp
@@ -201,10 +228,12 @@ Force the clone to be a copy, even if a "\fBZFS\fR clone" is possible.
 .RS 4n
 Specify the name of a \fBZFS\fR snapshot to use as the source of the clone. The
 \fIsnapshot\fR must be a \fIsnapshot\fR of the source zone taken from a
-previous "\fBzoneadm\fR clone" installation.
+previous
+.B zoneadm\~clone
+installation.
 .RE
 
-The source zone must be halted before this subcommand can be used.
+The source zone must not be running for this subcommand to be used.
 .RE
 
 .sp
@@ -218,26 +247,43 @@ Detach the specified zone. Detaching a zone is the first step in moving a zone
 from one system to another. The full procedure to migrate a zone is that the
 zone is detached, the \fIzonepath\fR directory is moved to the new host, and
 then the zone is attached on the new host. Once the zone is detached, it is
-left in the configured state. If you try to install or clone to a configured
-zone that has been detached, you will receive an error message and the
-\fBinstall\fR or \fBclone\fR subcommand will not be allowed to proceed. The
-\fB-n\fR option can be used to run the \fBdetach\fR subcommand, without
-executing the command. This generates the information needed for running the
-"\fBattach\fR \fB-n\fR" subcommand, which is useful to identify any conflicting
-issues, such as the network device being incompatible or if the host is capable
-of supporting the zone. The information is sent to standard output and can be
-saved to a file or piped to the "\fBattach\fR \fB-n\fR" subcommand.
+left in the "configured" state.
+If you try to
+.B install
+or
+.B clone
+to a configured zone that has been detached, you will receive an error message,
+and the
+.B install
+or
+.B clone
+subcommand will not be allowed to proceed.
 .sp
-Use the following command to detach a zone:
+The
+.B -n
+option can be used to run the
+.B detach
+subcommand, without executing the subcommand.
+This generates the information needed for running the
+.BR attach \~ -n
+subcommand, which is useful to identify any conflicting issues, such as the
+network device being incompatible or if the host is not capable of supporting
+the zone.
+The information is sent to standard output and can be saved to a file or piped
+to the
+.B attach\~-n
+subcommand.
+.sp
+The following is an example command to detach a zone:
 .sp
 .in +2
 .nf
-# zoneadm -z my-zone detach
+# \fBzoneadm -z\fR my-zone \fBdetach\fR
 .fi
 .in -2
 .sp
 
-The source zone must be halted before this subcommand can be used.
+The zone must not be running for this subcommand to be used.
 .RE
 
 .sp
@@ -247,8 +293,8 @@ The source zone must be halted before this subcommand can be used.
 .ad
 .sp .6
 .RS 4n
-Halt the specified zones. \fBhalt\fR bypasses running the shutdown scripts
-inside the zone. It also removes run time resources of the zone.
+Halt the specified zone. \fBhalt\fR bypasses running the shutdown scripts
+inside the zone. It also removes runtime resources of the zone.
 .RE
 
 .sp
@@ -258,24 +304,26 @@ inside the zone. It also removes run time resources of the zone.
 .ad
 .sp .6
 .RS 4n
-Display general help. If you specify \fIsubcommand\fR, displays help on
+Display general help. If you specify \fIsubcommand\fR, display specific help on
 \fIsubcommand\fR.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBinstall\fR [\fB-x\fR \fInodataset\fR] [\fIbrand-specific options\fR]\fR
+.B install
+.RB [ "-x nodataset" ]
+.RI [ brand-specific-options ]
 .ad
 .sp .6
 .RS 4n
 Install the specified zone on the system. This subcommand automatically
-attempts to verify first, most verification errors are fatal. See the
+attempts to \fBverify\fR first, and most verification errors are fatal. See the
 \fBverify\fR subcommand.
 .sp
 .ne 2
 .na
-\fB\fB-x\fR \fInodataset\fR\fR
+.B -x nodataset
 .ad
 .sp .6
 .RS 4n
@@ -294,15 +342,25 @@ information.
 .ad
 .sp .6
 .RS 4n
-Display the name of the current zones, or the specified zone if indicated.
+Display the name of all current zones or a specified zone if indicated.
 .sp
 By default, all running zones are listed. If you use this subcommand with the
-\fBzoneadm\fR \fB-z\fR \fIzonename\fR option, it lists only the specified zone,
-regardless of its state. In this case, the \fB-i\fR and \fB-c\fR options are
-disallowed.
+.BI -z\~ zonename
+option, it lists only the specified zone, regardless of its state.
+In this
+case, the
+.B -i
+and
+.B -c
+options are disallowed.
 .sp
-If neither the \fB-i\fR, \fB-c\fR, or \fB-n\fR options are given, all running
-zones are listed.
+If neither the
+.BR -c ,
+.BR -i ,
+.B -n
+nor
+.B -z
+option is given, all running zones are listed.
 .sp
 The following \fIlist_options\fR are supported:
 .sp
@@ -343,7 +401,7 @@ Do not include the global zone in the list of zones returned.
 .sp .6
 .RS 4n
 Request machine parsable output. The output format is a list of lines, one per
-zone, with colon- delimited fields. These fields are:
+zone, with colon-delimited fields. These fields are:
 .sp
 .in +2
 .nf
@@ -352,13 +410,22 @@ zoneid:zonename:state:zonepath:uuid:brand:ip-type
 .in -2
 .sp
 
-If the \fBzonepath\fR contains embedded colons, they can be escaped by a
-backslash ("\:"), which is parsable by using the shell \fBread\fR(1) function
-with the environmental variable \fBIFS\fR. The \fIuuid\fR value is assigned by
-\fBlibuuid\fR(3LIB) when the zone is installed, and is useful for identifying
-the same zone when present (or renamed) on alternate boot environments. Any
-software that parses the output of the "\fBzoneadm list -p\fR" command must be
-able to handle any fields that may be added in the future.
+If the
+.B zonepath
+contains embedded colons, they can be escaped by a backslash ("\e:"), which is
+parsable by using the shell
+.BR read (1)
+function with the environmental variable
+.BR IFS .
+The
+.I uuid
+value is assigned by
+.BR libuuid (3LIB)
+when a zone is installed and is useful for identifying the same zone when
+present (or renamed) on alternate boot environments.
+Any software that parses the output of the
+.B zoneadm\~list\~-p
+command must be able to handle any fields that may be added in the future.
 .sp
 The \fB-v\fR and \fB-p\fR options are mutually exclusive. If neither \fB-v\fR
 nor \fB-p\fR is used, just the zone name is listed.
@@ -371,8 +438,8 @@ nor \fB-p\fR is used, just the zone name is listed.
 .ad
 .sp .6
 .RS 4n
-Display verbose information, including zone name, id, current state, root
-directory, brand type, ip-type, and options.
+Display verbose information, including zone name, id, current state, zone path,
+brand type, ip-type, and options.
 .sp
 The \fB-v\fR and \fB-p\fR options are mutually exclusive. If neither \fB-v\fR
 nor \fB-p\fR is used, just the zone name is listed.
@@ -387,7 +454,7 @@ nor \fB-p\fR is used, just the zone name is listed.
 .ad
 .sp .6
 .RS 4n
-Change the state of an installed zone to "incomplete." This command may be
+Change the state of an installed zone to "incomplete." This subcommand may be
 useful in cases where administrative changes on the system have rendered a zone
 unusable or inconsistent. This change cannot be undone (except by uninstalling
 the zone).
@@ -400,9 +467,16 @@ the zone).
 .ad
 .sp .6
 .RS 4n
-Move the \fIzonepath\fR to \fInew_zonepath\fR. The zone must be halted before
-this subcommand can be used. The \fInew_zonepath\fR must be a local file system
-and normal restrictions for \fIzonepath\fR apply.
+Move the
+.I zonepath
+to
+.IR new_zonepath .
+The zone must not be running for this subcommand to be used.
+The
+.I new_zonepath
+must be a local file system, and normal restrictions for
+.I zonepath
+apply.
 .RE
 
 .sp
@@ -412,19 +486,27 @@ and normal restrictions for \fIzonepath\fR apply.
 .ad
 .sp .6
 .RS 4n
-Prepares a zone for running applications but does not start any user processes
+Prepare a zone for running applications, but do not start any user processes
 in the zone.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBreboot\fR\ [\fB--\fR \fIboot_options\fR]]\fR
+.B reboot
+.RB [ --
+.IR boot_options ]
 .ad
 .sp .6
 .RS 4n
-Restart the zones. This is equivalent to a \fBhalt\fR \fBboot\fR sequence. This
-subcommand fails if the specified zones are not active. See the \fIboot\fR
+Restart the zone. This is equivalent to a
+.B halt
+then
+.B boot
+sequence.
+This subcommand fails if the specified zone is not active.
+See the
+.I boot
 subcommand for the boot options.
 .RE
 
@@ -435,21 +517,30 @@ subcommand for the boot options.
 .ad
 .sp .6
 .RS 4n
-Gracefully shutdown the specified zone. This subcommand waits for all zone
-processes to finish; the default timeout is SCF_PROPERTY_TIMEOUT value from
-the SMF service system/zones. If the \fB-r\fR option is specified, reboot the
-zone. See \fIboot\fR subcommand for the boot options.
+Gracefully shut down the specified zone.
+This subcommand waits for all zone processes to finish; the default timeout is
+the
+.B SCF_PROPERTY_TIMEOUT
+value from the SMF service
+.BR system/zones .
+If the
+.B -r
+option is specified, reboot the zone.
+See the
+.I boot
+subcommand for the boot options.
 .RE
 
 .sp
 .ne 2
 .na
-\fB\fBuninstall [\fR\fB-F\fR\fB]\fR\fR
+.B uninstall
+.RB [ -F ]
 .ad
 .sp .6
 .RS 4n
-Uninstall the specified zone from the system. Use this subcommand with caution.
-It removes all of the files under the \fIzonepath\fR of the zone in question.
+Uninstall the specified zone from the system. Use this subcommand with caution;
+it removes all of the files under the \fIzonepath\fR of the zone in question.
 You can use the \fB-F\fR flag to force the action.
 .RE
 
@@ -472,7 +563,7 @@ installed on the machine. Following is a break-down of the checks by
 .RS 4n
 \fBzonepath\fR and its parent directory exist and are owned by root with
 appropriate modes. The appropriate modes are that \fBzonepath\fR is \fB700\fR,
-its parent is not \fBgroup\fR or \fBworld-writable\fR and so forth.
+its parent is not \fBgroup-\fR or \fBworld-writable\fR and so forth.
 \fBzonepath\fR is not over an NFS mount. A sub-directory of the \fBzonepath\fR
 named "root" does not exist.
 .sp
@@ -494,13 +585,13 @@ wrong.
 Any \fBfs\fR resources have their \fItype\fR value checked. An error is
 reported if the value is one of \fBproc\fR, \fBmntfs\fR, \fBautofs\fR,
 or \fBnfs\fR or the filesystem does not have an associated mount
-binary at \fB/usr/lib/fs/\fI<fstype>\fR/mount\fR.
+binary at \fB/usr/lib/fs/\fItype\fR/\fBmount\fR.
 .sp
 It is an error for the \fIdirectory\fR to be a relative path.
 .sp
 It is an error for the path specified by \fBraw\fR to be a relative path or if
 there is no \fBfsck\fR binary for a given filesystem type at
-\fB/usr/lib/fs/\fI<fstype>\fR/fsck\fR. It is also an error if a corresponding
+\fB/usr/lib/fs/\fItype\fR/\fBfsck\fR. It is also an error if a corresponding
 \fBfsck\fR binary exists but a \fBraw\fR path is not specified.
 .RE
 
@@ -531,13 +622,14 @@ a valid IPv6 address, which must be followed by "\fB/\fR" and a prefix length;
 .el o
 a host name which resolves to an IPv4 address.
 .RE
+
 Note that hostnames that resolve to IPv6 addresses are not supported.
 .sp
 The physical interface name is the network interface name.
 .sp
 A zone can be configured to be either exclusive-IP or shared-IP. For a
 shared-IP zone, both the physical and address properties must be set. For an
-exclusive-IP zone, the physical property must be set and the address property
+exclusive-IP zone, the physical property must be set, and the address property
 cannot be set.
 .RE
 
@@ -548,7 +640,7 @@ cannot be set.
 .ad
 .sp .6
 .RS 4n
-It also verifies that any defined resource control values are valid on the
+All defined resource control values are valid on the
 current machine. This means that the privilege level is \fBprivileged\fR, the
 limit is lower than the currently defined system value, and that the defined
 action agrees with the actions that are valid for the given resource control.
@@ -557,12 +649,9 @@ action agrees with the actions that are valid for the given resource control.
 .RE
 
 .SH EXAMPLES
-\fBExample 1 \fRUsing the \fB-m\fR Option
+\fBExample 1 \fRUsing the \fBboot\fR subcommand \fB-m\fR Option
 .sp
 .LP
-The following command illustrates the use of the \fB-m\fR option.
-
-.sp
 .in +2
 .nf
 # \fBzoneadm boot -- -m verbose\fR
@@ -571,12 +660,9 @@ The following command illustrates the use of the \fB-m\fR option.
 .sp
 
 .LP
-\fBExample 2 \fRUsing the \fB-i\fR Option
+\fBExample 2 \fRUsing the \fBboot\fR subcommand \fB-i\fR Option
 .sp
 .LP
-The following command illustrates the use of the \fB-i\fR option.
-
-.sp
 .in +2
 .nf
 # \fBzoneadm boot -- -i /sbin/init\fR
@@ -585,12 +671,9 @@ The following command illustrates the use of the \fB-i\fR option.
 .sp
 
 .LP
-\fBExample 3 \fRUsing the \fB-s\fR Option
+\fBExample 3 \fRUsing the \fBboot\fR subcommand \fB-s\fR Option
 .sp
 .LP
-The following command illustrates the use of the \fB-s\fR option.
-
-.sp
 .in +2
 .nf
 # \fBzoneadm boot -- -s\fR
@@ -669,9 +752,6 @@ The \fBzones\fR(7) service is managed by the service management facility,
 svc:/system/zones:default
 .fi
 .in -2
-.sp
-
-.sp
 .LP
 Administrative actions on this service, such as enabling, disabling, or
 requesting restart, can be performed using \fBsvcadm\fR(8). The service's
