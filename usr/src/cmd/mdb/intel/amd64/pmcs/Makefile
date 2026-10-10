@@ -39,3 +39,7 @@ CPPFLAGS += -I$(SRC)/uts/common
 
 CERRWARN += -_gcc=-Wno-switch
 CERRWARN += -_gcc=-Wno-char-subscripts
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

@@ -51,3 +51,6 @@ clean:
 include $(SRC)/common/hexdump/Makefile.targ
 include ../Makefile.targ
 include ../Makefile.ctf
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(PROG)

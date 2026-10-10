@@ -33,3 +33,7 @@ CFLAGS += $(INCS)
 LINTFLAGS += $(INCS)
 LDLIBS += -L$(ROOTLIB)/fm -ltopo
 LDFLAGS += -R/usr/lib/fm
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)

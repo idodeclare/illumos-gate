@@ -40,3 +40,6 @@ $(RUNFILES):
 
 $(RUNFILES)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDS)

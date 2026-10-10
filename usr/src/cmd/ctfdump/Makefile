@@ -31,3 +31,6 @@ install: all $(ROOTPROG)
 clean:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

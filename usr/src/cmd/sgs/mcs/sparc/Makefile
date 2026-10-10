@@ -31,3 +31,6 @@ include		../Makefile.targ
 
 install:        all $(ROOTPROG)  $(ROOTSTRIPFILEPROG) \
     $(ROOTLINKS) $(ROOTCCSBINLINK)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

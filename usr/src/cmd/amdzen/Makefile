@@ -43,3 +43,6 @@ clean:
 	$(RM) $(COMMON_OBJS) $(CLEANFILES)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(COMMON_OBJS)

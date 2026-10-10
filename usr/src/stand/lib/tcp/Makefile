@@ -40,3 +40,6 @@ CERRWARN += $(CNOWARN_UNINIT)
 SMATCH=off
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

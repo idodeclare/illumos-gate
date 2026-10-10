@@ -40,3 +40,6 @@ CERRWARN += -_gcc=-Wno-char-subscripts
 CERRWARN += $(CNOWARN_UNINIT)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

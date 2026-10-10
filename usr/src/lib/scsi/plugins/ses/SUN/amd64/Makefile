@@ -30,3 +30,7 @@ include $(SRC)/Makefile.master.64
 install: all $(ROOTPROG64) $(ROOTALIASES64)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(OBJS) \
+	    $(PROG)

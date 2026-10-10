@@ -59,3 +59,6 @@ $(ROOTOPTSIGFD)/%: %
 %: %.o
 	$(LINK.c) -o $@ $< $(COMMON_OBJS) $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(COMMON_OBJS) $(OBJS) $(PROGS)

@@ -44,3 +44,6 @@ NATIVE_LIBS	+= libgen.so libc.so
 install: $(ROOTONBLDMACHPROG)
 
 all: $(PROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

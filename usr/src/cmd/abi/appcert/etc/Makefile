@@ -73,3 +73,5 @@ clean:
 
 clobber:	clean
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

@@ -112,3 +112,6 @@ clean:		$(SUBDIRS)
 clobber:	$(SUBDIRS)
 
 include		../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(EXOBJS) $(OBJS)

@@ -70,3 +70,6 @@ $(TESTDIR)/%: %.ksh
 %: %.o $(COMMON_OBJS)
 	$(LINK.c) -o $@ $^ $(LDLIBS)
 	$(POST_PROCESS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEAN_OBJS) $(PROGS)

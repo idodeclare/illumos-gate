@@ -27,3 +27,6 @@ include		Makefile.targ
 include		../Makefile.plugin
 
 include $(SRC)/Makefile.msg.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(POFILE)

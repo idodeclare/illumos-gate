@@ -161,3 +161,6 @@ include $(UTSBASE)/intel/Makefile.targ
 include	$(UTSBASE)/i86pc/Makefile.workarounds
 
 ALL_DEFS += $(WORKAROUND_DEFS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

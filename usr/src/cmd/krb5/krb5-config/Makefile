@@ -39,3 +39,6 @@ clean:
 		$(RM) $(PROG)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROG)

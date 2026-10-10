@@ -33,3 +33,7 @@ include ../../Makefile.cmd.64
 all: $(PROG)
 
 install: all $(ROOTUSRSBINPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LLOBJS) $(OBJS) $(VARAUTHLOG) \
+	    $(VARSYSLOG)

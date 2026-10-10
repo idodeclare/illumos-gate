@@ -89,3 +89,6 @@ include $(UTSBASE)/intel/Makefile.targ
 
 $(OBJS_DIR)/%.o: $(COM_DIR)/modes/amd64/%.S
 	$(COMPILE.s) -o $@ $(COM_DIR)/modes/amd64/${@F:.o=.S}
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

@@ -28,3 +28,7 @@ include ../Makefile.com
 LDLIBS += -lzfs
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

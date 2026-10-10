@@ -84,3 +84,6 @@ $(ROOT)/usr/sadm/install/scripts/%: common/%
 	$(INS.file)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE)

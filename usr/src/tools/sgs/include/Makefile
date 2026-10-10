@@ -65,4 +65,5 @@ clobber: clean
 	$(RM) $(SYSHDRS) $(ROOTHDRS)
 
 
-
+.DONE:
+	@$(MAKE_GITIGNORE) $(ROOTHDRS) $(SYSHDRS)

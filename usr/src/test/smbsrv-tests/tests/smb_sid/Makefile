@@ -67,3 +67,6 @@ clean:
 	-$(RM) $(KERN_OBJS) $(KERN_SRCS)
 
 $(CMDS): $(TESTDIR) $(PROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(KERN_OBJS) $(KERN_SRCS) $(PROG)

@@ -43,6 +43,7 @@ PODIRS=		dump restore
 
 .DONE:
 	@rm -f $(LIBDONE)
+	@$(MAKE_GITIGNORE)
 
 all debug lint check: $(COMMONPRODSUBDIRS) $(UFSPRODSUBDIRS)
 

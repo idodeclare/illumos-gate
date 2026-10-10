@@ -62,3 +62,6 @@ clobber: clean
 	$(RM) $(PROG)
 
 check: $(CHKMANIFEST)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

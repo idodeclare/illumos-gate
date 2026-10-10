@@ -30,3 +30,6 @@ include ../../Makefile.cmd.64
 CFLAGS64 += -D_ELF64
 
 install: all $(ROOTUSRSBINPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

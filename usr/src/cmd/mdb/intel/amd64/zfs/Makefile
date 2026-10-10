@@ -43,3 +43,7 @@ CPPFLAGS += -I../../../../../common/zfs
 CSTD=	$(CSTD_GNU99)
 
 CERRWARN	+= -_gcc=-Wno-type-limits
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

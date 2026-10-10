@@ -98,3 +98,6 @@ $(ROOTXPG4LINKS):	$(ROOTXPG4PROG)
 clean:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

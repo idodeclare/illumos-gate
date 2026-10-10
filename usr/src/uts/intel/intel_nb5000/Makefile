@@ -86,3 +86,6 @@ $(OBJECTS): $(OBJS_DIR) $(MCAMD_OFF_H)
 #       Include common targets.
 #
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

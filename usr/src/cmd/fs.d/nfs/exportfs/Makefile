@@ -34,3 +34,6 @@ install: all $(ROOTUSRSBINPROG)
 
 clean clobber:
 	$(RM) $(PROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG)

@@ -51,3 +51,6 @@ $(PROG):	$(OBJS)
 		$(COMPILE.c) -o $@ $<
 
 include		../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

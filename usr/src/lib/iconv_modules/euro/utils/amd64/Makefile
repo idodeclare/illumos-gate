@@ -19,3 +19,6 @@ include $(SRC)/lib/iconv_modules/Makefile.iconv.64
 ICONV_DIR = $(ICONV_DIR_64)
 
 install: all $(ICONV_DIR) .WAIT $(ICONV_LIBS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROTOCLEANFILES)

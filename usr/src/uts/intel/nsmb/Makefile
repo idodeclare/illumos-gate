@@ -142,3 +142,6 @@ $(IOC_CHECK_H): $(OFFSETS_SRC)
 #
 include $(UTSBASE)/Makefile.mapfile
 include $(UTSBASE)/intel/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

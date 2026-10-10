@@ -51,3 +51,6 @@ lint:
 include ../../Makefile.targ
 
 install: all $(ROOTSMBDTRACEDIR) .WAIT $(ROOTSMBDTRACEFILE)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

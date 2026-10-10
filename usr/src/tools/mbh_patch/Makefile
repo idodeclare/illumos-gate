@@ -42,3 +42,6 @@ clean:
 	$(RM) mbh_patch
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(PROG)

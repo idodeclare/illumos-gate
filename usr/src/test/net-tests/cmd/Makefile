@@ -34,3 +34,6 @@ $(ROOTBIN):
 
 $(ROOTBIN)/%: %.ksh
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDS)

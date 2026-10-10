@@ -21,3 +21,6 @@ CRYPTO		= kcf pkcs
 TESTROOT	= $(ROOT)/opt/crypto-tests/tests/aes
 
 include $(SRC)/test/crypto-tests/tests/Makefile.crypto
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d $(BASEPROG) $(CLEANFILES) $(PROGS)

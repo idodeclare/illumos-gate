@@ -1400,3 +1400,6 @@ clobber: clean
 check:	$(CHECKHDRS)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(GENHDRS)

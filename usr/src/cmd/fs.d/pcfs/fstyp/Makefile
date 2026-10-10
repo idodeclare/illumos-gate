@@ -73,3 +73,6 @@ clean:
 	$(RM) $(LIBPROG)
 
 clobber: clean
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LIBPROG)

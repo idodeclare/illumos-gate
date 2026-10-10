@@ -88,3 +88,6 @@ $(OBJS_DIR)/%.o:  $(COM_DIR)/amd64/%.c
 
 $(OBJS_DIR)/%.o: $(COM_DIR)/amd64/%.S
 	$(COMPILE.s) -o $@ $(COM_DIR)/amd64/${@F:.o=.S}
+
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

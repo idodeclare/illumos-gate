@@ -29,3 +29,7 @@ include ../Makefile.com
 .KEEP_STATE:
 
 install: all $(ROOTLIBS) $(ROOTLINKS) $(ROOTCOMPATLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

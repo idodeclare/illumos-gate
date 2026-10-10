@@ -49,3 +49,6 @@ clean:
 		$(RM) $(OBJS) $(EXTOBJS)
 
 include		$(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(EXTOBJS) $(OBJS)

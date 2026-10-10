@@ -46,3 +46,6 @@ POFILE= 	volcopy.po
 XGETFLAGS += 	-a  -x volcopy.xcl
 
 catalog:        $(POFILE)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

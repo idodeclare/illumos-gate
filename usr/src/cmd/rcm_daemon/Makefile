@@ -72,3 +72,6 @@ common/%.check:	common/%.h
 FRC:
 
 #include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE)

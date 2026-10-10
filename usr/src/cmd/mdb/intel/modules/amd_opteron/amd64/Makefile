@@ -36,3 +36,7 @@ CPPFLAGS += -I../../../../common
 CPPFLAGS += -I$(SRC)/uts/i86pc/cpu
 CPPFLAGS += -I$(SRC)/uts/intel
 CPPFLAGS += -I$(SRC)/uts/i86pc
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

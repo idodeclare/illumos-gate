@@ -19,3 +19,6 @@ include		../../Makefile.com
 PROG=		close_wr
 
 include		../Makefile.cmd
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

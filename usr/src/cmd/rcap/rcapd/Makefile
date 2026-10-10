@@ -86,3 +86,6 @@ $(ROOTUSRLIBRCAP)/%: $(ROOTUSRLIBRCAP) %
 	$(INS.file)
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

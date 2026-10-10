@@ -26,3 +26,7 @@ include ../../../../Makefile.module
 
 MODULE_BUILD_TYPE = mdb
 LDLIBS += -lsmbios
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

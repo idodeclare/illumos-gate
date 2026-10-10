@@ -46,3 +46,6 @@ clean:
 
 include ../Makefile.targ
 include ../../Makefile.psm.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(PROG)

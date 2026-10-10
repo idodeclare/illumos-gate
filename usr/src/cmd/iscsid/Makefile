@@ -46,3 +46,6 @@ clean:
 install:	all $(ROOTMANIFEST) $(ROOTSVCMETHOD)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

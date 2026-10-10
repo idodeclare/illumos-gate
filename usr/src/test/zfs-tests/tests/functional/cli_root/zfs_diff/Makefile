@@ -46,3 +46,6 @@ clean:
 $(TARGETDIR)/$(PROG): $(TARGETDIR)
 
 include $(SRC)/test/zfs-tests/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

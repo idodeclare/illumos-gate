@@ -41,3 +41,6 @@ CPPFLAGS +=	-D_LARGEFILE64_SOURCE
 CERRWARN +=	-_gcc=-Wno-parentheses
 
 include		../../Makefile.mount.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

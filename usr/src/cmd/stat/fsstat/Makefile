@@ -45,3 +45,6 @@ FILEMODE= 0555
 SMOFF += signed
 
 include $(SRC)/cmd/stat/Makefile.stat.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

@@ -44,3 +44,7 @@ CPPFLAGS += $(INCDIRS:%=-I%) -DCMA_VERSION='$(CMA_VERSION)'
 
 LDFLAGS += -R/usr/lib/fm
 LDLIBS += -L$(ROOTLIB)/fm -lfmd_agent
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)

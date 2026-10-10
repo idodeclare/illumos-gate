@@ -32,3 +32,6 @@ include		$(SRC)/cmd/sgs/messages/Makefile.com
 .KEEP_STATE:
 
 include		$(SRC)/cmd/sgs/messages/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

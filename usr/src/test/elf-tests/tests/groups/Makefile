@@ -45,3 +45,6 @@ $(TESTDIR)/%: %
 	$(INS.file)
 
 include $(SRC)/test/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

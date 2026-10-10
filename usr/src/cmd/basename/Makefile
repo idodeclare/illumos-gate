@@ -48,3 +48,6 @@ lint_PROG_XPG4:	$(PROG).c
 	$(LINT.c) $(PROG).c $(LDLIBS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

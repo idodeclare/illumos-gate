@@ -45,3 +45,7 @@ install:	all .WAIT $(ROOTELFEDITDIR64) .WAIT $(ROOTELFEDITLIBS)
 
 include		../Makefile.targ
 include		$(SRC)/Makefile.master.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

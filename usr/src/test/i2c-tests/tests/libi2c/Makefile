@@ -33,3 +33,7 @@ addresses.64 := LDLIBS64 += -lnvpair
 
 discovery.32 := LDLIBS += -ldevinfo
 discovery.64 := LDLIBS64 += -ldevinfo
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(EXTRA_OBJS32) $(EXTRA_OBJS64) $(OBJS32) \
+	    $(OBJS64) $(PROGS32) $(PROGS64)

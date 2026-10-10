@@ -63,3 +63,7 @@ _msg: $(MSGDOMAIN) $(POFILE)
 	$(CP) $(POFILE) $(MSGDOMAIN)
 
 include $(SRC)/lib/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)
