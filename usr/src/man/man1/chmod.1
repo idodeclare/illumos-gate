@@ -492,7 +492,7 @@ its read or write permissions locked while a program is accessing that file.
 .sp
 In a directory which has the set\-group\-ID bit set (reflected as either
 \fB\(mi\(mi\(mi\(mi\(mis\(mi\(mi\(mi\fR or
-\fB\(mi\(mi\(mi\(mi\(mil\(mi\(mi\(mi\fR in the output of \fB\&'ls\ -ld'\fR),
+\fB\(mi\(mi\(mi\(mi\(mil\(mi\(mi\(mi\fR in the output of \fB\&'ls\~-ld'\fR),
 files and subdirectories are created with the group-ID of the parent directory,
 not that of current process.
 .sp
@@ -718,8 +718,8 @@ Default permissions for a specific group.
 .ad
 .sp .6
 .RS 4n
-Default permissions for users aside from the file owner or for members of the
-file group owner.
+Default permissions for users aside from the file owner and aside from members
+of the file group owner.
 .RE
 
 .sp
@@ -759,7 +759,7 @@ NFSv4 ACLs are specified as colon- (\fB:\fR) separated fields of the following.
 .BR owner@:\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -773,7 +773,7 @@ Permissions for file owner.
 .BR group@:\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -787,7 +787,7 @@ Permissions for file group owner.
 .BR everyone@:\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -803,7 +803,7 @@ Permissions for everyone, including file owner and group owner.
 .BR :\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -815,11 +815,11 @@ Permissions for a specific user.
 .ne 2
 .na
 .BR usersid:\c
-.IR sid-string\c
+.IR sid\-string\c
 .BR :\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -835,7 +835,7 @@ Permissions for a specific user, but user is specified by SID.
 .BR :\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -847,11 +847,11 @@ Permissions for a specific group.
 .ne 2
 .na
 .BR groupsid:\c
-.IR sid-string\c
+.IR sid\-string\c
 .BR :\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -863,11 +863,11 @@ Permissions for a specific group, but group is specified by SID.
 .ne 2
 .na
 .BR sid:\c
-.IR sid-string\c
+.IR sid\-string\c
 .BR :\c
 .IR perms [\c
 .BR :\c
-.IR inheritance-flags ]\c
+.IR inheritance\-flags ]\c
 .BR :allow | deny
 .ad
 .sp .6
@@ -1054,7 +1054,7 @@ letters to indicate permissions.
 .sp
 .LP
 Using the positional ACL format, permissions are specified as positional
-arguments similar to the \fBls\ -V\fR format. The hyphen (\fB-\fR), which
+arguments similar to the \fBls\~-V\fR format. The hyphen (\fB-\fR), which
 indicates that no permission is granted at that position, can be omitted and
 only the required letters have to be specified.
 .sp
