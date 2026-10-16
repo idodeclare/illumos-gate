@@ -22,6 +22,7 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2016, 2017, Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -87,22 +88,6 @@ mv_file ()
 		/usr/bin/chmod $3 $2
 	else
 		/usr/bin/rm $1
-	fi
-}
-
-#
-# This function takes a DHCP parameter (as defined in /etc/dhcp/inittab)
-# and returns the value for that parameter returned by the DHCP server.
-# If the global 'interface' is defined, it will request the value learned
-# on that interface, else it will request the value learned on the primary
-# interface.
-#
-get_dhcp_var ()
-{
-	if [ -n "$interface" ]; then
-		/sbin/dhcpinfo -i $interface $1
-	else
-		/sbin/dhcpinfo $1
 	fi
 }
 
@@ -232,13 +217,13 @@ cleanup_hosts ()
 # If our network configuration strategy is DHCP, check for DNS
 # configuration parameters obtained from the DHCP server.
 #
-# Script execution starts here.
+# Script execution continues here after going through the "start" case above.
 #
 smf_netstrategy
 
 if [ "$_INIT_NET_STRATEGY" = "dhcp" ]; then
-	dnsservers=`get_dhcp_var DNSserv`
-	dnsdomain=`get_dhcp_var DNSdmain`
+	dnsservers=`get_dhcp_var DNSserv $interface` && \
+	    dnsdomain=`get_dhcp_var DNSdmain $interface`
 else
 	dnsservers=""
 	dnsdomain=""
