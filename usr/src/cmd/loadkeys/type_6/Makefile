@@ -227,3 +227,6 @@ $(ROOTKEYDIR)/layout_113: $(ROOTKEYDIR)/romania
 	$(RM) $@; $(LN) $(ROOTKEYDIR)/romania  $@
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

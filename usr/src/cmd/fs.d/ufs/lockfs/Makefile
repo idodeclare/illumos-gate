@@ -40,3 +40,6 @@ SMOFF += all_func_returns
 
 $(ROOTUSRSBIN)/$(LIBPROG):
 	$(RM) $@; $(SYMLINK) $(LINKVALUE) $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

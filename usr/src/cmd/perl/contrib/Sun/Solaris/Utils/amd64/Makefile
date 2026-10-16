@@ -18,3 +18,6 @@ all: $(PERLEXT)
 install: $(ROOTPERLEXT) $(ROOTPERLMOD)
 
 include $(SRC)/cmd/perl/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

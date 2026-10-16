@@ -153,3 +153,8 @@ clean:
 
 clobber: clean
 	$(RM) $(NFSBOOT) $(STRIPALIGN)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CONF_L_OBJS) $(CONF_OBJS) $(L_OBJS) \
+	    $(MISC_L_OBJS) $(MISC_OBJS) $(NFSBOOT) $(NFSBOOT_L_OBJS) \
+	    $(NFSBOOT_OBJS) $(OBJS) $(SRT0_L_OBJ) $(SRT0_OBJ) $(STRIPALIGN)

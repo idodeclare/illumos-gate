@@ -30,3 +30,7 @@ CFLAGS += -I../../common -I$(SRC)/uts/sun4u/opl
 .KEEP_STATE:
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

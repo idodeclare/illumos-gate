@@ -205,3 +205,6 @@ clean:	clean_dump
 	$(RM) $(OBJS)
 
 check:	$(CHKMANIFEST)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

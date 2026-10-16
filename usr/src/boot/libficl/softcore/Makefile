@@ -34,3 +34,6 @@ softcore.c: $(SOURCES)
 
 clobber clean:
 	$(RM) $(CLEANFILES)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES)

@@ -48,3 +48,6 @@ all clean clobber lint:
 install: $(CONF:%=$(CONFDIR)/%)
 
 include $(SRC)/cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

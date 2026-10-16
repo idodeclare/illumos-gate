@@ -60,3 +60,6 @@ install:	$(ROOTLIBFSTYPEPROG)
 
 clean:
 	$(RM) $(OBJS) $(POFILE)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS) $(POFILE)

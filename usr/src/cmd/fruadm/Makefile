@@ -54,3 +54,6 @@ lint:	lint_PROG
 
 include $(SRC)/cmd/Makefile.targ
 include $(SRC)/Makefile.psm.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

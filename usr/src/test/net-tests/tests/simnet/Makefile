@@ -37,3 +37,6 @@ $(TESTDIR):
 
 $(TESTDIR)/%: %.ksh
 	$(INS.rename)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDS)

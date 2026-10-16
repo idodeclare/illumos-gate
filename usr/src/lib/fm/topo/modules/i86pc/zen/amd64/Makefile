@@ -17,3 +17,6 @@ include ../Makefile.common
 include ../../../Makefile.plugin.64
 
 install: $(ROOTPROG64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

@@ -65,3 +65,6 @@ $(ROOTDEMODIR) := DIRMODE = 755
 $(ROOTDEMOFILES) := FILEMODE = 644
 
 include ../../../cmd/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

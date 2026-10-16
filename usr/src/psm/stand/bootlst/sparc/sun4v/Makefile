@@ -60,3 +60,5 @@ CFLAGS64 += -xchip=ultra
 CERRWARN += -_gcc=-Wno-char-subscripts
 .KEEP_STATE:
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALL)

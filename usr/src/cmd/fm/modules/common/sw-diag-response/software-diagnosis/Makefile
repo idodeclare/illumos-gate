@@ -51,3 +51,7 @@ LDLIBS += -L$(ROOTLIB)/fm -ltopo -luutil -luuid -lkstat
 LDFLAGS += -R/usr/lib/fm
 CERRWARN += -_gcc=-Wno-parentheses
 CERRWARN += $(CNOWARN_UNINIT)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)

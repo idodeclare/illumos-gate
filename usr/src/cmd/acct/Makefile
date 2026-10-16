@@ -161,3 +161,6 @@ clobber: $(SUBDIRS)
 
 lint:	$(SUBDIRS)
 	$(LINT.c) $(SRCS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES)

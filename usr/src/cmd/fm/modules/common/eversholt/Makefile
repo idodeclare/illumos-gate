@@ -73,3 +73,7 @@ escparse.o: $(EVERSRCDIR)/escparse.y
 	$(YACC) -dt $(EVERSRCDIR)/escparse.y
 	$(COMPILE.c) -DYYDEBUG -c -o $@ y.tab.c
 	$(CTFCONVERT_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(DMODPROG) $(DMOD_OBJS) $(LINKOBJS) \
+	    $(OBJS) $(PROG)

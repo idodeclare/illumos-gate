@@ -95,3 +95,6 @@ $(PROG): $(OBJS)
 %.o: $(SRC)/common/amdzen/%.c
 	$(COMPILE.c) $<
 	$(POST_PROCESS_O)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

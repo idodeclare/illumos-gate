@@ -55,3 +55,6 @@ $(ROOTOPTPROGS): $(PROGS32) $(PROGS64) $(ROOTOPTCORE)
 FRC:
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(ALLOBJS) $(PROGS32) $(PROGS64)

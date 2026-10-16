@@ -39,3 +39,6 @@ install:	all $(ROOTPROG) $(ROOTCCSBINLINK)
 clean clobber:
 
 include		../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

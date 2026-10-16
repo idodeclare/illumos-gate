@@ -66,3 +66,6 @@ $(PROG): $(OBJS)
 	$(POST_PROCESS_O)
 
 include $(SRC)/tools/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLOBBERFILES) $(OBJS) $(PROG)

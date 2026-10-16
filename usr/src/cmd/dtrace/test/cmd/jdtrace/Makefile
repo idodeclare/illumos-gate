@@ -106,3 +106,6 @@ $(ROOTLIBJAVA)/%.jar: $(LIBDIR)/%.jar
 
 $(ROOTBIN)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(JDTRACE_JAR) $(PROG)

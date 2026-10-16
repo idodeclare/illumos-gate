@@ -93,3 +93,6 @@ $(ROOTCFGDIR)/%: $(ROOTCFGDIR) %
 	$(INS.file)
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

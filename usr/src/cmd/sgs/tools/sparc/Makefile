@@ -31,3 +31,7 @@ all:		$(NATIVE) $(PROGS) $(LIBS)
 install:	all $(ROOTPROGS) $(ROOTLIBS)
 
 include		$(SRC)/cmd/sgs/tools/Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(NATIVE) $(OBJECTS) \
+	    $(PROGS)

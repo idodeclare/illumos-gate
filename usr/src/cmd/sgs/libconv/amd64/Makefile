@@ -33,3 +33,6 @@ install all:	$(LIBRARY) .WAIT
 
 include		../Makefile.targ
 include		$(SRC)/Makefile.master.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBRARY) $(PICS)

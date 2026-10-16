@@ -79,3 +79,7 @@ install: all $(ROOTDYNLIBS) $(ROOTCOMPATLINKS)
 
 # include library targets
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

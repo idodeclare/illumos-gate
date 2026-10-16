@@ -20,3 +20,6 @@ PROG=		abort_conn
 LDLIBS +=	-lsocket
 
 include		../Makefile.cmd
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

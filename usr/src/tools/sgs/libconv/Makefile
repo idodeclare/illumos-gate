@@ -43,3 +43,6 @@ install all:	$(LIBRARY)
 
 include		$(SGSHOME)/libconv/Makefile.targ
 include		$(SRC)/Makefile.master.64
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBRARY) $(PICS)

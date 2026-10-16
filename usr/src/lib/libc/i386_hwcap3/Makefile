@@ -42,3 +42,7 @@ EXTN_DYNFLAGS=	-Wl,-Mmapfile
 OPTIMIZED_LIBCBASE=../i386_hwcap1
 
 include ../i386/Makefile.com
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

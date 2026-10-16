@@ -75,3 +75,6 @@ $(TESTDIR):
 
 $(TESTDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS32) $(OBJS64) $(PROG32) $(PROG64)

@@ -26,3 +26,6 @@ include $(SRC)/test/libproc-tests/Makefile.com
 
 agent_destroy.32 := LDLIBS += -lproc
 agent_destroy.64 := LDLIBS64 += -lproc
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROGS32) $(PROGS64)

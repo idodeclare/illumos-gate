@@ -68,3 +68,7 @@ clean:
 	$(RM) $(PROG) $(OBJS) $(LZMAOBJS) $(POFILE) $(POFILES)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(LZMAOBJS) $(OBJS) $(POFILE) \
+	    $(POFILES) $(PROG)

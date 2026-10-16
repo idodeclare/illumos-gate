@@ -72,3 +72,6 @@ $(ROOTLIBFMD)/%: %
 install_h:
 
 install: all $(ROOTPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(LINTFILES) $(OBJS) $(PROG)

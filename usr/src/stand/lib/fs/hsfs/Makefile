@@ -32,3 +32,6 @@ OBJECTS = hsfsops.o
 include ../Makefile.com
 
 include ../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

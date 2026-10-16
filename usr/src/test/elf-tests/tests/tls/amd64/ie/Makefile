@@ -58,3 +58,5 @@ $(TESTDIR)/%: %
 $(TESTDIR)/%.o: %.elf
 	$(INS.rename)
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROG)

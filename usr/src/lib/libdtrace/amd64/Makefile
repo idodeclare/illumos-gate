@@ -41,3 +41,7 @@ pics/%.o: $(SRC)/common/dis/i386/%.c
 
 install yydebug: all $(ROOTLIBS64) $(ROOTLINKS64) \
 	$(ROOTDLIBS) $(ROOTDOBJS64)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

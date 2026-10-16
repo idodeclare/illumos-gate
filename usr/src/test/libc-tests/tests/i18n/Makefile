@@ -22,3 +22,6 @@ include ../Makefile.com
 
 LDLIBS += -lumem
 LDLIBS64 += -lumem
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(KSHPROG) $(OBJS32) $(OBJS64) $(PROG32) $(PROG64)

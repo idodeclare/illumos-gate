@@ -91,3 +91,6 @@ h/term.h : src/libc/xcurses/mkterm.awk src/libc/xcurses/caps
 src/libc/xcurses/keyindex.c : src/libc/xcurses/mkkey.awk src/libc/xcurses/caps
 	$(RM) $@
 	cd src/libc/xcurses; $(AWK) -f mkkey.awk caps > keyindex.c
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(GENERATED)

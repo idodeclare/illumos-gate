@@ -104,3 +104,7 @@ install_h:
 # not automated in the build.
 check:
 	$(JSTYLE) -p $(PKGPATH)/*.java
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANDIRS) $(CLEANFILES) $(CLOBBERDIRS) \
+	    $(CLOBBERFILES)

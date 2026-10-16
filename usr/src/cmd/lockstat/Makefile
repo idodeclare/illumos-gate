@@ -64,3 +64,6 @@ clean:
 	$(COMPILE.c) $<
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES)

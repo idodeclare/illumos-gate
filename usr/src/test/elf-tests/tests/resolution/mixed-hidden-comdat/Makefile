@@ -47,3 +47,6 @@ $(TESTDIR)/%: %.sh
 
 $(TESTDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(PROG)

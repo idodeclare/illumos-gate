@@ -62,3 +62,6 @@ clean:
 	$(RM) $(OBJS1) $(OBJS2)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS1) $(OBJS2) $(PROGS)

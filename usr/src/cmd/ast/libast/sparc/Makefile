@@ -40,3 +40,7 @@ include ../Makefile.com
 sparc_C_PICFLAGS = $(C_BIGPICFLAGS)
 
 install: all $(ROOTLIBS) $(ROOTLINKS)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

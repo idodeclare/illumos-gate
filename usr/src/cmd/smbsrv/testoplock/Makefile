@@ -119,3 +119,6 @@ tol_misc.o : tol_misc.c
 
 $(ROOTSMBDDIR)/%: %
 	$(INS.file)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

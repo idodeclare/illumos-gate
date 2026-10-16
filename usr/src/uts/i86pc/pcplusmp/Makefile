@@ -89,3 +89,5 @@ install:	$(INSTALL_DEPS)
 #
 include $(UTSBASE)/i86pc/Makefile.targ
 
+.DONE:
+	@$(MAKE_GITIGNORE) -d "$(BUILD_TYPE)" $(CLEANFILES) $(CLOBBERFILES)

@@ -54,3 +54,6 @@ clobber: clean
 	$(RM) $(PROGS)
 
 FRC:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROGS)

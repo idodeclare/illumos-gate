@@ -41,3 +41,6 @@ install:	all $(ROOTPROG) $(ROOTCCSBINLINK)
 clean:
 
 include		../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES)

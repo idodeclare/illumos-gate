@@ -25,3 +25,7 @@ include ../../../Makefile.module
 
 MODSRCS_DIR = ../../modules/smbios
 LDLIBS += -lsmbios
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(KMODFILE) \
+	    $(KMODOBJS) $(MODFILE) $(MODOBJS)

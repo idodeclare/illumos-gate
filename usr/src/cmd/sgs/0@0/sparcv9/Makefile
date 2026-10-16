@@ -34,3 +34,6 @@ install:	all $(ROOTLIBDIR64)/$(DYNLIB)
 include		$(SRC)/cmd/sgs/0@0/Makefile.targ
 include		$(SRC)/Makefile.master.64
 
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERTARGFILES) $(DUPLICATE_SRC) \
+	    $(OBJS) $(PICS)

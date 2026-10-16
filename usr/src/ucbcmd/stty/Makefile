@@ -48,3 +48,6 @@ clean:
 	-$(RM) $(OBJS)
 
 include ../Makefile.ucbtarg
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(OBJS)

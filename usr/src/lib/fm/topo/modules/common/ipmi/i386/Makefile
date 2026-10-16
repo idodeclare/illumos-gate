@@ -16,3 +16,6 @@
 include ../Makefile.common
 
 install: $(ROOTPROG)
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(OBJS) $(PROG)

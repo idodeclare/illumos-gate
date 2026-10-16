@@ -75,3 +75,6 @@ lint:
 include ../../../Makefile.targ
 
 .PARALLEL:
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(UNIGNOREFILES:%=-x %) $(CMDCLOBBEREES)

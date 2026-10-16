@@ -34,3 +34,6 @@ include ../Makefile.com
 CPPFLAGS += -I../tcp $(SOCKCPPFLAGS)
 
 include ../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CLOBBERFILES) $(LIBS) $(OBJS)

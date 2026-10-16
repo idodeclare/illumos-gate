@@ -38,3 +38,6 @@ install:	$(ROOTPROG) $(ROOTPROG64) \
 
 $(ROOTBIN64)/dump:
 	$(RM) $@; $(SYMLINK) ../../bin/dump $@
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CLEANFILES) $(CMDCLOBBEREES) $(OBJS)

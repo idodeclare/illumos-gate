@@ -58,3 +58,6 @@ clean:
 	$(RM) $(OBJS) $(HAL_PROGS) $(HAL_SCRIPTS)
 
 include ../../../Makefile.targ
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(CMDCLOBBEREES) $(HAL_PROGS) $(HAL_SCRIPTS) $(OBJS)

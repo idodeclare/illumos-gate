@@ -19,3 +19,6 @@ include		../../Makefile.com
 PROG=		file_trunc
 
 include		../Makefile.cmd
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(OBJS) $(PROG)

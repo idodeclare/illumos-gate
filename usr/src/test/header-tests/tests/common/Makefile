@@ -35,3 +35,6 @@ clobber: clean
 
 clean:
 	-$(RM) -r __pycache__
+
+.DONE:
+	@$(MAKE_GITIGNORE) $(PROG)
