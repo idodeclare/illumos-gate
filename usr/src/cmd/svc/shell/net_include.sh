@@ -21,6 +21,7 @@
 #
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
+# Copyright 2017, 2026 Chris Fraire <cfraire@me.com>
 #
 # Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T.
 # All rights reserved.
@@ -65,11 +66,11 @@ net_record_err()
 # ipmp6_list	list of IPMP IPv6 interfaces.
 # inet_plumbed	list of plumbed IPv4 interfaces.
 # inet6_plumbed list of plumbed IPv6 interfaces.
-# ipmp_created 	list of created IPMP IPv4 interfaces.
+# ipmp_created	list of created IPMP IPv4 interfaces.
 # ipmp6_created	list of created IPMP IPv6 interfaces.
 # inet_failed	list of IPv4 interfaces that failed to plumb.
 # inet6_failed	list of IPv6 interfaces that failed to plumb.
-# ipmp_failed 	list of IPMP IPv4 interfaces that failed to be created.
+# ipmp_failed	list of IPMP IPv4 interfaces that failed to be created.
 # ipmp6_failed	list of IPMP IPv6 interfaces that failed to be created.
 #
 unset inet_list inet_plumbed inet_failed \
@@ -125,7 +126,7 @@ if_comp()
 
 #
 # physical_comp if1 if2
-# 
+#
 # Do the two interfaces share a physical interface?
 #
 physical_comp()
@@ -183,7 +184,7 @@ create_ipmp()
 }
 
 #
-# create_groupifname groupname type 
+# create_groupifname groupname type
 #
 # Create an IPMP meta-interface name for the group.  We only use this
 # function if all of the interfaces in the group failed at boot and there
@@ -229,7 +230,7 @@ get_hostname_ipmpinfo()
 			;;
 	esac
 
-	[ -r "$file" ] || return 
+	[ -r "$file" ] || return
 
 	type=$2
 	shift 2
@@ -269,7 +270,7 @@ get_group_for_type()
 	#
 	shift 2
 	for ifname in "$@"; do
-		if if_comp "$physical" $ifname; then 
+		if if_comp "$physical" $ifname; then
 			get_hostname_ipmpinfo $ifname $type group
 		fi
 	done | while :; do
@@ -323,7 +324,7 @@ doDHCPhostname()
 	if [ -f /etc/dhcp.$1 ] && [ -f /etc/hostname.$1 ]; then
                 set -- `shcat /etc/hostname.$1`
                 [ $# -eq 2 -a "$1" = "inet" ]
-                return $?      
+                return $?
         fi
         return 1
 }
@@ -338,11 +339,11 @@ doDHCPhostname()
 #
 # Examples:
 #	inet_process_hostname /sbin/ifconfig hme0 < /etc/hostname.hme0
-#	
+#
 #	inet_process_hostname /sbin/ifparse -f < /etc/hostname.hme0
 #
 # If there is only line in an hostname file we assume it contains
-# the old style address which results in the interface being brought up 
+# the old style address which results in the interface being brought up
 # and the netmask and broadcast address being set ($inet_oneline_epilogue).
 #
 # Note that if the interface is a VRRP interface, do not bring the address
@@ -432,7 +433,7 @@ inet_process_hostname()
 #
 # Examples:
 #	inet6_process_hostname /sbin/ifconfig hme0 inet6 < /etc/hostname6.hme0
-#	
+#
 #	inet6_process_hostname /sbin/ifparse -f inet6 < /etc/hostname6.hme0
 #
 # Return non-zero if any of the commands fail so that the caller may alert
@@ -440,11 +441,11 @@ inet_process_hostname()
 #
 inet6_process_hostname()
 {
-    	retval=0
+	retval=0
 	while read one rest; do
 		#
-	    	# See comment in inet_process_hostname for details.
-	        #
+		# See comment in inet_process_hostname for details.
+		#
 		[ "$one" = ipmp ] && one=
 		ifcmds="$one $rest"
 
@@ -489,7 +490,7 @@ move_addresses()
 
 		group=`get_group $ifname`
 		if [ -z "$group" ]; then
-			in_list physical_comp $ifname $processed || { 
+			in_list physical_comp $ifname $processed || {
 				echo " $ifname (not moved -- not" \
 				    "in an IPMP group)\c" >/dev/msglog
 				processed="$processed $ifname"
@@ -525,7 +526,7 @@ move_addresses()
 		/sbin/ifparse -f $type `
 			for item in $list; do
 				if_comp $ifname $item && $process_func \
-				    /sbin/ifparse $type < $hostpfx.$item 
+				    /sbin/ifparse $type < $hostpfx.$item
 			done | while read three four; do
 				[ "$three" != addif ] && echo "$three $four \c"
 			done` | while read one two; do
@@ -547,11 +548,11 @@ move_addresses()
 			| while read one two; do
 				[ "$one" = addif ] && \
 					/sbin/ifconfig $grifname $type \
-				    	    addif $two >/dev/null
+					    addif $two >/dev/null
 			done
 		fi
 
-		in_list physical_comp $ifname $processed || { 
+		in_list physical_comp $ifname $processed || {
 			processed="$processed $ifname"
 			echo " $ifname (moved to $grifname)\c" > /dev/msglog
 		}
@@ -566,7 +567,7 @@ move_addresses()
 # IP addresses is being enforced on the interface by the global zone
 #
 ipadm_from_gz_if()
-{ 
+{
 	pif=`/sbin/ipadm show-if -o persistent -p $1 2>/dev/null | egrep '4|6'`
 	if smf_is_globalzone || ![[ $pif == *4* || $pif == *6* ]]; then
 		return 1
@@ -580,7 +581,7 @@ ipadm_from_gz_if()
 		# the `allowed-ips' datalink property cannot currently be
 		# examined in any other way from the non-global zone, we
 		# resort to plumbing the interface
-		# 
+		#
 		/sbin/ifconfig $1 plumb > /dev/null 2>&1
 		l3protect=`/sbin/ipadm show-if -o current -p $1|grep -c 'Z'`
 		if [ $l3protect = 0 ]; then
@@ -630,7 +631,7 @@ if_configure()
 			# VRRP VNIC
 			#
 			if not_vrrp_interface $1 $type; then
-			    	/sbin/ifconfig $1 inet6 up || fail="$fail $1"
+				/sbin/ifconfig $1 inet6 up || fail="$fail $1"
 			fi
 		fi
 		echo " $1\c"
@@ -806,7 +807,7 @@ service_is_enabled()
 # Returns 0 if a valid IPv4 address is given, 1 otherwise.
 #
 is_valid_v4addr()
-{ 
+{
 	echo $1 | /usr/xpg4/bin/awk 'NF != 1 { exit 1 } \
 	$1 !~ /^((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}\
 	(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])$/ \
@@ -826,11 +827,11 @@ is_valid_v6addr()
 	$1 !~ /^([a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}$/ &&
 	# 1:2:3::6:7:8
 	$1 !~ /^([a-fA-F0-9]{1,4}:){0,6}:([a-fA-F0-9]{1,4}:){0,6}\
-	[a-fA-F0-9]{1,4}$/ && 
+	[a-fA-F0-9]{1,4}$/ &&
 	# 1:2:3::
 	$1 !~ /^([a-fA-F0-9]{1,4}:){0,7}:$/ &&
 	# ::7:8
-	$1 !~ /^:(:[a-fA-F0-9]{1,4}){0,6}:[a-fA-F0-9]{1,4}$/ && 
+	$1 !~ /^:(:[a-fA-F0-9]{1,4}){0,6}:[a-fA-F0-9]{1,4}$/ &&
 	# ::f:1.2.3.4
 	$1 !~ /^:(:[a-fA-F0-9]{1,4}){0,5}:\
 	((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}\
@@ -888,4 +889,47 @@ nwam_get_loc_list_prop()
 	slist=`echo $clist | sed -e s/","/" "/g`
 	echo $slist
 	return $rtn
+}
+
+# get_dhcp_var PARAMNAME [ INTERFACE ]
+#
+#   Prints the value of the DHCP parameter named by PARAMNAME (defined in
+#   /etc/dhcp/inittab) as returned by the DHCP server. The query is retried up
+#   to five times if dhcpinfo(1) exits with 2, "The operation was not
+#   successful," or once if it exits with 4, "The operation timed out." For any
+#   other failure exit code, retry does not happen. Any retry happens after a
+#   one second pause.
+#
+#   If INTERFACE is defined, the value learned on that interface will be
+#   printed; otherwise the value learned on the primary interface will be
+#   printed.
+#
+#   Returns 0 on success (printed parameter value may be zero length) or
+#   non-zero otherwise.
+#
+get_dhcp_var() {
+	typeset -i timeouts=0 i rc
+	typeset val
+
+	[ -z "$1" ] && return 1
+
+	for i in {1..6}; do
+		(( i > 1 )) && sleep 1
+
+		if [ -n "$2" ]; then
+			val="$(/sbin/dhcpinfo -i "$2" "$1")"
+		else
+			val="$(/sbin/dhcpinfo "$1")"
+		fi
+		rc=$?
+		if (( rc == 0 )); then
+			printf "%s\n" "$val"
+			return 0
+		fi
+		(( rc != 2 && rc != 4 )) && return 1
+		(( rc == 4 )) && timeouts=$((1 + timeouts))
+		(( timeouts > 1 )) && return 1
+	done
+
+	return 1
 }
