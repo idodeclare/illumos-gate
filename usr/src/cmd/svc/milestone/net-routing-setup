@@ -22,10 +22,16 @@
 #
 # Copyright (c) 1999, 2010, Oracle and/or its affiliates. All rights reserved.
 # Copyright (c) 2021 H. William Welliver
+# Copyright 2017, 2026 Chris Fraire <cfraire@me.com>
 
 # This script configures IP routing.
 
 . /lib/svc/share/smf_include.sh
+. /lib/svc/share/net_include.sh
+
+logmsg() {
+	logger -p daemon.notice -t routing-setup "$@"
+}
 
 #
 # In a shared-IP zone we need this service to be up, but all of the work
@@ -50,11 +56,14 @@ smf_configure_ip || exit $SMF_EXIT_OK
 
 #
 # Are we routing dynamically? routeadm(8) reports this in the
-# "current" values of ipv4/6-routing - if either are true, we are running
+# "current" values of ipv4/6-routing; if either are true, we are running
 # routing daemons (or at least they are enabled to run).
 #
+# Excerpt e.g.:
+# ipv4-routing persistent=enabled default=enabled current=enabled
+#
 dynamic_routing_test=`/sbin/routeadm -p | \
-nawk '/^ipv[46]-routing [.]*/ { print $2 }'  | /usr/bin/grep "current=enabled"`
+    /usr/bin/grep '^ipv[46]-routing .*current=enabled'`
 if [ -n "$dynamic_routing_test" ]; then
 	dynamic_routing="true"
 fi
@@ -88,14 +97,14 @@ smf_netstrategy
 if [ -f /etc/svc/volatile/etc/inet/static_routes ]; then
 	echo "Installing persistent routes"
 	if [ -f /etc/inet/static_routes ]; then
-		cat /etc/svc/volatile/etc/inet/static_routes | grep -v '^#' \
-		    >> /etc/inet/static_routes
+		cat /etc/svc/volatile/etc/inet/static_routes | \
+		    /usr/bin/egrep -v '^[[:space:]]*#' >> \
+		    /etc/inet/static_routes
 	else
 		cp /etc/svc/volatile/etc/inet/static_routes \
 		    /etc/inet/static_routes
 	fi
 	/usr/bin/rm /etc/svc/volatile/etc/inet/static_routes
-
 fi
 
 #
@@ -103,18 +112,18 @@ fi
 #
 if [ -f /etc/inet/static_routes ]; then
 	echo "Adding persistent link-local routes:"
-	/usr/bin/egrep -v "^(#|$)" /etc/inet/static_routes \
-	    | /usr/bin/grep -E -- "-interface |-iface " | while read line; do
+	/usr/bin/egrep -v "^[[:space:]]*(#|$)" /etc/inet/static_routes | \
+	    /usr/bin/egrep -- "-interface |-iface " | while read line; do
 		/usr/sbin/route add $line
 	done
 fi
 
 if [ "$_INIT_NET_STRATEGY" = "dhcp" ] && \
-    [ -n "`/sbin/dhcpinfo Router`" ]; then
-	defrouters=`/sbin/dhcpinfo Router`
+    defrouters=`get_dhcp_var Router` && [ -n "$defrouters" ]; then
+	: # pass
 elif [ -f /etc/defaultrouter ]; then
-	defrouters=`/usr/bin/grep -v \^\# /etc/defaultrouter | \
-	    /usr/bin/awk '{print $1}'`
+	defrouters=`/usr/bin/egrep -v '^[[:space:]]*(#|$)' \
+	    /etc/defaultrouter | /usr/bin/awk '{print $1}'`
 	if [ -n "$defrouters" ]; then
 		#
 		# We want the default router(s) listed in
@@ -162,6 +171,18 @@ else
 fi
 
 #
+# Read /etc/inet/static_routes, and add each non-link-local route. Do this here
+# prior to the netstat check below.
+#
+if [ -f /etc/inet/static_routes ]; then
+	echo "Adding persistent non-link-local routes:"
+	/usr/bin/egrep -v "^[[:space:]]*(#|$)" /etc/inet/static_routes | \
+	    /usr/bin/egrep -v -- "-interface |-iface " | while read line; do
+		/usr/sbin/route add $line
+	done
+fi
+
+#
 # Use routeadm(8) to configure forwarding and launch routing daemons
 # for IPv4 and IPv6 based on preset values.  These settings only apply
 # to the global zone.  For IPv4 dynamic routing, the system will default
@@ -185,42 +206,19 @@ fi
 # however, as persistent daemon state is now controlled by SMF.
 #
 ipv4_routing_set=`/usr/bin/svcprop -p routeadm/ipv4-routing-set $SMF_FMRI`
-if [ -z "$defrouters" ]; then
-	#
-	# Set default value for ipv4-routing to enabled.  If routeadm -e/-d
-	# has not yet been run by the administrator, we apply this default.
-	# The -b option is project-private and informs routeadm not
-	# to treat the enable as administrator-driven.
-	#
-	/usr/sbin/svccfg -s $SMF_FMRI \
-	    setprop routeadm/default-ipv4-routing = true
-	if [ "$ipv4_routing_set" = "false" ]; then
-		/sbin/routeadm -b -e ipv4-routing -u
-	fi
-else
-	#
-	# Default router(s) have been found,  so ipv4-routing default value
-	# should be disabled.  If routaedm -e/d has not yet been run by
-	# the administrator, we apply this default.  The -b option is
-	# project-private and informs routeadm not to treat the disable as
-	# administrator-driven.
-	#
-	/usr/sbin/svccfg -s $SMF_FMRI \
-	    setprop routeadm/default-ipv4-routing = false
-	if [ "$ipv4_routing_set" = "false" ]; then
-		/sbin/routeadm -b -d ipv4-routing -u
-	fi
-fi
+defrouters=${defrouters//[[:space:]]+/ }
+logmsg "defrouters:$defrouters;ipv4-routing-set=$ipv4_routing_set"
 
 #
-# Read /etc/inet/static_routes and add each non-link-local route.
+# Ensure default-ipv4-routing is disabled (as opposed to former versions of
+# illumos where it was enabled if defrouters were not found). If routaedm -e/d
+# has not yet been run by the administrator, we apply this setting.  The
+# -b option is project-private and informs routeadm not to treat the disable as
+# administrator-driven.
 #
-if [ -f /etc/inet/static_routes ]; then
-	echo "Adding persistent routes:"
-	/usr/bin/egrep -v "^(#|$)" /etc/inet/static_routes \
-	    | /usr/bin/grep -v -E -- "-interface |-iface " | while read line; do
-		/usr/sbin/route add $line
-	done
+/usr/sbin/svccfg -s $SMF_FMRI setprop routeadm/default-ipv4-routing = false
+if [ "$ipv4_routing_set" != "true" ]; then
+	/sbin/routeadm -b -d ipv4-routing -u
 fi
 
 # Clear exit status.

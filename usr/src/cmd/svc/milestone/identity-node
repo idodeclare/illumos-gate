@@ -23,11 +23,10 @@
 # Copyright (c) 1984, 1986, 1987, 1988, 1989 AT&T.
 # All rights reserved.
 #
-#
 # Copyright 2006 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2017 Chris Fraire <cfraire@me.com>
 #
-# ident	"%Z%%M%	%I%	%E% SMI"
 
 . /lib/svc/share/smf_include.sh
 . /lib/svc/share/net_include.sh
@@ -37,9 +36,12 @@ LD_LIBRARY_PATH=/lib; export LD_LIBRARY_PATH
 
 #
 # If DHCP was used on a primary interface then set the hostname
-# that was returned. If no hostname was returned, set the name
-# to be "unknown". The hostname must be set to something, because
-# tooltalk will hang unless the name can be locally resolved.
+# that was returned. If no hostname was returned, fall back to
+# the first defined: 1) /etc/nodename, 2) `uname -n` for a
+# non-global zone, or 3) "unknown". The hostname must be set to
+# something, because tooltalk will hang unless the name can be
+# locally resolved.
+#
 # Sendmail also requires the name to be resolvable locally.
 # Later, in inetsvc, we create a name "unknown" and create a entry
 # in the local /etc/inet/hosts file pairing "unknown" with the IP
@@ -54,7 +56,7 @@ LD_LIBRARY_PATH=/lib; export LD_LIBRARY_PATH
 smf_netstrategy
 
 case "$_INIT_NET_STRATEGY" in
-	"dhcp") hostname=`/sbin/dhcpinfo Hostname` ;;
+	"dhcp") hostname=`get_dhcp_var Hostname` ;;
 	"rarp") hostname=`/sbin/hostconfig -h -p bootparams`
 		trap 'intr=1' 2 3
 		while [ -z "$hostname" -a ! -f /etc/.UNCONFIGURED -a \
@@ -66,23 +68,26 @@ case "$_INIT_NET_STRATEGY" in
 		done
 		trap 2 3 ;;
 	"none") hostname="`shcat /etc/nodename 2>/dev/null`"
-       		if [ -z "$hostname" ]; then
+		if [ -z "$hostname" ]; then
 			if smf_is_globalzone; then
 				hostname=`/sbin/hostconfig -h -p bootparams`
-			else
-				hostname=`/sbin/uname -n`
 			fi
 		fi ;;
 esac
 
 #
 # If the netstrategy was unsuccessful and we haven't got a locally configured
-# name, default to "unknown"
+# name, fall back to a non-global-zone-specific value or otherwise to "unknown"
 #
 if [ -z "$hostname" ]; then
 	hostname="`shcat /etc/nodename 2>/dev/null`"
 	if [ -z "$hostname" ]; then
-		hostname="unknown"
+		if smf_is_nonglobalzone; then
+			hostname=`/sbin/uname -n`
+		fi
+		if [ -z "$hostname" ]; then
+			hostname="unknown"
+		fi
 	fi
 fi
 
