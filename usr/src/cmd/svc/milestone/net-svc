@@ -22,6 +22,7 @@
 #
 # Copyright 2010 Sun Microsystems, Inc.  All rights reserved.
 # Use is subject to license terms.
+# Copyright 2016, 2017, Chris Fraire <cfraire@me.com>
 #
 
 #
@@ -40,7 +41,7 @@ case "$1" in
 	#
 	# In a shared-IP zone we need this service to be up, but all of the
 	# work it tries to do is irrelevant (and will actually lead to the
-	# service failing if we try to do it), so just bail out. 
+	# service failing if we try to do it), so just bail out.
 	# In the global zone and exclusive-IP zones we proceed.
 	#
 	smf_configure_ip || exit $SMF_EXIT_OK
@@ -91,22 +92,6 @@ mv_file ()
 }
 
 #
-# This function takes a DHCP parameter (as defined in /etc/dhcp/inittab)
-# and returns the value for that parameter returned by the DHCP server.
-# If the global 'interface' is defined, it will request the value learned
-# on that interface, else it will request the value learned on the primary
-# interface.
-#
-get_dhcp_var ()
-{
-	if [ -n "$interface" ]; then
-		/sbin/dhcpinfo -i $interface $1
-	else
-		/sbin/dhcpinfo $1
-	fi
-}
-
-#
 # This function returns true if the string "# Added by DHCP$" occurs in
 # the passed-in file, false otherwise.
 #
@@ -140,8 +125,8 @@ update_resolv ()
 	/usr/bin/nawk </etc/resolv.conf >/tmp/resolv.conf.$$ '
 		function writedomain() {
 			if (updated == 0) {
-			    	# Use only first domain, not a search list
-			    	split(ENVIRON["dnsdomain"], d)
+				# Use only first domain, not a search list
+				split(ENVIRON["dnsdomain"], d)
 				if(length(d[1]) != 0)
 					printf("domain %s\n", d[1])
 			}
@@ -161,7 +146,7 @@ update_resolv ()
 
 #
 # update_nss()
-# This routine takes as a parameter, the name of the respective policy 
+# This routine takes as a parameter, the name of the respective policy
 # to change in the nsswitch.conf (hosts or ipnodes) to update with dns.
 #
 update_nss ()
@@ -232,13 +217,13 @@ cleanup_hosts ()
 # If our network configuration strategy is DHCP, check for DNS
 # configuration parameters obtained from the DHCP server.
 #
-# Script execution starts here.
+# Script execution continues here after going through the "start" case above.
 #
 smf_netstrategy
 
 if [ "$_INIT_NET_STRATEGY" = "dhcp" ]; then
-	dnsservers=`get_dhcp_var DNSserv`
-	dnsdomain=`get_dhcp_var DNSdmain`
+	dnsservers=`get_dhcp_var DNSserv $interface` && \
+	    dnsdomain=`get_dhcp_var DNSdmain $interface`
 else
 	dnsservers=""
 	dnsdomain=""

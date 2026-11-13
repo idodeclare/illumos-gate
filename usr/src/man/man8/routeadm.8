@@ -1,9 +1,10 @@
 '\" te
 .\" Copyright (c) 2006, Sun Microsystems, Inc. All Rights Reserved
+.\" Copyright 2026 Chris Fraire <cfraire@me.com>
 .\" The contents of this file are subject to the terms of the Common Development and Distribution License (the "License").  You may not use this file except in compliance with the License.
 .\" You can obtain a copy of the license at usr/src/OPENSOLARIS.LICENSE or http://www.opensolaris.org/os/licensing.  See the License for the specific language governing permissions and limitations under the License.
 .\" When distributing Covered Code, include this CDDL HEADER in each file and include the License file at usr/src/OPENSOLARIS.LICENSE.  If applicable, add the following below this CDDL HEADER, with the fields enclosed by brackets "[]" replaced with your own identifying information: Portions Copyright [yyyy] [name of copyright owner]
-.TH ROUTEADM 8 "May 13, 2017"
+.TH ROUTEADM 8 "Oct 20, 2026"
 .SH NAME
 routeadm \- IP forwarding and routing configuration
 .SH SYNOPSIS
@@ -326,16 +327,24 @@ should specify a dependency on this service.
 .sp .6
 .RS 4n
 Determines whether an IPv4 routing daemon is run. The system default is
-\fBenabled\fR unless the \fB/etc/defaultrouter\fR file exists (see
-\fBdefaultrouter\fR(5)), in which case the default is \fBdisabled\fR. The value
-of this option reflects the state of all IPv4 routing services, such that if
-any IPv4 routing service is enabled, \fBipv4-routing\fR is enabled. This allows
-users to interact with routing services using \fBsvcadm\fR(8), as well as
-through \fBrouteadm\fR. IPv4 routing services, specified by means of the
-\fBrouting-svcs\fR variable, will be prepared for enable on next boot when the
-user explicitly enables \fBipv4-routing\fR. The SMF routing daemon service for
-\fBin.routed\fR (\fBsvc:/network/routing/route:default\fR) is specified by
-default.
+.BR disabled .
+The value of this option reflects the state of all IPv4 routing services, such
+that if any IPv4 routing service is enabled,
+.B ipv4\-routing
+is enabled.
+This allows users to interact with routing services using
+.BR svcadm (8),
+as well as through
+.BR routeadm .
+IPv4 routing services, specified by means of the
+.B routing\-svcs
+variable, will be prepared for enable on next boot when the user explicitly
+enables
+.BR ipv4\-routing .
+The SMF routing daemon service for
+.B in.routed
+.RB ( svc:/network/routing/route:default )
+is specified by default.
 .RE
 
 .sp
